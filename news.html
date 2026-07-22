@@ -12,7 +12,6 @@
 <body>
 <canvas id="bgCanvas"></canvas>
 <div class="bg-noise"></div>
-<div class="progress-bar" id="progressBar"></div>
 <div class="page-transition-overlay" id="overlay"></div>
 
 <header class="topbar">
@@ -27,7 +26,6 @@
     <nav class="nav" id="mainNav">
       <a href="index.html" data-page="index.html" data-transition>Главная</a>
       <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
-      <a href="gallery.html" data-page="gallery.html" data-transition>Галерея</a>
       <a href="news.html" data-page="news.html" data-transition>Новости</a>
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
@@ -58,9 +56,9 @@
         <button class="btn btn-gold admin-only" id="addNewsBtn" style="display:none">＋ Добавить новость</button>
       </div>
 
-      <div class="news-list" id="newsList">
-        <div class="empty-state"><h3>Загрузка...</h3><p>Получение свежих новостей.</p></div>
-      </div>
+      <div id="newsHeroSlot"></div>
+      <div class="news-grid" id="newsGrid" style="margin-bottom:32px"></div>
+      <div class="news-list" id="newsList"></div>
     </div>
   </section>
 </main>
@@ -76,7 +74,6 @@
         <h5>Разделы</h5>
         <a href="index.html">Главная</a>
         <a href="ustav.html">Уставы</a>
-        <a href="gallery.html">Галерея</a>
         <a href="news.html">Новости</a>
       </div>
       <div class="footer-col">
@@ -133,6 +130,8 @@
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
+const heroSlot=document.getElementById("newsHeroSlot");
+const grid=document.getElementById("newsGrid");
 const listEl=document.getElementById("newsList");
 const addBtn=document.getElementById("addNewsBtn");
 const newsModal=document.getElementById("newsModal");
@@ -140,16 +139,74 @@ const newsForm=document.getElementById("newsForm");
 
 let LOADED=[];
 
+function fmt(d){try{return new Date(d).toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"})}catch(e){return d}}
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+function heroHtml(n){
+  const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
+  return `<a class="news-hero reveal" href="#n-${n.id}" id="n-${n.id}">
+    <div class="news-hero-thumb">${img}</div>
+    <div class="news-hero-body">
+      <span class="news-hero-tag">Главное</span>
+      <div class="news-date">${fmt(n.date)}</div>
+      <h2>${esc(n.title)}</h2>
+      <p>${esc(n.body||n.excerpt||"")}</p>
+      <div class="news-more">Читать материал</div>
+    </div>
+  </a>`;
+}
+
+function cardHtml(n){
+  const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
+  return `<a class="news-card reveal" href="#n-${n.id}" id="n-${n.id}">
+    <div class="news-thumb">
+      <span class="news-thumb-tag">Новость</span>
+      ${img}
+    </div>
+    <div class="news-body">
+      <div class="news-date">${fmt(n.date)}</div>
+      <div class="news-title">${esc(n.title)}</div>
+      <div class="news-excerpt">${esc(n.excerpt||"")}</div>
+      <div class="news-more">Читать</div>
+    </div>
+  </a>`;
+}
+
+function itemHtml(n,admin){
+  const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
+  const adm=admin?`<div class="news-item-actions admin-only">
+    <button class="btn btn-ghost btn-sm" data-edit="${n.id}">Ред.</button>
+    <button class="btn btn-ghost btn-sm" data-del="${n.id}">Удалить</button>
+  </div>`:"";
+  return `<article class="news-item reveal" id="n-${n.id}">
+    <div class="news-thumb">${img}</div>
+    <div class="news-item-body">
+      <div class="news-date">${fmt(n.date)}</div>
+      <h3>${esc(n.title)}</h3>
+      <p>${esc(n.body||n.excerpt||"")}</p>
+    </div>
+    ${adm}
+  </article>`;
+}
+
 async function load(){
   const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
   const isAdmin=!!(s&&s.user);
   LOADED=await VSRF_NEWS.fetchNews();
   if(!LOADED.length){
+    heroSlot.innerHTML="";grid.innerHTML="";
     listEl.innerHTML=`<div class="empty-state"><h3>Пока нет публикаций</h3><p>Как только появятся новости — они будут отображены здесь.</p></div>`;
     return;
   }
-  listEl.innerHTML=LOADED.map(n=>VSRF_NEWS.itemHtml(n,isAdmin)).join("");
-  listEl.querySelectorAll(".reveal").forEach(el=>{
+  const [hero,...rest]=LOADED;
+  const featured=rest.slice(0,3);
+  const archive=rest.slice(3);
+  heroSlot.innerHTML=heroHtml(hero);
+  grid.innerHTML=featured.map(cardHtml).join("");
+  listEl.innerHTML=archive.length
+    ? `<div class="section-head" style="margin-top:20px"><span class="badge">Архив</span></div>`+archive.map(n=>itemHtml(n,isAdmin)).join("")
+    : "";
+  document.querySelectorAll(".news-hero.reveal,.news-card.reveal,.news-item.reveal").forEach(el=>{
     new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
   });
   if(location.hash){
@@ -209,14 +266,16 @@ newsForm.addEventListener("submit",async e=>{
   }catch(err){msg.className="form-msg error";msg.textContent=err.message||"Ошибка сохранения"}
 });
 
-listEl.addEventListener("click",async e=>{
+document.addEventListener("click",async e=>{
   const editBtn=e.target.closest("[data-edit]");
   const delBtn=e.target.closest("[data-del]");
   if(editBtn){
+    e.preventDefault();
     const item=LOADED.find(x=>String(x.id)===String(editBtn.dataset.edit));
     if(item) openNewsModal(item);
   }
   if(delBtn){
+    e.preventDefault();
     const s=window.VSRF_AUTH.state;
     if(!s.available||!s.client){alert("Supabase не настроен");return}
     if(!confirm("Удалить новость?")) return;
@@ -229,6 +288,6 @@ listEl.addEventListener("click",async e=>{
 
 load();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f5416b1da3f13d',t:'MTc4NDc1Mjc3NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f567eddb5be964',t:'MTc4NDc1NDM1Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -10,7 +10,6 @@
     setupThemeToggle();
     setupBurger();
     setupReveal();
-    setupProgress();
     setupBackground();
     setupTransitions();
     setupActiveNav();
@@ -18,10 +17,8 @@
 
   function setupHeader(){
     const brand=document.getElementById("goHome");
-    if(brand){
-      brand.addEventListener("click",e=>{
-        if(brand.tagName!=="A"){e.preventDefault();location.href="index.html"}
-      });
+    if(brand&&brand.tagName!=="A"){
+      brand.addEventListener("click",e=>{e.preventDefault();location.href="index.html"});
     }
   }
 
@@ -66,18 +63,6 @@
     document.querySelectorAll(".reveal,.reveal-l,.reveal-r").forEach(el=>io.observe(el));
   }
 
-  function setupProgress(){
-    const bar=document.getElementById("progressBar");
-    if(!bar) return;
-    const upd=()=>{
-      const h=document.documentElement.scrollHeight-window.innerHeight;
-      const s=window.scrollY;
-      bar.style.width=h>0?Math.min((s/h)*100,100)+"%":"0";
-    };
-    window.addEventListener("scroll",upd,{passive:true});
-    upd();
-  }
-
   function setupTransitions(){
     const ov=document.getElementById("overlay");
     if(!ov) return;
@@ -104,7 +89,7 @@
     const c=document.getElementById("bgCanvas");
     if(!c) return;
     const ctx=c.getContext("2d");
-    let W=0,H=0,parts=[],raf,mouseX=0,mouseY=0;
+    let W=0,H=0,parts=[],raf;
     const N=Math.min(70,Math.max(30,Math.floor(window.innerWidth/24)));
 
     function resize(){

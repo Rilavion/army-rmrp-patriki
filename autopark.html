@@ -12,7 +12,6 @@
 <body>
 <canvas id="bgCanvas"></canvas>
 <div class="bg-noise"></div>
-<div class="progress-bar" id="progressBar"></div>
 <div class="page-transition-overlay" id="overlay"></div>
 
 <header class="topbar">
@@ -27,7 +26,6 @@
     <nav class="nav" id="mainNav">
       <a href="index.html" data-page="index.html" data-transition>Главная</a>
       <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
-      <a href="gallery.html" data-page="gallery.html" data-transition>Галерея</a>
       <a href="news.html" data-page="news.html" data-transition>Новости</a>
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
@@ -54,15 +52,6 @@
         <h2>Автопарк бригады</h2>
         <p>Военная и служебная техника, состоящая на вооружении в/ч №12132. Обеспечивается силами роты охраны и обеспечения.</p>
       </div>
-
-      <div class="filters reveal" id="autoFilters">
-        <button class="filter-btn active" data-filter="all">Все</button>
-        <button class="filter-btn" data-filter="light">Лёгкая техника</button>
-        <button class="filter-btn" data-filter="armor">Бронетехника</button>
-        <button class="filter-btn" data-filter="transport">Транспорт</button>
-        <button class="filter-btn" data-filter="special">Спецтехника</button>
-      </div>
-
       <div class="auto-grid" id="autoGrid"></div>
     </div>
   </section>
@@ -79,7 +68,6 @@
         <h5>Разделы</h5>
         <a href="index.html">Главная</a>
         <a href="ustav.html">Уставы</a>
-        <a href="gallery.html">Галерея</a>
         <a href="news.html">Новости</a>
       </div>
       <div class="footer-col">
@@ -118,55 +106,43 @@
 document.getElementById("year").textContent=new Date().getFullYear();
 
 const VEHICLES=[
-  {cat:"armor",title:"Тигр-М",purpose:"Бронеавтомобиль повышенной защищённости для перевозки личного состава и разведывательных задач.",img:"https://images.unsplash.com/photo-1587302912306-cf1ed9c33146?w=1200&q=70&auto=format&fit=crop",crew:"1+9",speed:"140 км/ч",role:"РОиО, ССО",year:"2013"},
-  {cat:"armor",title:"БТР-82А",purpose:"Колёсный бронетранспортёр для десантирования и огневой поддержки подразделений.",img:"",crew:"3+7",speed:"90 км/ч",role:"РОиО",year:"2013"},
-  {cat:"light",title:"УАЗ «Патриот»",purpose:"Служебный внедорожник для командного состава и оперативных выездов.",img:"",crew:"1+4",speed:"150 км/ч",role:"Штаб",year:"2016"},
-  {cat:"light",title:"УАЗ-3151 «Хантер»",purpose:"Лёгкий военный внедорожник, патрулирование и связь.",img:"",crew:"1+4",speed:"120 км/ч",role:"ВП",year:"2003"},
-  {cat:"transport",title:"КАМАЗ-5350 «Мустанг»",purpose:"Военный грузовик повышенной проходимости для перевозки личного состава и грузов.",img:"",crew:"1+2",speed:"100 км/ч",role:"РОиО",year:"2003"},
-  {cat:"transport",title:"Урал-4320",purpose:"Тяжёлый военный грузовик, транспортировка снаряжения и техники.",img:"",crew:"1+2",speed:"85 км/ч",role:"МТО",year:"1977"},
-  {cat:"special",title:"УАЗ «Скорая»",purpose:"Санитарный автомобиль медицинской роты для эвакуации раненых.",img:"",crew:"1+3",speed:"130 км/ч",role:"МР",year:"—"},
-  {cat:"special",title:"ГАЗ «Тигр» ВП",purpose:"Служебный автомобиль военной комендатуры для патрулей и задержаний.",img:"",crew:"1+4",speed:"140 км/ч",role:"ВП",year:"—"},
-  {cat:"special",title:"Автозак",purpose:"Специальный транспорт для конвоирования задержанных.",img:"",crew:"1+8",speed:"90 км/ч",role:"ВП",year:"—"}
+  {title:"Тигр-М",purpose:"Бронеавтомобиль повышенной защищённости для перевозки личного состава и разведывательных задач.",img:"https://images.unsplash.com/photo-1587302912306-cf1ed9c33146?w=1200&q=70&auto=format&fit=crop",crew:"1+9",speed:"140 км/ч",role:"РОиО, ССО",year:"2013"},
+  {title:"БТР-82А",purpose:"Колёсный бронетранспортёр для десантирования и огневой поддержки подразделений.",img:"",crew:"3+7",speed:"90 км/ч",role:"РОиО",year:"2013"},
+  {title:"УАЗ «Патриот»",purpose:"Служебный внедорожник для командного состава и оперативных выездов.",img:"",crew:"1+4",speed:"150 км/ч",role:"Штаб",year:"2016"},
+  {title:"УАЗ-3151 «Хантер»",purpose:"Лёгкий военный внедорожник для патрулирования и связи.",img:"",crew:"1+4",speed:"120 км/ч",role:"ВП",year:"2003"},
+  {title:"КАМАЗ-5350 «Мустанг»",purpose:"Военный грузовик повышенной проходимости для перевозки личного состава и грузов.",img:"",crew:"1+2",speed:"100 км/ч",role:"РОиО",year:"2003"},
+  {title:"Урал-4320",purpose:"Тяжёлый военный грузовик для транспортировки снаряжения и техники.",img:"",crew:"1+2",speed:"85 км/ч",role:"МТО",year:"1977"},
+  {title:"УАЗ «Скорая»",purpose:"Санитарный автомобиль медицинской роты для эвакуации раненых.",img:"",crew:"1+3",speed:"130 км/ч",role:"МР",year:"—"},
+  {title:"ГАЗ «Тигр» ВП",purpose:"Служебный автомобиль военной комендатуры для патрулей и задержаний.",img:"",crew:"1+4",speed:"140 км/ч",role:"ВП",year:"—"},
+  {title:"Автозак",purpose:"Специальный транспорт для конвоирования задержанных.",img:"",crew:"1+8",speed:"90 км/ч",role:"ВП",year:"—"}
 ];
-const catLabel={light:"Лёгкая техника",armor:"Бронетехника",transport:"Транспорт",special:"Спецтехника"};
 
 const grid=document.getElementById("autoGrid");
-function render(filter){
-  const list=filter==="all"?VEHICLES:VEHICLES.filter(v=>v.cat===filter);
-  if(!list.length){grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><h3>Нет техники</h3></div>`;return}
-  grid.innerHTML=list.map(v=>{
-    const media=v.img
-      ? `<img src="${v.img}" alt="${v.title}" loading="lazy">`
-      : `<div class="gallery-placeholder" style="width:100%;height:100%">
-          <div><svg viewBox="0 0 24 24" width="46" height="46" fill="currentColor" style="opacity:.6"><path d="M3 17h1a2 2 0 0 0 4 0h8a2 2 0 0 0 4 0h1v-4l-2-4h-4V6H5a2 2 0 0 0-2 2v9zm3-9h8v3H6V8z"/></svg><div style="margin-top:8px">Изображение уточняется</div></div>
-        </div>`;
-    return `<div class="auto-card reveal">
-      <div class="auto-thumb">${media}<div class="auto-cat">${catLabel[v.cat]}</div></div>
-      <div class="auto-body">
-        <div class="auto-title">${v.title}</div>
-        <div class="auto-purpose">${v.purpose}</div>
-        <div class="auto-specs">
-          <div class="auto-spec"><span class="auto-spec-label">Экипаж</span><span class="auto-spec-val">${v.crew}</span></div>
-          <div class="auto-spec"><span class="auto-spec-label">Скорость</span><span class="auto-spec-val">${v.speed}</span></div>
-          <div class="auto-spec"><span class="auto-spec-label">Подразделение</span><span class="auto-spec-val">${v.role}</span></div>
-          <div class="auto-spec"><span class="auto-spec-label">Принятие</span><span class="auto-spec-val">${v.year}</span></div>
-        </div>
+grid.innerHTML=VEHICLES.map(v=>{
+  const media=v.img
+    ? `<img src="${v.img}" alt="${v.title}" loading="lazy">`
+    : `<div class="auto-placeholder">
+        <div><svg viewBox="0 0 24 24" width="46" height="46" fill="currentColor"><path d="M3 17h1a2 2 0 0 0 4 0h8a2 2 0 0 0 4 0h1v-4l-2-4h-4V6H5a2 2 0 0 0-2 2v9zm3-9h8v3H6V8z"/></svg><div style="margin-top:8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Изображение уточняется</div></div>
+      </div>`;
+  return `<div class="auto-card reveal">
+    <div class="auto-thumb">${media}</div>
+    <div class="auto-body">
+      <div class="auto-title">${v.title}</div>
+      <div class="auto-purpose">${v.purpose}</div>
+      <div class="auto-specs">
+        <div class="auto-spec"><span class="auto-spec-label">Экипаж</span><span class="auto-spec-val">${v.crew}</span></div>
+        <div class="auto-spec"><span class="auto-spec-label">Скорость</span><span class="auto-spec-val">${v.speed}</span></div>
+        <div class="auto-spec"><span class="auto-spec-label">Подразделение</span><span class="auto-spec-val">${v.role}</span></div>
+        <div class="auto-spec"><span class="auto-spec-label">Принятие</span><span class="auto-spec-val">${v.year}</span></div>
       </div>
-    </div>`;
-  }).join("");
-  grid.querySelectorAll(".reveal").forEach(el=>{
-    new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
-  });
-}
-render("all");
+    </div>
+  </div>`;
+}).join("");
 
-document.getElementById("autoFilters").addEventListener("click",e=>{
-  const b=e.target.closest(".filter-btn");if(!b) return;
-  document.querySelectorAll(".filter-btn").forEach(x=>x.classList.remove("active"));
-  b.classList.add("active");
-  render(b.dataset.filter);
+grid.querySelectorAll(".reveal").forEach(el=>{
+  new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
 });
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f541b5ebb8f13d',t:'MTc4NDc1Mjc4Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f567994cc5e964',t:'MTc4NDc1NDMzOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
