@@ -146,10 +146,11 @@
     <form id="newsForm">
       <input type="hidden" name="id">
       <div class="form-group"><label>Заголовок</label><input name="title" required></div>
-      <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
         <div class="form-group"><label>Дата</label><input name="date" type="date" required></div>
-        <div class="form-group"><label>URL изображения</label><input name="image" type="url" placeholder="https://..."></div>
+        <div class="form-group"><label>Тег</label><select name="tag" id="tagSelect"></select></div>
       </div>
+      <div class="form-group"><label>URL изображения</label><input name="image" type="url" placeholder="https://..."></div>
       <div class="form-group"><label>Краткое описание (для карточек)</label><textarea name="excerpt" required style="min-height:80px"></textarea></div>
       <div class="form-group"><label>Полный текст (в модалке)</label><textarea name="body" style="min-height:200px" required></textarea></div>
       <button class="btn btn-gold" style="width:100%" type="submit">Сохранить</button>
@@ -184,8 +185,9 @@ function esc(s){return VSRF_NEWS.esc(s)}
 
 function heroHtml(n){
   const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
+  const t=VSRF_NEWS.tagInfo(n.tag);
   return `<div class="news-hero reveal" data-news-id="${n.id}">
-    <div class="news-hero-thumb">${img}</div>
+    <div class="news-hero-thumb">${img}<span class="news-thumb-tag ${t.cls}" style="top:20px;left:20px">${t.label}</span></div>
     <div class="news-hero-body">
       <span class="news-hero-tag">Главное</span>
       <div class="news-date">${fmt(n.date)}</div>
@@ -202,8 +204,9 @@ function cardHtml(n){
 
 function itemHtml(n){
   const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
+  const t=VSRF_NEWS.tagInfo(n.tag);
   return `<article class="news-item reveal" data-news-id="${n.id}">
-    <div class="news-thumb">${img}</div>
+    <div class="news-thumb">${img}<span class="news-thumb-tag ${t.cls}">${t.label}</span></div>
     <div class="news-item-body">
       <div class="news-date">${fmt(n.date)}</div>
       <h3>${esc(n.title)}</h3>
@@ -220,7 +223,9 @@ function openNews(id){
   currentNews=n;
   const img=n.image?`<div class="news-modal-hero"><img src="${n.image}" alt=""></div>`:"";
   const body=(n.body||n.excerpt||"").split(/\n{2,}/).map(p=>`<p>${esc(p).replace(/\n/g,"<br>")}</p>`).join("");
+  const t=VSRF_NEWS.tagInfo(n.tag);
   newsContent.innerHTML=`${img}
+    <div style="margin-bottom:12px"><span class="news-modal-tag ${t.cls}">${t.label}</span></div>
     <h2 class="news-modal-title">${esc(n.title)}</h2>
     <div class="news-modal-meta">
       <span>📅 ${fmt(n.date)}</span>
@@ -268,6 +273,8 @@ async function load(){
 
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(()=>load());
 
+document.getElementById("tagSelect").innerHTML=VSRF_NEWS.tagsList().map(t=>`<option value="${t.key}">${t.label}</option>`).join("");
+
 addBtn.addEventListener("click",()=>openEdit());
 function openEdit(item){
   document.getElementById("editNewsTitle").textContent=item?"Редактировать новость":"Новая новость";
@@ -279,8 +286,10 @@ function openEdit(item){
     newsForm.image.value=item.image||"";
     newsForm.excerpt.value=item.excerpt||"";
     newsForm.body.value=item.body||"";
+    newsForm.tag.value=item.tag||"news";
   }else{
     newsForm.date.value=new Date().toISOString().slice(0,10);
+    newsForm.tag.value="news";
   }
   const msg=editNewsModal.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
   editNewsModal.classList.add("active");
@@ -312,6 +321,7 @@ newsForm.addEventListener("submit",async e=>{
   const payload={
     title:newsForm.title.value.trim(),
     date:newsForm.date.value,
+    tag:newsForm.tag.value||"news",
     image:newsForm.image.value.trim()||null,
     excerpt:newsForm.excerpt.value.trim(),
     body:newsForm.body.value.trim()
@@ -333,5 +343,5 @@ newsForm.addEventListener("submit",async e=>{
 load();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f5dcf43f5e9d9a',t:'MTc4NDc1OTE0NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -1,6 +1,17 @@
 window.VSRF_NEWS=(function(){
   const DEMO=[];
 
+  const TAGS={
+    news:{label:"Новость",cls:"tag-news"},
+    order:{label:"Приказ",cls:"tag-order"},
+    event:{label:"Мероприятие",cls:"tag-event"},
+    training:{label:"Учения",cls:"tag-training"},
+    tech:{label:"Техника",cls:"tag-tech"},
+    personnel:{label:"Кадры",cls:"tag-personnel"},
+    alert:{label:"Тревога",cls:"tag-alert"},
+    announce:{label:"Объявление",cls:"tag-announce"}
+  };
+
   async function fetchNews(limit){
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(s&&s.available&&s.client){
@@ -24,11 +35,15 @@ window.VSRF_NEWS=(function(){
 
   function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
+  function tagInfo(t){return TAGS[t]||TAGS.news}
+  function tagsList(){return Object.keys(TAGS).map(k=>({key:k,label:TAGS[k].label}))}
+
   function cardHtml(n){
     const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
+    const t=tagInfo(n.tag);
     return `<div class="news-card reveal" data-news-id="${n.id}">
       <div class="news-thumb">
-        <span class="news-thumb-tag">Новость</span>
+        <span class="news-thumb-tag ${t.cls}">${t.label}</span>
         ${img}
       </div>
       <div class="news-body">
@@ -40,5 +55,5 @@ window.VSRF_NEWS=(function(){
     </div>`;
   }
 
-  return {fetchNews,cardHtml,fmt,esc,DEMO};
+  return {fetchNews,cardHtml,fmt,esc,tagInfo,tagsList,DEMO};
 })();

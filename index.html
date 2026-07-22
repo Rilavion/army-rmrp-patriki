@@ -63,20 +63,8 @@
       </div>
       <div class="hero-visual reveal-r">
         <div class="hero-glow"></div>
-        <div class="hero-book">
-          <div class="hb-inner">
-            <div class="hb-spine"></div>
-            <div class="hb-cover">
-              <div class="c-tag">1781813346950</div>
-              <div class="c-kicker">Внутренние уставы организации</div>
-              <div class="c-title">ВС РФ</div>
-              <p class="c-sub">1-я отдельная гвардейская бригада специального назначения (ОБрСпН), в/ч №12132</p>
-              <div class="c-crest">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Middle_Emblem_of_the_Russian_Navy.svg/1280px-Middle_Emblem_of_the_Russian_Navy.svg.png" alt="Эмблема">
-              </div>
-            </div>
-            <div class="hb-pages"></div>
-          </div>
+        <div class="hero-emblem">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Middle_Emblem_of_the_Russian_Navy.svg/1280px-Middle_Emblem_of_the_Russian_Navy.svg.png" alt="Эмблема">
         </div>
       </div>
     </div>
@@ -238,7 +226,9 @@ function openNews(id){
   const n=PREVIEW.find(x=>String(x.id)===String(id));if(!n) return;
   const img=n.image?`<div class="news-modal-hero"><img src="${n.image}" alt=""></div>`:"";
   const body=(n.body||n.excerpt||"").split(/\n{2,}/).map(p=>`<p>${VSRF_NEWS.esc(p)}</p>`).join("");
+  const t=VSRF_NEWS.tagInfo(n.tag);
   newsContent.innerHTML=`${img}
+    <div style="margin-bottom:12px"><span class="news-modal-tag ${t.cls}">${t.label}</span></div>
     <h2 class="news-modal-title">${VSRF_NEWS.esc(n.title)}</h2>
     <div class="news-modal-meta">
       <span>📅 ${VSRF_NEWS.fmt(n.date)}</span>
@@ -263,6 +253,6 @@ function openNews(id){
   });
 })();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f5dcd77cc39d9a',t:'MTc4NDc1OTE0MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

@@ -52,10 +52,13 @@
 <main>
   <section class="section" style="padding-top:60px">
     <div class="container">
-      <div class="section-head reveal">
-        <span class="badge">Материально-техническое обеспечение</span>
-        <h2>Автопарк бригады</h2>
-        <p>Военная и служебная техника, состоящая на вооружении в/ч №12132. Обеспечивается силами роты охраны и обеспечения.</p>
+      <div class="section-head reveal" style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+        <div>
+          <span class="badge">Материально-техническое обеспечение</span>
+          <h2>Автопарк бригады</h2>
+          <p>Военная и служебная техника, состоящая на вооружении в/ч №12132. Обеспечивается силами роты охраны и обеспечения.</p>
+        </div>
+        <button class="btn btn-gold admin-only" id="addVehBtn" style="display:none">＋ Добавить технику</button>
       </div>
       <div class="auto-grid" id="autoGrid"></div>
     </div>
@@ -121,6 +124,33 @@
   </div>
 </div>
 
+<div class="modal-back" id="vehModal">
+  <div class="modal modal-lg">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="vehModalTitle">Новая техника</h3>
+    <div class="modal-sub">Заполните карточку боевой единицы</div>
+    <form id="vehForm">
+      <input type="hidden" name="id">
+      <div class="form-group"><label>Название</label><input name="title" required placeholder="Тигр-М"></div>
+      <div class="form-group"><label>URL изображения</label><input name="image" type="url" placeholder="https://..."></div>
+      <div class="form-group"><label>Описание / назначение</label><textarea name="purpose" required style="min-height:100px" placeholder="Бронеавтомобиль повышенной защищённости..."></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label>Экипаж</label><input name="crew" placeholder="1+9"></div>
+        <div class="form-group"><label>Скорость</label><input name="speed" placeholder="140 км/ч"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label>Гос. цена</label><input name="price" placeholder="12 500 000 ₽"></div>
+        <div class="form-group"><label>Доступно с должности</label><input name="rank" placeholder="Ст. сержант"></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-top:8px">
+        <button type="button" class="btn btn-ghost btn-sm btn-danger" id="vehDeleteBtn" style="display:none">Удалить</button>
+        <button class="btn btn-gold btn-sm" type="submit" style="margin-left:auto">Сохранить</button>
+      </div>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="main.js"></script>
@@ -128,44 +158,174 @@
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
-const VEHICLES=[
-  {title:"Тигр-М",purpose:"Бронеавтомобиль повышенной защищённости для перевозки личного состава и разведывательных задач.",img:"https://images.unsplash.com/photo-1587302912306-cf1ed9c33146?w=1200&q=70&auto=format&fit=crop",crew:"1+9",speed:"140 км/ч",role:"РОиО, ССО",year:"2013"},
-  {title:"БТР-82А",purpose:"Колёсный бронетранспортёр для десантирования и огневой поддержки подразделений.",img:"",crew:"3+7",speed:"90 км/ч",role:"РОиО",year:"2013"},
-  {title:"УАЗ «Патриот»",purpose:"Служебный внедорожник для командного состава и оперативных выездов.",img:"",crew:"1+4",speed:"150 км/ч",role:"Штаб",year:"2016"},
-  {title:"УАЗ-3151 «Хантер»",purpose:"Лёгкий военный внедорожник для патрулирования и связи.",img:"",crew:"1+4",speed:"120 км/ч",role:"ВП",year:"2003"},
-  {title:"КАМАЗ-5350 «Мустанг»",purpose:"Военный грузовик повышенной проходимости для перевозки личного состава и грузов.",img:"",crew:"1+2",speed:"100 км/ч",role:"РОиО",year:"2003"},
-  {title:"Урал-4320",purpose:"Тяжёлый военный грузовик для транспортировки снаряжения и техники.",img:"",crew:"1+2",speed:"85 км/ч",role:"МТО",year:"1977"},
-  {title:"УАЗ «Скорая»",purpose:"Санитарный автомобиль медицинской роты для эвакуации раненых.",img:"",crew:"1+3",speed:"130 км/ч",role:"МР",year:"—"},
-  {title:"ГАЗ «Тигр» ВП",purpose:"Служебный автомобиль военной комендатуры для патрулей и задержаний.",img:"",crew:"1+4",speed:"140 км/ч",role:"ВП",year:"—"},
-  {title:"Автозак",purpose:"Специальный транспорт для конвоирования задержанных.",img:"",crew:"1+8",speed:"90 км/ч",role:"ВП",year:"—"}
+const DEFAULT_VEHICLES=[
+  {id:"d1",title:"Тигр-М",purpose:"Бронеавтомобиль повышенной защищённости для перевозки личного состава и разведывательных задач.",image:"https://images.unsplash.com/photo-1587302912306-cf1ed9c33146?w=1200&q=70&auto=format&fit=crop",crew:"1+9",speed:"140 км/ч",price:"12 500 000 ₽",rank:"Ст. сержант"},
+  {id:"d2",title:"БТР-82А",purpose:"Колёсный бронетранспортёр для десантирования и огневой поддержки подразделений.",image:"",crew:"3+7",speed:"90 км/ч",price:"32 000 000 ₽",rank:"Прапорщик"},
+  {id:"d3",title:"УАЗ «Патриот»",purpose:"Служебный внедорожник для командного состава и оперативных выездов.",image:"",crew:"1+4",speed:"150 км/ч",price:"1 800 000 ₽",rank:"Мл. лейтенант"},
+  {id:"d4",title:"УАЗ-3151 «Хантер»",purpose:"Лёгкий военный внедорожник для патрулирования и связи.",image:"",crew:"1+4",speed:"120 км/ч",price:"1 200 000 ₽",rank:"Сержант"},
+  {id:"d5",title:"КАМАЗ-5350 «Мустанг»",purpose:"Военный грузовик повышенной проходимости для перевозки личного состава и грузов.",image:"",crew:"1+2",speed:"100 км/ч",price:"6 800 000 ₽",rank:"Прапорщик"},
+  {id:"d6",title:"Урал-4320",purpose:"Тяжёлый военный грузовик для транспортировки снаряжения и техники.",image:"",crew:"1+2",speed:"85 км/ч",price:"4 500 000 ₽",rank:"Сержант"},
+  {id:"d7",title:"УАЗ «Скорая»",purpose:"Санитарный автомобиль медицинской роты для эвакуации раненых.",image:"",crew:"1+3",speed:"130 км/ч",price:"1 400 000 ₽",rank:"Сержант"},
+  {id:"d8",title:"ГАЗ «Тигр» ВП",purpose:"Служебный автомобиль военной комендатуры для патрулей и задержаний.",image:"",crew:"1+4",speed:"140 км/ч",price:"10 500 000 ₽",rank:"Сержант"},
+  {id:"d9",title:"Автозак",purpose:"Специальный транспорт для конвоирования задержанных.",image:"",crew:"1+8",speed:"90 км/ч",price:"3 200 000 ₽",rank:"Прапорщик"}
 ];
 
+let VEHICLES=[];
 const grid=document.getElementById("autoGrid");
-grid.innerHTML=VEHICLES.map(v=>{
-  const media=v.img
-    ? `<img src="${v.img}" alt="${v.title}" loading="lazy">`
+const modal=document.getElementById("vehModal");
+const form=document.getElementById("vehForm");
+const delBtn=document.getElementById("vehDeleteBtn");
+const addBtn=document.getElementById("addVehBtn");
+
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+function cardHtml(v){
+  const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  const media=v.image
+    ? `<img src="${esc(v.image)}" alt="${esc(v.title)}" loading="lazy">`
     : `<div class="auto-placeholder">
         <div><svg viewBox="0 0 24 24" width="46" height="46" fill="currentColor" style="opacity:.55"><path d="M3 17h1a2 2 0 0 0 4 0h8a2 2 0 0 0 4 0h1v-4l-2-4h-4V6H5a2 2 0 0 0-2 2v9zm3-9h8v3H6V8z"/></svg><div style="margin-top:8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Изображение уточняется</div></div>
       </div>`;
-  return `<div class="auto-card reveal">
-    <div class="auto-thumb">${media}</div>
+  const edit=isAdmin?`<button class="veh-edit-btn admin-only" data-edit="${v.id}" title="Редактировать">✎</button>`:"";
+  return `<div class="auto-card reveal" data-veh-id="${v.id}">
+    <div class="auto-thumb">${media}${edit}</div>
     <div class="auto-body">
-      <div class="auto-title">${v.title}</div>
-      <div class="auto-purpose">${v.purpose}</div>
+      <div class="auto-title">${esc(v.title)}</div>
+      <div class="auto-purpose">${esc(v.purpose)}</div>
       <div class="auto-specs">
-        <div class="auto-spec"><span class="auto-spec-label">Экипаж</span><span class="auto-spec-val">${v.crew}</span></div>
-        <div class="auto-spec"><span class="auto-spec-label">Скорость</span><span class="auto-spec-val">${v.speed}</span></div>
-        <div class="auto-spec"><span class="auto-spec-label">Подразделение</span><span class="auto-spec-val">${v.role}</span></div>
-        <div class="auto-spec"><span class="auto-spec-label">Принятие</span><span class="auto-spec-val">${v.year}</span></div>
+        <div class="auto-spec"><span class="auto-spec-label">Экипаж</span><span class="auto-spec-val">${esc(v.crew||"—")}</span></div>
+        <div class="auto-spec"><span class="auto-spec-label">Скорость</span><span class="auto-spec-val">${esc(v.speed||"—")}</span></div>
+        <div class="auto-spec"><span class="auto-spec-label">Гос. цена</span><span class="auto-spec-val">${esc(v.price||"—")}</span></div>
+        <div class="auto-spec"><span class="auto-spec-label">Доступно с должности</span><span class="auto-spec-val">${esc(v.rank||"—")}</span></div>
       </div>
     </div>
   </div>`;
-}).join("");
+}
 
-grid.querySelectorAll(".reveal").forEach(el=>{
-  new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
+function render(){
+  if(!VEHICLES.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><h3>Нет техники</h3><p>Добавьте первую единицу через админ-панель.</p></div>`;
+    return;
+  }
+  grid.innerHTML=VEHICLES.map(cardHtml).join("");
+  grid.querySelectorAll(".reveal").forEach(el=>{
+    new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
+  });
+}
+
+function readLocal(){try{return JSON.parse(localStorage.getItem("vsrf-vehicles")||"null")}catch(e){return null}}
+function writeLocal(list){localStorage.setItem("vsrf-vehicles",JSON.stringify(list))}
+
+async function load(){
+  const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+  if(s&&s.available&&s.client){
+    try{
+      const {data,error}=await s.client.from("vehicles").select("*").order("created_at",{ascending:true});
+      if(error) throw error;
+      if(data&&data.length){VEHICLES=data;writeLocal(VEHICLES);render();updateAdmin();return}
+    }catch(e){}
+  }
+  VEHICLES=readLocal()||DEFAULT_VEHICLES.slice();
+  render();updateAdmin();
+}
+
+function updateAdmin(){
+  const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  document.querySelectorAll(".admin-only").forEach(el=>el.style.display=isAdmin?"":"none");
+  render();
+}
+if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(()=>load());
+
+function openEdit(v){
+  document.getElementById("vehModalTitle").textContent=v?"Редактировать технику":"Новая техника";
+  form.reset();
+  form.id.value=v?v.id:"";
+  if(v){
+    form.title.value=v.title||"";
+    form.image.value=v.image||"";
+    form.purpose.value=v.purpose||"";
+    form.crew.value=v.crew||"";
+    form.speed.value=v.speed||"";
+    form.price.value=v.price||"";
+    form.rank.value=v.rank||"";
+    delBtn.style.display="";
+  }else{
+    delBtn.style.display="none";
+  }
+  const msg=form.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
+  modal.classList.add("active");
+}
+
+addBtn.addEventListener("click",()=>openEdit());
+grid.addEventListener("click",e=>{
+  const b=e.target.closest("[data-edit]");
+  if(!b) return;
+  const v=VEHICLES.find(x=>String(x.id)===String(b.dataset.edit));
+  if(v) openEdit(v);
 });
+modal.addEventListener("click",e=>{if(e.target===modal) modal.classList.remove("active")});
+modal.querySelector(".modal-close").addEventListener("click",()=>modal.classList.remove("active"));
+document.addEventListener("keydown",e=>{if(e.key==="Escape") modal.classList.remove("active")});
+
+delBtn.addEventListener("click",async()=>{
+  if(!form.id.value) return;
+  if(!confirm("Удалить технику?")) return;
+  const s=window.VSRF_AUTH.state;
+  const msg=form.querySelector(".form-msg");
+  if(s.available&&s.client){
+    try{
+      const {error}=await s.client.from("vehicles").delete().eq("id",form.id.value);
+      if(error) throw error;
+    }catch(err){msg.className="form-msg error";msg.textContent=err.message;return}
+  }else{
+    VEHICLES=VEHICLES.filter(x=>String(x.id)!==String(form.id.value));
+    writeLocal(VEHICLES);
+  }
+  modal.classList.remove("active");
+  load();
+});
+
+form.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const msg=form.querySelector(".form-msg");
+  const payload={
+    title:form.title.value.trim(),
+    image:form.image.value.trim()||null,
+    purpose:form.purpose.value.trim(),
+    crew:form.crew.value.trim(),
+    speed:form.speed.value.trim(),
+    price:form.price.value.trim(),
+    rank:form.rank.value.trim()
+  };
+  const s=window.VSRF_AUTH.state;
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  if(s.available&&s.client){
+    try{
+      if(form.id.value){
+        const {error}=await s.client.from("vehicles").update(payload).eq("id",form.id.value);
+        if(error) throw error;
+      }else{
+        const {error}=await s.client.from("vehicles").insert(payload);
+        if(error) throw error;
+      }
+      msg.className="form-msg success";msg.textContent="Готово";
+      setTimeout(()=>{modal.classList.remove("active");load()},500);
+    }catch(err){msg.className="form-msg error";msg.textContent=err.message||"Ошибка"}
+  }else{
+    if(form.id.value){
+      const i=VEHICLES.findIndex(x=>String(x.id)===String(form.id.value));
+      if(i>=0) VEHICLES[i]=Object.assign({},VEHICLES[i],payload);
+    }else{
+      VEHICLES.push(Object.assign({id:"l"+Date.now()},payload));
+    }
+    writeLocal(VEHICLES);
+    msg.className="form-msg success";msg.textContent="Сохранено локально";
+    setTimeout(()=>{modal.classList.remove("active");load()},500);
+  }
+});
+
+load();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f5dcbdcaba9d9a',t:'MTc4NDc1OTEzNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
