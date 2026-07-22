@@ -26,6 +26,7 @@
     <nav class="nav" id="mainNav">
       <a href="index.html" data-page="index.html" data-transition>Главная</a>
       <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="training.html" data-page="training.html" data-transition>Обучение</a>
       <a href="news.html" data-page="news.html" data-transition>Новости</a>
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
@@ -91,7 +92,7 @@
             <h2>Все уставы</h2>
             <p>Кликните на книгу — откроется полная страница документа с боковой навигацией и оглавлением.</p>
           </div>
-          <button class="btn btn-ghost admin-only" id="editListBtn" style="display:none">✎ Редактировать</button>
+          <button class="btn btn-gold admin-only" id="addUstavBtn" style="display:none">＋ Новый устав</button>
         </div>
         <div class="books-grid" id="grid"></div>
       </div>
@@ -108,7 +109,9 @@
         <div class="doc-chips">
           <div class="chip" id="dChipCode"></div>
           <div class="chip">1-я ОБрСпН · в/ч №12132</div>
-          <button class="btn btn-ghost btn-sm admin-only" id="editDocBtn" style="display:none">✎ Редактировать документ</button>
+          <button class="btn btn-ghost btn-sm admin-only" id="editMetaBtn" style="display:none">⚙ Метаданные</button>
+          <button class="btn btn-ghost btn-sm admin-only" id="editDocBtn" style="display:none">✎ Редактировать содержание</button>
+          <button class="btn btn-ghost btn-sm btn-danger admin-only" id="deleteDocBtn" style="display:none">Удалить</button>
         </div>
         <div class="doc-toolbar-progress" id="docProgress"></div>
       </div>
@@ -125,6 +128,7 @@
                     <div class="b-meta" id="dBookMeta"></div>
                   </div>
                   <div class="b-code" id="dBookCode"></div>
+                  <div class="b-emblem" id="dBookEmblem"><img id="dBookEmblemImg" src="" alt=""></div>
                 </div>
                 <div class="b-pages"></div>
               </div>
@@ -152,6 +156,7 @@
         <h5>Разделы</h5>
         <a href="index.html">Главная</a>
         <a href="ustav.html">Уставы</a>
+        <a href="training.html">Обучение</a>
         <a href="news.html">Новости</a>
       </div>
       <div class="footer-col">
@@ -183,7 +188,7 @@
   <div class="search-box">
     <div class="search-input-wrap">
       <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
-      <input class="search-input" placeholder="Поиск по уставам, страницам, разделам..." spellcheck="false">
+      <input class="search-input" placeholder="Поиск..." spellcheck="false">
       <button class="search-close-kbd">Esc</button>
     </div>
     <div class="search-results"></div>
@@ -204,15 +209,53 @@
   </div>
 </div>
 
+<div class="modal-back" id="metaModal">
+  <div class="modal modal-lg">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="metaTitle">Метаданные устава</h3>
+    <div class="modal-sub">Обложка, эмблема, идентификатор.</div>
+    <form id="metaForm">
+      <input type="hidden" name="slug">
+      <input type="hidden" name="isNew">
+      <div class="form-group"><label>Название (короткое)</label><input name="title" required placeholder="Устав военной полиции"></div>
+      <div class="form-group"><label>Полное название (для шапки документа)</label><input name="full" placeholder="УСТАВ ВОЕННОЙ ПОЛИЦИИ"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label>Slug (URL-идентификатор, латиница)</label>
+          <input name="slug_input" required placeholder="ustav-voennoy-politsii" id="metaSlugInput">
+        </div>
+        <div class="form-group">
+          <label>Цвет обложки</label>
+          <select name="theme" id="metaTheme"></select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label>Код документа</label><input name="code" placeholder="1781813401486"></div>
+        <div class="form-group"><label>Meta (маленькая подпись на обложке, разрешён &lt;br&gt;)</label><input name="meta" placeholder="Военная полиция<br>в/ч №12132"></div>
+      </div>
+      <div class="form-group">
+        <label>Герб / эмблема — URL изображения</label>
+        <input name="emblem" type="url" id="metaEmblem" placeholder="https://upload.wikimedia.org/...">
+        <div id="emblemPreview" style="margin-top:10px;display:flex;align-items:center;gap:14px">
+          <div class="paper-emblem" style="width:64px;height:64px;margin:0"><img id="emblemImg" src="" alt=""></div>
+          <div style="font-size:12px;color:var(--muted)">Превью герба</div>
+        </div>
+      </div>
+      <div class="form-group"><label>Подзаголовок документа</label><input name="sub" placeholder="1-я ОБрСпН · в/ч №12132"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">
+        <button class="btn btn-ghost btn-sm" id="metaCancel" type="button">Отмена</button>
+        <button class="btn btn-gold btn-sm" type="submit">Сохранить</button>
+      </div>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
 <div class="modal-back" id="editorModal">
   <div class="modal modal-xl">
     <button class="modal-close" aria-label="Закрыть">✕</button>
     <h3 id="editorTitle">Редактор устава</h3>
     <div class="modal-sub">Изменения сохраняются локально мгновенно, а при подключённом Supabase — синхронизируются в облако.</div>
-    <div class="editor-toolbar">
-      <input id="edFull" placeholder="Полное название (напр. УСТАВ ВНУТРЕННЕЙ СЛУЖБЫ...)">
-      <input id="edSub" placeholder="Подзаголовок">
-    </div>
     <div class="editor">
       <div class="editor-side" id="edSide"></div>
       <div class="editor-main" id="edMain"></div>
@@ -233,9 +276,7 @@
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
-let DATA=[];
-let currentSlug=null;
-let tocObserver=null;
+let DATA=[];let currentSlug=null;let tocObserver=null;
 
 const $=id=>document.getElementById(id);
 const grid=$("grid");
@@ -250,33 +291,33 @@ async function boot(){
   DATA=await VSRF_USTAV.loadAll();
   renderList();
   route();
+  updateAdminUI();
 }
 
 function renderList(){
-  grid.innerHTML=DATA.map(d=>`
-    <a class="book-card reveal" href="#doc/${d.slug}">
+  grid.innerHTML=DATA.map(d=>{
+    const emblem=d.emblem?`<div class="b-emblem"><img src="${VSRF_USTAV.esc(d.emblem)}" alt=""></div>`:"";
+    return `<a class="book-card" href="#doc/${d.slug}">
       <div class="b3d">
         <div class="b-spine"></div>
-        <div class="b-front ${d.theme}">
+        <div class="b-front ${d.theme||'t1'}">
           <div>
             <div class="b-label">ВС РФ</div>
             <h3>${VSRF_USTAV.esc(d.title)}</h3>
             <div class="b-meta">1-я ОБрСпН<br>в/ч №12132</div>
           </div>
-          <div class="b-code">${d.code}</div>
+          <div class="b-code">${VSRF_USTAV.esc(d.code||"")}</div>
+          ${emblem}
         </div>
         <div class="b-pages"></div>
       </div>
-    </a>`).join("");
-  document.querySelectorAll("#grid .reveal").forEach(el=>{
-    new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
-  });
+    </a>`;
+  }).join("");
 }
 
 function showList(){
   document.title="Уставы — ВС РФ · в/ч №12132";
-  viewList.style.display="block";
-  viewDoc.style.display="none";
+  viewList.style.display="block";viewDoc.style.display="none";
   currentSlug=null;
   if(tocObserver){tocObserver.disconnect();tocObserver=null}
   docProgress.style.width="0";
@@ -286,14 +327,15 @@ function showDoc(slug,anchor){
   const d=DATA.find(x=>x.slug===slug);
   if(!d){location.hash="";showList();return}
   document.title=d.title+" — ВС РФ · в/ч №12132";
-  viewList.style.display="none";
-  viewDoc.style.display="block";
+  viewList.style.display="none";viewDoc.style.display="block";
   currentSlug=slug;
-  $("dChipCode").textContent=d.code;
+  $("dChipCode").textContent=d.code||"";
   $("dBookTitle").textContent=d.title;
-  $("dBookMeta").innerHTML=d.meta;
-  $("dBookCode").textContent=d.code;
-  $("dBookFront").className="b-front "+d.theme;
+  $("dBookMeta").innerHTML=d.meta||"1-я ОБрСпН<br>в/ч №12132";
+  $("dBookCode").textContent=d.code||"";
+  $("dBookFront").className="b-front "+(d.theme||"t1");
+  const emblemBox=$("dBookEmblem");
+  if(d.emblem){$("dBookEmblemImg").src=d.emblem;emblemBox.style.display=""}else{emblemBox.style.display="none"}
   paperArticle.innerHTML=VSRF_USTAV.render(d);
   const toc=VSRF_USTAV.buildToc(d);
   $("tocCounter").textContent=toc.length?`${toc.length} разд.`:"";
@@ -304,9 +346,7 @@ function showDoc(slug,anchor){
     tocList.innerHTML=`<li style="padding:12px 14px;color:var(--muted);font-size:13px">Содержание пусто</li>`;
   }
   updateAdminUI();
-  if(anchor){
-    setTimeout(()=>{const e=document.getElementById(anchor);if(e) e.scrollIntoView({behavior:"smooth",block:"start"})},300);
-  }
+  if(anchor){setTimeout(()=>{const e=document.getElementById(anchor);if(e) e.scrollIntoView({behavior:"smooth",block:"start"})},300)}
 }
 
 function setupTocObserver(toc){
@@ -340,7 +380,6 @@ function route(){
   }
   if(currentSlug!==null){transition(showList)}else{showList()}
 }
-
 window.addEventListener("hashchange",route);
 $("backBtn").addEventListener("click",e=>{e.preventDefault();location.hash=""});
 
@@ -355,30 +394,17 @@ document.addEventListener("click",e=>{
   const c=e.target.closest("[data-copy-anchor]");
   if(!c) return;
   const url=location.origin+location.pathname+`#doc/${currentSlug}--${c.dataset.copyAnchor.split("--").slice(1).join("--")}`;
-  navigator.clipboard.writeText(url).then(()=>{
-    c.style.color="#2a7a2a";
-    setTimeout(()=>{c.style.color=""},1200);
-  }).catch(()=>{});
+  navigator.clipboard.writeText(url).then(()=>{c.style.color="#2a7a2a";setTimeout(()=>{c.style.color=""},1200)}).catch(()=>{});
 });
 
 window.addEventListener("scroll",()=>{
   if(viewDoc.style.display!=="block"){docProgress.style.width="0";return}
-  const paper=paperArticle;
-  const rect=paper.getBoundingClientRect();
+  const rect=paperArticle.getBoundingClientRect();
   const total=rect.height-window.innerHeight+150;
   const scrolled=Math.max(0,-rect.top+150);
   const p=total>0?Math.min(scrolled/total,1):0;
   docProgress.style.width=(p*100)+"%";
 },{passive:true});
-
-const editorModal=$("editorModal");
-const edSide=$("edSide");
-const edMain=$("edMain");
-const edFull=$("edFull");
-const edSub=$("edSub");
-const edMsg=$("edMsg");
-let editDoc=null;
-let editActiveChap=null;
 
 function updateAdminUI(){
   const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
@@ -386,18 +412,104 @@ function updateAdminUI(){
 }
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdminUI);
 
-$("editDocBtn").addEventListener("click",()=>{
-  const d=DATA.find(x=>x.slug===currentSlug);
-  if(d) openEditor(d);
+const metaModal=$("metaModal");
+const metaForm=$("metaForm");
+const themeSelect=$("metaTheme");
+themeSelect.innerHTML=VSRF_USTAV.THEMES.map(t=>`<option value="${t.id}">${t.name}</option>`).join("");
+$("metaEmblem").addEventListener("input",e=>{
+  const img=$("emblemImg");img.src=e.target.value||VSRF_USTAV.DEFAULT_EMBLEM;
 });
-$("editListBtn").addEventListener("click",()=>{
-  const slugs=DATA.map(d=>d.slug);
-  const choice=prompt("Введите slug устава для редактирования:\n\n"+DATA.map(d=>`• ${d.slug} — ${d.title}`).join("\n"),slugs[0]);
-  if(!choice) return;
-  const d=DATA.find(x=>x.slug===choice);
-  if(d) openEditor(d);else alert("Не найден");
+$("metaCancel").addEventListener("click",()=>metaModal.classList.remove("active"));
+metaModal.querySelector(".modal-close").addEventListener("click",()=>metaModal.classList.remove("active"));
+metaModal.addEventListener("click",e=>{if(e.target===metaModal) metaModal.classList.remove("active")});
+
+$("addUstavBtn").addEventListener("click",()=>openMeta(null,true));
+$("editMetaBtn").addEventListener("click",()=>{
+  const d=DATA.find(x=>x.slug===currentSlug);if(d) openMeta(d,false);
 });
 
+function openMeta(doc,isNew){
+  $("metaTitle").textContent=isNew?"Новый устав":"Метаданные устава";
+  metaForm.reset();
+  metaForm.slug.value=doc?doc.slug:"";
+  metaForm.isNew.value=isNew?"1":"";
+  metaForm.title.value=doc?doc.title:"";
+  metaForm.full.value=doc?(doc.full||""):"";
+  metaForm.slug_input.value=doc?doc.slug:"";
+  metaForm.theme.value=doc?doc.theme:"t1";
+  metaForm.code.value=doc?(doc.code||""):"";
+  metaForm.meta.value=doc?(doc.meta||"1-я ОБрСпН<br>в/ч №12132"):"1-я ОБрСпН<br>в/ч №12132";
+  metaForm.emblem.value=doc?(doc.emblem||""):"";
+  metaForm.sub.value=doc?(doc.sub||"1-я ОБрСпН · в/ч №12132"):"1-я ОБрСпН · в/ч №12132";
+  $("emblemImg").src=metaForm.emblem.value||VSRF_USTAV.DEFAULT_EMBLEM;
+  const msg=metaForm.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
+  metaModal.classList.add("active");
+  if(isNew){
+    metaForm.title.oninput=()=>{
+      if(!metaForm.slug_input.dataset.touched) metaForm.slug_input.value=VSRF_USTAV.makeSlug(metaForm.title.value);
+    };
+    metaForm.slug_input.oninput=()=>{metaForm.slug_input.dataset.touched="1"};
+  }
+}
+
+metaForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const msg=metaForm.querySelector(".form-msg");
+  const isNew=metaForm.isNew.value==="1";
+  const newSlug=VSRF_USTAV.makeSlug(metaForm.slug_input.value||metaForm.title.value);
+  if(!newSlug){msg.className="form-msg error";msg.textContent="Введите название или slug";return}
+  if(isNew&&DATA.find(x=>x.slug===newSlug)){msg.className="form-msg error";msg.textContent="Устав с таким slug уже существует";return}
+  const oldSlug=metaForm.slug.value;
+  const base=isNew?{preamble:"",chapters:[],signature:null}:(DATA.find(x=>x.slug===oldSlug)||{});
+  const doc=Object.assign({},base,{
+    slug:newSlug,
+    title:metaForm.title.value.trim(),
+    full:metaForm.full.value.trim()||metaForm.title.value.trim().toUpperCase(),
+    sub:metaForm.sub.value.trim()||"1-я ОБрСпН · в/ч №12132",
+    theme:metaForm.theme.value,
+    code:metaForm.code.value.trim(),
+    meta:metaForm.meta.value.trim()||"1-я ОБрСпН<br>в/ч №12132",
+    emblem:metaForm.emblem.value.trim()||VSRF_USTAV.DEFAULT_EMBLEM
+  });
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  if(!isNew&&oldSlug&&oldSlug!==newSlug){
+    await VSRF_USTAV.remove(oldSlug);
+  }
+  const r=await VSRF_USTAV.save(doc);
+  if(r.ok){
+    if(isNew) DATA.push(doc);
+    else{
+      const i=DATA.findIndex(x=>x.slug===oldSlug);
+      if(i>=0) DATA[i]=doc;else DATA.push(doc);
+    }
+    renderList();
+    msg.className="form-msg success";msg.textContent=r.remote?"Сохранено в Supabase":"Сохранено локально";
+    setTimeout(()=>{
+      metaModal.classList.remove("active");
+      if(currentSlug===oldSlug&&oldSlug!==newSlug){location.hash="#doc/"+newSlug}
+      else if(currentSlug===newSlug){showDoc(newSlug)}
+    },600);
+  }else{msg.className="form-msg error";msg.textContent="Ошибка"}
+});
+
+$("deleteDocBtn").addEventListener("click",async()=>{
+  const d=DATA.find(x=>x.slug===currentSlug);if(!d) return;
+  if(!confirm(`Удалить устав «${d.title}» безвозвратно? Это удалит его и все главы.`)) return;
+  const r=await VSRF_USTAV.remove(d.slug);
+  DATA=DATA.filter(x=>x.slug!==d.slug);
+  renderList();
+  location.hash="";
+});
+
+const editorModal=$("editorModal");
+const edSide=$("edSide");
+const edMain=$("edMain");
+const edMsg=$("edMsg");
+let editDoc=null;let editActiveChap=null;
+
+$("editDocBtn").addEventListener("click",()=>{
+  const d=DATA.find(x=>x.slug===currentSlug);if(d) openEditor(d);
+});
 function uid(){return "id"+Math.random().toString(36).slice(2,9)}
 function deepClone(o){return JSON.parse(JSON.stringify(o))}
 
@@ -407,8 +519,6 @@ function openEditor(doc){
   editDoc.preamble=editDoc.preamble||"";
   editActiveChap="preamble";
   $("editorTitle").textContent="Редактор: "+doc.title;
-  edFull.value=editDoc.full||editDoc.title;
-  edSub.value=editDoc.sub||"1-я ОБрСпН · в/ч №12132";
   edMsg.className="form-msg";edMsg.textContent="";
   renderEditor();
   editorModal.classList.add("active");
@@ -427,7 +537,6 @@ function renderEditor(){
     `<div class="chap-item ${editActiveChap==='__sig'?'active':''}" data-chap="__sig">Подпись документа</div>`
   ];
   edSide.innerHTML=items.join("");
-
   if(editActiveChap==="preamble"){
     edMain.innerHTML=`
       <div class="art-editor">
@@ -462,16 +571,13 @@ function renderEditor(){
     $("chapTitle").addEventListener("input",e=>{chap.title=e.target.value;renderSide()});
     renderArts(chap);
     $("edAddArt").addEventListener("click",()=>{
-      const next=(chap.articles||[]).length+1;
       chap.articles=chap.articles||[];
-      chap.articles.push({num:`${chap.articles.length?chap.articles[0].num.split(".")[0]:next}.${(chap.articles.length||0)+1}`,text:"",notes:[]});
+      chap.articles.push({num:`X.${(chap.articles.length||0)+1}`,text:"",notes:[]});
       renderArts(chap);
     });
   }
-
   edSide.addEventListener("click",sideClick,{once:true});
 }
-
 function renderSide(){
   edSide.querySelectorAll(".chap-item").forEach(el=>{
     const id=el.dataset.chap;
@@ -481,36 +587,23 @@ function renderSide(){
     }
   });
 }
-
 function sideClick(e){
   const item=e.target.closest(".chap-item");
   const rm=e.target.closest("[data-remove-chap]");
   const add=e.target.closest("#edAddChap");
-  if(rm){
-    e.stopPropagation();
-    if(!confirm("Удалить главу и все её статьи?")) return renderEditor();
-    editDoc.chapters=editDoc.chapters.filter(c=>c.id!==rm.dataset.removeChap);
-    if(editActiveChap===rm.dataset.removeChap) editActiveChap="preamble";
-    return renderEditor();
-  }
+  if(rm){e.stopPropagation();if(!confirm("Удалить главу?")) return renderEditor();editDoc.chapters=editDoc.chapters.filter(c=>c.id!==rm.dataset.removeChap);if(editActiveChap===rm.dataset.removeChap) editActiveChap="preamble";return renderEditor()}
   if(add){
     const n=editDoc.chapters.length+1;
     const roman=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV"][editDoc.chapters.length]||n;
-    const id="ch"+n+"_"+uid().slice(2,5);
-    editDoc.chapters.push({id,title:`ГЛАВА ${roman}. НОВАЯ ГЛАВА`,articles:[]});
-    editActiveChap=id;
+    editDoc.chapters.push({id:"ch"+n+"_"+uid().slice(2,5),title:`ГЛАВА ${roman}. НОВАЯ ГЛАВА`,articles:[]});
+    editActiveChap=editDoc.chapters[editDoc.chapters.length-1].id;
     return renderEditor();
   }
   if(item){editActiveChap=item.dataset.chap;renderEditor()}
 }
-
 function renderArts(chap){
-  const box=$("artsList");
-  if(!box) return;
-  if(!chap.articles||!chap.articles.length){
-    box.innerHTML=`<div class="empty-state" style="padding:24px">Пока нет статей. Добавьте первую.</div>`;
-    return;
-  }
+  const box=$("artsList");if(!box) return;
+  if(!chap.articles||!chap.articles.length){box.innerHTML=`<div class="empty-state" style="padding:24px">Пока нет статей.</div>`;return}
   box.innerHTML=chap.articles.map((a,i)=>`
     <div class="art-editor" data-art-i="${i}">
       <div class="art-editor-head">
@@ -529,48 +622,33 @@ function renderArts(chap){
       </div>`).join("")}
     </div>`).join("");
   box.querySelectorAll("[data-art-i]").forEach(row=>{
-    const i=+row.dataset.artI;
-    const art=chap.articles[i];
+    const i=+row.dataset.artI;const art=chap.articles[i];
     row.querySelector("[data-num]").addEventListener("input",e=>{art.num=e.target.value});
     row.querySelector("[data-text]").addEventListener("input",e=>{art.text=e.target.value});
-    row.querySelectorAll("[data-note]").forEach(t=>{
-      t.addEventListener("input",e=>{art.notes[+t.dataset.note]=e.target.value});
-    });
+    row.querySelectorAll("[data-note]").forEach(t=>{t.addEventListener("input",e=>{art.notes[+t.dataset.note]=e.target.value})});
     const up=row.querySelector("[data-up]");if(up) up.addEventListener("click",()=>{if(i>0){const [x]=chap.articles.splice(i,1);chap.articles.splice(i-1,0,x);renderArts(chap)}});
     const dn=row.querySelector("[data-down]");if(dn) dn.addEventListener("click",()=>{if(i<chap.articles.length-1){const [x]=chap.articles.splice(i,1);chap.articles.splice(i+1,0,x);renderArts(chap)}});
     row.querySelector("[data-add-note]").addEventListener("click",()=>{art.notes=art.notes||[];art.notes.push("");renderArts(chap)});
     row.querySelector("[data-del-art]").addEventListener("click",()=>{if(confirm("Удалить статью?")){chap.articles.splice(i,1);renderArts(chap)}});
-    row.querySelectorAll("[data-del-note]").forEach(b=>{
-      b.addEventListener("click",()=>{art.notes.splice(+b.dataset.delNote,1);renderArts(chap)});
-    });
+    row.querySelectorAll("[data-del-note]").forEach(b=>{b.addEventListener("click",()=>{art.notes.splice(+b.dataset.delNote,1);renderArts(chap)})});
   });
 }
-
 $("edCancel").addEventListener("click",()=>editorModal.classList.remove("active"));
 editorModal.querySelector(".modal-close").addEventListener("click",()=>editorModal.classList.remove("active"));
 $("edSave").addEventListener("click",async()=>{
-  editDoc.full=edFull.value.trim()||editDoc.title;
-  editDoc.sub=edSub.value.trim()||"1-я ОБрСпН · в/ч №12132";
   edMsg.className="form-msg info";edMsg.textContent="Сохранение...";
   const r=await VSRF_USTAV.save(editDoc);
   if(r.ok){
     const idx=DATA.findIndex(x=>x.slug===editDoc.slug);
     if(idx>=0) DATA[idx]=Object.assign({},DATA[idx],editDoc);
     edMsg.className="form-msg success";
-    edMsg.textContent=r.remote?"Сохранено в Supabase":"Сохранено локально (для облачной синхронизации подключите Supabase)";
-    setTimeout(()=>{
-      editorModal.classList.remove("active");
-      if(currentSlug===editDoc.slug) showDoc(currentSlug);
-    },800);
-  }else{
-    edMsg.className="form-msg error";edMsg.textContent="Ошибка сохранения";
-  }
+    edMsg.textContent=r.remote?"Сохранено в Supabase":"Сохранено локально";
+    setTimeout(()=>{editorModal.classList.remove("active");if(currentSlug===editDoc.slug) showDoc(currentSlug)},700);
+  }else{edMsg.className="form-msg error";edMsg.textContent="Ошибка"}
 });
-
 window.VSRF_USTAV_TOC=[];
-
 boot();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f5dd1c7acd9d9a',t:'MTc4NDc1OTE1Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

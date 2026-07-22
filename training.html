@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Обучение — ВС РФ · в/ч №12132</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise"></div>
+<div class="page-transition-overlay" id="overlay"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-icon">ВС</div>
+      <div class="brand-text">
+        <span class="brand-label">Вооружённые Силы РФ</span>
+        <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
+      </div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="training.html" data-page="training.html" data-transition>Обучение</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+    </nav>
+    <div class="header-actions">
+      <button class="search-btn" data-open-search title="Поиск (Ctrl+K)">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <span>Поиск</span><span class="kbd">Ctrl K</span>
+      </button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="login-btn" data-open-login>
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        <span>Войти</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="section" style="padding-top:60px">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="badge">Учебная программа</span>
+        <h2>Обучающий материал</h2>
+        <p>Курсы, инструктажи и учебные материалы для военнослужащих. По окончании — прохождение зачётного теста.</p>
+      </div>
+
+      <div class="train-controls reveal">
+        <div class="dropdown" id="catDropdown">
+          <button class="dropdown-btn" id="catDropBtn">
+            <span class="dropdown-dot" id="catDropDot" style="background:#cda85a"></span>
+            <span id="catDropLabel">Все категории</span>
+            <span class="dropdown-arrow">▾</span>
+          </button>
+          <div class="dropdown-menu" id="catDropMenu"></div>
+        </div>
+        <div class="dropdown" id="subDropdown" style="display:none">
+          <button class="dropdown-btn" id="subDropBtn">
+            <span id="subDropLabel">Все подкатегории</span>
+            <span class="dropdown-arrow">▾</span>
+          </button>
+          <div class="dropdown-menu" id="subDropMenu"></div>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn btn-ghost btn-sm admin-only" id="manageCatsBtn" style="display:none">⚙ Категории</button>
+        <button class="btn btn-gold btn-sm admin-only" id="addLessonBtn" style="display:none">＋ Новый урок</button>
+      </div>
+
+      <div class="train-grid" id="trainGrid" style="margin-top:24px"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h4>1-я ОБрСпН · в/ч №12132</h4>
+        <p>Вооружённые Силы Российской Федерации.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Разделы</h5>
+        <a href="index.html">Главная</a>
+        <a href="ustav.html">Уставы</a>
+        <a href="training.html">Обучение</a>
+        <a href="news.html">Новости</a>
+      </div>
+      <div class="footer-col">
+        <h5>Ресурсы</h5>
+        <a href="autopark.html">Автопарк</a>
+        <a href="map.html">Карта</a>
+        <a href="#" data-open-login>Личный кабинет</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> · Вооружённые Силы Российской Федерации</span>
+      <span>1-я ОБрСпН · в/ч №12132</span>
+    </div>
+  </div>
+</footer>
+
+<div class="fab-stack" id="fabStack">
+  <button class="fab" id="fabUp" title="Наверх">
+    <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg>
+    <span class="fab-hint">Наверх</span>
+  </button>
+</div>
+
+<div class="search-modal" id="searchModal">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      <input class="search-input" placeholder="Поиск..." spellcheck="false">
+      <button class="search-close-kbd">Esc</button>
+    </div>
+    <div class="search-results"></div>
+  </div>
+</div>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Вход администратора</h3>
+    <div class="modal-sub">Доступ к управлению контентом</div>
+    <form>
+      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
+      <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-back" id="lessonModal">
+  <div class="modal modal-xl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <div class="lesson-view-hero" id="lessonHero"></div>
+    <div style="padding:0 4px">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px" id="lessonTags"></div>
+      <h2 class="news-modal-title" id="lessonTitle"></h2>
+      <div class="news-modal-body" id="lessonBody" style="margin-top:16px"></div>
+      <div id="lessonTestBox" style="display:none;margin-top:24px">
+        <div class="train-test-head">
+          <div>
+            <div class="badge">Зачётный тест</div>
+            <h3 style="font-family:'Cormorant Garamond',serif;font-size:26px;margin:8px 0 4px">Пройдите тест</h3>
+            <p style="color:var(--muted);font-size:13px">По итогам обучения — контрольное тестирование</p>
+          </div>
+          <a class="btn btn-gold btn-sm" id="lessonTestOpen" target="_blank" rel="noopener">Открыть в новой вкладке ↗</a>
+        </div>
+        <div class="train-test-iframe">
+          <iframe id="lessonTestIframe" src="" width="100%" height="600" frameborder="0" marginheight="0" marginwidth="0">Загрузка…</iframe>
+        </div>
+      </div>
+      <div class="admin-only" id="lessonAdminBar" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" id="lessonEditBtn">✎ Редактировать</button>
+        <button class="btn btn-ghost btn-sm btn-danger" id="lessonDelBtn">Удалить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="editLessonModal">
+  <div class="modal modal-lg">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="editLessonTitle">Новый урок</h3>
+    <div class="modal-sub">Опишите урок и, при необходимости, вставьте ссылку на Google Форму с тестом.</div>
+    <form id="lessonForm">
+      <input type="hidden" name="id">
+      <div class="form-group"><label>Название урока</label><input name="title" required placeholder="Строевая подготовка. Занятие №1"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label>Категория</label><select name="category" id="lessonCatSelect" required></select></div>
+        <div class="form-group"><label>URL обложки (необязательно)</label><input name="image" type="url" placeholder="https://..."></div>
+      </div>
+      <div class="form-group"><label>Краткое описание</label><textarea name="excerpt" required style="min-height:70px"></textarea></div>
+      <div class="form-group"><label>Полный материал урока</label><textarea name="content" style="min-height:180px" placeholder="Разделяйте абзацы пустой строкой"></textarea></div>
+      <div class="form-group">
+        <label>Ссылка на Google-тест (Google Forms)</label>
+        <input name="test_url" type="url" placeholder="https://docs.google.com/forms/d/e/.../viewform или https://forms.gle/...">
+        <div style="margin-top:6px;font-size:12px;color:var(--muted)">Ссылку берите со страницы формы (кнопка «Отправить» → «Ссылка»). Форма встроится через iframe с автоматическим `?embedded=true`.</div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+        <button type="button" class="btn btn-ghost btn-sm" id="lessonFormCancel">Отмена</button>
+        <button class="btn btn-gold btn-sm" type="submit">Сохранить</button>
+      </div>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-back" id="catsModal">
+  <div class="modal modal-lg">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Категории и подкатегории</h3>
+    <div class="modal-sub">Настройте структуру учебных материалов</div>
+    <div id="catsList" style="margin-top:16px"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+      <button class="btn btn-ghost btn-sm" id="addRootCatBtn">＋ Категория верхнего уровня</button>
+      <button class="btn btn-gold btn-sm" style="margin-left:auto" id="catsCloseBtn">Готово</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="catEditModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="catEditTitle">Категория</h3>
+    <form id="catForm">
+      <input type="hidden" name="id"><input type="hidden" name="parent">
+      <div class="form-group"><label>Название</label><input name="name" required placeholder="КМБ · Курс молодого бойца"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label>Цвет</label><input name="color" type="color" value="#cda85a" style="height:44px;padding:4px"></div>
+        <div class="form-group"><label>Порядок</label><input name="sort" type="number" value="10"></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:space-between;margin-top:8px">
+        <button type="button" class="btn btn-ghost btn-sm btn-danger" id="catDeleteBtn" style="display:none">Удалить</button>
+        <button class="btn btn-gold btn-sm" type="submit" style="margin-left:auto">Сохранить</button>
+      </div>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="training-engine.js"></script>
+<script src="main.js"></script>
+<script src="auth.js"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+
+let CATS=[];let LESSONS=[];
+let activeCat=null;let activeSub=null;let currentLesson=null;
+
+const $=id=>document.getElementById(id);
+const grid=$("trainGrid");
+
+const catDrop=$("catDropdown"),subDrop=$("subDropdown");
+const catDropBtn=$("catDropBtn"),subDropBtn=$("subDropBtn");
+const catDropMenu=$("catDropMenu"),subDropMenu=$("subDropMenu");
+const catDropLabel=$("catDropLabel"),subDropLabel=$("subDropLabel");
+const catDropDot=$("catDropDot");
+
+async function boot(){
+  CATS=await VSRF_TRAIN.loadCats();
+  LESSONS=await VSRF_TRAIN.loadLessons();
+  renderCatDropdown();renderSubDropdown();renderGrid();updateAdmin();
+}
+
+function esc(s){return VSRF_TRAIN.esc(s)}
+function rootCats(){return CATS.filter(c=>!c.parent).sort((a,b)=>(a.sort||0)-(b.sort||0))}
+function subCats(pid){return CATS.filter(c=>c.parent===pid).sort((a,b)=>(a.sort||0)-(b.sort||0))}
+function findCat(id){return CATS.find(c=>c.id===id)}
+
+function renderCatDropdown(){
+  const roots=rootCats();
+  const items=[`<div class="dropdown-item ${activeCat===null?'active':''}" data-cat="__all"><span class="dropdown-dot" style="background:#cda85a"></span>Все категории<span class="dropdown-count">${LESSONS.length}</span></div>`];
+  roots.forEach(c=>{
+    const cnt=LESSONS.filter(l=>{
+      if(l.category===c.id) return true;
+      return subCats(c.id).some(s=>s.id===l.category);
+    }).length;
+    items.push(`<div class="dropdown-item ${activeCat===c.id?'active':''}" data-cat="${c.id}"><span class="dropdown-dot" style="background:${c.color||'#cda85a'}"></span>${esc(c.name)}<span class="dropdown-count">${cnt}</span></div>`);
+  });
+  catDropMenu.innerHTML=items.join("");
+  const cur=activeCat?findCat(activeCat):null;
+  catDropLabel.textContent=cur?cur.name:"Все категории";
+  catDropDot.style.background=cur?(cur.color||"#cda85a"):"#cda85a";
+}
+function renderSubDropdown(){
+  if(!activeCat){subDrop.style.display="none";return}
+  const subs=subCats(activeCat);
+  if(!subs.length){subDrop.style.display="none";return}
+  subDrop.style.display="";
+  const items=[`<div class="dropdown-item ${activeSub===null?'active':''}" data-sub="__all">Все подкатегории</div>`];
+  subs.forEach(s=>{
+    const cnt=LESSONS.filter(l=>l.category===s.id).length;
+    items.push(`<div class="dropdown-item ${activeSub===s.id?'active':''}" data-sub="${s.id}"><span class="dropdown-dot" style="background:${s.color||'#cda85a'}"></span>${esc(s.name)}<span class="dropdown-count">${cnt}</span></div>`);
+  });
+  subDropMenu.innerHTML=items.join("");
+  const cur=activeSub?findCat(activeSub):null;
+  subDropLabel.textContent=cur?cur.name:"Все подкатегории";
+}
+
+catDropBtn.addEventListener("click",()=>{catDrop.classList.toggle("open");subDrop.classList.remove("open")});
+subDropBtn.addEventListener("click",()=>{subDrop.classList.toggle("open");catDrop.classList.remove("open")});
+document.addEventListener("click",e=>{
+  if(!catDrop.contains(e.target)) catDrop.classList.remove("open");
+  if(!subDrop.contains(e.target)) subDrop.classList.remove("open");
+});
+catDropMenu.addEventListener("click",e=>{
+  const it=e.target.closest("[data-cat]");if(!it) return;
+  activeCat=it.dataset.cat==="__all"?null:it.dataset.cat;
+  activeSub=null;
+  catDrop.classList.remove("open");
+  renderCatDropdown();renderSubDropdown();renderGrid();
+});
+subDropMenu.addEventListener("click",e=>{
+  const it=e.target.closest("[data-sub]");if(!it) return;
+  activeSub=it.dataset.sub==="__all"?null:it.dataset.sub;
+  subDrop.classList.remove("open");
+  renderSubDropdown();renderGrid();
+});
+
+function filteredLessons(){
+  if(activeSub) return LESSONS.filter(l=>l.category===activeSub);
+  if(activeCat){const ids=[activeCat,...subCats(activeCat).map(s=>s.id)];return LESSONS.filter(l=>ids.includes(l.category))}
+  return LESSONS.slice();
+}
+
+function renderGrid(){
+  const list=filteredLessons();
+  if(!list.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9M18.82 9L12 12.72 5.18 9 12 5.28M17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73"/></svg><h3>Нет уроков</h3><p>Пока в этой категории материалы не добавлены.</p></div>`;
+    return;
+  }
+  grid.innerHTML=list.map(l=>{
+    const cat=findCat(l.category);
+    const catName=cat?cat.name:"—";
+    const catColor=cat?(cat.color||"#cda85a"):"#cda85a";
+    const img=l.image?`<img src="${esc(l.image)}" alt="${esc(l.title)}" loading="lazy">`:`<div class="lesson-placeholder"><svg viewBox="0 0 24 24" width="46" height="46" fill="currentColor" style="opacity:.55"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9M18.82 9L12 12.72 5.18 9 12 5.28M17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73"/></svg></div>`;
+    const test=l.test_url?`<span class="lesson-badge lesson-badge-test">✓ С тестом</span>`:"";
+    return `<div class="lesson-card" data-lesson-id="${l.id}">
+      <div class="lesson-thumb" style="--cat-color:${catColor}">${img}<span class="lesson-badge" style="color:${catColor};border-color:${catColor}66">${esc(catName)}</span>${test}</div>
+      <div class="lesson-body">
+        <h3 class="lesson-title">${esc(l.title)}</h3>
+        <p class="lesson-excerpt">${esc(l.excerpt||"")}</p>
+        <div class="lesson-more">Открыть урок →</div>
+      </div>
+    </div>`;
+  }).join("");
+  grid.querySelectorAll(".lesson-card").forEach(c=>c.addEventListener("click",()=>openLesson(c.dataset.lessonId)));
+}
+
+const lessonModal=$("lessonModal");
+function openLesson(id){
+  const l=LESSONS.find(x=>String(x.id)===String(id));if(!l) return;
+  currentLesson=l;
+  const cat=findCat(l.category);
+  const catName=cat?cat.name:"—";
+  const catColor=cat?(cat.color||"#cda85a"):"#cda85a";
+  const parent=cat&&cat.parent?findCat(cat.parent):null;
+  const img=l.image?`<img src="${esc(l.image)}" alt="">`:"";
+  $("lessonHero").innerHTML=img;
+  $("lessonHero").style.display=l.image?"":"none";
+  $("lessonTitle").textContent=l.title;
+  $("lessonTags").innerHTML=`
+    ${parent?`<span class="lesson-badge" style="position:static;color:${catColor};border-color:${catColor}66">${esc(parent.name)}</span>`:""}
+    <span class="lesson-badge" style="position:static;color:${catColor};border-color:${catColor}66">${esc(catName)}</span>
+    ${l.test_url?`<span class="lesson-badge lesson-badge-test" style="position:static">✓ С тестом</span>`:""}
+  `;
+  const body=(l.content||l.excerpt||"").split(/\n{2,}/).map(p=>`<p>${esc(p).replace(/\n/g,"<br>")}</p>`).join("");
+  $("lessonBody").innerHTML=body||`<p style="opacity:.6">Материал будет добавлен позже.</p>`;
+  const testBox=$("lessonTestBox");
+  if(l.test_url){
+    testBox.style.display="";
+    $("lessonTestIframe").src=VSRF_TRAIN.extractFormEmbed(l.test_url);
+    $("lessonTestOpen").href=l.test_url;
+  }else{
+    testBox.style.display="none";$("lessonTestIframe").src="";
+  }
+  const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  $("lessonAdminBar").style.display=isAdmin?"flex":"none";
+  lessonModal.classList.add("active");
+  history.replaceState(null,"","#l-"+id);
+}
+function closeLesson(){
+  lessonModal.classList.remove("active");
+  $("lessonTestIframe").src="";
+  history.replaceState(null,"",location.pathname);
+}
+lessonModal.addEventListener("click",e=>{if(e.target===lessonModal) closeLesson()});
+lessonModal.querySelector(".modal-close").addEventListener("click",closeLesson);
+document.addEventListener("keydown",e=>{if(e.key==="Escape") closeLesson()});
+
+const lessonForm=$("lessonForm"),editLessonModal=$("editLessonModal");
+function openLessonEdit(l){
+  $("editLessonTitle").textContent=l?"Редактировать урок":"Новый урок";
+  lessonForm.reset();
+  const sel=$("lessonCatSelect");
+  const allCats=CATS.slice().sort((a,b)=>{
+    const pa=a.parent||a.id,pb=b.parent||b.id;
+    if(pa!==pb) return (findCat(pa)?.sort||0)-(findCat(pb)?.sort||0);
+    return (a.parent?1:0)-(b.parent?1:0);
+  });
+  sel.innerHTML=allCats.map(c=>{
+    const prefix=c.parent?"  ↳ ":"";
+    return `<option value="${c.id}">${prefix}${esc(c.name)}</option>`;
+  }).join("")||`<option value="">— нет категорий —</option>`;
+  lessonForm.id.value=l?l.id:"";
+  if(l){
+    lessonForm.title.value=l.title||"";
+    lessonForm.category.value=l.category||"";
+    lessonForm.image.value=l.image||"";
+    lessonForm.excerpt.value=l.excerpt||"";
+    lessonForm.content.value=l.content||"";
+    lessonForm.test_url.value=l.test_url||"";
+  }else if(activeCat){
+    lessonForm.category.value=activeSub||activeCat;
+  }
+  const msg=lessonForm.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
+  editLessonModal.classList.add("active");
+}
+$("addLessonBtn").addEventListener("click",()=>openLessonEdit());
+$("lessonEditBtn").addEventListener("click",()=>{closeLesson();if(currentLesson) openLessonEdit(currentLesson)});
+$("lessonDelBtn").addEventListener("click",async()=>{
+  if(!currentLesson) return;
+  if(!confirm("Удалить урок «"+currentLesson.title+"»?")) return;
+  await VSRF_TRAIN.removeLesson(currentLesson.id);
+  LESSONS=LESSONS.filter(x=>x.id!==currentLesson.id);
+  closeLesson();renderGrid();renderCatDropdown();renderSubDropdown();
+});
+editLessonModal.addEventListener("click",e=>{if(e.target===editLessonModal) editLessonModal.classList.remove("active")});
+editLessonModal.querySelector(".modal-close").addEventListener("click",()=>editLessonModal.classList.remove("active"));
+$("lessonFormCancel").addEventListener("click",()=>editLessonModal.classList.remove("active"));
+
+lessonForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const msg=lessonForm.querySelector(".form-msg");
+  const p={
+    id:lessonForm.id.value||VSRF_TRAIN.uid("l"),
+    title:lessonForm.title.value.trim(),
+    category:lessonForm.category.value,
+    image:lessonForm.image.value.trim()||null,
+    excerpt:lessonForm.excerpt.value.trim(),
+    content:lessonForm.content.value.trim(),
+    test_url:lessonForm.test_url.value.trim()||null,
+    sort:Date.now()
+  };
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  const r=await VSRF_TRAIN.saveLesson(p);
+  if(r.ok){
+    const i=LESSONS.findIndex(x=>x.id===p.id);
+    if(i>=0) LESSONS[i]=p;else LESSONS.push(p);
+    renderGrid();renderCatDropdown();renderSubDropdown();
+    msg.className="form-msg success";msg.textContent=r.remote?"Сохранено в Supabase":"Сохранено локально";
+    setTimeout(()=>editLessonModal.classList.remove("active"),500);
+  }else{msg.className="form-msg error";msg.textContent=r.error||"Ошибка"}
+});
+
+const catsModal=$("catsModal"),catEditModal=$("catEditModal"),catForm=$("catForm");
+$("manageCatsBtn").addEventListener("click",()=>{renderCatsList();catsModal.classList.add("active")});
+$("catsCloseBtn").addEventListener("click",()=>catsModal.classList.remove("active"));
+catsModal.addEventListener("click",e=>{if(e.target===catsModal) catsModal.classList.remove("active")});
+catsModal.querySelector(".modal-close").addEventListener("click",()=>catsModal.classList.remove("active"));
+
+function renderCatsList(){
+  const roots=rootCats();
+  if(!roots.length){$("catsList").innerHTML=`<div class="empty-state">Категорий нет. Добавьте первую.</div>`;return}
+  $("catsList").innerHTML=roots.map(r=>`
+    <div class="cat-row">
+      <div class="cat-row-line">
+        <span class="dropdown-dot" style="background:${r.color||'#cda85a'}"></span>
+        <span style="flex:1;font-weight:600">${esc(r.name)}</span>
+        <button class="mini-btn" data-add-sub="${r.id}">+ Подкат.</button>
+        <button class="mini-btn" data-edit-cat="${r.id}">✎</button>
+        <button class="mini-btn danger" data-del-cat="${r.id}">×</button>
+      </div>
+      ${subCats(r.id).map(s=>`<div class="cat-row-line cat-row-sub">
+        <span style="opacity:.5">↳</span>
+        <span class="dropdown-dot" style="background:${s.color||'#cda85a'}"></span>
+        <span style="flex:1">${esc(s.name)}</span>
+        <button class="mini-btn" data-edit-cat="${s.id}">✎</button>
+        <button class="mini-btn danger" data-del-cat="${s.id}">×</button>
+      </div>`).join("")}
+    </div>
+  `).join("");
+}
+$("addRootCatBtn").addEventListener("click",()=>openCatEdit(null,null));
+$("catsList").addEventListener("click",async e=>{
+  const addSub=e.target.closest("[data-add-sub]");
+  const edit=e.target.closest("[data-edit-cat]");
+  const del=e.target.closest("[data-del-cat]");
+  if(addSub) return openCatEdit(null,addSub.dataset.addSub);
+  if(edit){const c=findCat(edit.dataset.editCat);if(c) openCatEdit(c,c.parent)}
+  if(del){
+    const c=findCat(del.dataset.delCat);
+    if(!confirm(`Удалить «${c.name}»? Все подкатегории и уроки в ней тоже удалятся.`)) return;
+    await VSRF_TRAIN.removeCat(c.id);
+    CATS=CATS.filter(x=>x.id!==c.id&&x.parent!==c.id);
+    LESSONS=LESSONS.filter(l=>l.category!==c.id&&!CATS.every(cc=>cc.id!==l.category));
+    if(activeCat===c.id||activeSub===c.id){activeCat=null;activeSub=null}
+    renderCatsList();renderCatDropdown();renderSubDropdown();renderGrid();
+  }
+});
+function openCatEdit(cat,parent){
+  $("catEditTitle").textContent=cat?"Редактировать категорию":(parent?"Новая подкатегория":"Новая категория");
+  catForm.reset();
+  catForm.id.value=cat?cat.id:"";
+  catForm.parent.value=parent||"";
+  catForm.name.value=cat?cat.name:"";
+  catForm.color.value=cat?(cat.color||"#cda85a"):"#cda85a";
+  catForm.sort.value=cat?(cat.sort||10):10;
+  $("catDeleteBtn").style.display=cat?"":"none";
+  const msg=catForm.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
+  catEditModal.classList.add("active");
+}
+catEditModal.addEventListener("click",e=>{if(e.target===catEditModal) catEditModal.classList.remove("active")});
+catEditModal.querySelector(".modal-close").addEventListener("click",()=>catEditModal.classList.remove("active"));
+$("catDeleteBtn").addEventListener("click",async()=>{
+  if(!catForm.id.value) return;
+  const c=findCat(catForm.id.value);
+  if(!confirm(`Удалить «${c.name}»?`)) return;
+  await VSRF_TRAIN.removeCat(c.id);
+  CATS=CATS.filter(x=>x.id!==c.id&&x.parent!==c.id);
+  LESSONS=LESSONS.filter(l=>CATS.some(cc=>cc.id===l.category));
+  catEditModal.classList.remove("active");
+  renderCatsList();renderCatDropdown();renderSubDropdown();renderGrid();
+});
+catForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const msg=catForm.querySelector(".form-msg");
+  const p={
+    id:catForm.id.value||VSRF_TRAIN.uid("c"),
+    name:catForm.name.value.trim(),
+    color:catForm.color.value,
+    parent:catForm.parent.value||null,
+    sort:parseInt(catForm.sort.value)||10
+  };
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  const r=await VSRF_TRAIN.saveCat(p);
+  if(r.ok){
+    const i=CATS.findIndex(x=>x.id===p.id);
+    if(i>=0) CATS[i]=p;else CATS.push(p);
+    msg.className="form-msg success";msg.textContent=r.remote?"Сохранено":"Локально";
+    setTimeout(()=>{catEditModal.classList.remove("active");renderCatsList();renderCatDropdown();renderSubDropdown();renderGrid()},400);
+  }else{msg.className="form-msg error";msg.textContent=r.error||"Ошибка"}
+});
+
+function updateAdmin(){
+  const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  document.querySelectorAll(".admin-only").forEach(el=>{if(el!==$("lessonAdminBar")) el.style.display=isAdmin?"":"none"});
+}
+if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
+
+boot().then(()=>{
+  if(location.hash.startsWith("#l-")){const id=location.hash.slice(3);setTimeout(()=>openLesson(id),300)}
+});
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
+</html>

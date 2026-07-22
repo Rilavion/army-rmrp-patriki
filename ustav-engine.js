@@ -1,24 +1,32 @@
 window.VSRF_USTAV=(function(){
+  const DEFAULT_EMBLEM="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Middle_Emblem_of_the_Russian_Navy.svg/1280px-Middle_Emblem_of_the_Russian_Navy.svg.png";
+
   const DEFAULT_DATA=[
-    {slug:"ustav-vnutrenney-sluzhby",theme:"t1",title:"Устав внутренней службы",code:"1781813401486",meta:"Министерство обороны РФ<br>в/ч №12132",
+    {slug:"ustav-vnutrenney-sluzhby",theme:"t1",title:"Устав внутренней службы",code:"1781813401486",meta:"Министерство обороны РФ<br>в/ч №12132",emblem:DEFAULT_EMBLEM,
       full:"УСТАВ ВНУТРЕННЕЙ СЛУЖБЫ ВООРУЖЕННЫХ СИЛ РОССИЙСКОЙ ФЕДЕРАЦИИ",
       sub:"1-я отдельная гвардейская бригада специального назначения · в/ч №12132",
-      preamble:"",
-      chapters:[],
+      preamble:"",chapters:[],
       signature:{title:"Командир 1-ой мотострелковой бригады",rank:"генерал-лейтенант",name:"Волков Р.А."}
     },
-    {slug:"stroevoy-ustav",theme:"t2",title:"Строевой устав",code:"1781813453292",meta:"Строевая подготовка<br>в/ч №12132",
+    {slug:"stroevoy-ustav",theme:"t2",title:"Строевой устав",code:"1781813453292",meta:"Строевая подготовка<br>в/ч №12132",emblem:DEFAULT_EMBLEM,
       full:"СТРОЕВОЙ УСТАВ",sub:"1-я ОБрСпН · в/ч №12132",preamble:"",chapters:[],signature:null},
-    {slug:"karaulnaya-i-garnizonnaya",theme:"t3",title:"Устав караульной и гарнизонной служб",code:"1781813512103",meta:"Караульная и гарнизонная служба<br>в/ч №12132",
+    {slug:"karaulnaya-i-garnizonnaya",theme:"t3",title:"Устав караульной и гарнизонной служб",code:"1781813512103",meta:"Караульная и гарнизонная служба<br>в/ч №12132",emblem:DEFAULT_EMBLEM,
       full:"УСТАВ КАРАУЛЬНОЙ И ГАРНИЗОННОЙ СЛУЖБ",sub:"1-я ОБрСпН · в/ч №12132",preamble:"",chapters:[],signature:null},
-    {slug:"disciplinarnyy-ustav",theme:"t4",title:"Дисциплинарный устав",code:"1781813587291",meta:"Воинская дисциплина<br>в/ч №12132",
+    {slug:"disciplinarnyy-ustav",theme:"t4",title:"Дисциплинарный устав",code:"1781813587291",meta:"Воинская дисциплина<br>в/ч №12132",emblem:DEFAULT_EMBLEM,
       full:"ДИСЦИПЛИНАРНЫЙ УСТАВ",sub:"1-я ОБрСпН · в/ч №12132",preamble:"",chapters:[],signature:null},
-    {slug:"ustav-voennoy-politsii",theme:"t5",title:"Устав военной полиции",code:"1781813632975",meta:"Военная полиция<br>в/ч №12132",
+    {slug:"ustav-voennoy-politsii",theme:"t5",title:"Устав военной полиции",code:"1781813632975",meta:"Военная полиция<br>в/ч №12132",emblem:DEFAULT_EMBLEM,
       full:"УСТАВ ВОЕННОЙ ПОЛИЦИИ",sub:"1-я ОБрСпН · в/ч №12132",preamble:"",chapters:[],signature:null}
   ];
 
-  function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+  const THEMES=[
+    {id:"t1",name:"Оливковый"},
+    {id:"t2",name:"Хаки"},
+    {id:"t3",name:"Синий"},
+    {id:"t4",name:"Бурый"},
+    {id:"t5",name:"Пурпур"}
+  ];
 
+  function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   function paragraphs(text){
     return String(text||"").split(/\n{2,}/).map(p=>p.trim()).filter(Boolean).map(p=>`<p>${esc(p).replace(/\n/g,"<br>")}</p>`).join("");
   }
@@ -39,7 +47,9 @@ window.VSRF_USTAV=(function(){
   }
 
   function render(doc){
+    const emblem=doc.emblem||DEFAULT_EMBLEM;
     let html=`<div class="paper-head">
+      <div class="paper-emblem"><img src="${esc(emblem)}" alt=""></div>
       <div class="ministry">МИНИСТЕРСТВО ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ</div>
       <h1>${esc(doc.full||doc.title)}</h1>
       <div class="sub">${esc(doc.sub||"1-я ОБрСпН · в/ч №12132")}</div>
@@ -49,7 +59,6 @@ window.VSRF_USTAV=(function(){
     if(doc.preamble&&doc.preamble.trim()){
       html+=`<section class="preamble" id="preamble"><h2>ПРЕАМБУЛА</h2>${paragraphs(doc.preamble)}</section>`;
     }
-
     if(!doc.chapters||!doc.chapters.length){
       if(!doc.preamble||!doc.preamble.trim()){
         html+=`<div class="doc-empty"><h3>Документ пуст</h3>Здесь пока нет глав и статей. Администратор может заполнить документ через панель редактирования.</div>`;
@@ -57,7 +66,6 @@ window.VSRF_USTAV=(function(){
     }else{
       doc.chapters.forEach(c=>{html+=renderChapter(c,doc.slug)});
     }
-
     if(doc.signature){
       html+=`<section class="sig">
         <div class="sig-title">${esc(doc.signature.title||"")}</div>
@@ -81,40 +89,56 @@ window.VSRF_USTAV=(function(){
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(s&&s.available&&s.client){
       try{
-        const {data,error}=await s.client.from("ustavy").select("*");
+        const {data,error}=await s.client.from("ustavy").select("*").order("sort_order",{ascending:true,nullsFirst:true});
         if(error) throw error;
         if(data&&data.length){
-          const merged=DEFAULT_DATA.map(d=>{
-            const row=data.find(x=>x.slug===d.slug);
-            if(!row) return local[d.slug]||d;
-            try{
-              const parsed=typeof row.content==="string"?JSON.parse(row.content):row.content;
-              return Object.assign({},d,parsed,{slug:d.slug,theme:d.theme,code:d.code,meta:d.meta,title:d.title});
-            }catch(e){return local[d.slug]||d}
+          const remoteSlugs=data.map(r=>r.slug);
+          const list=data.map(row=>{
+            const base=DEFAULT_DATA.find(d=>d.slug===row.slug)||{slug:row.slug,theme:"t1",code:"",meta:"",emblem:DEFAULT_EMBLEM};
+            let parsed={};
+            try{parsed=typeof row.content==="string"?JSON.parse(row.content):(row.content||{})}catch(e){parsed={}}
+            return Object.assign({},base,parsed,{
+              slug:row.slug,title:row.title||base.title,
+              theme:row.theme||parsed.theme||base.theme,
+              code:row.code||parsed.code||base.code,
+              meta:row.meta||parsed.meta||base.meta,
+              emblem:row.emblem||parsed.emblem||base.emblem||DEFAULT_EMBLEM
+            });
           });
-          return merged;
+          DEFAULT_DATA.forEach(d=>{if(!remoteSlugs.includes(d.slug)) list.push(Object.assign({},d,local[d.slug]||{}))});
+          return list;
         }
       }catch(e){}
     }
-    return DEFAULT_DATA.map(d=>Object.assign({},d,local[d.slug]||{}));
+    const list=DEFAULT_DATA.map(d=>Object.assign({},d,local[d.slug]||{}));
+    Object.keys(local).forEach(slug=>{
+      if(!list.find(x=>x.slug===slug)) list.push(local[slug]);
+    });
+    return list;
   }
 
-  function readLocal(){
-    try{return JSON.parse(localStorage.getItem("vsrf-ustavy-local")||"{}")}catch(e){return {}}
-  }
+  function readLocal(){try{return JSON.parse(localStorage.getItem("vsrf-ustavy-local")||"{}")}catch(e){return {}}}
   function writeLocal(slug,doc){
     const all=readLocal();
-    all[slug]={preamble:doc.preamble,chapters:doc.chapters,signature:doc.signature,full:doc.full,sub:doc.sub};
+    all[slug]=Object.assign({},all[slug]||{},doc,{slug});
+    localStorage.setItem("vsrf-ustavy-local",JSON.stringify(all));
+  }
+  function removeLocal(slug){
+    const all=readLocal();
+    delete all[slug];
     localStorage.setItem("vsrf-ustavy-local",JSON.stringify(all));
   }
 
   async function save(doc){
-    const payload={preamble:doc.preamble||"",chapters:doc.chapters||[],signature:doc.signature||null,full:doc.full||doc.title,sub:doc.sub||""};
-    const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     writeLocal(doc.slug,doc);
+    const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(s&&s.available&&s.client){
       try{
-        const row={slug:doc.slug,title:doc.title,content:payload,updated_at:new Date().toISOString()};
+        const row={
+          slug:doc.slug,title:doc.title,theme:doc.theme,code:doc.code||"",meta:doc.meta||"",emblem:doc.emblem||DEFAULT_EMBLEM,
+          content:{preamble:doc.preamble||"",chapters:doc.chapters||[],signature:doc.signature||null,full:doc.full||doc.title,sub:doc.sub||""},
+          updated_at:new Date().toISOString()
+        };
         const {error}=await s.client.from("ustavy").upsert(row,{onConflict:"slug"});
         if(error) throw error;
         return {ok:true,remote:true};
@@ -123,5 +147,23 @@ window.VSRF_USTAV=(function(){
     return {ok:true,remote:false};
   }
 
-  return {DEFAULT_DATA,render,buildToc,loadAll,save,esc,paragraphs};
+  async function remove(slug){
+    removeLocal(slug);
+    const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+    if(s&&s.available&&s.client){
+      try{
+        const {error}=await s.client.from("ustavy").delete().eq("slug",slug);
+        if(error) throw error;
+        return {ok:true,remote:true};
+      }catch(e){return {ok:true,remote:false,error:e.message}}
+    }
+    return {ok:true,remote:false};
+  }
+
+  function makeSlug(s){
+    const map={а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ё:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"c",ч:"ch",ш:"sh",щ:"sch",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya"," ":"-"};
+    return (s||"").toLowerCase().split("").map(c=>map[c]!==undefined?map[c]:c).join("").replace(/[^a-z0-9-]/g,"").replace(/-+/g,"-").replace(/^-|-$/g,"").slice(0,50)||"ustav-"+Date.now();
+  }
+
+  return {DEFAULT_DATA,THEMES,DEFAULT_EMBLEM,render,buildToc,loadAll,save,remove,esc,paragraphs,makeSlug};
 })();

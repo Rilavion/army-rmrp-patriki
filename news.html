@@ -26,6 +26,7 @@
     <nav class="nav" id="mainNav">
       <a href="index.html" data-page="index.html" data-transition>Главная</a>
       <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="training.html" data-page="training.html" data-transition>Обучение</a>
       <a href="news.html" data-page="news.html" data-transition>Новости</a>
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
@@ -79,6 +80,7 @@
         <h5>Разделы</h5>
         <a href="index.html">Главная</a>
         <a href="ustav.html">Уставы</a>
+        <a href="training.html">Обучение</a>
         <a href="news.html">Новости</a>
       </div>
       <div class="footer-col">
@@ -186,7 +188,7 @@ function esc(s){return VSRF_NEWS.esc(s)}
 function heroHtml(n){
   const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
   const t=VSRF_NEWS.tagInfo(n.tag);
-  return `<div class="news-hero reveal" data-news-id="${n.id}">
+  return `<div class="news-hero" data-news-id="${n.id}">
     <div class="news-hero-thumb">${img}<span class="news-thumb-tag ${t.cls}" style="top:20px;left:20px">${t.label}</span></div>
     <div class="news-hero-body">
       <span class="news-hero-tag">Главное</span>
@@ -205,7 +207,7 @@ function cardHtml(n){
 function itemHtml(n){
   const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
   const t=VSRF_NEWS.tagInfo(n.tag);
-  return `<article class="news-item reveal" data-news-id="${n.id}">
+  return `<article class="news-item" data-news-id="${n.id}">
     <div class="news-thumb">${img}<span class="news-thumb-tag ${t.cls}">${t.label}</span></div>
     <div class="news-item-body">
       <div class="news-date">${fmt(n.date)}</div>
@@ -343,5 +345,5 @@ newsForm.addEventListener("submit",async e=>{
 load();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f5dcf43f5e9d9a',t:'MTc4NDc1OTE0NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

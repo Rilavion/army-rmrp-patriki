@@ -41,7 +41,7 @@ window.VSRF_NEWS=(function(){
   function cardHtml(n){
     const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
     const t=tagInfo(n.tag);
-    return `<div class="news-card reveal" data-news-id="${n.id}">
+    return `<div class="news-card" data-news-id="${n.id}">
       <div class="news-thumb">
         <span class="news-thumb-tag ${t.cls}">${t.label}</span>
         ${img}
