@@ -123,6 +123,11 @@ alter table public.news add column if not exists tag text default 'news';
 create table public.ustavy (
   slug text primary key,
   title text not null,
+  theme text default 't1',
+  code text default '',
+  meta text default '',
+  emblem text default '',
+  sort_order int default 100,
   content jsonb not null default '{}'::jsonb,
   updated_at timestamptz default now()
 );
@@ -139,6 +144,53 @@ create policy "ustavy_write_auth"
   to authenticated
   using (true) with check (true);
 ```
+
+**Если у вас уже была таблица `ustavy` со старой схемой** — выполните разово:
+```sql
+alter table public.ustavy add column if not exists theme text default 't1';
+alter table public.ustavy add column if not exists code text default '';
+alter table public.ustavy add column if not exists meta text default '';
+alter table public.ustavy add column if not exists emblem text default '';
+alter table public.ustavy add column if not exists sort_order int default 100;
+```
+
+### Шаг 9. Таблицы обучения (курсы + уроки)
+
+```sql
+create table public.train_categories (
+  id text primary key,
+  name text not null,
+  color text default '#cda85a',
+  parent text references public.train_categories(id) on delete cascade,
+  sort int default 10,
+  created_at timestamptz default now()
+);
+
+create table public.train_lessons (
+  id text primary key,
+  title text not null,
+  category text references public.train_categories(id) on delete cascade,
+  image text,
+  excerpt text,
+  content text,
+  test_url text,
+  sort bigint default 0,
+  created_at timestamptz default now()
+);
+
+alter table public.train_categories enable row level security;
+alter table public.train_lessons enable row level security;
+
+create policy "tc_read" on public.train_categories for select to anon, authenticated using (true);
+create policy "tc_write" on public.train_categories for all to authenticated using (true) with check (true);
+create policy "tl_read" on public.train_lessons for select to anon, authenticated using (true);
+create policy "tl_write" on public.train_lessons for all to authenticated using (true) with check (true);
+```
+
+**Как встраивать Google Тесты:**
+1. Откройте Google Форму → **Отправить** → иконка ссылки `🔗` → **Копировать**
+2. Вставьте в поле «Ссылка на Google-тест» при создании урока
+3. Сайт автоматически добавит `?embedded=true` и встроит iframe. Пользователь заполняет тест прямо на странице урока или открывает в новой вкладке.
 
 ### Что означают RLS-политики
 - **_read_all** — читать может ЛЮБОЙ (даже неавторизованный посетитель сайта). Это нужно, чтобы новости показывались обычным пользователям.

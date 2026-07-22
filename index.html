@@ -201,16 +201,17 @@ const BOOKS=[
   {slug:"disciplinarnyy-ustav",theme:"t4",title:"Дисциплинарный устав",code:"1781813587291"},
   {slug:"ustav-voennoy-politsii",theme:"t5",title:"Устав военной полиции",code:"1781813632975"}
 ];
+const DEFAULT_EMBLEM="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Middle_Emblem_of_the_Russian_Navy.svg/1280px-Middle_Emblem_of_the_Russian_Navy.svg.png";
 document.getElementById("booksGrid").innerHTML=BOOKS.map(d=>`
   <a class="book-card reveal" href="ustav.html#doc/${d.slug}" data-transition>
     <div class="b3d">
       <div class="b-spine"></div>
       <div class="b-front ${d.theme}">
-        <div>
-          <div class="b-label">ВС РФ</div>
-          <h3>${d.title}</h3>
-          <div class="b-meta">1-я ОБрСпН<br>в/ч №12132</div>
-        </div>
+        <div class="b-emblem"><img src="${DEFAULT_EMBLEM}" alt=""></div>
+        <div class="b-divider"></div>
+        <div class="b-label">ВС РФ</div>
+        <h3>${d.title}</h3>
+        <div class="b-meta">1-я ОБрСпН<br>в/ч №12132</div>
         <div class="b-code">${d.code}</div>
       </div>
       <div class="b-pages"></div>
@@ -256,6 +257,6 @@ async function loadNewsPreview(){
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(()=>loadNewsPreview());
 else loadNewsPreview();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f62ba6aeb2e84e',t:'MTc4NDc2MjM2OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f63c09a980e84e',t:'MTc4NDc2MzA0MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

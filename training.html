@@ -182,7 +182,7 @@
       <input type="hidden" name="id">
       <div class="form-group"><label>Название урока</label><input name="title" required placeholder="Строевая подготовка. Занятие №1"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="form-group"><label>Категория</label><select name="category" id="lessonCatSelect" required></select></div>
+        <div class="form-group"><label>Категория</label><select name="category" id="lessonCatSelect" class="form-select-custom" required></select></div>
         <div class="form-group"><label>URL обложки (необязательно)</label><input name="image" type="url" placeholder="https://..."></div>
       </div>
       <div class="form-group"><label>Краткое описание</label><textarea name="excerpt" required style="min-height:70px"></textarea></div>
@@ -239,6 +239,7 @@
 <script src="training-engine.js"></script>
 <script src="main.js"></script>
 <script src="auth.js"></script>
+<script src="select-enhance.js"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -400,6 +401,7 @@ function openLessonEdit(l){
     const prefix=c.parent?"  ↳ ":"";
     return `<option value="${c.id}">${prefix}${esc(c.name)}</option>`;
   }).join("")||`<option value="">— нет категорий —</option>`;
+  VSRF_SELECT.enhance(sel);
   lessonForm.id.value=l?l.id:"";
   if(l){
     lessonForm.title.value=l.title||"";
@@ -411,6 +413,7 @@ function openLessonEdit(l){
   }else if(activeCat){
     lessonForm.category.value=activeSub||activeCat;
   }
+  sel.dispatchEvent(new Event("__vsrf_refresh"));
   const msg=lessonForm.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
   editLessonModal.classList.add("active");
 }
@@ -550,6 +553,6 @@ boot().then(()=>{
   if(location.hash.startsWith("#l-")){const id=location.hash.slice(3);setTimeout(()=>openLesson(id),300)}
 });
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f63c77df12e84e',t:'MTc4NDc2MzA1Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
