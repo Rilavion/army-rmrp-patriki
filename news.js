@@ -12,7 +12,17 @@ window.VSRF_NEWS=(function(){
     announce:{label:"Объявление",cls:"tag-announce"}
   };
 
+  function waitReady(){
+    return new Promise(resolve=>{
+      const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+      if(!s||s.ready) return resolve();
+      const off=window.VSRF_AUTH.onChange(st=>{if(st.ready){off&&off();resolve()}});
+      setTimeout(()=>resolve(),1200);
+    });
+  }
+
   async function fetchNews(limit){
+    await waitReady();
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(s&&s.available&&s.client){
       try{
@@ -21,20 +31,16 @@ window.VSRF_NEWS=(function(){
         const {data,error}=await q;
         if(error) throw error;
         return data||[];
-      }catch(e){return []}
+      }catch(e){console.warn("[VSRF_NEWS]",e.message);return []}
     }
     return limit?DEMO.slice(0,limit):DEMO.slice();
   }
 
   function fmt(d){
-    try{
-      const dt=new Date(d);
-      return dt.toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"});
-    }catch(e){return d}
+    try{return new Date(d).toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"})}catch(e){return d}
   }
 
   function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-
   function tagInfo(t){return TAGS[t]||TAGS.news}
   function tagsList(){return Object.keys(TAGS).map(k=>({key:k,label:TAGS[k].label}))}
 
