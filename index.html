@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ВС РФ — в/ч №12132 · Главная</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise"></div>
+<div class="progress-bar" id="progressBar"></div>
+<div class="page-transition-overlay" id="overlay"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" id="goHome" href="index.html">
+      <div class="brand-icon">ВС</div>
+      <div class="brand-text">
+        <span class="brand-label">Вооружённые Силы РФ</span>
+        <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
+      </div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="gallery.html" data-page="gallery.html" data-transition>Галерея</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="login-btn" data-open-login>
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        <span>Войти</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="reveal-l">
+        <span class="pill">Официальный портал воинской части</span>
+        <h1>Вооружённые&nbsp;Силы Российской Федерации</h1>
+        <p class="hero-lead">1-я отдельная гвардейская бригада специального назначения (ОБрСпН), в/ч №12132. Служим Отечеству. Честь. Долг. Присяга.</p>
+        <div class="hero-actions">
+          <a class="btn btn-gold" href="ustav.html" data-transition>Открыть уставы</a>
+          <a class="btn btn-ghost" href="#about">О части →</a>
+        </div>
+      </div>
+      <div class="hero-visual reveal-r">
+        <div class="hero-glow"></div>
+        <div class="hero-emblem">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Middle_Emblem_of_the_Russian_Navy.svg/1280px-Middle_Emblem_of_the_Russian_Navy.svg.png" alt="Эмблема">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="card reveal">
+          <div class="card-body">
+            <span class="badge">Официальное представление</span>
+            <h2>О воинской части</h2>
+            <h3>1-я отдельная гвардейская бригада специального назначения</h3>
+            <p>Вооружённые Силы Российской Федерации — государственная военная структура, обеспечивающая защиту страны, её граждан и государственных интересов. Основная деятельность направлена на поддержание обороноспособности, охрану военных объектов и выполнение задач, предусмотренных законодательством.</p>
+            <p>1-я ОБрСпН, в/ч №12132 — подразделение, включающее военную комендатуру, Силы специальных операций, роту охраны и обеспечения, военный комиссариат, медицинскую роту и военную академию. Личный состав руководствуется внутренними уставами организации.</p>
+          </div>
+        </div>
+        <div class="about-media reveal-r">
+          <img src="https://images.unsplash.com/photo-1519669556878-63bdad8a1a49?w=1200&q=70&auto=format&fit=crop" alt="Строй" loading="lazy">
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat reveal"><div class="stat-num" data-count="7">0</div><div class="stat-label">Подразделений</div></div>
+        <div class="stat reveal"><div class="stat-num" data-count="12132">0</div><div class="stat-label">№ Войсковой части</div></div>
+        <div class="stat reveal"><div class="stat-num" data-count="5">0</div><div class="stat-label">Уставов</div></div>
+        <div class="stat reveal"><div class="stat-num" data-count="24">0</div><div class="stat-label">Часа в сутки</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="badge">Каталог документов</span>
+        <h2>Уставы подразделения</h2>
+        <p>Внутренние уставы организации, регламентирующие порядок службы, взаимоотношения между военнослужащими и деятельность подразделений.</p>
+      </div>
+      <div class="books-grid" id="booksGrid"></div>
+      <div style="margin-top:24px;text-align:center">
+        <a class="btn btn-ghost" href="ustav.html" data-transition>Все уставы →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="badge">Оперативная сводка</span>
+        <h2>Последние новости</h2>
+        <p>Актуальные события и объявления воинской части.</p>
+      </div>
+      <div class="news-grid" id="newsPreview"></div>
+      <div style="margin-top:24px;text-align:center">
+        <a class="btn btn-ghost" href="news.html" data-transition>Все новости →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h4>1-я ОБрСпН · в/ч №12132</h4>
+        <p>Вооружённые Силы Российской Федерации. Отдельная гвардейская бригада специального назначения. Служим Отечеству.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Разделы</h5>
+        <a href="index.html">Главная</a>
+        <a href="ustav.html">Уставы</a>
+        <a href="gallery.html">Галерея</a>
+        <a href="news.html">Новости</a>
+      </div>
+      <div class="footer-col">
+        <h5>Ресурсы</h5>
+        <a href="autopark.html">Автопарк</a>
+        <a href="map.html">Карта</a>
+        <a href="#" data-open-login>Личный кабинет</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> · Вооружённые Силы Российской Федерации</span>
+      <span>1-я ОБрСпН · в/ч №12132</span>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Вход администратора</h3>
+    <div class="modal-sub">Доступ к управлению контентом</div>
+    <form>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Пароль</label>
+        <input type="password" name="password" required autocomplete="current-password">
+      </div>
+      <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/news.js"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+
+const BOOKS=[
+  {slug:"ustav-vnutrenney-sluzhby",theme:"t1",title:"Устав внутренней службы",code:"1781813401486"},
+  {slug:"stroevoy-ustav",theme:"t2",title:"Строевой устав",code:"1781813453292"},
+  {slug:"karaulnaya-i-garnizonnaya",theme:"t3",title:"Устав караульной и гарнизонной служб",code:"1781813512103"},
+  {slug:"disciplinarnyy-ustav",theme:"t4",title:"Дисциплинарный устав",code:"1781813587291"},
+  {slug:"ustav-voennoy-politsii",theme:"t5",title:"Устав военной полиции",code:"1781813632975"}
+];
+document.getElementById("booksGrid").innerHTML=BOOKS.map(d=>`
+  <a class="book-card reveal" href="ustav.html#doc/${d.slug}" data-transition>
+    <div class="b3d">
+      <div class="b-spine"></div>
+      <div class="b-front ${d.theme}">
+        <div>
+          <div class="b-label">ВС РФ</div>
+          <h3>${d.title}</h3>
+          <div class="b-meta">1-я ОБрСпН<br>в/ч №12132</div>
+        </div>
+        <div class="b-code">${d.code}</div>
+      </div>
+      <div class="b-pages"></div>
+    </div>
+  </a>`).join("");
+
+(async()=>{
+  const list=await VSRF_NEWS.fetchNews(3);
+  const el=document.getElementById("newsPreview");
+  if(!list||!list.length){
+    el.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><h3>Новостей пока нет</h3><p>Как только появятся публикации — они отобразятся здесь.</p></div>`;
+    return;
+  }
+  el.innerHTML=list.map(VSRF_NEWS.cardHtml).join("");
+  document.querySelectorAll("#newsPreview .reveal").forEach(el=>{
+    new IntersectionObserver((entries,io)=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.15}).observe(el);
+  });
+})();
+
+document.querySelectorAll("[data-count]").forEach(el=>{
+  const target=+el.dataset.count;
+  const io=new IntersectionObserver((entries,ob)=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      ob.unobserve(el);
+      const dur=1400,start=performance.now();
+      const step=t=>{
+        const p=Math.min((t-start)/dur,1);
+        const e2=1-Math.pow(1-p,3);
+        el.textContent=Math.floor(target*e2).toLocaleString("ru-RU");
+        if(p<1) requestAnimationFrame(step);
+        else el.textContent=target.toLocaleString("ru-RU");
+      };
+      requestAnimationFrame(step);
+    });
+  },{threshold:.4});
+  io.observe(el);
+});
+</script>
+</body>
+</html>

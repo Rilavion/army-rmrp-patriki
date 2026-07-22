@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Автопарк — ВС РФ · в/ч №12132</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise"></div>
+<div class="progress-bar" id="progressBar"></div>
+<div class="page-transition-overlay" id="overlay"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" id="goHome" href="index.html">
+      <div class="brand-icon">ВС</div>
+      <div class="brand-text">
+        <span class="brand-label">Вооружённые Силы РФ</span>
+        <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
+      </div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="gallery.html" data-page="gallery.html" data-transition>Галерея</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="login-btn" data-open-login>
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        <span>Войти</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="section" style="padding-top:60px">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="badge">Материально-техническое обеспечение</span>
+        <h2>Автопарк бригады</h2>
+        <p>Военная и служебная техника, состоящая на вооружении в/ч №12132. Обеспечивается силами роты охраны и обеспечения.</p>
+      </div>
+
+      <div class="filters reveal" id="autoFilters">
+        <button class="filter-btn active" data-filter="all">Все</button>
+        <button class="filter-btn" data-filter="light">Лёгкая техника</button>
+        <button class="filter-btn" data-filter="armor">Бронетехника</button>
+        <button class="filter-btn" data-filter="transport">Транспорт</button>
+        <button class="filter-btn" data-filter="special">Спецтехника</button>
+      </div>
+
+      <div class="auto-grid" id="autoGrid"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h4>1-я ОБрСпН · в/ч №12132</h4>
+        <p>Вооружённые Силы Российской Федерации. Отдельная гвардейская бригада специального назначения.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Разделы</h5>
+        <a href="index.html">Главная</a>
+        <a href="ustav.html">Уставы</a>
+        <a href="gallery.html">Галерея</a>
+        <a href="news.html">Новости</a>
+      </div>
+      <div class="footer-col">
+        <h5>Ресурсы</h5>
+        <a href="autopark.html">Автопарк</a>
+        <a href="map.html">Карта</a>
+        <a href="#" data-open-login>Личный кабинет</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> · Вооружённые Силы Российской Федерации</span>
+      <span>1-я ОБрСпН · в/ч №12132</span>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Вход администратора</h3>
+    <div class="modal-sub">Доступ к управлению контентом</div>
+    <form>
+      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
+      <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+
+const VEHICLES=[
+  {cat:"armor",title:"Тигр-М",purpose:"Бронеавтомобиль повышенной защищённости для перевозки личного состава и разведывательных задач.",img:"https://images.unsplash.com/photo-1587302912306-cf1ed9c33146?w=1200&q=70&auto=format&fit=crop",crew:"1+9",speed:"140 км/ч",role:"РОиО, ССО",year:"2013"},
+  {cat:"armor",title:"БТР-82А",purpose:"Колёсный бронетранспортёр для десантирования и огневой поддержки подразделений.",img:"",crew:"3+7",speed:"90 км/ч",role:"РОиО",year:"2013"},
+  {cat:"light",title:"УАЗ «Патриот»",purpose:"Служебный внедорожник для командного состава и оперативных выездов.",img:"",crew:"1+4",speed:"150 км/ч",role:"Штаб",year:"2016"},
+  {cat:"light",title:"УАЗ-3151 «Хантер»",purpose:"Лёгкий военный внедорожник, патрулирование и связь.",img:"",crew:"1+4",speed:"120 км/ч",role:"ВП",year:"2003"},
+  {cat:"transport",title:"КАМАЗ-5350 «Мустанг»",purpose:"Военный грузовик повышенной проходимости для перевозки личного состава и грузов.",img:"",crew:"1+2",speed:"100 км/ч",role:"РОиО",year:"2003"},
+  {cat:"transport",title:"Урал-4320",purpose:"Тяжёлый военный грузовик, транспортировка снаряжения и техники.",img:"",crew:"1+2",speed:"85 км/ч",role:"МТО",year:"1977"},
+  {cat:"special",title:"УАЗ «Скорая»",purpose:"Санитарный автомобиль медицинской роты для эвакуации раненых.",img:"",crew:"1+3",speed:"130 км/ч",role:"МР",year:"—"},
+  {cat:"special",title:"ГАЗ «Тигр» ВП",purpose:"Служебный автомобиль военной комендатуры для патрулей и задержаний.",img:"",crew:"1+4",speed:"140 км/ч",role:"ВП",year:"—"},
+  {cat:"special",title:"Автозак",purpose:"Специальный транспорт для конвоирования задержанных.",img:"",crew:"1+8",speed:"90 км/ч",role:"ВП",year:"—"}
+];
+const catLabel={light:"Лёгкая техника",armor:"Бронетехника",transport:"Транспорт",special:"Спецтехника"};
+
+const grid=document.getElementById("autoGrid");
+function render(filter){
+  const list=filter==="all"?VEHICLES:VEHICLES.filter(v=>v.cat===filter);
+  if(!list.length){grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><h3>Нет техники</h3></div>`;return}
+  grid.innerHTML=list.map(v=>{
+    const media=v.img
+      ? `<img src="${v.img}" alt="${v.title}" loading="lazy">`
+      : `<div class="gallery-placeholder" style="width:100%;height:100%">
+          <div><svg viewBox="0 0 24 24" width="46" height="46" fill="currentColor" style="opacity:.6"><path d="M3 17h1a2 2 0 0 0 4 0h8a2 2 0 0 0 4 0h1v-4l-2-4h-4V6H5a2 2 0 0 0-2 2v9zm3-9h8v3H6V8z"/></svg><div style="margin-top:8px">Изображение уточняется</div></div>
+        </div>`;
+    return `<div class="auto-card reveal">
+      <div class="auto-thumb">${media}<div class="auto-cat">${catLabel[v.cat]}</div></div>
+      <div class="auto-body">
+        <div class="auto-title">${v.title}</div>
+        <div class="auto-purpose">${v.purpose}</div>
+        <div class="auto-specs">
+          <div class="auto-spec"><span class="auto-spec-label">Экипаж</span><span class="auto-spec-val">${v.crew}</span></div>
+          <div class="auto-spec"><span class="auto-spec-label">Скорость</span><span class="auto-spec-val">${v.speed}</span></div>
+          <div class="auto-spec"><span class="auto-spec-label">Подразделение</span><span class="auto-spec-val">${v.role}</span></div>
+          <div class="auto-spec"><span class="auto-spec-label">Принятие</span><span class="auto-spec-val">${v.year}</span></div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+  grid.querySelectorAll(".reveal").forEach(el=>{
+    new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
+  });
+}
+render("all");
+
+document.getElementById("autoFilters").addEventListener("click",e=>{
+  const b=e.target.closest(".filter-btn");if(!b) return;
+  document.querySelectorAll(".filter-btn").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  render(b.dataset.filter);
+});
+</script>
+</body>
+</html>

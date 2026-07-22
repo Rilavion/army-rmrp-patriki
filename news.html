@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Новости — ВС РФ · в/ч №12132</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise"></div>
+<div class="progress-bar" id="progressBar"></div>
+<div class="page-transition-overlay" id="overlay"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" id="goHome" href="index.html">
+      <div class="brand-icon">ВС</div>
+      <div class="brand-text">
+        <span class="brand-label">Вооружённые Силы РФ</span>
+        <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
+      </div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="gallery.html" data-page="gallery.html" data-transition>Галерея</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="login-btn" data-open-login>
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        <span>Войти</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="section" style="padding-top:60px">
+    <div class="container">
+      <div class="section-head reveal" style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+        <div>
+          <span class="badge">Оперативная сводка</span>
+          <h2>Новости части</h2>
+          <p>Актуальные события, приказы и объявления в/ч №12132.</p>
+        </div>
+        <button class="btn btn-gold admin-only" id="addNewsBtn" style="display:none">＋ Добавить новость</button>
+      </div>
+
+      <div class="news-list" id="newsList">
+        <div class="empty-state"><h3>Загрузка...</h3><p>Получение свежих новостей.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h4>1-я ОБрСпН · в/ч №12132</h4>
+        <p>Вооружённые Силы Российской Федерации. Отдельная гвардейская бригада специального назначения.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Разделы</h5>
+        <a href="index.html">Главная</a>
+        <a href="ustav.html">Уставы</a>
+        <a href="gallery.html">Галерея</a>
+        <a href="news.html">Новости</a>
+      </div>
+      <div class="footer-col">
+        <h5>Ресурсы</h5>
+        <a href="autopark.html">Автопарк</a>
+        <a href="map.html">Карта</a>
+        <a href="#" data-open-login>Личный кабинет</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> · Вооружённые Силы Российской Федерации</span>
+      <span>1-я ОБрСпН · в/ч №12132</span>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Вход администратора</h3>
+    <div class="modal-sub">Доступ к управлению контентом</div>
+    <form>
+      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
+      <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-back" id="newsModal">
+  <div class="modal" style="max-width:640px">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="newsModalTitle">Новая новость</h3>
+    <div class="modal-sub">Заполните поля публикации</div>
+    <form id="newsForm">
+      <input type="hidden" name="id">
+      <div class="form-group"><label>Заголовок</label><input name="title" required></div>
+      <div class="form-group"><label>Дата (ГГГГ-ММ-ДД)</label><input name="date" type="date" required></div>
+      <div class="form-group"><label>URL изображения (необязательно)</label><input name="image" type="url" placeholder="https://..."></div>
+      <div class="form-group"><label>Краткое описание</label><textarea name="excerpt" required></textarea></div>
+      <div class="form-group"><label>Полный текст</label><textarea name="body" style="min-height:180px" required></textarea></div>
+      <button class="btn btn-gold" style="width:100%" type="submit">Сохранить</button>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/news.js"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+
+const listEl=document.getElementById("newsList");
+const addBtn=document.getElementById("addNewsBtn");
+const newsModal=document.getElementById("newsModal");
+const newsForm=document.getElementById("newsForm");
+
+let LOADED=[];
+
+async function load(){
+  const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+  const isAdmin=!!(s&&s.user);
+  LOADED=await VSRF_NEWS.fetchNews();
+  if(!LOADED.length){
+    listEl.innerHTML=`<div class="empty-state"><h3>Пока нет публикаций</h3><p>Как только появятся новости — они будут отображены здесь.</p></div>`;
+    return;
+  }
+  listEl.innerHTML=LOADED.map(n=>VSRF_NEWS.itemHtml(n,isAdmin)).join("");
+  listEl.querySelectorAll(".reveal").forEach(el=>{
+    new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
+  });
+  if(location.hash){
+    const t=document.querySelector(location.hash);
+    if(t) setTimeout(()=>t.scrollIntoView({behavior:"smooth",block:"start"}),200);
+  }
+  document.querySelectorAll(".admin-only").forEach(el=>el.style.display=isAdmin?"":"none");
+}
+
+VSRF_AUTH.onChange(()=>{load()});
+
+addBtn.addEventListener("click",()=>openNewsModal());
+function openNewsModal(item){
+  document.getElementById("newsModalTitle").textContent=item?"Редактировать новость":"Новая новость";
+  newsForm.reset();
+  newsForm.id.value=item?item.id:"";
+  if(item){
+    newsForm.title.value=item.title||"";
+    newsForm.date.value=(item.date||"").slice(0,10);
+    newsForm.image.value=item.image||"";
+    newsForm.excerpt.value=item.excerpt||"";
+    newsForm.body.value=item.body||"";
+  }else{
+    newsForm.date.value=new Date().toISOString().slice(0,10);
+  }
+  const msg=newsModal.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
+  newsModal.classList.add("active");
+}
+newsModal.addEventListener("click",e=>{if(e.target===newsModal) newsModal.classList.remove("active")});
+newsModal.querySelector(".modal-close").addEventListener("click",()=>newsModal.classList.remove("active"));
+
+newsForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const msg=newsModal.querySelector(".form-msg");
+  const s=window.VSRF_AUTH.state;
+  if(!s.available||!s.client){
+    msg.className="form-msg info";msg.textContent="Редактирование временно недоступно (Supabase не настроен).";return;
+  }
+  const payload={
+    title:newsForm.title.value.trim(),
+    date:newsForm.date.value,
+    image:newsForm.image.value.trim()||null,
+    excerpt:newsForm.excerpt.value.trim(),
+    body:newsForm.body.value.trim()
+  };
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  try{
+    if(newsForm.id.value){
+      const {error}=await s.client.from("news").update(payload).eq("id",newsForm.id.value);
+      if(error) throw error;
+    }else{
+      const {error}=await s.client.from("news").insert(payload);
+      if(error) throw error;
+    }
+    msg.textContent="Готово";
+    setTimeout(()=>{newsModal.classList.remove("active");load()},400);
+  }catch(err){msg.className="form-msg error";msg.textContent=err.message||"Ошибка сохранения"}
+});
+
+listEl.addEventListener("click",async e=>{
+  const editBtn=e.target.closest("[data-edit]");
+  const delBtn=e.target.closest("[data-del]");
+  if(editBtn){
+    const item=LOADED.find(x=>String(x.id)===String(editBtn.dataset.edit));
+    if(item) openNewsModal(item);
+  }
+  if(delBtn){
+    const s=window.VSRF_AUTH.state;
+    if(!s.available||!s.client){alert("Supabase не настроен");return}
+    if(!confirm("Удалить новость?")) return;
+    try{
+      await s.client.from("news").delete().eq("id",delBtn.dataset.del);
+      load();
+    }catch(err){alert(err.message||"Ошибка")}
+  }
+});
+
+load();
+</script>
+</body>
+</html>
