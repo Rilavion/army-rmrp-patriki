@@ -16,7 +16,7 @@
 
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" id="goHome" href="index.html">
+    <a class="brand" href="index.html">
       <div class="brand-icon">ВС</div>
       <div class="brand-text">
         <span class="brand-label">Вооружённые Силы РФ</span>
@@ -31,6 +31,11 @@
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
     </nav>
     <div class="header-actions">
+      <button class="search-btn" data-open-search title="Поиск (Ctrl+K)">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <span>Поиск</span>
+        <span class="kbd">Ctrl K</span>
+      </button>
       <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
         <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -46,12 +51,47 @@
 
 <main>
   <section id="view-list" class="active">
-    <section class="section" style="padding-top:60px">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="reveal-l">
+          <span class="pill">Внутренние уставы организации</span>
+          <h1>Уставы&nbsp;подразделения</h1>
+          <p class="hero-lead">Полный каталог внутренних уставов 1-й ОБрСпН, в/ч №12132. Регламент службы, дисциплины и взаимоотношений военнослужащих.</p>
+          <div class="hero-actions">
+            <a class="btn btn-gold" href="#doc/ustav-vnutrenney-sluzhby">Основной устав →</a>
+            <a class="btn btn-ghost" href="#catalog">К каталогу</a>
+          </div>
+        </div>
+        <div class="hero-visual reveal-r">
+          <div class="hero-glow"></div>
+          <div class="hero-book">
+            <div class="hb-inner">
+              <div class="hb-spine"></div>
+              <div class="hb-cover">
+                <div class="c-tag">1781813346950</div>
+                <div class="c-kicker">Внутренние уставы организации</div>
+                <div class="c-title">ВС РФ</div>
+                <p class="c-sub">1-я отдельная гвардейская бригада специального назначения (ОБрСпН), в/ч №12132</p>
+                <div class="c-crest">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Middle_Emblem_of_the_Russian_Navy.svg/1280px-Middle_Emblem_of_the_Russian_Navy.svg.png" alt="Эмблема">
+                </div>
+              </div>
+              <div class="hb-pages"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="catalog">
       <div class="container">
-        <div class="section-head reveal">
-          <span class="badge">Каталог документов</span>
-          <h2>Уставы подразделения</h2>
-          <p>Внутренние уставы организации, регламентирующие порядок службы, взаимоотношения между военнослужащими и деятельность подразделений в/ч №12132.</p>
+        <div class="section-head reveal" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px">
+          <div>
+            <span class="badge">Каталог документов</span>
+            <h2>Все уставы</h2>
+            <p>Кликните на книгу — откроется полная страница документа с боковой навигацией и оглавлением.</p>
+          </div>
+          <button class="btn btn-ghost admin-only" id="editListBtn" style="display:none">✎ Редактировать</button>
         </div>
         <div class="books-grid" id="grid"></div>
       </div>
@@ -59,8 +99,8 @@
   </section>
 
   <section id="view-doc" style="display:none">
-    <div class="container doc-enter">
-      <div class="doc-toolbar">
+    <div class="container">
+      <div class="doc-toolbar" id="docToolbar">
         <button class="back-btn" id="backBtn">
           <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
           Вернуться к уставам
@@ -68,7 +108,9 @@
         <div class="doc-chips">
           <div class="chip" id="dChipCode"></div>
           <div class="chip">1-я ОБрСпН · в/ч №12132</div>
+          <button class="btn btn-ghost btn-sm admin-only" id="editDocBtn" style="display:none">✎ Редактировать документ</button>
         </div>
+        <div class="doc-toolbar-progress" id="docProgress"></div>
       </div>
       <div class="doc-grid">
         <aside class="doc-sidebar">
@@ -87,7 +129,7 @@
                 <div class="b-pages"></div>
               </div>
             </div>
-            <div class="toc-label">Оглавление</div>
+            <div class="toc-label"><span>Оглавление</span><span id="tocCounter" style="font-weight:400;letter-spacing:.05em"></span></div>
             <ul class="toc" id="tocList"></ul>
           </div>
         </aside>
@@ -126,6 +168,28 @@
   </div>
 </footer>
 
+<div class="fab-stack" id="fabStack">
+  <button class="fab" id="fabPrint" title="Печать">
+    <svg viewBox="0 0 24 24"><path d="M19 8H5a3 3 0 0 0-3 3v6h4v4h12v-4h4v-6a3 3 0 0 0-3-3zm-3 11H8v-5h8zm3-7a1 1 0 1 1 1-1 1 1 0 0 1-1 1zM18 3H6v4h12z"/></svg>
+    <span class="fab-hint">Печать документа</span>
+  </button>
+  <button class="fab" id="fabUp" title="Наверх">
+    <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg>
+    <span class="fab-hint">Наверх</span>
+  </button>
+</div>
+
+<div class="search-modal" id="searchModal">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      <input class="search-input" placeholder="Поиск по уставам, страницам, разделам..." spellcheck="false">
+      <button class="search-close-kbd">Esc</button>
+    </div>
+    <div class="search-results"></div>
+  </div>
+</div>
+
 <div class="modal-back" id="loginModal">
   <div class="modal">
     <button class="modal-close" aria-label="Закрыть">✕</button>
@@ -140,138 +204,38 @@
   </div>
 </div>
 
+<div class="modal-back" id="editorModal">
+  <div class="modal modal-xl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="editorTitle">Редактор устава</h3>
+    <div class="modal-sub">Изменения сохраняются локально мгновенно, а при подключённом Supabase — синхронизируются в облако.</div>
+    <div class="editor-toolbar">
+      <input id="edFull" placeholder="Полное название (напр. УСТАВ ВНУТРЕННЕЙ СЛУЖБЫ...)">
+      <input id="edSub" placeholder="Подзаголовок">
+    </div>
+    <div class="editor">
+      <div class="editor-side" id="edSide"></div>
+      <div class="editor-main" id="edMain"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" id="edCancel">Отмена</button>
+      <button class="btn btn-gold btn-sm" id="edSave">Сохранить</button>
+    </div>
+    <div class="form-msg" id="edMsg"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<script src="ustav-engine.js"></script>
 <script src="main.js"></script>
 <script src="auth.js"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
-const DATA=[
-{slug:"ustav-vnutrenney-sluzhby",theme:"t1",title:"Устав внутренней службы",code:"1781813401486",meta:"Министерство обороны РФ<br>в/ч №12132",
-toc:[
-{id:"preamble",label:"Преамбула"},
-{id:"ch1",label:"Глава I. Общие положения"},
-{id:"ch2",label:"Глава II. Распорядок дня"},
-{id:"ch3",label:"Глава III. Внешний вид"},
-{id:"ch4",label:"Глава IV. Структура войсковой части"},
-{id:"ch5",label:"Глава V. Субординация"},
-{id:"ch6",label:"Глава VI. Правила использования рации"},
-{id:"ch7",label:"Глава VII. Регламент действий"},
-{id:"ch8",label:"Глава VIII. Кадровая отчетность"}
-],
-html:`<div class="paper-head"><div class="ministry">МИНИСТЕРСТВО ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ</div><h1>УСТАВ ВНУТРЕННЕЙ СЛУЖБЫ ВООРУЖЕННЫХ СИЛ РОССИЙСКОЙ ФЕДЕРАЦИИ</h1><div class="sub">1-я отдельная гвардейская бригада специального назначения · в/ч №12132</div></div><div class="paper-body">
-<section class="preamble" id="preamble"><h2>ПРЕАМБУЛА</h2><p>Настоящий Устав определяет права и обязанности военнослужащих Вооруженных Сил Российской Федерации и взаимоотношения между ними, обязанности основных должностных лиц полка и его подразделений, а также правила внутреннего порядка. Обязанности должностных лиц, не указанных в Уставе, определяются соответствующими положениями, наставлениями, инструкциями и руководствами.</p><p>Все военнослужащие воинских подразделений, штаба, независимо от своих воинских званий, служебного положения и заслуг должны строго руководствоваться требованиями настоящего Устава.</p><p>На граждан, обучающихся по программе военной подготовки и проходящих учебные сборы, распространяются права и обязанности военнослужащих.</p></section>
-<section class="chapter" id="ch1"><h2>ГЛАВА I. ОБЩИЕ ПОЛОЖЕНИЯ</h2><div class="arts">
-<div class="art"><strong>1.1.</strong> Каждый военнослужащий Вооруженных сил Российской Федерации должен знать и соблюдать положения настоящего Устава, а также иных нормативных актов, регулирующих деятельность конкретных подразделений. Незнание Устава и других правовых актов не освобождает от ответственности.</div>
-<div class="art"><strong>1.2.</strong> Каждый военнослужащий Вооруженных сил Российской Федерации обязан честно и качественно исполнять свой долг перед Родиной и её жителями, защищать национальные интересы, суверенитет, целостность и неприкосновенность территории Российской Федерации военными методами, а также для выполнения задач в соответствии с международными обязательствами Российской Федерации.</div>
-<div class="art"><strong>1.3.</strong> Лица, подпадающие под действие настоящего Устава, обязаны соблюдать установленную иерархию и беспрекословно выполнять приказы и распоряжения вышестоящих по должности или званию лиц, если иное не предусмотрено законодательством Российской Федерации или настоящим Уставом.</div>
-<div class="art"><strong>1.4.</strong> Запрещены любые действия, высказывания или поступки, способные нанести ущерб репутации Вооружённых Сил Российской Федерации, подорвать доверие к их деятельности или дискредитировать звание военнослужащего.</div>
-<div class="art"><strong>1.5.</strong> При возникновении любых вопросов военнослужащие Вооруженных сил Российской Федерации должны обращаться непосредственно к старшему составу и командиру своего подразделения.</div>
-<div class="art"><strong>1.6.</strong> Каждый военнослужащий Вооруженных сил Российской Федерации обязан знать высшее командование и командиров подразделений своей воинской части, членов Правительства РФ в лицо. И руководствоваться принципом единоначалия. Единоначалие является одним из основных принципов строительства Вооруженных Сил, руководства ими и взаимоотношений между военнослужащими. Единоначалие заключается в наделении командира (начальника) всей полнотой распорядительной власти по отношению к подчиненным и возложении на него персональной ответственности перед государством за все стороны жизни и деятельности воинской части, подразделения и каждого военнослужащего. Единоначалие выражается в праве командира (начальника), исходя из всесторонней оценки обстановки, единолично принимать решения, отдавать в установленном порядке соответствующие приказы и обеспечивать их выполнение.</div>
-<div class="art"><strong>1.7.</strong> Военнослужащие, во время объявленного построения, обязаны явиться в назначенное место сбора точно и в срок.</div>
-<div class="art"><strong>1.8.</strong> Лица, подпадающие под действие настоящего Устава, обязаны знать и соблюдать должностные обязанности, определяющие объем, пределы и порядок выполнения возложенных на них функций и задач в соответствии с занимаемой должностью, а также иных нормативных правовых актов, регулирующих деятельность соответствующими руководствами, наставлениями, положениями, инструкциями или письменными приказами прямых начальников в рамках норм, предусмотренных настоящим Уставом.</div>
-<div class="art"><strong>1.9.</strong> Набор в ряды Вооруженных сил Российской Федерации осуществляется посредством агитационных мероприятий, а также призывов, проводимых по графику, утвержденному высшим командным составом ВС РФ, Правительством РФ или иными лицами, уполномоченными на то действующим законодательством.</div>
-<div class="art"><strong>1.10.</strong> Военнослужащий срочной службы обязан пройти курс молодого бойца не более чем за 5 дней, а для прохождения военной академии — не более чем за 10 дней.<div class="note">Примечание: после провала ВА, вас занесут в черный список, сроком на усмотрений командира или заместителя командира, от 14 дней до 90 дней.</div></div>
-<div class="art"><strong>1.11.</strong> Порядок увольнения из рядов Вооруженных сил РФ установлен настоящим Уставом. Причинами для увольнения могут быть: по собственному желанию; грубое нарушение устава; нарушение действующего законодательства; наличие двух непогашенных дисциплинарных взысканий в виде выговоров; наличие у военнослужащего непогашенной судимости; по решению суда или предписанию органов Прокуратуры; иные причины, по результатам внутреннего расследования командованием части.</div>
-</div></section>
-<section class="chapter" id="ch2"><h2>ГЛАВА II. РАСПОРЯДОК ДНЯ</h2><div class="arts">
-<div class="art"><strong>2.1.</strong> Распорядок дня в в/ч №12132: Будние дни с 9:00 до 22:00; Выходные с 9:00 до 21:00; Праздничные дни с 9:00 до 20:00; Обеденный перерыв ежедневно с 14:00 до 15:00.</div>
-<div class="art"><strong>2.2.</strong> Служебная деятельность военнослужащих не прекращается даже после завершения служебного дня. Каждый военнослужащий может быть вызван из отгула, во внеслужебное время, за исключением отпускного времени (в мирное время) для исполнения воинской и служебной обязанности с возможностью получения дополнительного времени на отдых по мере завершения выполнения поставленной задачи.</div>
-<div class="art"><strong>2.3.</strong> Ежедневно, в 21:00, проводится вечерняя поверка, на которой обязуется присутствовать каждый военнослужащий. Неявка — строгое нарушение воинской дисциплины.<div class="note">Примечание: На время проведения вечерней поверки все постовые, в том числе дежурные обязаны покинуть свой пост. На постах КПП №1, КПП №2 допускается остаться одному постовому.</div></div>
-<div class="art"><strong>2.4.</strong> В зависимости от определенных обстоятельств, командир бригады вправе своим приказом вносить временные корректировки в служебный график.</div>
-<div class="art"><strong>2.5.</strong> Военнослужащие со звания Старший сержант имеют право на увольнительную раз в сутки длительностью 60 минут. Увольнительную допускается разбить на две части по 30 минут.<div class="note">Исключение: Военнослужащие со звания Подполковник обязуются соблюдать круглосуточный режим работы и могут покидать территорию вне служебной формы с устного разрешения Командира бригады.</div></div>
-<div class="art"><strong>2.6.</strong> Военнослужащие до звания Старший сержант не имеют право покидать территорию воинской части по окончании служебного дня.<div class="note">Примечание I: Разрешено покинуть территорию по согласованию с высшим офицерским составом.</div><div class="note">Примечание II: При организации тренировочных мероприятий за территорией допускается покинуть территорию только в сопровождении организатора.</div></div>
-<div class="art"><strong>2.7.</strong> После окончания служебного дня, военнослужащим со звания Старший сержант и имеющим военный билет разрешено покидать территорию воинской части с соблюдением служебного графика.</div>
-<div class="art"><strong>2.8.</strong> Военнослужащие, достигшие звания Старший Сержант и выше, имеющие Военный билет имеют право на гарантированный отпуск длительностью не более 7 дней раз в месяц по усмотрению руководства.<div class="note">Исключение: в случае семейных обстоятельств каждый может написать отпуск на любое количество дней с одобрения Начальника штаба, Заместителя командира бригады, Командира бригады.</div></div>
-<div class="art"><strong>2.9.</strong> Военнослужащим разрешено отдыхать в специально отведенных местах: казарма, раздевалка, военный госпиталь.<div class="note">Примечание: Максимально допустимое время отдыха в сутки — 60 минут.</div></div>
-<div class="art"><strong>2.10.</strong> При переходе в режим повышенной боевой готовности (код-4), при объявлении военного положения, чрезвычайного положения, контртеррористической операции бригада переходит в круглосуточный режим работы.</div>
-<div class="art"><strong>2.11.</strong> Личный состав подразделений обязан еженедельно сразу после окончания вечерней поверки организованно являться в Медицинскую роту для прохождения планового освидетельствования. Расписание: Пн — ССО; Вт — ВП; Ср — РОИО; Чт — ВК; Пт — ВА; Сб-Вс — выходной.</div>
-</div></section>
-<section class="chapter" id="ch3"><h2>ГЛАВА III. ВНЕШНИЙ ВИД</h2><div class="arts">
-<div class="art"><strong>3.1.</strong> Все военнослужащие в расположении или при участии в официальных мероприятиях обязаны быть одетыми по установленной форме.<div class="note">Примечание: Снять головной убор допускается исключительно на мероприятиях в помещениях.</div></div>
-<div class="art"><strong>3.2.</strong> При выборе формы одежды военнослужащие обязаны руководствоваться настоящим уставом, приказами Министерства Обороны и должностными регламентами.</div>
-<div class="art"><strong>3.3.</strong> Военнослужащие обязаны носить форму подразделения, к которому они отнесены. Запрещается ношение формы других подразделений без соответствующего разрешения.</div>
-<div class="art"><strong>3.4.</strong> Военнослужащие обязаны носить форму с погонами соответствующего звания.</div>
-<div class="art"><strong>3.5.</strong> Запрещено использовать при исполнении обязанностей: спортивную и пляжную одежду; элементы с логотипами брендов; неопрятную одежду; татуировки на кистях, лице и шее; криминальную символику; яркий макияж; бижутерию для мужчин (кроме часов); аксессуары ярких цветов.<div class="note">Примечание: Белый и Черный цвета допустимы для использования.</div></div>
-<div class="art"><strong>3.6.</strong> Голова и лицо военнослужащего должны быть гладко выбриты. Со звания Мл. Лейтенант до Капитана — прически до 1 см. Со звания Майор и выше — любые опрятные прически. Окраска в неестественный цвет запрещена.<div class="note">Исключение: Военнослужащие женского пола.</div></div>
-<div class="art"><strong>3.7.</strong> Со звания Младший Лейтенант разрешены усы опрятного вида.<div class="note">Примечание: Бороды разрешены со звания Майор при условии опрятного вида.</div></div>
-<div class="art"><strong>3.8.</strong> Вне служебного времени военнослужащие также должны соблюдать правила ношения формы, если они предполагаются для мероприятий, связанных с военной службой.</div>
-</div></section>
-<section class="chapter" id="ch4"><h2>ГЛАВА IV. СТРУКТУРА ВОЙСКОВОЙ ЧАСТИ</h2><div class="arts">
-<div class="art"><strong>4.1.</strong> Иерархическая структура 1-ой мотострелковой бригады: Командир бригады; Первый заместитель командира бригады; Начальник штаба бригады; Зам. по тактической подготовке; Зам. по МТО; Помощник по особым поручениям; Комендант военной комендатуры; Командиры подразделений и их заместители; Военная комендатура; ССО; РОиО; Военный комиссариат; Отдел призыва; Отдел кадровой работы; Медицинская рота; Военная академия.</div>
-<div class="art"><strong>4.2.</strong> Иерархическая структура штаба: Командир бригады; Первый заместитель; Начальник штаба; Зам. по ТП; Зам. по МТО; Помощник по особым поручениям; Комендант; Командиры подразделений и их заместители.</div>
-<div class="art"><strong>4.3.</strong> Командир бригады — осуществляет общее руководство бригадой. Является высшей инстанцией при принятии решений. Устанавливает структуру, вводит документы, определяет направления политики, назначает на должности, выдает выговоры, назначает переаттестации, увольняет, рассматривает жалобы и присваивает звания.</div>
-<div class="art"><strong>4.4.</strong> Первый заместитель командира бригады — подчиняется Командиру, является прямым начальником всего личного состава. В отсутствие Командира решает важнейшие задачи. Контролирует все структурные единицы, проводит занятия, координирует действия подразделений. Имеет полные кадровые полномочия.</div>
-<div class="art"><strong>4.5.</strong> Начальник штаба — заместитель Командира и прямой начальник штаба. Отвечает за управление подразделениями, боевую и мобилизационную готовность, планирование, внутреннюю службу, дисциплину и учет. Курирует работу Военного комиссариата.</div>
-<div class="art"><strong>4.6.</strong> Зам. по МТО — обеспечивает поставки вооружения, боеприпасов, организует охрану конвоев и территории воинской части. Курирует работу Роты охраны и обеспечения.</div>
-<div class="art"><strong>4.7.</strong> Зам. по ТП — обеспечивает выполнение задач ССО. Непосредственно курирует работу Сил Специальных Операций.</div>
-<div class="art"><strong>4.8.</strong> Помощник командира по особым поручениям — консультирует и оказывает поддержку, координирует задачи, контролирует подготовку, организует учебные мероприятия, собирает отчетность. Имеет право проводить комплексные проверки подразделений.</div>
-<div class="art"><strong>4.9.</strong> Командиры подразделений — являются единоначальниками, отвечают за боевую готовность, выполнение задач, дисциплину и внутренний порядок. Определяют цели и задачи, формируют должности, проводят ревизии, ведут учет поощрений и взысканий, представляют звания.</div>
-<div class="art"><strong>4.10.</strong> Военная комендатура — обеспечивает правопорядок и воинскую дисциплину. Включает отдел дознания и батальон военной полиции. Осуществляет патрулирование, задержание, надзор, обыск, пресечение правонарушений, профилактическую работу и содействие в расследованиях.</div>
-<div class="art"><strong>4.11.</strong> Силы специальных операций — высокоподготовленное подразделение для разведывательных, контрразведывательных и специальных задач. Деятельность засекречена. Задачи: разведка, контрразведка, захват объектов, обеспечение безопасности, антитеррор, защита поставок.</div>
-<div class="art"><strong>4.12.</strong> Военный комиссариат — отвечает за военно-мобилизационную работу и воинский учет. Включает отдел призыва и отдел кадровой работы. Осуществляет призыв, обучение, регистрацию и мобилизацию резерва.</div>
-<div class="art"><strong>4.13.</strong> Рота охраны и обеспечения — обеспечивает охрану конвоев, объектов, призывов, КПП и сопровождение высшего офицерского состава. Инициирует и участвует в поставках. Во время поставки имеет приоритет в командовании.</div>
-<div class="art"><strong>4.14.</strong> Медицинская рота — обследование, первая врачебная помощь, медицинская сортировка, лечение легкораненых, военно-врачебная экспертиза, эвакуация раненых и больных.</div>
-</div></section>
-<section class="chapter" id="ch5"><h2>ГЛАВА V. СУБОРДИНАЦИЯ</h2><div class="arts">
-<div class="art"><strong>5.1.</strong> Субординация — система иерархических отношений, определяющая порядок подчинения военнослужащих командирам, уважение дисциплины и выполнение обязанностей.</div>
-<div class="art"><strong>5.2.</strong> Каждый военнослужащий обязан следовать указаниям непосредственного начальства в соответствии с полномочиями.</div>
-<div class="art"><strong>5.3.</strong> Субординация распространяется на все сферы: боевые задачи, дисциплину, уставы и служебные обязанности.</div>
-<div class="art"><strong>5.4.</strong> Воинская дисциплина — строгое соблюдение правил и обязанностей, основанных на ответственности, чести, верности присяге и Конституции РФ.</div>
-<div class="art"><strong>5.5.</strong> При разногласиях военнослужащий вправе обратиться к вышестоящему начальству для разрешения ситуаций.</div>
-<div class="art"><strong>5.6.</strong> Нарушение субординации влечет дисциплинарные меры.</div>
-<div class="art"><strong>5.7.</strong> Общение со старшим по званию: Обращение — «Товарищ [Звание] [Фамилия], разрешите…»; Согласие — «Так точно»; Несогласие — «Никак нет»; Выполнение — «Есть»; Незнание — «Не могу знать!»; Извинения — «Виноват, исправлюсь»; Приветствие — «Здравия желаю, [Звание] [Фамилия].»</div>
-<div class="art"><strong>5.8.</strong> Общение с младшим по званию: запрещены внеуставные отношения. Старшему составу допускается обращаться на «Ты».</div>
-<div class="art"><strong>5.9.</strong> Общение с гражданскими: запрещены брань, оскорбления, применение силы без угрозы. Обращение: «Гражданин» или «Гражданка».</div>
-</div></section>
-<section class="chapter" id="ch6"><h2>ГЛАВА VI. ПРАВИЛА ИСПОЛЬЗОВАНИЯ РАЦИИ</h2><div class="arts">
-<div class="art"><strong>6.1.</strong> Тэги: ВП — [ВП]; ССО — [ССО]; РОиО — [РОиО]; ВК — [ВК]; МР — [МР]; ВА — [ВА].<div class="note">Примечание: Полковники и вышестоящие тэгов не имеют. Доклад в наряде не требует тега.</div></div>
-<div class="art"><strong>6.2.</strong> Коды: Код-1 — стабильно; Код-2 — скопление подозрительных лиц; Код-3 — проникновение, нападение, массовое нарушение; Код-4 — боевая тревога (от полковника и министра обороны).</div>
-<div class="art"><strong>6.3.</strong> Индикаторы тревоги: Код Синий — всеобщее построение (от Майора); Код Красный запрос — срочная помощь (от Прапорщика); Код Красный общий — запрос от госструктур (от Майора).</div>
-</div></section>
-<section class="chapter" id="ch7"><h2>ГЛАВА VII. РЕГЛАМЕНТ ДЕЙСТВИЙ</h2><div class="arts">
-<div class="art"><strong>Часть I. 7.1.1.</strong> Основная задача поставочных мероприятий — загрузка машин и доставка груза в полном объеме без утрат.</div>
-<div class="art"><strong>7.1.2.</strong> Во время спецопераций запрещено: прыгать с ящиком, использовать мобильные телефоны, вести посторонние разговоры.</div>
-<div class="art"><strong>7.1.3.</strong> Во время нападения на стрельбу реагируют исключительно ССО или иные госструктуры.<div class="note">Исключение: приказ старшего по званию.</div></div>
-<div class="art"><strong>7.1.4.</strong> Запрещено прибывать и находиться рядом с объектом после начала операции.</div>
-<div class="art"><strong>Часть II. 7.2.1.</strong> После объявления военного положения весь личный состав переодевается в боевую форму и находится в ней до окончания.<div class="note">Исключение: прямой приказ Командира бригады и его заместителей, Министра Обороны, Секретаря СБ.</div></div>
-<div class="art"><strong>7.2.2.</strong> Руководству подразделений получить инструкции у Командира бригады и/или его заместителей.</div>
-<div class="art"><strong>7.2.3–7.2.8.</strong> Действия подразделений при военном положении: ВП — оперативный дежурный + патрулирование; ССО — по указанию командира; РОиО — усилить КПП; ВК — инструктаж ВА; МР — оперативный дежурный + помощь; ВА — построение по сигналу ВК.</div>
-<div class="art"><strong>Часть III. 7.3.1.</strong> При Коде-3: получить обмундирование, кратчайшим путем на служебном транспорте добраться до места объявления.</div>
-<div class="art"><strong>7.3.2.</strong> При обнаружении нарушителя — оповестить по рации о местоположении, направлении, приметах, транспорте.</div>
-<div class="art"><strong>7.3.3–7.4.7.</strong> ВП — прибывают, задерживают, оказывают огневую поддержку; ССО — силовая поддержка ВП, при отсутствии ВП — самостоятельные действия; РОиО — занимают точки, содействуют погоне; МР — медпомощь пострадавшим; ВК и ВА — не прибывают, кроме прямого приказа.</div>
-</div></section>
-<section class="chapter" id="ch8"><h2>ГЛАВА VIII. КАДРОВАЯ ОТЧЕТНОСТЬ</h2><div class="arts">
-<div class="art"><strong>8.1.1.</strong> Все отчеты составляются строго по форме.</div>
-<div class="art"><strong>8.1.2.</strong> Запрещено удалять отчеты, редактировать заявления после отправки. Сроки отпуска после одобрения не редактируются.<div class="note">Исключение: если ошибка обнаружена самостоятельно, допускается удалить отчет и создать новый.</div></div>
-<div class="art"><strong>8.1.3.</strong> Военнослужащие со звания Майор, Подполковник обязаны подавать еженедельный отчёт на премирование куратору.</div>
-<div class="art"><strong>8.1.4.</strong> Каждый военнослужащий должен оставлять недельный отчёт.<div class="note">Примечание: Норма устанавливается командирами подразделений и утверждается приказом командира бригады.</div></div>
-<div class="art"><strong>8.2.1.</strong> Для повышения не должно быть активных дисциплинарных взысканий.</div>
-<div class="art"><strong>8.2.2.</strong> Повышение проходит строго по системе подразделения.</div>
-<div class="art"><strong>8.2.3.</strong> Запрещено обходить систему повышений, использовать старые материалы и подделывать отчёты.</div>
-<div class="art"><strong>8.2.4.</strong> Повышение производится по представлению командира подразделения, согласованному с вышестоящим командованием.</div>
-<div class="art"><strong>8.2.5.</strong> Запрещено использовать материалы из предыдущих отчётов и любые махинации с подделкой.</div>
-<div class="art"><strong>8.2.6.</strong> Все повышения проходят сразу после вечерней поверки.<div class="note">Исключение: регламент определяет Командир подразделения. В иное время — по согласованию с Командиром бригады.</div></div>
-<div class="art"><strong>8.2.7.</strong> Испытательный срок для командиров подразделений, заместителей и членов штаба — от 14 до 21 дня.</div>
-<div class="art"><strong>8.2.8.</strong> При назначении военнослужащий повышается на максимально допустимое звание для данной должности.</div>
-<div class="art"><strong>8.2.9.</strong> Если испытательный срок не пройден — возврат на прежнее звание и должность. Возможно зачисление в списки без подразделения.</div>
-</div></section>
-<section class="sig"><div class="sig-title">Командир 1-ой мотострелковой бригады</div><div class="sig-rank">генерал-лейтенант</div><div class="sig-name">Волков Р.А.</div></section>
-</div>`},
-
-{slug:"stroevoy-ustav",theme:"t2",title:"Строевой устав",code:"1781813453292",meta:"Строевая подготовка<br>в/ч №12132",toc:[],
-html:`<div class="paper-head"><div class="ministry">МИНИСТЕРСТВО ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ</div><h1>СТРОЕВОЙ УСТАВ</h1><div class="sub">1-я ОБрСпН · в/ч №12132</div></div><div class="doc-empty">Страница строевого устава подготовлена.<br>Полный текст будет размещён позднее.</div>`},
-
-{slug:"karaulnaya-i-garnizonnaya",theme:"t3",title:"Устав караульной и гарнизонной служб",code:"1781813512103",meta:"Караульная и гарнизонная служба<br>в/ч №12132",toc:[],
-html:`<div class="paper-head"><div class="ministry">МИНИСТЕРСТВО ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ</div><h1>УСТАВ КАРАУЛЬНОЙ И ГАРНИЗОННОЙ СЛУЖБ</h1><div class="sub">1-я ОБрСпН · в/ч №12132</div></div><div class="doc-empty">Страница устава караульной и гарнизонной служб подготовлена.<br>Полный текст будет размещён позднее.</div>`},
-
-{slug:"disciplinarnyy-ustav",theme:"t4",title:"Дисциплинарный устав",code:"1781813587291",meta:"Воинская дисциплина<br>в/ч №12132",toc:[],
-html:`<div class="paper-head"><div class="ministry">МИНИСТЕРСТВО ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ</div><h1>ДИСЦИПЛИНАРНЫЙ УСТАВ</h1><div class="sub">1-я ОБрСпН · в/ч №12132</div></div><div class="doc-empty">Страница дисциплинарного устава подготовлена.<br>Полный текст будет размещён позднее.</div>`},
-
-{slug:"ustav-voennoy-politsii",theme:"t5",title:"Устав военной полиции",code:"1781813632975",meta:"Военная полиция<br>в/ч №12132",toc:[],
-html:`<div class="paper-head"><div class="ministry">МИНИСТЕРСТВО ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ</div><h1>УСТАВ ВОЕННОЙ ПОЛИЦИИ</h1><div class="sub">1-я ОБрСпН · в/ч №12132</div></div><div class="doc-empty">Страница устава военной полиции подготовлена.<br>Полный текст будет размещён позднее.</div>`}
-];
+let DATA=[];
+let currentSlug=null;
+let tocObserver=null;
 
 const $=id=>document.getElementById(id);
 const grid=$("grid");
@@ -280,29 +244,34 @@ const viewDoc=$("view-doc");
 const overlay=$("overlay");
 const paperArticle=$("paperArticle");
 const tocList=$("tocList");
+const docProgress=$("docProgress");
 
-grid.innerHTML=DATA.map(d=>`
-<a class="book-card reveal" href="#doc/${d.slug}">
-  <div class="b3d">
-    <div class="b-spine"></div>
-    <div class="b-front ${d.theme}">
-      <div>
-        <div class="b-label">ВС РФ</div>
-        <h3>${d.title}</h3>
-        <div class="b-meta">1-я ОБрСпН<br>в/ч №12132</div>
+async function boot(){
+  DATA=await VSRF_USTAV.loadAll();
+  renderList();
+  route();
+}
+
+function renderList(){
+  grid.innerHTML=DATA.map(d=>`
+    <a class="book-card reveal" href="#doc/${d.slug}">
+      <div class="b3d">
+        <div class="b-spine"></div>
+        <div class="b-front ${d.theme}">
+          <div>
+            <div class="b-label">ВС РФ</div>
+            <h3>${VSRF_USTAV.esc(d.title)}</h3>
+            <div class="b-meta">1-я ОБрСпН<br>в/ч №12132</div>
+          </div>
+          <div class="b-code">${d.code}</div>
+        </div>
+        <div class="b-pages"></div>
       </div>
-      <div class="b-code">${d.code}</div>
-    </div>
-    <div class="b-pages"></div>
-  </div>
-</a>`).join("");
-
-document.querySelectorAll("#grid .reveal").forEach(el=>{
-  new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
-});
-
-let currentSlug=null;
-let tocObserver=null;
+    </a>`).join("");
+  document.querySelectorAll("#grid .reveal").forEach(el=>{
+    new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
+  });
+}
 
 function showList(){
   document.title="Уставы — ВС РФ · в/ч №12132";
@@ -310,9 +279,10 @@ function showList(){
   viewDoc.style.display="none";
   currentSlug=null;
   if(tocObserver){tocObserver.disconnect();tocObserver=null}
+  docProgress.style.width="0";
 }
 
-function showDoc(slug){
+function showDoc(slug,anchor){
   const d=DATA.find(x=>x.slug===slug);
   if(!d){location.hash="";showList();return}
   document.title=d.title+" — ВС РФ · в/ч №12132";
@@ -323,20 +293,24 @@ function showDoc(slug){
   $("dBookTitle").textContent=d.title;
   $("dBookMeta").innerHTML=d.meta;
   $("dBookCode").textContent=d.code;
-  const bf=$("dBookFront");
-  bf.className="b-front "+d.theme;
-  paperArticle.innerHTML=d.html;
-  if(d.toc&&d.toc.length){
-    tocList.innerHTML=d.toc.map(t=>`<li><a href="#${t.id}" data-toc="${t.id}">${t.label}</a></li>`).join("");
-    setupTocObserver(d.toc);
+  $("dBookFront").className="b-front "+d.theme;
+  paperArticle.innerHTML=VSRF_USTAV.render(d);
+  const toc=VSRF_USTAV.buildToc(d);
+  $("tocCounter").textContent=toc.length?`${toc.length} разд.`:"";
+  if(toc.length){
+    tocList.innerHTML=toc.map(t=>`<li><a href="#doc/${d.slug}--${t.id}" data-toc="${t.id}">${VSRF_USTAV.esc(t.label)}</a></li>`).join("");
+    setupTocObserver(toc);
   }else{
-    tocList.innerHTML=`<li style="padding:12px 14px;color:var(--muted);font-size:13px">Содержание будет добавлено</li>`;
+    tocList.innerHTML=`<li style="padding:12px 14px;color:var(--muted);font-size:13px">Содержание пусто</li>`;
+  }
+  updateAdminUI();
+  if(anchor){
+    setTimeout(()=>{const e=document.getElementById(anchor);if(e) e.scrollIntoView({behavior:"smooth",block:"start"})},300);
   }
 }
 
 function setupTocObserver(toc){
   if(tocObserver) tocObserver.disconnect();
-  const ids=toc.map(t=>t.id);
   tocObserver=new IntersectionObserver(entries=>{
     entries.forEach(e=>{
       if(e.isIntersecting){
@@ -345,49 +319,258 @@ function setupTocObserver(toc){
         if(a) a.classList.add("active");
       }
     });
-  },{rootMargin:"-80px 0px -60% 0px",threshold:0});
-  ids.forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) tocObserver.observe(el);
-  });
+  },{rootMargin:"-160px 0px -60% 0px",threshold:0});
+  toc.forEach(t=>{const el=document.getElementById(t.id);if(el) tocObserver.observe(el)});
 }
 
 function transition(fn){
   overlay.classList.add("active");
-  setTimeout(()=>{
-    fn();
-    window.scrollTo({top:0,behavior:"instant"});
-    setTimeout(()=>overlay.classList.remove("active"),60);
-  },350);
+  setTimeout(()=>{fn();window.scrollTo({top:0,behavior:"instant"});setTimeout(()=>overlay.classList.remove("active"),60)},350);
 }
 
 function route(){
   const h=location.hash||"";
   if(h.startsWith("#doc/")){
-    const slug=h.replace("#doc/","").trim();
-    if(currentSlug!==slug){transition(()=>showDoc(slug))}
+    const raw=h.replace("#doc/","").trim();
+    const [slug,anchor]=raw.split("--");
+    if(currentSlug!==slug){transition(()=>showDoc(slug,anchor))}
+    else if(anchor){const e=document.getElementById(anchor);if(e) e.scrollIntoView({behavior:"smooth"})}
     else{showDoc(slug)}
     return;
   }
-  if(currentSlug!==null){transition(showList)}
-  else{showList()}
+  if(currentSlug!==null){transition(showList)}else{showList()}
 }
 
 window.addEventListener("hashchange",route);
-window.addEventListener("load",route);
-
 $("backBtn").addEventListener("click",e=>{e.preventDefault();location.hash=""});
 
 tocList.addEventListener("click",e=>{
-  const a=e.target.closest("a[data-toc]");
-  if(!a) return;
+  const a=e.target.closest("a[data-toc]");if(!a) return;
   e.preventDefault();
   const el=document.getElementById(a.dataset.toc);
   if(el) el.scrollIntoView({behavior:"smooth"});
 });
 
-route();
+document.addEventListener("click",e=>{
+  const c=e.target.closest("[data-copy-anchor]");
+  if(!c) return;
+  const url=location.origin+location.pathname+`#doc/${currentSlug}--${c.dataset.copyAnchor.split("--").slice(1).join("--")}`;
+  navigator.clipboard.writeText(url).then(()=>{
+    c.style.color="#2a7a2a";
+    setTimeout(()=>{c.style.color=""},1200);
+  }).catch(()=>{});
+});
+
+window.addEventListener("scroll",()=>{
+  if(viewDoc.style.display!=="block"){docProgress.style.width="0";return}
+  const paper=paperArticle;
+  const rect=paper.getBoundingClientRect();
+  const total=rect.height-window.innerHeight+150;
+  const scrolled=Math.max(0,-rect.top+150);
+  const p=total>0?Math.min(scrolled/total,1):0;
+  docProgress.style.width=(p*100)+"%";
+},{passive:true});
+
+const editorModal=$("editorModal");
+const edSide=$("edSide");
+const edMain=$("edMain");
+const edFull=$("edFull");
+const edSub=$("edSub");
+const edMsg=$("edMsg");
+let editDoc=null;
+let editActiveChap=null;
+
+function updateAdminUI(){
+  const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  document.querySelectorAll(".admin-only").forEach(el=>el.style.display=isAdmin?"":"none");
+}
+if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdminUI);
+
+$("editDocBtn").addEventListener("click",()=>{
+  const d=DATA.find(x=>x.slug===currentSlug);
+  if(d) openEditor(d);
+});
+$("editListBtn").addEventListener("click",()=>{
+  const slugs=DATA.map(d=>d.slug);
+  const choice=prompt("Введите slug устава для редактирования:\n\n"+DATA.map(d=>`• ${d.slug} — ${d.title}`).join("\n"),slugs[0]);
+  if(!choice) return;
+  const d=DATA.find(x=>x.slug===choice);
+  if(d) openEditor(d);else alert("Не найден");
+});
+
+function uid(){return "id"+Math.random().toString(36).slice(2,9)}
+function deepClone(o){return JSON.parse(JSON.stringify(o))}
+
+function openEditor(doc){
+  editDoc=deepClone(doc);
+  editDoc.chapters=editDoc.chapters||[];
+  editDoc.preamble=editDoc.preamble||"";
+  editActiveChap="preamble";
+  $("editorTitle").textContent="Редактор: "+doc.title;
+  edFull.value=editDoc.full||editDoc.title;
+  edSub.value=editDoc.sub||"1-я ОБрСпН · в/ч №12132";
+  edMsg.className="form-msg";edMsg.textContent="";
+  renderEditor();
+  editorModal.classList.add("active");
+}
+
+function renderEditor(){
+  const items=[
+    `<h4>Разделы</h4>`,
+    `<div class="chap-item ${editActiveChap==='preamble'?'active':''}" data-chap="preamble">Преамбула</div>`,
+    ...editDoc.chapters.map(c=>`<div class="chap-item ${editActiveChap===c.id?'active':''}" data-chap="${c.id}">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${VSRF_USTAV.esc(c.title||"Без названия")}</span>
+      <span class="cx" data-remove-chap="${c.id}" title="Удалить главу">×</span>
+    </div>`),
+    `<button class="editor-add-btn" id="edAddChap">+ Добавить главу</button>`,
+    `<h4 style="margin-top:14px">Подпись</h4>`,
+    `<div class="chap-item ${editActiveChap==='__sig'?'active':''}" data-chap="__sig">Подпись документа</div>`
+  ];
+  edSide.innerHTML=items.join("");
+
+  if(editActiveChap==="preamble"){
+    edMain.innerHTML=`
+      <div class="art-editor">
+        <div class="art-editor-head"><span class="art-editor-num">Преамбула</span></div>
+        <textarea id="edPreamble" placeholder="Текст преамбулы. Разделяйте абзацы пустой строкой." style="min-height:280px">${VSRF_USTAV.esc(editDoc.preamble)}</textarea>
+      </div>`;
+    $("edPreamble").addEventListener("input",e=>{editDoc.preamble=e.target.value});
+  }else if(editActiveChap==="__sig"){
+    const sig=editDoc.signature||{title:"",rank:"",name:""};
+    edMain.innerHTML=`
+      <div class="art-editor">
+        <div class="art-editor-head"><span class="art-editor-num">Подпись</span>
+          <div class="art-editor-actions"><button class="mini-btn danger" id="sigClear">Удалить подпись</button></div>
+        </div>
+        <div class="form-group"><label>Должность</label><input id="sigTitle" value="${VSRF_USTAV.esc(sig.title)}" placeholder="Командир 1-ой мотострелковой бригады"></div>
+        <div class="form-group"><label>Звание</label><input id="sigRank" value="${VSRF_USTAV.esc(sig.rank)}" placeholder="генерал-лейтенант"></div>
+        <div class="form-group"><label>Фамилия и инициалы</label><input id="sigName" value="${VSRF_USTAV.esc(sig.name)}" placeholder="Волков Р.А."></div>
+      </div>`;
+    const upd=()=>{editDoc.signature={title:$("sigTitle").value,rank:$("sigRank").value,name:$("sigName").value}};
+    ["sigTitle","sigRank","sigName"].forEach(id=>$(id).addEventListener("input",upd));
+    $("sigClear").addEventListener("click",()=>{editDoc.signature=null;renderEditor()});
+  }else{
+    const chap=editDoc.chapters.find(c=>c.id===editActiveChap);
+    if(!chap){edMain.innerHTML=`<div class="empty-state">Выберите или добавьте главу</div>`;return}
+    edMain.innerHTML=`
+      <div class="art-editor">
+        <div class="form-group"><label>Название главы</label><input id="chapTitle" value="${VSRF_USTAV.esc(chap.title)}" placeholder="ГЛАВА I. ОБЩИЕ ПОЛОЖЕНИЯ"></div>
+      </div>
+      <div id="artsList"></div>
+      <button class="editor-add-btn" id="edAddArt" style="width:100%">+ Добавить статью</button>
+    `;
+    $("chapTitle").addEventListener("input",e=>{chap.title=e.target.value;renderSide()});
+    renderArts(chap);
+    $("edAddArt").addEventListener("click",()=>{
+      const next=(chap.articles||[]).length+1;
+      chap.articles=chap.articles||[];
+      chap.articles.push({num:`${chap.articles.length?chap.articles[0].num.split(".")[0]:next}.${(chap.articles.length||0)+1}`,text:"",notes:[]});
+      renderArts(chap);
+    });
+  }
+
+  edSide.addEventListener("click",sideClick,{once:true});
+}
+
+function renderSide(){
+  edSide.querySelectorAll(".chap-item").forEach(el=>{
+    const id=el.dataset.chap;
+    if(id&&id!=="preamble"&&id!=="__sig"){
+      const c=editDoc.chapters.find(x=>x.id===id);
+      if(c){const s=el.querySelector("span");if(s) s.textContent=c.title||"Без названия"}
+    }
+  });
+}
+
+function sideClick(e){
+  const item=e.target.closest(".chap-item");
+  const rm=e.target.closest("[data-remove-chap]");
+  const add=e.target.closest("#edAddChap");
+  if(rm){
+    e.stopPropagation();
+    if(!confirm("Удалить главу и все её статьи?")) return renderEditor();
+    editDoc.chapters=editDoc.chapters.filter(c=>c.id!==rm.dataset.removeChap);
+    if(editActiveChap===rm.dataset.removeChap) editActiveChap="preamble";
+    return renderEditor();
+  }
+  if(add){
+    const n=editDoc.chapters.length+1;
+    const roman=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV"][editDoc.chapters.length]||n;
+    const id="ch"+n+"_"+uid().slice(2,5);
+    editDoc.chapters.push({id,title:`ГЛАВА ${roman}. НОВАЯ ГЛАВА`,articles:[]});
+    editActiveChap=id;
+    return renderEditor();
+  }
+  if(item){editActiveChap=item.dataset.chap;renderEditor()}
+}
+
+function renderArts(chap){
+  const box=$("artsList");
+  if(!box) return;
+  if(!chap.articles||!chap.articles.length){
+    box.innerHTML=`<div class="empty-state" style="padding:24px">Пока нет статей. Добавьте первую.</div>`;
+    return;
+  }
+  box.innerHTML=chap.articles.map((a,i)=>`
+    <div class="art-editor" data-art-i="${i}">
+      <div class="art-editor-head">
+        <input class="art-editor-num" style="width:auto" value="${VSRF_USTAV.esc(a.num)}" data-num>
+        <div class="art-editor-actions">
+          <button class="mini-btn" data-up ${i===0?'disabled':''}>↑</button>
+          <button class="mini-btn" data-down ${i===chap.articles.length-1?'disabled':''}>↓</button>
+          <button class="mini-btn" data-add-note>+ Прим.</button>
+          <button class="mini-btn danger" data-del-art>Удалить</button>
+        </div>
+      </div>
+      <textarea data-text placeholder="Текст статьи">${VSRF_USTAV.esc(a.text)}</textarea>
+      ${(a.notes||[]).map((n,ni)=>`<div class="note-editor">
+        <button class="note-editor-remove" data-del-note="${ni}" title="Удалить">×</button>
+        <textarea data-note="${ni}" placeholder="Примечание / исключение">${VSRF_USTAV.esc(n)}</textarea>
+      </div>`).join("")}
+    </div>`).join("");
+  box.querySelectorAll("[data-art-i]").forEach(row=>{
+    const i=+row.dataset.artI;
+    const art=chap.articles[i];
+    row.querySelector("[data-num]").addEventListener("input",e=>{art.num=e.target.value});
+    row.querySelector("[data-text]").addEventListener("input",e=>{art.text=e.target.value});
+    row.querySelectorAll("[data-note]").forEach(t=>{
+      t.addEventListener("input",e=>{art.notes[+t.dataset.note]=e.target.value});
+    });
+    const up=row.querySelector("[data-up]");if(up) up.addEventListener("click",()=>{if(i>0){const [x]=chap.articles.splice(i,1);chap.articles.splice(i-1,0,x);renderArts(chap)}});
+    const dn=row.querySelector("[data-down]");if(dn) dn.addEventListener("click",()=>{if(i<chap.articles.length-1){const [x]=chap.articles.splice(i,1);chap.articles.splice(i+1,0,x);renderArts(chap)}});
+    row.querySelector("[data-add-note]").addEventListener("click",()=>{art.notes=art.notes||[];art.notes.push("");renderArts(chap)});
+    row.querySelector("[data-del-art]").addEventListener("click",()=>{if(confirm("Удалить статью?")){chap.articles.splice(i,1);renderArts(chap)}});
+    row.querySelectorAll("[data-del-note]").forEach(b=>{
+      b.addEventListener("click",()=>{art.notes.splice(+b.dataset.delNote,1);renderArts(chap)});
+    });
+  });
+}
+
+$("edCancel").addEventListener("click",()=>editorModal.classList.remove("active"));
+editorModal.querySelector(".modal-close").addEventListener("click",()=>editorModal.classList.remove("active"));
+$("edSave").addEventListener("click",async()=>{
+  editDoc.full=edFull.value.trim()||editDoc.title;
+  editDoc.sub=edSub.value.trim()||"1-я ОБрСпН · в/ч №12132";
+  edMsg.className="form-msg info";edMsg.textContent="Сохранение...";
+  const r=await VSRF_USTAV.save(editDoc);
+  if(r.ok){
+    const idx=DATA.findIndex(x=>x.slug===editDoc.slug);
+    if(idx>=0) DATA[idx]=Object.assign({},DATA[idx],editDoc);
+    edMsg.className="form-msg success";
+    edMsg.textContent=r.remote?"Сохранено в Supabase":"Сохранено локально (для облачной синхронизации подключите Supabase)";
+    setTimeout(()=>{
+      editorModal.classList.remove("active");
+      if(currentSlug===editDoc.slug) showDoc(currentSlug);
+    },800);
+  }else{
+    edMsg.className="form-msg error";edMsg.textContent="Ошибка сохранения";
+  }
+});
+
+window.VSRF_USTAV_TOC=[];
+
+boot();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f5680f9c9be964',t:'MTc4NDc1NDM1Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

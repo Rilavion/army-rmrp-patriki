@@ -16,7 +16,7 @@
 
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" id="goHome" href="index.html">
+    <a class="brand" href="index.html">
       <div class="brand-icon">ВС</div>
       <div class="brand-text">
         <span class="brand-label">Вооружённые Силы РФ</span>
@@ -31,6 +31,11 @@
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
     </nav>
     <div class="header-actions">
+      <button class="search-btn" data-open-search title="Поиск (Ctrl+K)">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <span>Поиск</span>
+        <span class="kbd">Ctrl K</span>
+      </button>
       <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
         <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -90,6 +95,24 @@
   </div>
 </footer>
 
+<div class="fab-stack" id="fabStack">
+  <button class="fab" id="fabUp" title="Наверх">
+    <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg>
+    <span class="fab-hint">Наверх</span>
+  </button>
+</div>
+
+<div class="search-modal" id="searchModal">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      <input class="search-input" placeholder="Поиск..." spellcheck="false">
+      <button class="search-close-kbd">Esc</button>
+    </div>
+    <div class="search-results"></div>
+  </div>
+</div>
+
 <div class="modal-back" id="loginModal">
   <div class="modal">
     <button class="modal-close" aria-label="Закрыть">✕</button>
@@ -105,17 +128,30 @@
 </div>
 
 <div class="modal-back" id="newsModal">
-  <div class="modal" style="max-width:640px">
+  <div class="modal modal-lg">
     <button class="modal-close" aria-label="Закрыть">✕</button>
-    <h3 id="newsModalTitle">Новая новость</h3>
-    <div class="modal-sub">Заполните поля публикации</div>
+    <div class="news-modal-content" id="newsModalContent"></div>
+    <div class="admin-only" id="newsModalAdmin" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" id="editNewsBtn">✎ Редактировать</button>
+      <button class="btn btn-ghost btn-sm btn-danger" id="delNewsBtn">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="editNewsModal">
+  <div class="modal modal-lg">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="editNewsTitle">Новая новость</h3>
+    <div class="modal-sub">Заполните поля публикации. Абзацы разделяйте пустой строкой.</div>
     <form id="newsForm">
       <input type="hidden" name="id">
       <div class="form-group"><label>Заголовок</label><input name="title" required></div>
-      <div class="form-group"><label>Дата (ГГГГ-ММ-ДД)</label><input name="date" type="date" required></div>
-      <div class="form-group"><label>URL изображения (необязательно)</label><input name="image" type="url" placeholder="https://..."></div>
-      <div class="form-group"><label>Краткое описание</label><textarea name="excerpt" required></textarea></div>
-      <div class="form-group"><label>Полный текст</label><textarea name="body" style="min-height:180px" required></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px">
+        <div class="form-group"><label>Дата</label><input name="date" type="date" required></div>
+        <div class="form-group"><label>URL изображения</label><input name="image" type="url" placeholder="https://..."></div>
+      </div>
+      <div class="form-group"><label>Краткое описание (для карточек)</label><textarea name="excerpt" required style="min-height:80px"></textarea></div>
+      <div class="form-group"><label>Полный текст (в модалке)</label><textarea name="body" style="min-height:200px" required></textarea></div>
       <button class="btn btn-gold" style="width:100%" type="submit">Сохранить</button>
       <div class="form-msg"></div>
     </form>
@@ -135,67 +171,78 @@ const grid=document.getElementById("newsGrid");
 const listEl=document.getElementById("newsList");
 const addBtn=document.getElementById("addNewsBtn");
 const newsModal=document.getElementById("newsModal");
+const newsContent=document.getElementById("newsModalContent");
+const editNewsModal=document.getElementById("editNewsModal");
 const newsForm=document.getElementById("newsForm");
+const modalAdmin=document.getElementById("newsModalAdmin");
 
 let LOADED=[];
+let currentNews=null;
 
 function fmt(d){try{return new Date(d).toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"})}catch(e){return d}}
-function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function esc(s){return VSRF_NEWS.esc(s)}
 
 function heroHtml(n){
   const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
-  return `<a class="news-hero reveal" href="#n-${n.id}" id="n-${n.id}">
+  return `<div class="news-hero reveal" data-news-id="${n.id}">
     <div class="news-hero-thumb">${img}</div>
     <div class="news-hero-body">
       <span class="news-hero-tag">Главное</span>
       <div class="news-date">${fmt(n.date)}</div>
       <h2>${esc(n.title)}</h2>
-      <p>${esc(n.body||n.excerpt||"")}</p>
+      <p>${esc(n.excerpt||n.body||"")}</p>
       <div class="news-more">Читать материал</div>
     </div>
-  </a>`;
+  </div>`;
 }
 
 function cardHtml(n){
-  const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
-  return `<a class="news-card reveal" href="#n-${n.id}" id="n-${n.id}">
-    <div class="news-thumb">
-      <span class="news-thumb-tag">Новость</span>
-      ${img}
-    </div>
-    <div class="news-body">
-      <div class="news-date">${fmt(n.date)}</div>
-      <div class="news-title">${esc(n.title)}</div>
-      <div class="news-excerpt">${esc(n.excerpt||"")}</div>
-      <div class="news-more">Читать</div>
-    </div>
-  </a>`;
+  return VSRF_NEWS.cardHtml(n);
 }
 
-function itemHtml(n,admin){
+function itemHtml(n){
   const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
-  const adm=admin?`<div class="news-item-actions admin-only">
-    <button class="btn btn-ghost btn-sm" data-edit="${n.id}">Ред.</button>
-    <button class="btn btn-ghost btn-sm" data-del="${n.id}">Удалить</button>
-  </div>`:"";
-  return `<article class="news-item reveal" id="n-${n.id}">
+  return `<article class="news-item reveal" data-news-id="${n.id}">
     <div class="news-thumb">${img}</div>
     <div class="news-item-body">
       <div class="news-date">${fmt(n.date)}</div>
       <h3>${esc(n.title)}</h3>
-      <p>${esc(n.body||n.excerpt||"")}</p>
+      <p>${esc(n.excerpt||n.body||"")}</p>
     </div>
-    ${adm}
+    <div class="news-item-actions">
+      <span class="btn btn-ghost btn-sm">Читать →</span>
+    </div>
   </article>`;
 }
 
+function openNews(id){
+  const n=LOADED.find(x=>String(x.id)===String(id));if(!n) return;
+  currentNews=n;
+  const img=n.image?`<div class="news-modal-hero"><img src="${n.image}" alt=""></div>`:"";
+  const body=(n.body||n.excerpt||"").split(/\n{2,}/).map(p=>`<p>${esc(p).replace(/\n/g,"<br>")}</p>`).join("");
+  newsContent.innerHTML=`${img}
+    <h2 class="news-modal-title">${esc(n.title)}</h2>
+    <div class="news-modal-meta">
+      <span>📅 ${fmt(n.date)}</span>
+      <span>· 1-я ОБрСпН · в/ч №12132</span>
+    </div>
+    <div class="news-modal-body">${body}</div>`;
+  const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  modalAdmin.style.display=isAdmin?"flex":"none";
+  newsModal.classList.add("active");
+  history.replaceState(null,"","#n-"+id);
+}
+function closeNews(){newsModal.classList.remove("active");history.replaceState(null,"",location.pathname)}
+newsModal.addEventListener("click",e=>{if(e.target===newsModal) closeNews()});
+newsModal.querySelector(".modal-close").addEventListener("click",closeNews);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(newsModal.classList.contains("active")) closeNews();if(editNewsModal.classList.contains("active")) editNewsModal.classList.remove("active")}});
+
 async function load(){
-  const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
-  const isAdmin=!!(s&&s.user);
+  const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
   LOADED=await VSRF_NEWS.fetchNews();
   if(!LOADED.length){
     heroSlot.innerHTML="";grid.innerHTML="";
-    listEl.innerHTML=`<div class="empty-state"><h3>Пока нет публикаций</h3><p>Как только появятся новости — они будут отображены здесь.</p></div>`;
+    listEl.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM5 8h5v2H5zm14 8H5v-2h14zm0-4h-7v-2h7z"/></svg><h3>Пока нет публикаций</h3><p>Как только появятся новости — они будут отображены здесь.</p></div>`;
     return;
   }
   const [hero,...rest]=LOADED;
@@ -204,23 +251,26 @@ async function load(){
   heroSlot.innerHTML=heroHtml(hero);
   grid.innerHTML=featured.map(cardHtml).join("");
   listEl.innerHTML=archive.length
-    ? `<div class="section-head" style="margin-top:20px"><span class="badge">Архив</span></div>`+archive.map(n=>itemHtml(n,isAdmin)).join("")
+    ? `<div class="section-head" style="margin-top:20px"><span class="badge">Архив</span></div>`+archive.map(itemHtml).join("")
     : "";
-  document.querySelectorAll(".news-hero.reveal,.news-card.reveal,.news-item.reveal").forEach(el=>{
+  document.querySelectorAll("[data-news-id]").forEach(el=>{
+    el.addEventListener("click",()=>openNews(el.dataset.newsId));
+  });
+  document.querySelectorAll(".reveal").forEach(el=>{
     new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
   });
-  if(location.hash){
-    const t=document.querySelector(location.hash);
-    if(t) setTimeout(()=>t.scrollIntoView({behavior:"smooth",block:"start"}),200);
+  document.querySelectorAll(".admin-only").forEach(el=>{if(el!==modalAdmin) el.style.display=isAdmin?"":"none"});
+  if(location.hash.startsWith("#n-")){
+    const id=location.hash.slice(3);
+    setTimeout(()=>openNews(id),300);
   }
-  document.querySelectorAll(".admin-only").forEach(el=>el.style.display=isAdmin?"":"none");
 }
 
-VSRF_AUTH.onChange(()=>{load()});
+if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(()=>load());
 
-addBtn.addEventListener("click",()=>openNewsModal());
-function openNewsModal(item){
-  document.getElementById("newsModalTitle").textContent=item?"Редактировать новость":"Новая новость";
+addBtn.addEventListener("click",()=>openEdit());
+function openEdit(item){
+  document.getElementById("editNewsTitle").textContent=item?"Редактировать новость":"Новая новость";
   newsForm.reset();
   newsForm.id.value=item?item.id:"";
   if(item){
@@ -232,18 +282,32 @@ function openNewsModal(item){
   }else{
     newsForm.date.value=new Date().toISOString().slice(0,10);
   }
-  const msg=newsModal.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
-  newsModal.classList.add("active");
+  const msg=editNewsModal.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
+  editNewsModal.classList.add("active");
 }
-newsModal.addEventListener("click",e=>{if(e.target===newsModal) newsModal.classList.remove("active")});
-newsModal.querySelector(".modal-close").addEventListener("click",()=>newsModal.classList.remove("active"));
+editNewsModal.addEventListener("click",e=>{if(e.target===editNewsModal) editNewsModal.classList.remove("active")});
+editNewsModal.querySelector(".modal-close").addEventListener("click",()=>editNewsModal.classList.remove("active"));
+
+document.getElementById("editNewsBtn").addEventListener("click",()=>{
+  if(currentNews){closeNews();openEdit(currentNews)}
+});
+document.getElementById("delNewsBtn").addEventListener("click",async()=>{
+  if(!currentNews) return;
+  const s=window.VSRF_AUTH.state;
+  if(!s.available||!s.client){alert("Supabase не настроен");return}
+  if(!confirm("Удалить новость «"+currentNews.title+"»?")) return;
+  try{
+    await s.client.from("news").delete().eq("id",currentNews.id);
+    closeNews();load();
+  }catch(e){alert(e.message||"Ошибка")}
+});
 
 newsForm.addEventListener("submit",async e=>{
   e.preventDefault();
-  const msg=newsModal.querySelector(".form-msg");
+  const msg=editNewsModal.querySelector(".form-msg");
   const s=window.VSRF_AUTH.state;
   if(!s.available||!s.client){
-    msg.className="form-msg info";msg.textContent="Редактирование временно недоступно (Supabase не настроен).";return;
+    msg.className="form-msg info";msg.textContent="Редактирование недоступно — настройте Supabase.";return;
   }
   const payload={
     title:newsForm.title.value.trim(),
@@ -261,33 +325,13 @@ newsForm.addEventListener("submit",async e=>{
       const {error}=await s.client.from("news").insert(payload);
       if(error) throw error;
     }
-    msg.textContent="Готово";
-    setTimeout(()=>{newsModal.classList.remove("active");load()},400);
+    msg.className="form-msg success";msg.textContent="Готово";
+    setTimeout(()=>{editNewsModal.classList.remove("active");load()},500);
   }catch(err){msg.className="form-msg error";msg.textContent=err.message||"Ошибка сохранения"}
-});
-
-document.addEventListener("click",async e=>{
-  const editBtn=e.target.closest("[data-edit]");
-  const delBtn=e.target.closest("[data-del]");
-  if(editBtn){
-    e.preventDefault();
-    const item=LOADED.find(x=>String(x.id)===String(editBtn.dataset.edit));
-    if(item) openNewsModal(item);
-  }
-  if(delBtn){
-    e.preventDefault();
-    const s=window.VSRF_AUTH.state;
-    if(!s.available||!s.client){alert("Supabase не настроен");return}
-    if(!confirm("Удалить новость?")) return;
-    try{
-      await s.client.from("news").delete().eq("id",delBtn.dataset.del);
-      load();
-    }catch(err){alert(err.message||"Ошибка")}
-  }
 });
 
 load();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f567eddb5be964',t:'MTc4NDc1NDM1Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

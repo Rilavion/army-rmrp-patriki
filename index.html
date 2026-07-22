@@ -16,7 +16,7 @@
 
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" id="goHome" href="index.html">
+    <a class="brand" href="index.html">
       <div class="brand-icon">ВС</div>
       <div class="brand-text">
         <span class="brand-label">Вооружённые Силы РФ</span>
@@ -31,6 +31,11 @@
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
     </nav>
     <div class="header-actions">
+      <button class="search-btn" data-open-search title="Поиск (Ctrl+K)">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <span>Поиск</span>
+        <span class="kbd">Ctrl K</span>
+      </button>
       <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
         <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -58,8 +63,20 @@
       </div>
       <div class="hero-visual reveal-r">
         <div class="hero-glow"></div>
-        <div class="hero-emblem">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Middle_Emblem_of_the_Russian_Navy.svg/1280px-Middle_Emblem_of_the_Russian_Navy.svg.png" alt="Эмблема">
+        <div class="hero-book">
+          <div class="hb-inner">
+            <div class="hb-spine"></div>
+            <div class="hb-cover">
+              <div class="c-tag">1781813346950</div>
+              <div class="c-kicker">Внутренние уставы организации</div>
+              <div class="c-title">ВС РФ</div>
+              <p class="c-sub">1-я отдельная гвардейская бригада специального назначения (ОБрСпН), в/ч №12132</p>
+              <div class="c-crest">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Middle_Emblem_of_the_Russian_Navy.svg/1280px-Middle_Emblem_of_the_Russian_Navy.svg.png" alt="Эмблема">
+              </div>
+            </div>
+            <div class="hb-pages"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -140,23 +157,42 @@
   </div>
 </footer>
 
+<div class="fab-stack" id="fabStack">
+  <button class="fab" id="fabUp" title="Наверх">
+    <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg>
+    <span class="fab-hint">Наверх</span>
+  </button>
+</div>
+
+<div class="search-modal" id="searchModal">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      <input class="search-input" placeholder="Поиск по уставам, страницам, разделам..." spellcheck="false">
+      <button class="search-close-kbd">Esc</button>
+    </div>
+    <div class="search-results"></div>
+  </div>
+</div>
+
 <div class="modal-back" id="loginModal">
   <div class="modal">
     <button class="modal-close" aria-label="Закрыть">✕</button>
     <h3>Вход администратора</h3>
     <div class="modal-sub">Доступ к управлению контентом</div>
     <form>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" name="email" required autocomplete="email">
-      </div>
-      <div class="form-group">
-        <label>Пароль</label>
-        <input type="password" name="password" required autocomplete="current-password">
-      </div>
+      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
       <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
       <div class="form-msg"></div>
     </form>
+  </div>
+</div>
+
+<div class="modal-back" id="newsModal">
+  <div class="modal modal-lg">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <div class="news-modal-content" id="newsModalContent"></div>
   </div>
 </div>
 
@@ -191,19 +227,42 @@ document.getElementById("booksGrid").innerHTML=BOOKS.map(d=>`
     </div>
   </a>`).join("");
 
+const newsModal=document.getElementById("newsModal");
+const newsContent=document.getElementById("newsModalContent");
+newsModal.addEventListener("click",e=>{if(e.target===newsModal) newsModal.classList.remove("active")});
+newsModal.querySelector(".modal-close").addEventListener("click",()=>newsModal.classList.remove("active"));
+document.addEventListener("keydown",e=>{if(e.key==="Escape") newsModal.classList.remove("active")});
+
+let PREVIEW=[];
+function openNews(id){
+  const n=PREVIEW.find(x=>String(x.id)===String(id));if(!n) return;
+  const img=n.image?`<div class="news-modal-hero"><img src="${n.image}" alt=""></div>`:"";
+  const body=(n.body||n.excerpt||"").split(/\n{2,}/).map(p=>`<p>${VSRF_NEWS.esc(p)}</p>`).join("");
+  newsContent.innerHTML=`${img}
+    <h2 class="news-modal-title">${VSRF_NEWS.esc(n.title)}</h2>
+    <div class="news-modal-meta">
+      <span>📅 ${VSRF_NEWS.fmt(n.date)}</span>
+      <span>· 1-я ОБрСпН · в/ч №12132</span>
+    </div>
+    <div class="news-modal-body">${body}</div>`;
+  newsModal.classList.add("active");
+}
+
 (async()=>{
   const list=await VSRF_NEWS.fetchNews(3);
+  PREVIEW=list||[];
   const el=document.getElementById("newsPreview");
   if(!list||!list.length){
-    el.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><h3>Новостей пока нет</h3><p>Как только появятся публикации — они отобразятся здесь.</p></div>`;
+    el.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM5 8h5v2H5zm14 8H5v-2h14zm0-4h-7v-2h7z"/></svg><h3>Новостей пока нет</h3><p>Как только появятся публикации — они отобразятся здесь.</p></div>`;
     return;
   }
   el.innerHTML=list.map(VSRF_NEWS.cardHtml).join("");
+  el.querySelectorAll(".news-card").forEach(c=>c.addEventListener("click",()=>openNews(c.dataset.newsId)));
   document.querySelectorAll("#newsPreview .reveal").forEach(el=>{
-    new IntersectionObserver((entries,io)=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.15}).observe(el);
+    new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.15}).observe(el);
   });
 })();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f567cbfdbce964',t:'MTc4NDc1NDM0Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
