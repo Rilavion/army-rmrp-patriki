@@ -12,6 +12,15 @@ window.VSRF_TRAIN=(function(){
 
   function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
+  function waitReady(){
+    return new Promise(resolve=>{
+      const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+      if(!s||s.ready) return resolve();
+      const off=window.VSRF_AUTH.onChange(st=>{if(st.ready){off&&off();resolve()}});
+      setTimeout(()=>resolve(),1500);
+    });
+  }
+
   function extractFormEmbed(url){
     if(!url) return null;
     url=url.trim();
@@ -25,6 +34,7 @@ window.VSRF_TRAIN=(function(){
   }
 
   async function loadCats(){
+    await waitReady();
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(s&&s.available&&s.client){
       try{
@@ -37,6 +47,7 @@ window.VSRF_TRAIN=(function(){
     return local.length?local:DEMO_CATS.slice();
   }
   async function loadLessons(){
+    await waitReady();
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(s&&s.available&&s.client){
       try{
@@ -96,14 +107,17 @@ window.VSRF_TRAIN=(function(){
         }
         const {error}=await s.client.from("train_lessons").upsert(lesson,{onConflict:"id"});
         if(error) throw error;
-        return {ok:true,remote:true};
+        const {data:saved,error:e2}=await s.client.from("train_lessons").select("*").eq("id",lesson.id).maybeSingle();
+        if(e2) throw e2;
+        if(lesson.test_url&&saved&&!("test_url" in saved)) return {ok:false,error:"MISSING_COL_TEST_URL"};
+        return {ok:true,remote:true,saved:saved||lesson};
       }catch(e){return {ok:false,error:e.message}}
     }
     const list=readLocalLessons();
     const i=list.findIndex(x=>x.id===lesson.id);
     if(i>=0) list[i]=lesson;else list.push(lesson);
     writeLocalLessons(list);
-    return {ok:true,remote:false};
+    return {ok:true,remote:false,saved:lesson};
   }
   async function removeLesson(id){
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;

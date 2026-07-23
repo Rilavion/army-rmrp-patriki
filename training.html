@@ -462,15 +462,24 @@ lessonForm.addEventListener("submit",async e=>{
   msg.className="form-msg info";msg.textContent="Сохранение...";
   const r=await VSRF_TRAIN.saveLesson(p);
   if(r.ok){
-    const i=LESSONS.findIndex(x=>x.id===p.id);
-    if(i>=0) LESSONS[i]=p;else LESSONS.push(p);
+    const item=r.saved||p;
+    const i=LESSONS.findIndex(x=>x.id===item.id);
+    if(i>=0) LESSONS[i]=item;else LESSONS.push(item);
     renderGrid();renderCatDropdown();renderSubDropdown();
     msg.className="form-msg success";msg.textContent=r.remote?"Сохранено в Supabase":"Сохранено локально";
     setTimeout(()=>editLessonModal.classList.remove("active"),500);
   }else{
     let err=r.error||"Ошибка";
-    if(/foreign key|violates|category/i.test(err)) err="Категория не найдена в базе. Пересоздайте её через «⚙ Категории» или обновите страницу — устаревшие категории могут отображаться из localStorage.";
-    msg.className="form-msg error";msg.textContent=err;
+    if(err==="MISSING_COL_TEST_URL"){
+      err="В таблице train_lessons отсутствует колонка test_url. Выполните в Supabase → SQL Editor:\n\nalter table public.train_lessons add column if not exists test_url text;\n\nПотом сохраните урок снова.";
+    }
+    else if(/column .* does not exist|column ".*" of relation/i.test(err)){
+      err="В базе отсутствует необходимая колонка. Выполните:\n\nalter table public.train_lessons add column if not exists test_url text;\nalter table public.train_lessons add column if not exists image text;\nalter table public.train_lessons add column if not exists content text;\nalter table public.train_lessons add column if not exists excerpt text;";
+    }
+    else if(/foreign key|violates|category/i.test(err)){
+      err="Категория не найдена в базе. Пересоздайте её через «⚙ Категории» или обновите страницу — устаревшие категории могут отображаться из localStorage.";
+    }
+    msg.className="form-msg error";msg.textContent=err;msg.style.whiteSpace="pre-wrap";
   }
 });
 
@@ -567,12 +576,19 @@ function updateAdmin(){
   const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
   document.querySelectorAll(".admin-only").forEach(el=>{if(el!==$("lessonAdminBar")) el.style.display=isAdmin?"":"none"});
 }
-if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
+let __lastAvailable=null;
+if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(st=>{
+  updateAdmin();
+  if(st.ready&&st.available!==__lastAvailable){
+    __lastAvailable=st.available;
+    boot();
+  }
+});
 
 boot().then(()=>{
   if(location.hash.startsWith("#l-")){const id=location.hash.slice(3);setTimeout(()=>openLesson(id),300)}
 });
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f689feebdbf3b2',t:'MTc4NDc2NjIzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f6917d68b0f3b2',t:'MTc4NDc2NjU0MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
