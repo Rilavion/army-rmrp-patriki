@@ -28,7 +28,7 @@
       <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
       <a href="training.html" data-page="training.html" data-transition>Обучение</a>
       <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
-      <a href="docs.html" data-page="docs.html" data-transition>Документы</a>
+      <a href="docs.html" data-page="docs.html" data-transition data-admin>Документы</a>
       <a href="news.html" data-page="news.html" data-transition>Новости</a>
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
@@ -58,14 +58,14 @@
         <div>
           <span class="badge">Иерархическая структура · СС ВСРФ</span>
           <h2>Старший состав в/ч №12132</h2>
-          <p>Командование бригады и командный состав подразделений. Иерархия по уставу.</p>
+          <p>Командование бригады и подразделения в едином дереве. Каждое подразделение — со своей эмблемой и цветовой темой.</p>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap" class="admin-only" id="adminBar" style="display:none">
+        <div style="display:flex;gap:10px;flex-wrap:wrap" id="adminBar" class="admin-only">
           <button class="btn btn-ghost btn-sm" id="editModeBtn">✎ Режим редактирования</button>
         </div>
       </div>
 
-      <div class="compose-tree" id="compTree"></div>
+      <div class="hier" id="hier"></div>
     </div>
   </section>
 </main>
@@ -86,7 +86,7 @@
       </div>
       <div class="footer-col">
         <h5>Ресурсы</h5>
-        <a href="docs.html">Документы</a>
+        <a href="docs.html" data-admin>Документы</a>
         <a href="news.html">Новости</a>
         <a href="autopark.html">Автопарк</a>
       </div>
@@ -146,7 +146,11 @@
     <form id="sForm">
       <input type="hidden" name="id">
       <div class="form-group"><label>Полное название</label><input name="name" required></div>
-      <div class="form-group"><label>Аббревиатура</label><input name="short" required placeholder="ВП"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="form-group"><label>Аббревиатура</label><input name="short" required placeholder="ВП"></div>
+        <div class="form-group"><label>Цвет</label><input name="color" type="color" value="#7a8a4a" style="height:44px;padding:4px"></div>
+        <div class="form-group"><label>Эмблема (эмодзи)</label><input name="icon" value="★" placeholder="🛡"></div>
+      </div>
       <div style="display:flex;gap:10px;justify-content:space-between;margin-top:8px">
         <button type="button" class="btn btn-ghost btn-sm btn-danger" id="sDeleteBtn" style="display:none">Удалить подразделение</button>
         <button class="btn btn-gold btn-sm" type="submit" style="margin-left:auto">Сохранить</button>
@@ -168,77 +172,109 @@
 document.getElementById("year").textContent=new Date().getFullYear();
 
 const $=id=>document.getElementById(id);
-const tree=$("compTree");
+const hier=$("hier");
 let STATE=null;let editing=false;
 const toast=$("toast");
 function showToast(t,type){toast.textContent=t;toast.className="toast show "+(type||"");setTimeout(()=>toast.classList.remove("show"),1800)}
 
 function esc(s){return VSRF_COMP.esc(s)}
 
+function initials(name){
+  const parts=(name||"").trim().split(/\s+/);
+  return parts.slice(0,2).map(p=>p[0]||"").join("").toUpperCase()||"?";
+}
+function avatar(p,size,color){
+  const bg=color||"#3d5a49";
+  if(p&&p.photo) return `<div class="avatar" style="width:${size}px;height:${size}px"><img src="${esc(p.photo)}" alt=""></div>`;
+  return `<div class="avatar avatar-init" style="width:${size}px;height:${size}px;background:linear-gradient(145deg,${bg},${shade(bg,-20)})"><span>${esc(initials(p&&p.name||""))}</span></div>`;
+}
+function shade(hex,percent){
+  const h=hex.replace("#","");const n=parseInt(h,16);
+  let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  const f=1+percent/100;r=Math.max(0,Math.min(255,r*f))|0;g=Math.max(0,Math.min(255,g*f))|0;b=Math.max(0,Math.min(255,b*f))|0;
+  return "#"+((r<<16)|(g<<8)|b).toString(16).padStart(6,"0");
+}
+
 function render(){
   document.body.classList.toggle("admin-editing",editing);
-  const hqBody=VSRF_COMP.HQ_SLOTS.map(slot=>{
-    const p=STATE.hq[slot.key]||{};
-    const inner=p.name
-      ? `<div class="compose-person">
-          <span class="compose-person-badge">${esc(slot.badge)}</span>
-          <span class="compose-person-name">${esc(p.name)}</span>
-          ${p.code?`<span class="compose-member-code">${esc(p.code)}</span>`:""}
-          ${p.tag?`<span class="compose-person-tag">${esc(p.tag)}</span>`:""}
-        </div>`
-      : `<div class="compose-empty">Должность вакантна</div>`;
-    const actions=editing?`<button class="mini-icon-btn" data-edit-hq="${slot.key}">✎</button>`:"";
-    return `<div class="compose-slot">
-      <div class="compose-slot-title">${esc(slot.label)}</div>
-      <div class="compose-slot-body">${inner}${actions}</div>
-    </div>`;
-  }).join("");
 
-  const subsHtml=STATE.subs.map(sub=>{
-    const rows=(sub.members||[]).map((m,i)=>{
-      const r=VSRF_COMP.rankInfo(m.rank);
-      return `<div class="compose-sub-row">
-        <span class="compose-sub-row-rank">${esc(r.short)}</span>
-        <span class="compose-sub-row-name">${esc(m.name)}${m.role?` <span style="color:var(--muted);font-size:11px">· ${esc(m.role)}</span>`:""}</span>
-        ${m.code?`<span class="compose-sub-row-code">${esc(m.code)}</span>`:""}
-        <div class="compose-sub-row-actions">
-          <button class="mini-icon-btn" data-edit-member="${sub.id}:${i}">✎</button>
-          <button class="mini-icon-btn danger" data-del-member="${sub.id}:${i}">×</button>
+  const cmd=STATE.hq.cmd_brigade||{};
+  const cmdCard=`<div class="hier-cmd">
+    <div class="hier-cmd-inner">
+      <div class="hier-cmd-badge">Командир бригады</div>
+      ${avatar(cmd,120,"#c78a2a")}
+      <div class="hier-cmd-name">${cmd.name?esc(cmd.name):`<span style="opacity:.5">Вакансия</span>`}</div>
+      <div class="hier-cmd-rank">Ген-Майор ${cmd.tag?`· ${esc(cmd.tag)}`:""}</div>
+      ${cmd.code?`<div class="hier-cmd-code">📞 ${esc(cmd.code)}</div>`:""}
+      ${editing?`<button class="hier-edit-btn" data-edit-hq="cmd_brigade">✎</button>`:""}
+    </div>
+  </div>`;
+
+  const staffMembers=VSRF_COMP.HQ_SLOTS.filter(s=>s.key!=="cmd_brigade");
+  const staffHtml=`<div class="hier-staff">
+    <div class="hier-staff-title"><span class="hier-line"></span><span class="hier-staff-label">Штаб · Заместители</span><span class="hier-line"></span></div>
+    <div class="hier-staff-grid">
+      ${staffMembers.map(slot=>{
+        const p=STATE.hq[slot.key]||{};
+        const filled=!!p.name;
+        return `<div class="hier-officer ${filled?"":"hier-officer-empty"}" data-hq="${slot.key}">
+          ${avatar(p,64,"#3d5a49")}
+          <div class="hier-officer-body">
+            <div class="hier-officer-role">${esc(slot.label)}</div>
+            <div class="hier-officer-name">${filled?esc(p.name):`<span style="opacity:.4">— вакансия —</span>`}</div>
+            <div class="hier-officer-meta">
+              <span class="hier-officer-rank">${esc(slot.badge)}</span>
+              ${p.code?`<span class="hier-officer-code">${esc(p.code)}</span>`:""}
+            </div>
+          </div>
+          ${editing?`<button class="hier-edit-btn hier-edit-corner" data-edit-hq="${slot.key}">✎</button>`:""}
+        </div>`;
+      }).join("")}
+    </div>
+  </div>`;
+
+  const subsHtml=`<div class="hier-subs-title"><span class="hier-line"></span><span class="hier-staff-label">Подразделения · ${STATE.subs.length} шт.</span><span class="hier-line"></span></div>
+  <div class="hier-subs">
+    ${STATE.subs.map(sub=>{
+      const color=sub.color||"#7a8a4a";
+      const icon=sub.icon||"★";
+      const sorted=(sub.members||[]).slice().sort((a,b)=>VSRF_COMP.rankInfo(a.rank).tier-VSRF_COMP.rankInfo(b.rank).tier);
+      const rows=sorted.map(m=>{
+        const r=VSRF_COMP.rankInfo(m.rank);
+        return `<div class="hier-member">
+          ${avatar(m,44,color)}
+          <div class="hier-member-body">
+            <div class="hier-member-rank" style="color:${color}">${esc(r.label)}</div>
+            <div class="hier-member-name">${esc(m.name)}</div>
+            ${m.role?`<div class="hier-member-role">${esc(m.role)}</div>`:""}
+          </div>
+          ${m.code?`<div class="hier-member-code">${esc(m.code)}</div>`:""}
+          ${editing?`<div class="hier-member-actions">
+            <button class="mini-icon-btn" data-edit-member="${sub.id}::${sub.members.indexOf(m)}">✎</button>
+            <button class="mini-icon-btn danger" data-del-member="${sub.id}::${sub.members.indexOf(m)}">×</button>
+          </div>`:""}
+        </div>`;
+      }).join("")||`<div class="hier-empty">В составе никого нет</div>`;
+      const editBtn=editing?`<button class="hier-edit-btn" data-edit-sub="${sub.id}">⚙</button>`:"";
+      const addBtn=editing?`<button class="hier-add-btn" data-add-member="${sub.id}">+ Добавить в подразделение</button>`:"";
+      return `<div class="hier-sub" style="--sub-color:${color};--sub-color-2:${shade(color,-25)}">
+        <div class="hier-sub-head">
+          <div class="hier-sub-icon">${esc(icon)}</div>
+          <div class="hier-sub-title-wrap">
+            <div class="hier-sub-badge">${esc(sub.short)}</div>
+            <div class="hier-sub-title">${esc(sub.name)}</div>
+          </div>
+          <div class="hier-sub-count">${sub.members.length}</div>
+          ${editBtn}
         </div>
+        <div class="hier-sub-body">${rows}</div>
+        ${addBtn?`<div class="hier-sub-footer">${addBtn}</div>`:""}
       </div>`;
-    }).join("")||`<div class="compose-empty" style="padding:8px 12px">Пусто</div>`;
-    const editBtn=editing?`<button class="mini-icon-btn" data-edit-sub="${sub.id}" title="Настройки подразделения">⚙</button>`:"";
-    const addBtn=editing?`<button class="compose-add-btn" data-add-member="${sub.id}">+ Добавить участника</button>`:"";
-    return `<div class="compose-sub">
-      <div class="compose-sub-head">
-        <span class="compose-sub-badge">${esc(sub.short)}</span>
-        <div class="compose-sub-name">${esc(sub.name)}</div>
-        ${editBtn}
-      </div>
-      <div class="compose-sub-body">${rows}</div>
-      <div class="compose-sub-actions">${addBtn}</div>
-    </div>`;
-  }).join("");
+    }).join("")}
+  </div>
+  ${editing?`<div style="margin-top:16px"><button class="hier-add-btn" id="addSubBtn" style="width:100%;padding:16px">+ Добавить подразделение</button></div>`:""}`;
 
-  const addSubBtn=editing?`<div style="padding:14px 20px 20px"><button class="compose-add-btn" id="addSubBtn" style="width:100%">+ Добавить подразделение</button></div>`:"";
-
-  tree.innerHTML=`
-    <div class="compose-node">
-      <div class="compose-node-head">
-        <div class="compose-node-name">Командование бригады</div>
-        <span class="compose-node-badge">Штаб</span>
-      </div>
-      <div class="compose-node-body">${hqBody}</div>
-    </div>
-    <div class="compose-node">
-      <div class="compose-node-head">
-        <div class="compose-node-name">Подразделения</div>
-        <span class="compose-node-badge">${STATE.subs.length} шт.</span>
-      </div>
-      <div class="compose-subs">${subsHtml}</div>
-      ${addSubBtn}
-    </div>
-  `;
+  hier.innerHTML=`${cmdCard}<div class="hier-connector"></div>${staffHtml}<div class="hier-connector"></div>${subsHtml}`;
 }
 
 async function boot(){STATE=await VSRF_COMP.load();render()}
@@ -256,6 +292,39 @@ pModal.querySelector(".modal-close").addEventListener("click",()=>pModal.classLi
 sModal.addEventListener("click",e=>{if(e.target===sModal) sModal.classList.remove("active")});
 sModal.querySelector(".modal-close").addEventListener("click",()=>sModal.classList.remove("active"));
 
+function photoField(current){
+  return `<div class="form-group"><label>Фото</label>
+    <div class="photo-controls">
+      <div class="photo-preview">${current?`<img src="${esc(current)}">`:`<span>Нет фото</span>`}</div>
+      <div class="photo-actions">
+        <input type="url" name="photo" value="${esc(current)}" placeholder="https://... или Data URL">
+        <div style="display:flex;gap:6px">
+          <label class="btn btn-ghost btn-sm" style="flex:1;min-height:34px;cursor:pointer">📁 Файл<input type="file" name="photoFile" accept="image/*" hidden></label>
+          <button type="button" class="btn btn-ghost btn-sm" data-clear-photo style="min-height:34px;padding:0 10px">×</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindPhotoField(form){
+  const urlInput=form.querySelector('input[name="photo"]');
+  const fileInput=form.querySelector('input[name="photoFile"]');
+  const preview=form.querySelector(".photo-preview");
+  const clear=form.querySelector('[data-clear-photo]');
+  function sync(){
+    const v=urlInput.value.trim();
+    preview.innerHTML=v?`<img src="${esc(v)}">`:`<span>Нет фото</span>`;
+  }
+  urlInput.addEventListener("input",sync);
+  fileInput.addEventListener("change",e=>{
+    const f=e.target.files[0];if(!f) return;
+    const r=new FileReader();r.onload=ev=>{urlInput.value=ev.target.result;sync()};
+    r.readAsDataURL(f);
+  });
+  clear.addEventListener("click",()=>{urlInput.value="";fileInput.value="";sync()});
+}
+
 function openHqEdit(key){
   const slot=VSRF_COMP.HQ_SLOTS.find(s=>s.key===key);
   const p=STATE.hq[key]||{};
@@ -265,7 +334,9 @@ function openHqEdit(key){
     <div class="form-group"><label>ФИО</label><input name="name" value="${esc(p.name||"")}" placeholder="Иван Иванов"></div>
     <div class="form-group"><label>Код (телефон/позывной)</label><input name="code" value="${esc(p.code||"")}" placeholder="123-456"></div>
     <div class="form-group"><label>Заметка</label><input name="tag" value="${esc(p.tag||"")}" placeholder="ком. бриг"></div>
+    ${photoField(p.photo||"")}
   `;
+  bindPhotoField(pForm);
   pDel.style.display=p.name?"":"none";
   pForm.querySelector(".form-msg").className="form-msg";
   pModal.classList.add("active");
@@ -273,7 +344,7 @@ function openHqEdit(key){
 
 function openMemberEdit(subId,memberIdx){
   const sub=STATE.subs.find(s=>s.id===subId);if(!sub) return;
-  const m=memberIdx>=0?sub.members[memberIdx]:{rank:"maj",name:"",code:"",role:""};
+  const m=memberIdx>=0?sub.members[memberIdx]:{rank:"maj",name:"",code:"",role:"",photo:""};
   $("pModalTitle").textContent=(memberIdx>=0?"Изменить":"Новый участник")+" · "+sub.name;
   pForm.ctx.value=`member:${subId}:${memberIdx}`;
   pFields.innerHTML=`
@@ -285,7 +356,9 @@ function openMemberEdit(subId,memberIdx){
     <div class="form-group"><label>ФИО</label><input name="name" value="${esc(m.name||"")}" required></div>
     <div class="form-group"><label>Должность / роль</label><input name="role" value="${esc(m.role||"")}" placeholder="Ком. батальона ВП"></div>
     <div class="form-group"><label>Код (телефон/позывной)</label><input name="code" value="${esc(m.code||"")}" placeholder="123-456"></div>
+    ${photoField(m.photo||"")}
   `;
+  bindPhotoField(pForm);
   pDel.style.display=memberIdx>=0?"":"none";
   pForm.querySelector(".form-msg").className="form-msg";
   pModal.classList.add("active");
@@ -295,13 +368,15 @@ function openMemberEdit(subId,memberIdx){
 pForm.addEventListener("submit",async e=>{
   e.preventDefault();
   const ctx=pForm.ctx.value.split(":");
-  const data={};pForm.querySelectorAll("input,select").forEach(el=>{if(el.name&&el.name!=="ctx") data[el.name]=el.value.trim()});
+  const data={};pForm.querySelectorAll("input,select").forEach(el=>{
+    if(el.name&&el.name!=="ctx"&&el.type!=="file") data[el.name]=el.value.trim();
+  });
   if(ctx[0]==="hq"){
-    STATE.hq[ctx[1]]={name:data.name,code:data.code,tag:data.tag};
+    STATE.hq[ctx[1]]={name:data.name,code:data.code,tag:data.tag,photo:data.photo};
   }else{
     const sub=STATE.subs.find(s=>s.id===ctx[1]);if(!sub) return;
     const idx=parseInt(ctx[2]);
-    const m={rank:data.rank,name:data.name,code:data.code,role:data.role};
+    const m={rank:data.rank,name:data.name,code:data.code,role:data.role,photo:data.photo};
     if(idx>=0) sub.members[idx]=m;else sub.members.push(m);
   }
   await VSRF_COMP.save(STATE);
@@ -311,7 +386,7 @@ pForm.addEventListener("submit",async e=>{
 pDel.addEventListener("click",async()=>{
   if(!confirm("Удалить?")) return;
   const ctx=pForm.ctx.value.split(":");
-  if(ctx[0]==="hq"){STATE.hq[ctx[1]]={name:"",code:"",tag:""}}
+  if(ctx[0]==="hq"){STATE.hq[ctx[1]]={name:"",code:"",tag:"",photo:""}}
   else{const sub=STATE.subs.find(s=>s.id===ctx[1]);if(sub) sub.members.splice(parseInt(ctx[2]),1)}
   await VSRF_COMP.save(STATE);
   pModal.classList.remove("active");render();showToast("Удалено","success");
@@ -322,16 +397,18 @@ function openSubEdit(subId){
   $("sModalTitle").textContent=sub?"Настройки подразделения":"Новое подразделение";
   sForm.reset();
   sForm.id.value=sub?sub.id:"";
-  if(sub){sForm.name.value=sub.name;sForm.short.value=sub.short}
+  if(sub){sForm.name.value=sub.name;sForm.short.value=sub.short;sForm.color.value=sub.color||"#7a8a4a";sForm.icon.value=sub.icon||"★"}
+  else{sForm.color.value="#7a8a4a";sForm.icon.value="★"}
   sDel.style.display=sub?"":"none";
   sModal.classList.add("active");
 }
 
 sForm.addEventListener("submit",async e=>{
   e.preventDefault();
-  const id=sForm.id.value;const name=sForm.name.value.trim();const short=sForm.short.value.trim();
-  if(id){const sub=STATE.subs.find(s=>s.id===id);if(sub){sub.name=name;sub.short=short}}
-  else{STATE.subs.push({id:VSRF_COMP.uid(),name,short,members:[]})}
+  const id=sForm.id.value;
+  const data={name:sForm.name.value.trim(),short:sForm.short.value.trim(),color:sForm.color.value,icon:sForm.icon.value.trim()||"★"};
+  if(id){const sub=STATE.subs.find(s=>s.id===id);if(sub) Object.assign(sub,data)}
+  else{STATE.subs.push(Object.assign({id:VSRF_COMP.uid(),members:[]},data))}
   await VSRF_COMP.save(STATE);
   sModal.classList.remove("active");render();showToast("Сохранено","success");
 });
@@ -344,13 +421,13 @@ sDel.addEventListener("click",async()=>{
   sModal.classList.remove("active");render();showToast("Удалено","success");
 });
 
-tree.addEventListener("click",e=>{
+hier.addEventListener("click",e=>{
   const hq=e.target.closest("[data-edit-hq]");if(hq) return openHqEdit(hq.dataset.editHq);
-  const em=e.target.closest("[data-edit-member]");if(em){const [s,i]=em.dataset.editMember.split(":");return openMemberEdit(s,parseInt(i))}
+  const em=e.target.closest("[data-edit-member]");if(em){const [s,i]=em.dataset.editMember.split("::");return openMemberEdit(s,parseInt(i))}
   const am=e.target.closest("[data-add-member]");if(am) return openMemberEdit(am.dataset.addMember,-1);
   const dm=e.target.closest("[data-del-member]");if(dm){
     if(!confirm("Удалить участника?")) return;
-    const [s,i]=dm.dataset.delMember.split(":");
+    const [s,i]=dm.dataset.delMember.split("::");
     const sub=STATE.subs.find(x=>x.id===s);if(sub) sub.members.splice(parseInt(i),1);
     VSRF_COMP.save(STATE).then(()=>{render();showToast("Удалено","success")});
     return;

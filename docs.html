@@ -6,7 +6,7 @@
 <title>Документы — ВС РФ · в/ч №12132</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
       <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
       <a href="training.html" data-page="training.html" data-transition>Обучение</a>
       <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
-      <a href="docs.html" data-page="docs.html" data-transition>Документы</a>
+      <a href="docs.html" data-page="docs.html" data-transition data-admin>Документы</a>
       <a href="news.html" data-page="news.html" data-transition>Новости</a>
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
@@ -53,11 +53,11 @@
 
 <main>
   <section class="section" style="padding-top:60px">
-    <div class="container admin-only" id="mainWrap" style="display:none">
+    <div class="container" id="mainWrap" style="display:none">
       <div class="section-head reveal">
         <span class="badge">Штабные документы · Только для админов</span>
         <h2>Конструктор документов</h2>
-        <p>Выберите шаблон, заполните поля справа — документ обновится в реальном времени. Скопируйте в буфер как изображение, скачайте PNG или распечатайте.</p>
+        <p>Оформлено по ГОСТ Р 7.0.97-2016 (шрифт Times New Roman, размер 14 пт). Выберите шаблон, заполните поля справа — документ обновится в реальном времени. Копируйте отдельные страницы в буфер или скачивайте PNG.</p>
       </div>
 
       <div class="docs-tabs" id="docsTabs"></div>
@@ -69,9 +69,24 @@
         <div class="doc-panel">
           <h4 id="docPanelTitle">Поля документа</h4>
           <form id="docForm"></form>
+
+          <h4 style="margin-top:20px">Печать (изображение)</h4>
+          <div class="seal-controls">
+            <input type="url" id="sealUrlInput" placeholder="https://... (URL картинки печати)">
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" id="sealLoadBtn" type="button" style="flex:1;min-height:36px">🖼 Из URL</button>
+              <label class="btn btn-ghost btn-sm" style="flex:1;min-height:36px;cursor:pointer">
+                📁 Файл<input type="file" id="sealFileInput" accept="image/*" hidden>
+              </label>
+              <button class="btn btn-ghost btn-sm" id="sealClearBtn" type="button" style="min-height:36px;padding:0 10px">×</button>
+            </div>
+            <div id="sealPreview" style="display:none"><img id="sealPreviewImg" src=""></div>
+          </div>
+
           <div class="doc-actions">
-            <button class="btn btn-gold btn-sm" id="copyBtn">📋 Скопировать как PNG</button>
-            <button class="btn btn-ghost btn-sm" id="downloadBtn">💾 Скачать PNG</button>
+            <div id="perPageCopy"></div>
+            <button class="btn btn-gold btn-sm" id="copyAllBtn">📋 Скопировать всё как PNG</button>
+            <button class="btn btn-ghost btn-sm" id="downloadBtn">💾 Скачать (все страницы)</button>
             <button class="btn btn-ghost btn-sm" id="printBtn">🖨 Печать / PDF</button>
             <button class="btn btn-ghost btn-sm" id="resetBtn">↺ Сбросить поля</button>
           </div>
@@ -161,6 +176,7 @@ const tabs=$("docsTabs");
 const preview=$("docsPreview");
 const form=$("docForm");
 const toast=$("toast");
+const perPageCopy=$("perPageCopy");
 
 let currentTemplate="prikaz";
 let values={};
@@ -183,7 +199,7 @@ tabs.addEventListener("click",e=>{
   const b=e.target.closest("[data-tpl]");if(!b) return;
   currentTemplate=b.dataset.tpl;
   values=loadValues()||VSRF_DOC_TEMPLATES.defaults(currentTemplate);
-  renderTabs();renderForm();renderDoc();
+  renderTabs();renderForm();renderDoc();syncSealUI();
 });
 
 function loadValues(){
@@ -196,60 +212,90 @@ function saveValues(){
 function renderForm(){
   const t=VSRF_DOC_TEMPLATES.TEMPLATES[currentTemplate];
   $("docPanelTitle").textContent=t.name+" — поля";
-  form.innerHTML=t.fields.map(f=>{
+  form.innerHTML=t.fields.filter(f=>f.key!=="seal_url").map(f=>{
     const v=VSRF_DOC_TEMPLATES.esc(values[f.key]==null?"":values[f.key]);
-    if(f.type==="textarea"||f.area==="multiline"){
+    if(f.type==="textarea"){
       return `<div class="form-group"><label>${f.label}</label><textarea name="${f.key}" rows="3">${v}</textarea></div>`;
     }
     return `<div class="form-group"><label>${f.label}</label><input name="${f.key}" value="${v}"></div>`;
   }).join("");
   form.querySelectorAll("input,textarea").forEach(el=>{
-    el.addEventListener("input",()=>{
-      values[el.name]=el.value;
-      saveValues();
-      renderDoc();
-    });
+    el.addEventListener("input",()=>{values[el.name]=el.value;saveValues();renderDoc()});
   });
 }
 
 function renderDoc(){
   preview.innerHTML=VSRF_DOC_TEMPLATES.render(currentTemplate,values);
+  const pages=preview.querySelectorAll(".doc-page");
+  if(pages.length>1){
+    perPageCopy.innerHTML=`<div class="doc-per-page-label">Скопировать страницу отдельно:</div>
+      <div class="doc-per-page-buttons">
+        ${Array.from(pages).map((_,i)=>`<button class="btn btn-ghost btn-sm doc-page-btn" data-page="${i}">📄 Стр. ${i+1}</button>`).join("")}
+      </div>`;
+  }else{perPageCopy.innerHTML=""}
 }
 
+perPageCopy.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-page]");if(!b) return;
+  const idx=parseInt(b.dataset.page);
+  const pages=preview.querySelectorAll(".doc-page");
+  if(!pages[idx]) return;
+  await copyCanvasToClipboard(pages[idx],b);
+});
+
 function showToast(text,type){
-  toast.textContent=text;
-  toast.className="toast show "+(type||"");
-  setTimeout(()=>toast.classList.remove("show"),2200);
+  toast.textContent=text;toast.className="toast show "+(type||"");
+  setTimeout(()=>toast.classList.remove("show"),2400);
+}
+
+async function renderCanvas(node){
+  if(!window.html2canvas) throw new Error("html2canvas не загружен");
+  return await html2canvas(node,{backgroundColor:"#ffffff",scale:2,useCORS:true,logging:false,allowTaint:true});
+}
+
+async function copyCanvasToClipboard(node,btn){
+  const old=btn?btn.textContent:"";
+  if(btn){btn.textContent="Копирование...";btn.disabled=true}
+  try{
+    const canvas=await renderCanvas(node);
+    canvas.toBlob(async blob=>{
+      try{
+        if(!navigator.clipboard||!window.ClipboardItem) throw new Error("Буфер обмена недоступен — используйте «Скачать»");
+        await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
+        showToast("Скопировано в буфер","success");
+      }catch(e){showToast(e.message||"Ошибка копирования","error")}
+      finally{if(btn){btn.textContent=old;btn.disabled=false}}
+    },"image/png");
+  }catch(e){showToast(e.message||"Ошибка","error");if(btn){btn.textContent=old;btn.disabled=false}}
 }
 
 async function captureAll(){
-  if(!window.html2canvas){showToast("html2canvas не загружен","error");return null}
   const pages=preview.querySelectorAll(".doc-page");
   if(!pages.length) return null;
-  if(pages.length===1){
-    return await html2canvas(pages[0],{backgroundColor:"#ffffff",scale:2,useCORS:true,logging:false});
-  }
+  if(pages.length===1) return await renderCanvas(pages[0]);
   const canvases=[];
-  for(const p of pages){canvases.push(await html2canvas(p,{backgroundColor:"#ffffff",scale:2,useCORS:true,logging:false}))}
+  for(const p of pages) canvases.push(await renderCanvas(p));
   const w=Math.max(...canvases.map(c=>c.width));
   const gap=40;
   const h=canvases.reduce((s,c)=>s+c.height,0)+gap*(canvases.length-1);
   const out=document.createElement("canvas");out.width=w;out.height=h;
-  const ctx=out.getContext("2d");ctx.fillStyle="#fefdfa";ctx.fillRect(0,0,w,h);
-  let y=0;canvases.forEach((c,i)=>{ctx.drawImage(c,0,y);y+=c.height+gap});
+  const ctx=out.getContext("2d");ctx.fillStyle="#f5f2ea";ctx.fillRect(0,0,w,h);
+  let y=0;canvases.forEach(c=>{ctx.drawImage(c,0,y);y+=c.height+gap});
   return out;
 }
 
-$("copyBtn").addEventListener("click",async()=>{
-  const btn=$("copyBtn");const old=btn.textContent;btn.textContent="Копирование...";btn.disabled=true;
+$("copyAllBtn").addEventListener("click",async()=>{
+  const pages=preview.querySelectorAll(".doc-page");
+  if(pages.length===1) return copyCanvasToClipboard(pages[0],$("copyAllBtn"));
+  const btn=$("copyAllBtn");const old=btn.textContent;btn.textContent="Копирование...";btn.disabled=true;
   try{
     const canvas=await captureAll();if(!canvas) throw new Error("Нет документа");
     canvas.toBlob(async blob=>{
       try{
-        if(!navigator.clipboard||!window.ClipboardItem) throw new Error("Буфер обмена недоступен. Используйте кнопку «Скачать PNG»");
+        if(!navigator.clipboard||!window.ClipboardItem) throw new Error("Буфер обмена недоступен");
         await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
-        showToast("Документ скопирован в буфер обмена","success");
-      }catch(e){showToast(e.message||"Не удалось скопировать","error")}
+        showToast("Все страницы скопированы","success");
+      }catch(e){showToast(e.message||"Ошибка","error")}
       finally{btn.textContent=old;btn.disabled=false}
     },"image/png");
   }catch(e){showToast(e.message||"Ошибка","error");btn.textContent=old;btn.disabled=false}
@@ -258,14 +304,21 @@ $("copyBtn").addEventListener("click",async()=>{
 $("downloadBtn").addEventListener("click",async()=>{
   const btn=$("downloadBtn");const old=btn.textContent;btn.textContent="Генерация...";btn.disabled=true;
   try{
-    const canvas=await captureAll();if(!canvas) throw new Error("Нет документа");
+    const pages=preview.querySelectorAll(".doc-page");
+    if(!pages.length) throw new Error("Нет документа");
     const t=VSRF_DOC_TEMPLATES.TEMPLATES[currentTemplate].name;
     const num=(values.number||"").replace(/[^\d]/g,"")||Date.now();
-    const a=document.createElement("a");
-    a.download=`${t}_${num}.png`;
-    a.href=canvas.toDataURL("image/png");
-    a.click();
-    showToast("PNG сохранён","success");
+    if(pages.length===1){
+      const canvas=await renderCanvas(pages[0]);
+      const a=document.createElement("a");a.download=`${t}_${num}.png`;a.href=canvas.toDataURL("image/png");a.click();
+    }else{
+      for(let i=0;i<pages.length;i++){
+        const canvas=await renderCanvas(pages[i]);
+        const a=document.createElement("a");a.download=`${t}_${num}_стр${i+1}.png`;a.href=canvas.toDataURL("image/png");a.click();
+        await new Promise(r=>setTimeout(r,300));
+      }
+    }
+    showToast("Сохранено","success");
   }catch(e){showToast(e.message||"Ошибка","error")}
   finally{btn.textContent=old;btn.disabled=false}
 });
@@ -274,16 +327,38 @@ $("printBtn").addEventListener("click",()=>{
   const w=window.open("","","width=900,height=1200");
   const styles=Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(l=>`<link rel="stylesheet" href="${l.href}">`).join("");
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${VSRF_DOC_TEMPLATES.TEMPLATES[currentTemplate].name}</title>${styles}
-    <style>body{background:#fff;padding:0;margin:0}.a4{box-shadow:none !important;margin:0 auto;page-break-after:always}@page{size:A4;margin:0}</style>
+    <style>body{background:#fff;padding:0;margin:0}.a4{box-shadow:none !important;margin:0 auto;page-break-after:always}.a4:last-child{page-break-after:auto}@page{size:A4;margin:0}</style>
     </head><body>${preview.innerHTML}</body></html>`);
   w.document.close();
-  setTimeout(()=>{w.focus();w.print()},500);
+  setTimeout(()=>{w.focus();w.print()},600);
 });
 
 $("resetBtn").addEventListener("click",()=>{
   if(!confirm("Сбросить все поля к значениям по умолчанию?")) return;
   values=VSRF_DOC_TEMPLATES.defaults(currentTemplate);
-  saveValues();renderForm();renderDoc();
+  saveValues();renderForm();renderDoc();syncSealUI();
+});
+
+function syncSealUI(){
+  const url=values.seal_url||"";
+  $("sealUrlInput").value=url;
+  const pv=$("sealPreview"),img=$("sealPreviewImg");
+  if(url){img.src=url;pv.style.display=""}else{pv.style.display="none"}
+}
+$("sealLoadBtn").addEventListener("click",()=>{
+  const url=$("sealUrlInput").value.trim();
+  values.seal_url=url;saveValues();syncSealUI();renderDoc();
+  if(url) showToast("Печать загружена","success");
+});
+$("sealUrlInput").addEventListener("change",()=>$("sealLoadBtn").click());
+$("sealClearBtn").addEventListener("click",()=>{
+  values.seal_url="";saveValues();syncSealUI();renderDoc();showToast("Печать удалена","success");
+});
+$("sealFileInput").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{values.seal_url=ev.target.result;saveValues();syncSealUI();renderDoc();showToast("Печать загружена","success")};
+  r.readAsDataURL(f);
 });
 
 function updateAdmin(){
@@ -294,7 +369,7 @@ function updateAdmin(){
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 
 values=loadValues()||VSRF_DOC_TEMPLATES.defaults(currentTemplate);
-renderTabs();renderForm();renderDoc();
+renderTabs();renderForm();renderDoc();syncSealUI();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
