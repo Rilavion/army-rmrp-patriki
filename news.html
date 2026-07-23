@@ -8,26 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<style id="vsrf-admin-guard">
-[data-admin]{display:none !important}
-body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
-body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
-</style>
-<script>
-(function(){
-  var VSRF_ADMIN_GUARD=true;
-  function apply(){
-    var s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
-    if(!s||!s.ready) return;
-    document.body.classList.toggle("vsrf-is-admin",!!s.user);
-  }
-  document.addEventListener("DOMContentLoaded",function(){
-    apply();
-    if(window.VSRF_AUTH&&window.VSRF_AUTH.onChange) window.VSRF_AUTH.onChange(apply);
-    else{var t=setInterval(function(){if(window.VSRF_AUTH){clearInterval(t);apply();window.VSRF_AUTH.onChange(apply)}},80);setTimeout(function(){clearInterval(t)},4000);}
-  });
-})();
-</script>
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -37,7 +17,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 <header class="topbar">
   <div class="topbar-inner">
     <a class="brand" href="index.html">
-      <div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-icon">ВС</div>
       <div class="brand-text">
         <span class="brand-label">Вооружённые Силы РФ</span>
         <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
@@ -77,6 +57,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
     <div class="container">
       <div class="section-head reveal" style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
         <div>
+          <span class="badge">Оперативная сводка</span>
           <h2>Новости части</h2>
           <p>Актуальные события, приказы и объявления в/ч №12132.</p>
         </div>
@@ -170,11 +151,13 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
     <form id="newsForm">
       <input type="hidden" name="id">
       <div class="form-group"><label>Заголовок</label><input name="title" required></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
         <div class="form-group"><label>Дата</label><input name="date" type="date" required></div>
         <div class="form-group"><label>Тег</label><select name="tag" id="tagSelect" class="form-select-custom"></select></div>
+        <div class="form-group"><label>Отдел</label><select name="dept" id="deptSelect" class="form-select-custom"></select></div>
       </div>
-      <div class="form-group"><label>URL изображения</label><input name="image" type="url" placeholder="https://..."></div>
+      <div class="form-group"><label>Главное изображение (для карточки)</label><input name="image" type="url" placeholder="https://..."></div>
+      <div class="form-group"><label>Дополнительные изображения (URL через запятую или с новой строки)</label><textarea name="images" placeholder="https://example.com/img2.jpg&#10;https://example.com/img3.jpg" style="min-height:60px;font-family:monospace;font-size:12px"></textarea></div>
       <div class="form-group"><label>Краткое описание (для карточек)</label><textarea name="excerpt" required style="min-height:80px"></textarea></div>
       <div class="form-group"><label>Полный текст (в модалке)</label><textarea name="body" style="min-height:200px" required></textarea></div>
       <button class="btn btn-gold" style="width:100%" type="submit">Сохранить</button>
@@ -209,10 +192,17 @@ function fmt(d){try{return new Date(d).toLocaleDateString("ru-RU",{day:"numeric"
 function esc(s){return VSRF_NEWS.esc(s)}
 
 function heroHtml(n){
-  const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
+  const heroImg=VSRF_NEWS.firstImage(n);
+  const img=heroImg?`<img src="${esc(heroImg)}" alt="${esc(n.title)}" loading="lazy">`:"";
   const t=VSRF_NEWS.tagInfo(n.tag);
+  const d=VSRF_NEWS.deptInfo(n.dept);
   return `<div class="news-hero" data-news-id="${n.id}">
-    <div class="news-hero-thumb">${img}<span class="news-thumb-tag ${t.cls}" style="top:20px;left:20px">${t.label}</span></div>
+    <div class="news-hero-thumb">${img}
+      <div class="news-thumb-badges" style="top:20px;left:20px">
+        <span class="news-thumb-tag ${t.cls}">${t.label}</span>
+        <span class="news-thumb-dept ${d.cls}">${d.label}</span>
+      </div>
+    </div>
     <div class="news-hero-body">
       <span class="news-hero-tag">Главное</span>
       <div class="news-date">${fmt(n.date)}</div>
@@ -228,10 +218,17 @@ function cardHtml(n){
 }
 
 function itemHtml(n){
-  const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
+  const heroImg=VSRF_NEWS.firstImage(n);
+  const img=heroImg?`<img src="${esc(heroImg)}" alt="${esc(n.title)}" loading="lazy">`:"";
   const t=VSRF_NEWS.tagInfo(n.tag);
+  const d=VSRF_NEWS.deptInfo(n.dept);
   return `<article class="news-item" data-news-id="${n.id}">
-    <div class="news-thumb">${img}<span class="news-thumb-tag ${t.cls}">${t.label}</span></div>
+    <div class="news-thumb">${img}
+      <div class="news-thumb-badges">
+        <span class="news-thumb-tag ${t.cls}">${t.label}</span>
+        <span class="news-thumb-dept ${d.cls}">${d.label}</span>
+      </div>
+    </div>
     <div class="news-item-body">
       <div class="news-date">${fmt(n.date)}</div>
       <h3>${esc(n.title)}</h3>
@@ -246,17 +243,36 @@ function itemHtml(n){
 function openNews(id){
   const n=LOADED.find(x=>String(x.id)===String(id));if(!n) return;
   currentNews=n;
-  const img=n.image?`<div class="news-modal-hero"><img src="${n.image}" alt=""></div>`:"";
-  const body=(n.body||n.excerpt||"").split(/\n{2,}/).map(p=>`<p>${esc(p).replace(/\n/g,"<br>")}</p>`).join("");
+  const imgs=VSRF_NEWS.allImages(n);
   const t=VSRF_NEWS.tagInfo(n.tag);
-  newsContent.innerHTML=`${img}
-    <div style="margin-bottom:12px"><span class="news-modal-tag ${t.cls}">${t.label}</span></div>
-    <h2 class="news-modal-title">${esc(n.title)}</h2>
-    <div class="news-modal-meta">
-      <span>📅 ${fmt(n.date)}</span>
-      <span>· 1-я ОБрСпН · в/ч №12132</span>
+  const d=VSRF_NEWS.deptInfo(n.dept);
+  const hero=imgs[0]?`<div class="news-modal-hero" data-lightbox="${esc(imgs[0])}">
+    <div class="news-modal-hero-badges">
+      <span class="news-thumb-tag ${t.cls}">${t.label}</span>
+      <span class="news-thumb-dept ${d.cls}">${d.label}</span>
     </div>
-    <div class="news-modal-body">${body}</div>`;
+    <img src="${esc(imgs[0])}" alt="">
+  </div>`:`<div style="padding:24px 0 0 0"><div style="display:flex;gap:8px;flex-wrap:wrap">
+    <span class="news-thumb-tag ${t.cls}">${t.label}</span>
+    <span class="news-thumb-dept ${d.cls}">${d.label}</span>
+  </div></div>`;
+  const body=(n.body||n.excerpt||"").split(/\n{2,}/).map(p=>`<p>${esc(p).replace(/\n/g,"<br>")}</p>`).join("");
+  const gallery=imgs.length>1?`<div class="news-modal-gallery">
+    <div class="news-modal-gallery-title">Дополнительные материалы (${imgs.length-1})</div>
+    <div class="news-modal-gallery-grid">
+      ${imgs.slice(1).map(u=>`<div class="news-modal-gallery-item" data-lightbox="${esc(u)}"><img src="${esc(u)}" alt="" loading="lazy"></div>`).join("")}
+    </div>
+  </div>`:"";
+  newsContent.innerHTML=`${hero}
+    <div class="news-modal-body-wrap">
+      <h2 class="news-modal-title">${esc(n.title)}</h2>
+      <div class="news-modal-meta">
+        <span class="news-modal-meta-item"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>${fmt(n.date)}</span>
+        <span class="news-modal-meta-item"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>1-я ОБрСпН · в/ч №12132</span>
+      </div>
+      <div class="news-modal-body">${body}</div>
+      ${gallery}
+    </div>`;
   const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
   modalAdmin.style.display=isAdmin?"flex":"none";
   newsModal.classList.add("active");
@@ -299,7 +315,9 @@ async function load(){
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(()=>load());
 
 document.getElementById("tagSelect").innerHTML=VSRF_NEWS.tagsList().map(t=>`<option value="${t.key}">${t.label}</option>`).join("");
+document.getElementById("deptSelect").innerHTML=VSRF_NEWS.deptsList().map(t=>`<option value="${t.key}">${t.label}</option>`).join("");
 VSRF_SELECT.enhance(document.getElementById("tagSelect"));
+VSRF_SELECT.enhance(document.getElementById("deptSelect"));
 
 addBtn.addEventListener("click",()=>openEdit());
 function openEdit(item){
@@ -310,14 +328,22 @@ function openEdit(item){
     newsForm.title.value=item.title||"";
     newsForm.date.value=(item.date||"").slice(0,10);
     newsForm.image.value=item.image||"";
+    let extra=item.images;
+    if(Array.isArray(extra)) extra=extra.join("\n");
+    else if(typeof extra==="string") extra=extra.split(/[\s,]+/).filter(Boolean).join("\n");
+    else extra="";
+    newsForm.images.value=extra||"";
     newsForm.excerpt.value=item.excerpt||"";
     newsForm.body.value=item.body||"";
     newsForm.tag.value=item.tag||"news";
+    newsForm.dept.value=item.dept||"general";
   }else{
     newsForm.date.value=new Date().toISOString().slice(0,10);
     newsForm.tag.value="news";
+    newsForm.dept.value="general";
   }
   newsForm.tag.dispatchEvent(new Event("__vsrf_refresh"));
+  newsForm.dept.dispatchEvent(new Event("__vsrf_refresh"));
   const msg=editNewsModal.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
   editNewsModal.classList.add("active");
 }
@@ -345,11 +371,14 @@ newsForm.addEventListener("submit",async e=>{
   if(!s.available||!s.client){
     msg.className="form-msg info";msg.textContent="Редактирование недоступно — настройте Supabase.";return;
   }
+  const extraImages=newsForm.images.value.split(/[\s,\n]+/).map(x=>x.trim()).filter(Boolean);
   const payload={
     title:newsForm.title.value.trim(),
     date:newsForm.date.value,
     tag:newsForm.tag.value||"news",
+    dept:newsForm.dept.value||"general",
     image:newsForm.image.value.trim()||null,
+    images:extraImages,
     excerpt:newsForm.excerpt.value.trim(),
     body:newsForm.body.value.trim()
   };
@@ -367,8 +396,22 @@ newsForm.addEventListener("submit",async e=>{
   }catch(err){msg.className="form-msg error";msg.textContent=err.message||"Ошибка сохранения"}
 });
 
+const lightbox=document.createElement("div");
+lightbox.className="news-lightbox";
+lightbox.innerHTML='<button class="news-lightbox-close">✕</button><img src="" alt="">';
+document.body.appendChild(lightbox);
+const lbImg=lightbox.querySelector("img");
+function openLightbox(src){lbImg.src=src;lightbox.classList.add("active")}
+function closeLightbox(){lightbox.classList.remove("active")}
+lightbox.addEventListener("click",e=>{if(e.target===lightbox||e.target.classList.contains("news-lightbox-close")) closeLightbox()});
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-lightbox]");
+  if(t&&newsModal.classList.contains("active")){e.stopPropagation();openLightbox(t.dataset.lightbox)}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&lightbox.classList.contains("active")){closeLightbox();e.stopPropagation()}});
+
 load();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9db9a1ea7e92c',t:'MTc4NDgwMTAzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1fb5ebeeba5e949',t:'MTc4NDgxNjg5MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>

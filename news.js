@@ -12,6 +12,17 @@ window.VSRF_NEWS=(function(){
     announce:{label:"Объявление",cls:"tag-announce"}
   };
 
+  const DEPTS={
+    general:{label:"Общее",cls:"dept-general"},
+    hq:{label:"Штаб",cls:"dept-hq"},
+    vp:{label:"ВП",cls:"dept-vp"},
+    vk:{label:"ВК",cls:"dept-vk"},
+    sso:{label:"ССО",cls:"dept-sso"},
+    roio:{label:"РОиО",cls:"dept-roio"},
+    mch:{label:"МЧ",cls:"dept-mch"},
+    va:{label:"ВА",cls:"dept-va"}
+  };
+
   function waitReady(){
     return new Promise(resolve=>{
       const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
@@ -40,17 +51,47 @@ window.VSRF_NEWS=(function(){
     try{return new Date(d).toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"})}catch(e){return d}
   }
 
+  function daysBetween(d1,d2){
+    try{return Math.abs((new Date(d1)-new Date(d2))/86400000)}catch(e){return 999}
+  }
+
   function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   function tagInfo(t){return TAGS[t]||TAGS.news}
   function tagsList(){return Object.keys(TAGS).map(k=>({key:k,label:TAGS[k].label}))}
+  function deptInfo(d){return DEPTS[d]||DEPTS.general}
+  function deptsList(){return Object.keys(DEPTS).map(k=>({key:k,label:DEPTS[k].label}))}
+
+  function firstImage(n){
+    if(n.image) return n.image;
+    if(n.images){
+      if(Array.isArray(n.images)&&n.images.length) return n.images[0];
+      if(typeof n.images==="string"&&n.images.trim()) return n.images.split(/[\s,]+/).filter(Boolean)[0];
+    }
+    return "";
+  }
+
+  function allImages(n){
+    const arr=[];
+    if(n.image) arr.push(n.image);
+    if(n.images){
+      if(Array.isArray(n.images)) n.images.forEach(x=>{if(x&&arr.indexOf(x)<0) arr.push(x)});
+      else if(typeof n.images==="string") n.images.split(/[\s,]+/).filter(Boolean).forEach(x=>{if(arr.indexOf(x)<0) arr.push(x)});
+    }
+    return arr;
+  }
 
   function cardHtml(n){
-    const img=n.image?`<img src="${n.image}" alt="${esc(n.title)}" loading="lazy">`:"";
+    const img=firstImage(n);
+    const imgHtml=img?`<img src="${esc(img)}" alt="${esc(n.title)}" loading="lazy">`:"";
     const t=tagInfo(n.tag);
+    const d=deptInfo(n.dept);
     return `<div class="news-card" data-news-id="${n.id}">
       <div class="news-thumb">
-        <span class="news-thumb-tag ${t.cls}">${t.label}</span>
-        ${img}
+        <div class="news-thumb-badges">
+          <span class="news-thumb-tag ${t.cls}">${t.label}</span>
+          <span class="news-thumb-dept ${d.cls}">${d.label}</span>
+        </div>
+        ${imgHtml}
       </div>
       <div class="news-body">
         <div class="news-date">${fmt(n.date)}</div>
@@ -61,5 +102,5 @@ window.VSRF_NEWS=(function(){
     </div>`;
   }
 
-  return {fetchNews,cardHtml,fmt,esc,tagInfo,tagsList,DEMO};
+  return {fetchNews,cardHtml,fmt,esc,tagInfo,tagsList,deptInfo,deptsList,firstImage,allImages,daysBetween,DEMO};
 })();
