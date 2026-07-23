@@ -258,6 +258,8 @@ const catDropDot=$("catDropDot");
 async function boot(){
   CATS=await VSRF_TRAIN.loadCats();
   LESSONS=await VSRF_TRAIN.loadLessons();
+  const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+  if(s&&s.available){try{localStorage.removeItem("vsrf-train-cats");localStorage.removeItem("vsrf-train-lessons")}catch(e){}}
   renderCatDropdown();renderSubDropdown();renderGrid();updateAdmin();
 }
 
@@ -325,7 +327,20 @@ function filteredLessons(){
 function renderGrid(){
   const list=filteredLessons();
   if(!list.length){
-    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9M18.82 9L12 12.72 5.18 9 12 5.28M17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73"/></svg><h3>Нет уроков</h3><p>Пока в этой категории материалы не добавлены.</p></div>`;
+    const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+    const noCats=!CATS.length&&isAdmin;
+    const seedBtn=noCats?`<button class="btn btn-gold btn-sm" id="seedCatsBtn" style="margin-top:16px">Заполнить демо-категориями</button>`:"";
+    const msg=noCats
+      ? `<h3>Нет категорий</h3><p>Сначала создайте категории через «⚙ Категории» или загрузите демо-набор.</p>${seedBtn}`
+      : `<h3>Нет уроков</h3><p>${isAdmin?"Нажмите «＋ Новый урок» чтобы добавить первый.":"Пока в этой категории материалы не добавлены."}</p>`;
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9M18.82 9L12 12.72 5.18 9 12 5.28M17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73"/></svg>${msg}</div>`;
+    const sb=document.getElementById("seedCatsBtn");
+    if(sb) sb.addEventListener("click",async()=>{
+      sb.disabled=true;sb.textContent="Загрузка...";
+      const r=await VSRF_TRAIN.seedDemoCats();
+      if(r.ok){CATS=await VSRF_TRAIN.loadCats();renderCatDropdown();renderSubDropdown();renderGrid()}
+      else{alert("Ошибка: "+r.error);sb.disabled=false;sb.textContent="Заполнить демо-категориями"}
+    });
     return;
   }
   grid.innerHTML=list.map(l=>{
@@ -443,6 +458,7 @@ lessonForm.addEventListener("submit",async e=>{
     test_url:lessonForm.test_url.value.trim()||null,
     sort:Date.now()
   };
+  if(!p.category){msg.className="form-msg error";msg.textContent="Выберите категорию";return}
   msg.className="form-msg info";msg.textContent="Сохранение...";
   const r=await VSRF_TRAIN.saveLesson(p);
   if(r.ok){
@@ -451,7 +467,11 @@ lessonForm.addEventListener("submit",async e=>{
     renderGrid();renderCatDropdown();renderSubDropdown();
     msg.className="form-msg success";msg.textContent=r.remote?"Сохранено в Supabase":"Сохранено локально";
     setTimeout(()=>editLessonModal.classList.remove("active"),500);
-  }else{msg.className="form-msg error";msg.textContent=r.error||"Ошибка"}
+  }else{
+    let err=r.error||"Ошибка";
+    if(/foreign key|violates|category/i.test(err)) err="Категория не найдена в базе. Пересоздайте её через «⚙ Категории» или обновите страницу — устаревшие категории могут отображаться из localStorage.";
+    msg.className="form-msg error";msg.textContent=err;
+  }
 });
 
 const catsModal=$("catsModal"),catEditModal=$("catEditModal"),catForm=$("catForm");
@@ -553,6 +573,6 @@ boot().then(()=>{
   if(location.hash.startsWith("#l-")){const id=location.hash.slice(3);setTimeout(()=>openLesson(id),300)}
 });
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f651077dfce950',t:'MTc4NDc2MzkwMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f67eaa5cc2f3b2',t:'MTc4NDc2NTc2OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

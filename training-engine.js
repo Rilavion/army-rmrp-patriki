@@ -25,27 +25,27 @@ window.VSRF_TRAIN=(function(){
   }
 
   async function loadCats(){
-    const local=readLocalCats();
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(s&&s.available&&s.client){
       try{
         const {data,error}=await s.client.from("train_categories").select("*").order("sort");
         if(error) throw error;
-        if(data&&data.length) return data;
-      }catch(e){}
+        return data||[];
+      }catch(e){console.warn("[VSRF_TRAIN] loadCats:",e.message);return []}
     }
+    const local=readLocalCats();
     return local.length?local:DEMO_CATS.slice();
   }
   async function loadLessons(){
-    const local=readLocalLessons();
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(s&&s.available&&s.client){
       try{
         const {data,error}=await s.client.from("train_lessons").select("*").order("sort");
         if(error) throw error;
-        if(data&&data.length) return data;
-      }catch(e){}
+        return data||[];
+      }catch(e){console.warn("[VSRF_TRAIN] loadLessons:",e.message);return []}
     }
+    const local=readLocalLessons();
     return local.length?local:DEMO_LESSONS.slice();
   }
 
@@ -57,8 +57,11 @@ window.VSRF_TRAIN=(function(){
   async function saveCat(cat){
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(s&&s.available&&s.client){
-      try{const {error}=await s.client.from("train_categories").upsert(cat,{onConflict:"id"});if(error) throw error;return {ok:true,remote:true}}
-      catch(e){return {ok:false,error:e.message}}
+      try{
+        const {error}=await s.client.from("train_categories").upsert(cat,{onConflict:"id"});
+        if(error) throw error;
+        return {ok:true,remote:true};
+      }catch(e){return {ok:false,error:e.message}}
     }
     const list=readLocalCats();
     const i=list.findIndex(x=>x.id===cat.id);
@@ -85,8 +88,16 @@ window.VSRF_TRAIN=(function(){
   async function saveLesson(lesson){
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(s&&s.available&&s.client){
-      try{const {error}=await s.client.from("train_lessons").upsert(lesson,{onConflict:"id"});if(error) throw error;return {ok:true,remote:true}}
-      catch(e){return {ok:false,error:e.message}}
+      try{
+        if(lesson.category){
+          const {data:cat,error:e0}=await s.client.from("train_categories").select("id").eq("id",lesson.category).maybeSingle();
+          if(e0) throw e0;
+          if(!cat) return {ok:false,error:"Категория «"+lesson.category+"» отсутствует в базе. Создайте её через «⚙ Категории» или обновите страницу."};
+        }
+        const {error}=await s.client.from("train_lessons").upsert(lesson,{onConflict:"id"});
+        if(error) throw error;
+        return {ok:true,remote:true};
+      }catch(e){return {ok:false,error:e.message}}
     }
     const list=readLocalLessons();
     const i=list.findIndex(x=>x.id===lesson.id);
@@ -104,7 +115,22 @@ window.VSRF_TRAIN=(function(){
     return {ok:true,remote:false};
   }
 
+  async function seedDemoCats(){
+    const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+    if(!(s&&s.available&&s.client)) return {ok:false,error:"Supabase недоступен"};
+    try{
+      const {data:existing,error:e1}=await s.client.from("train_categories").select("id");
+      if(e1) throw e1;
+      const existingIds=new Set((existing||[]).map(r=>r.id));
+      const toInsert=DEMO_CATS.filter(c=>!existingIds.has(c.id));
+      if(!toInsert.length) return {ok:true,count:0};
+      const {error}=await s.client.from("train_categories").insert(toInsert);
+      if(error) throw error;
+      return {ok:true,count:toInsert.length};
+    }catch(e){return {ok:false,error:e.message}}
+  }
+
   function uid(prefix){return (prefix||"id")+"_"+Math.random().toString(36).slice(2,9)}
 
-  return {DEMO_CATS,DEMO_LESSONS,loadCats,loadLessons,saveCat,removeCat,saveLesson,removeLesson,esc,extractFormEmbed,uid};
+  return {DEMO_CATS,DEMO_LESSONS,loadCats,loadLessons,saveCat,removeCat,saveLesson,removeLesson,seedDemoCats,esc,extractFormEmbed,uid};
 })();
