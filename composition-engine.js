@@ -9,8 +9,8 @@ window.VSRF_COMP=(function(){
     {key:"lt",label:"Лейтенант",short:"Лт",tier:6}
   ];
 
-  const HQ_SLOTS=[
-    {key:"cmd_brigade",label:"Командир бригады",badge:"Ген-Майор",tier:1},
+  const DEFAULT_HQ_SLOTS=[
+    {key:"cmd_brigade",label:"Командир бригады",badge:"Ген-Майор",tier:1,locked:true},
     {key:"first_deputy",label:"Первый заместитель",badge:"Полковник",tier:2},
     {key:"chief_staff",label:"Начальник штаба",badge:"Полковник",tier:2},
     {key:"deputy_vp_vk",label:"Зам. по ВП и ВК",badge:"Полковник",tier:2},
@@ -29,6 +29,7 @@ window.VSRF_COMP=(function(){
   };
 
   const DEFAULT_STATE={
+    hq_slots:JSON.parse(JSON.stringify(DEFAULT_HQ_SLOTS)),
     hq:{
       cmd_brigade:{name:"Ян Милонов",code:"376-939",tag:"ком. бриг",photo:""},
       first_deputy:{name:"Эдвард Милонов",code:"617-798",tag:"первый зам",photo:""},
@@ -83,6 +84,15 @@ window.VSRF_COMP=(function(){
   function readLocal(){try{return JSON.parse(localStorage.getItem("vsrf-composition")||"null")}catch(e){return null}}
   function writeLocal(state){localStorage.setItem("vsrf-composition",JSON.stringify(state))}
 
+  function migrate(st){
+    if(!st) st={};
+    if(!st.hq_slots||!Array.isArray(st.hq_slots)||!st.hq_slots.length){
+      st.hq_slots=JSON.parse(JSON.stringify(DEFAULT_HQ_SLOTS));
+    }
+    if(!st.hq) st.hq={};
+    if(!st.subs) st.subs=[];
+    return st;
+  }
   async function load(){
     await waitReady();
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
@@ -92,11 +102,11 @@ window.VSRF_COMP=(function(){
         if(error) throw error;
         if(data&&data.state){
           const st=typeof data.state==="string"?JSON.parse(data.state):data.state;
-          return Object.assign({},DEFAULT_STATE,st);
+          return migrate(Object.assign({},DEFAULT_STATE,st));
         }
       }catch(e){console.warn("[VSRF_COMP]",e.message)}
     }
-    return readLocal()||JSON.parse(JSON.stringify(DEFAULT_STATE));
+    return migrate(readLocal()||JSON.parse(JSON.stringify(DEFAULT_STATE)));
   }
 
   async function save(state){
@@ -115,5 +125,5 @@ window.VSRF_COMP=(function(){
 
   function uid(){return "s_"+Math.random().toString(36).slice(2,9)}
 
-  return {RANKS,HQ_SLOTS,DEFAULT_STATE,SUB_PRESETS,load,save,esc,rankInfo,uid};
+  return {RANKS,DEFAULT_HQ_SLOTS,DEFAULT_STATE,SUB_PRESETS,load,save,esc,rankInfo,uid};
 })();

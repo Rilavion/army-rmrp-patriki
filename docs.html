@@ -83,6 +83,19 @@
             <div id="sealPreview" style="display:none"><img id="sealPreviewImg" src=""></div>
           </div>
 
+          <h4 style="margin-top:14px">Подпись (изображение)</h4>
+          <div class="seal-controls">
+            <input type="url" id="sigUrlInput" placeholder="https://... (URL картинки подписи)">
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" id="sigLoadBtn" type="button" style="flex:1;min-height:36px">🖼 Из URL</button>
+              <label class="btn btn-ghost btn-sm" style="flex:1;min-height:36px;cursor:pointer">
+                📁 Файл<input type="file" id="sigFileInput" accept="image/*" hidden>
+              </label>
+              <button class="btn btn-ghost btn-sm" id="sigClearBtn" type="button" style="min-height:36px;padding:0 10px">×</button>
+            </div>
+            <div id="sigPreview" style="display:none"><img id="sigPreviewImg" src=""></div>
+          </div>
+
           <div class="doc-actions">
             <div id="perPageCopy"></div>
             <button class="btn btn-gold btn-sm" id="copyAllBtn">📋 Скопировать всё как PNG</button>
@@ -212,7 +225,7 @@ function saveValues(){
 function renderForm(){
   const t=VSRF_DOC_TEMPLATES.TEMPLATES[currentTemplate];
   $("docPanelTitle").textContent=t.name+" — поля";
-  form.innerHTML=t.fields.filter(f=>f.key!=="seal_url").map(f=>{
+  form.innerHTML=t.fields.filter(f=>f.key!=="seal_url"&&f.key!=="sig_url").map(f=>{
     const v=VSRF_DOC_TEMPLATES.esc(values[f.key]==null?"":values[f.key]);
     if(f.type==="textarea"){
       return `<div class="form-group"><label>${f.label}</label><textarea name="${f.key}" rows="3">${v}</textarea></div>`;
@@ -248,9 +261,39 @@ function showToast(text,type){
   setTimeout(()=>toast.classList.remove("show"),2400);
 }
 
+async function urlToDataURL(url){
+  if(!url||url.startsWith("data:")) return url;
+  try{
+    const res=await fetch(url,{mode:"cors"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const blob=await res.blob();
+    return await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(blob)});
+  }catch(e){
+    try{
+      const proxied="https://images.weserv.nl/?url="+encodeURIComponent(url.replace(/^https?:\/\//,""));
+      const res=await fetch(proxied);
+      if(!res.ok) throw new Error("proxy HTTP "+res.status);
+      const blob=await res.blob();
+      return await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(blob)});
+    }catch(e2){console.warn("Не удалось загрузить",url,e2.message);return null}
+  }
+}
+
+async function preloadImages(node){
+  const imgs=Array.from(node.querySelectorAll("img"));
+  await Promise.all(imgs.map(async img=>{
+    const src=img.getAttribute("src");
+    if(!src||src.startsWith("data:")) return;
+    const data=await urlToDataURL(src);
+    if(data) img.setAttribute("src",data);
+    await new Promise(r=>{if(img.complete) r();else{img.onload=img.onerror=r}});
+  }));
+}
+
 async function renderCanvas(node){
   if(!window.html2canvas) throw new Error("html2canvas не загружен");
-  return await html2canvas(node,{backgroundColor:"#ffffff",scale:2,useCORS:true,logging:false,allowTaint:true});
+  await preloadImages(node);
+  return await html2canvas(node,{backgroundColor:"#ffffff",scale:2,useCORS:true,logging:false,allowTaint:true,imageTimeout:0});
 }
 
 async function copyCanvasToClipboard(node,btn){
@@ -344,6 +387,10 @@ function syncSealUI(){
   $("sealUrlInput").value=url;
   const pv=$("sealPreview"),img=$("sealPreviewImg");
   if(url){img.src=url;pv.style.display=""}else{pv.style.display="none"}
+  const surl=values.sig_url||"";
+  $("sigUrlInput").value=surl;
+  const spv=$("sigPreview"),simg=$("sigPreviewImg");
+  if(surl){simg.src=surl;spv.style.display=""}else{spv.style.display="none"}
 }
 $("sealLoadBtn").addEventListener("click",()=>{
   const url=$("sealUrlInput").value.trim();
@@ -360,6 +407,21 @@ $("sealFileInput").addEventListener("change",e=>{
   r.onload=ev=>{values.seal_url=ev.target.result;saveValues();syncSealUI();renderDoc();showToast("Печать загружена","success")};
   r.readAsDataURL(f);
 });
+$("sigLoadBtn").addEventListener("click",()=>{
+  const url=$("sigUrlInput").value.trim();
+  values.sig_url=url;saveValues();syncSealUI();renderDoc();
+  if(url) showToast("Подпись загружена","success");
+});
+$("sigUrlInput").addEventListener("change",()=>$("sigLoadBtn").click());
+$("sigClearBtn").addEventListener("click",()=>{
+  values.sig_url="";saveValues();syncSealUI();renderDoc();showToast("Подпись удалена","success");
+});
+$("sigFileInput").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{values.sig_url=ev.target.result;saveValues();syncSealUI();renderDoc();showToast("Подпись загружена","success")};
+  r.readAsDataURL(f);
+});
 
 function updateAdmin(){
   const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
@@ -371,6 +433,6 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 values=loadValues()||VSRF_DOC_TEMPLATES.defaults(currentTemplate);
 renderTabs();renderForm();renderDoc();syncSealUI();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9cfeaab7eec5e',t:'MTc4NDgwMDU1NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

@@ -76,6 +76,15 @@
     document.querySelectorAll(".nav a[data-page]").forEach(a=>{
       if(a.dataset.page===p||(p===""&&a.dataset.page==="index.html")) a.classList.add("active");
     });
+    hideAdminNav();
+    if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(hideAdminNav);
+  }
+
+  function hideAdminNav(){
+    const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+    if(!s||!s.ready) return;
+    document.body.classList.add("auth-ready");
+    document.body.classList.toggle("is-admin",!!s.user);
   }
 
   function setupFab(){

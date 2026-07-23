@@ -1,7 +1,8 @@
 window.VSRF_DOC_TEMPLATES=(function(){
   const EMBLEM="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Emblem_of_the_Russian_Ministry_of_Defence.svg/512px-Emblem_of_the_Russian_Ministry_of_Defence.svg.png";
 
-  const COMMON_SIG={key:"seal_url",label:"URL печати (изображение)",type:"text",default:""};
+  const COMMON_SEAL={key:"seal_url",label:"URL печати (изображение)",type:"text",default:""};
+  const COMMON_SIG_IMG={key:"sig_url",label:"URL подписи (изображение)",type:"text",default:""};
 
   const TEMPLATES={
     prikaz:{
@@ -20,7 +21,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
         {key:"sig_role2",label:"Подпись — должность строка 2",type:"text",default:"гарнизона"},
         {key:"sig_rank",label:"Подпись — звание",type:"text",default:"Подполковник"},
         {key:"sig_name",label:"Подпись — ФИО с инициалами",type:"text",default:"Монтерро Р.В."},
-        COMMON_SIG
+        COMMON_SEAL,COMMON_SIG_IMG
       ]
     },
     letter:{
@@ -42,7 +43,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
         {key:"sig_role1",label:"Подпись — должность",type:"text",default:"Командир Бригады"},
         {key:"sig_rank",label:"Подпись — звание",type:"text",default:"Генерал-лейтенант"},
         {key:"sig_name",label:"Подпись — ФИО",type:"text",default:"В.В. Прайд"},
-        COMMON_SIG
+        COMMON_SEAL,COMMON_SIG_IMG
       ]
     },
     ukaz:{
@@ -57,7 +58,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
         {key:"sig_role1",label:"Подпись — должность",type:"text",default:"Командир Бригады"},
         {key:"sig_rank",label:"Подпись — звание",type:"text",default:"Генерал-лейтенант"},
         {key:"sig_name",label:"Подпись — ФИО",type:"text",default:"В.В. Прайд"},
-        COMMON_SIG
+        COMMON_SEAL,COMMON_SIG_IMG
       ]
     }
   };
@@ -75,7 +76,10 @@ window.VSRF_DOC_TEMPLATES=(function(){
     </div>`;
   }
 
-  function signature(name){
+  function signature(name,sigUrl){
+    if(sigUrl&&sigUrl.trim()){
+      return `<div class="doc-signature doc-signature-img"><img src="${esc(sigUrl.trim())}" alt="Подпись" crossorigin="anonymous"></div>`;
+    }
     const initials=(name||"").match(/[А-ЯЁA-Z]/g)||["V"];
     const seed=initials.slice(0,2).join("").charCodeAt(0)%3;
     const paths=[
@@ -143,7 +147,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
             <div>${esc(v.sig_role2)}</div>
             <div>${esc(v.sig_rank)}</div>
           </div>
-          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name)}</div>
+          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name,v.sig_url)}</div>
           <div class="doc-sign-right">${esc(v.sig_name)}</div>
         </div>
       </div>
@@ -184,7 +188,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
             <div>${esc(v.sig_role1)}</div>
             <div>${esc(v.sig_rank)}</div>
           </div>
-          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name)}</div>
+          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name,v.sig_url)}</div>
           <div class="doc-sign-right">${esc(v.sig_name)}</div>
         </div>
       </div>
@@ -211,7 +215,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
             <div>${esc(v.sig_role1)}</div>
             <div>${esc(v.sig_rank)}</div>
           </div>
-          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name)}</div>
+          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name,v.sig_url)}</div>
           <div class="doc-sign-right">${esc(v.sig_name)}</div>
         </div>
       </div>

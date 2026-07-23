@@ -210,7 +210,7 @@ function render(){
     </div>
   </div>`;
 
-  const staffMembers=VSRF_COMP.HQ_SLOTS.filter(s=>s.key!=="cmd_brigade");
+  const staffMembers=(STATE.hq_slots||[]).filter(s=>s.key!=="cmd_brigade");
   const staffHtml=`<div class="hier-staff">
     <div class="hier-staff-title"><span class="hier-line"></span><span class="hier-staff-label">Штаб · Заместители</span><span class="hier-line"></span></div>
     <div class="hier-staff-grid">
@@ -227,9 +227,13 @@ function render(){
               ${p.code?`<span class="hier-officer-code">${esc(p.code)}</span>`:""}
             </div>
           </div>
-          ${editing?`<button class="hier-edit-btn hier-edit-corner" data-edit-hq="${slot.key}">✎</button>`:""}
+          ${editing?`<div class="hier-edit-group">
+            <button class="hier-edit-btn hier-edit-corner" data-edit-hq="${slot.key}" title="Изменить должность/данные">✎</button>
+            ${!slot.locked?`<button class="hier-edit-btn hier-edit-corner danger" data-del-hq="${slot.key}" title="Удалить должность">×</button>`:""}
+          </div>`:""}
         </div>`;
       }).join("")}
+      ${editing?`<button class="hier-officer hier-officer-add" id="addHqBtn">＋ Добавить должность в штаб</button>`:""}
     </div>
   </div>`;
 
@@ -325,19 +329,25 @@ function bindPhotoField(form){
   clear.addEventListener("click",()=>{urlInput.value="";fileInput.value="";sync()});
 }
 
-function openHqEdit(key){
-  const slot=VSRF_COMP.HQ_SLOTS.find(s=>s.key===key);
-  const p=STATE.hq[key]||{};
-  $("pModalTitle").textContent=slot.label;
-  pForm.ctx.value="hq:"+key;
+function openHqEdit(key,isNew){
+  const slot=isNew?{key:"",label:"",badge:"Полковник",tier:2}:(STATE.hq_slots||[]).find(s=>s.key===key);
+  if(!slot) return;
+  const p=isNew?{}:(STATE.hq[key]||{});
+  $("pModalTitle").textContent=isNew?"Новая должность в штабе":slot.label;
+  pForm.ctx.value=(isNew?"hqnew:":"hq:")+key;
+  const canEditMeta=isNew||!slot.locked;
   pFields.innerHTML=`
+    ${canEditMeta?`
+    <div class="form-group"><label>Название должности</label><input name="label" value="${esc(slot.label||"")}" placeholder="Зам. по связи" required></div>
+    <div class="form-group"><label>Звание должности (бейдж)</label><input name="badge" value="${esc(slot.badge||"")}" placeholder="Полковник"></div>
+    `:`<div class="form-group" style="opacity:.6;font-size:12px">Должность: <b>${esc(slot.label)}</b> (защищена от изменений)</div>`}
     <div class="form-group"><label>ФИО</label><input name="name" value="${esc(p.name||"")}" placeholder="Иван Иванов"></div>
     <div class="form-group"><label>Код (телефон/позывной)</label><input name="code" value="${esc(p.code||"")}" placeholder="123-456"></div>
     <div class="form-group"><label>Заметка</label><input name="tag" value="${esc(p.tag||"")}" placeholder="ком. бриг"></div>
     ${photoField(p.photo||"")}
   `;
   bindPhotoField(pForm);
-  pDel.style.display=p.name?"":"none";
+  pDel.style.display=(!isNew&&p.name)?"":"none";
   pForm.querySelector(".form-msg").className="form-msg";
   pModal.classList.add("active");
 }
@@ -372,7 +382,17 @@ pForm.addEventListener("submit",async e=>{
     if(el.name&&el.name!=="ctx"&&el.type!=="file") data[el.name]=el.value.trim();
   });
   if(ctx[0]==="hq"){
+    const slot=(STATE.hq_slots||[]).find(s=>s.key===ctx[1]);
+    if(slot&&!slot.locked){
+      if(data.label) slot.label=data.label;
+      if(data.badge) slot.badge=data.badge;
+    }
     STATE.hq[ctx[1]]={name:data.name,code:data.code,tag:data.tag,photo:data.photo};
+  }else if(ctx[0]==="hqnew"){
+    if(!data.label){pForm.querySelector(".form-msg").className="form-msg error";pForm.querySelector(".form-msg").textContent="Укажите название должности";return}
+    const newKey="hq_"+Math.random().toString(36).slice(2,8);
+    STATE.hq_slots.push({key:newKey,label:data.label,badge:data.badge||"Полковник",tier:2});
+    STATE.hq[newKey]={name:data.name,code:data.code,tag:data.tag,photo:data.photo};
   }else{
     const sub=STATE.subs.find(s=>s.id===ctx[1]);if(!sub) return;
     const idx=parseInt(ctx[2]);
@@ -384,12 +404,12 @@ pForm.addEventListener("submit",async e=>{
 });
 
 pDel.addEventListener("click",async()=>{
-  if(!confirm("Удалить?")) return;
+  if(!confirm("Очистить данные должности (оставить вакансией)?")) return;
   const ctx=pForm.ctx.value.split(":");
   if(ctx[0]==="hq"){STATE.hq[ctx[1]]={name:"",code:"",tag:"",photo:""}}
-  else{const sub=STATE.subs.find(s=>s.id===ctx[1]);if(sub) sub.members.splice(parseInt(ctx[2]),1)}
+  else if(ctx[0]!=="hqnew"){const sub=STATE.subs.find(s=>s.id===ctx[1]);if(sub) sub.members.splice(parseInt(ctx[2]),1)}
   await VSRF_COMP.save(STATE);
-  pModal.classList.remove("active");render();showToast("Удалено","success");
+  pModal.classList.remove("active");render();showToast("Очищено","success");
 });
 
 function openSubEdit(subId){
@@ -422,7 +442,17 @@ sDel.addEventListener("click",async()=>{
 });
 
 hier.addEventListener("click",e=>{
-  const hq=e.target.closest("[data-edit-hq]");if(hq) return openHqEdit(hq.dataset.editHq);
+  const hqEdit=e.target.closest("[data-edit-hq]");if(hqEdit) return openHqEdit(hqEdit.dataset.editHq,false);
+  const hqDel=e.target.closest("[data-del-hq]");if(hqDel){
+    const slot=(STATE.hq_slots||[]).find(s=>s.key===hqDel.dataset.delHq);
+    if(!slot||slot.locked) return;
+    if(!confirm(`Удалить должность «${slot.label}» из штаба?`)) return;
+    STATE.hq_slots=STATE.hq_slots.filter(s=>s.key!==hqDel.dataset.delHq);
+    delete STATE.hq[hqDel.dataset.delHq];
+    VSRF_COMP.save(STATE).then(()=>{render();showToast("Должность удалена","success")});
+    return;
+  }
+  if(e.target.closest("#addHqBtn")) return openHqEdit("",true);
   const em=e.target.closest("[data-edit-member]");if(em){const [s,i]=em.dataset.editMember.split("::");return openMemberEdit(s,parseInt(i))}
   const am=e.target.closest("[data-add-member]");if(am) return openMemberEdit(am.dataset.addMember,-1);
   const dm=e.target.closest("[data-del-member]");if(dm){
@@ -445,6 +475,6 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 
 boot();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9d0113fbdec5e',t:'MTc4NDgwMDU2MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
