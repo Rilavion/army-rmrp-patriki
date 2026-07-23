@@ -1,5 +1,5 @@
 window.VSRF_DOC_TEMPLATES=(function(){
-  const EMBLEM="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Emblem_of_the_Russian_Ministry_of_Defence.svg/512px-Emblem_of_the_Russian_Ministry_of_Defence.svg.png";
+  const EMBLEM="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg";
 
   const COMMON_SEAL={key:"seal_url",label:"URL печати (изображение)",type:"text",default:""};
   const COMMON_SIG_IMG={key:"sig_url",label:"URL подписи (изображение)",type:"text",default:""};
