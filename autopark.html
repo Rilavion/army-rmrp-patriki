@@ -15,7 +15,6 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 </style>
 <script>
 (function(){
-  var VSRF_ADMIN_GUARD=true;
   function apply(){
     var s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(!s||!s.ready) return;
@@ -77,6 +76,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
     <div class="container">
       <div class="section-head reveal" style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
         <div>
+          <span class="badge">Материально-техническое обеспечение</span>
           <h2>Автопарк бригады</h2>
           <p>Военная и служебная техника, состоящая на вооружении в/ч №12132. Обеспечивается силами роты охраны и обеспечения.</p>
         </div>
@@ -291,17 +291,35 @@ modal.addEventListener("click",e=>{if(e.target===modal) modal.classList.remove("
 modal.querySelector(".modal-close").addEventListener("click",()=>modal.classList.remove("active"));
 document.addEventListener("keydown",e=>{if(e.key==="Escape") modal.classList.remove("active")});
 
+function friendlyDbError(err){
+  const m=(err&&err.message)||String(err);
+  if(/schema cache|Could not find the table/i.test(m)){
+    return "В базе Supabase нет таблицы «vehicles». Выполните SQL из SUPABASE.md (раздел «Автопарк в БД»), затем обновите страницу.";
+  }
+  if(/column .* does not exist/i.test(m)){
+    return "В таблице vehicles не хватает колонок. Выполните: alter table public.vehicles add column if not exists price text; alter table public.vehicles add column if not exists rank text;";
+  }
+  if(/permission denied|RLS/i.test(m)){
+    return "Нет прав на изменение. Проверьте RLS-политики таблицы vehicles.";
+  }
+  return m;
+}
+
 delBtn.addEventListener("click",async()=>{
   if(!form.id.value) return;
   if(!confirm("Удалить технику?")) return;
   const s=window.VSRF_AUTH.state;
   const msg=form.querySelector(".form-msg");
-  if(s.available&&s.client){
+  const isDemoId=/^d\d+$/.test(String(form.id.value));
+  if(s.available&&s.client&&!isDemoId){
     try{
       const {error}=await s.client.from("vehicles").delete().eq("id",form.id.value);
       if(error) throw error;
-    }catch(err){msg.className="form-msg error";msg.textContent=err.message;return}
+    }catch(err){msg.className="form-msg error";msg.textContent=friendlyDbError(err);msg.style.whiteSpace="pre-wrap";return}
   }else{
+    if(isDemoId&&s.available){
+      msg.className="form-msg info";msg.textContent="Демо-техника хранится только локально. Добавьте свою запись — она сохранится в БД.";
+    }
     VEHICLES=VEHICLES.filter(x=>String(x.id)!==String(form.id.value));
     writeLocal(VEHICLES);
   }
@@ -323,9 +341,10 @@ form.addEventListener("submit",async e=>{
   };
   const s=window.VSRF_AUTH.state;
   msg.className="form-msg info";msg.textContent="Сохранение...";
+  const isDemoId=/^d\d+$/.test(String(form.id.value));
   if(s.available&&s.client){
     try{
-      if(form.id.value){
+      if(form.id.value&&!isDemoId){
         const {error}=await s.client.from("vehicles").update(payload).eq("id",form.id.value);
         if(error) throw error;
       }else{
@@ -334,7 +353,7 @@ form.addEventListener("submit",async e=>{
       }
       msg.className="form-msg success";msg.textContent="Готово";
       setTimeout(()=>{modal.classList.remove("active");load()},500);
-    }catch(err){msg.className="form-msg error";msg.textContent=err.message||"Ошибка"}
+    }catch(err){msg.className="form-msg error";msg.textContent=friendlyDbError(err);msg.style.whiteSpace="pre-wrap"}
   }else{
     if(form.id.value){
       const i=VEHICLES.findIndex(x=>String(x.id)===String(form.id.value));
@@ -350,6 +369,5 @@ form.addEventListener("submit",async e=>{
 
 load();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9db603f3be92c',t:'MTc4NDgwMTAyNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1fa0e085a08f11d',t:'MTc4NDgwMzA5OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
