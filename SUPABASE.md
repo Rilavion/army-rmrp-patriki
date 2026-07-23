@@ -187,6 +187,38 @@ create policy "tl_read" on public.train_lessons for select to anon, authenticate
 create policy "tl_write" on public.train_lessons for all to authenticated using (true) with check (true);
 ```
 
+**Если таблица `train_lessons` создавалась раньше без колонки `test_url`** — выполните:
+
+```sql
+alter table public.train_lessons add column if not exists test_url text;
+alter table public.train_lessons add column if not exists image text;
+alter table public.train_lessons add column if not exists content text;
+alter table public.train_lessons add column if not exists excerpt text;
+alter table public.train_lessons add column if not exists sort bigint default 0;
+```
+
+Симптом: при сохранении урока ссылка на тест «пропадает». Причина — Supabase молча игнорирует поля, которых нет в схеме.
+
+### Шаг 10. Таблица состава части (для страницы «Состав»)
+
+```sql
+create table public.composition (
+  id int primary key default 1,
+  state jsonb not null default '{}'::jsonb,
+  updated_at timestamptz default now()
+);
+
+alter table public.composition enable row level security;
+create policy "comp_read" on public.composition for select to anon, authenticated using (true);
+create policy "comp_write" on public.composition for all to authenticated using (true) with check (true);
+```
+
+Хранит **одну строку** (id=1) с полной иерархией штаба и подразделений в JSONB. Правится через страницу `composition.html` (кнопка «✎ Режим редактирования» для админа).
+
+### Страница «Документы» (`docs.html`)
+
+Никаких таблиц не требует — данные полей хранятся в `localStorage` у каждого админа. Работает офлайн после первой загрузки.
+
 **Как встраивать Google Тесты:**
 1. Откройте Google Форму → **Отправить** → иконка ссылки `🔗` → **Копировать**
 2. Вставьте в поле «Ссылка на Google-тест» при создании урока

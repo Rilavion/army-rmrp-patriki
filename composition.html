@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Состав — ВС РФ · в/ч №12132</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise"></div>
+<div class="page-transition-overlay" id="overlay"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-icon">ВС</div>
+      <div class="brand-text">
+        <span class="brand-label">Вооружённые Силы РФ</span>
+        <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
+      </div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="training.html" data-page="training.html" data-transition>Обучение</a>
+      <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
+      <a href="docs.html" data-page="docs.html" data-transition>Документы</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+    </nav>
+    <div class="header-actions">
+      <button class="search-btn" data-open-search title="Поиск (Ctrl+K)">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <span>Поиск</span><span class="kbd">Ctrl K</span>
+      </button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="login-btn" data-open-login>
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        <span>Войти</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="section" style="padding-top:60px">
+    <div class="container">
+      <div class="section-head reveal" style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+        <div>
+          <span class="badge">Иерархическая структура · СС ВСРФ</span>
+          <h2>Старший состав в/ч №12132</h2>
+          <p>Командование бригады и командный состав подразделений. Иерархия по уставу.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap" class="admin-only" id="adminBar" style="display:none">
+          <button class="btn btn-ghost btn-sm" id="editModeBtn">✎ Режим редактирования</button>
+        </div>
+      </div>
+
+      <div class="compose-tree" id="compTree"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h4>1-я ОБрСпН · в/ч №12132</h4>
+        <p>Вооружённые Силы Российской Федерации.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Разделы</h5>
+        <a href="index.html">Главная</a>
+        <a href="ustav.html">Уставы</a>
+        <a href="training.html">Обучение</a>
+        <a href="composition.html">Состав</a>
+      </div>
+      <div class="footer-col">
+        <h5>Ресурсы</h5>
+        <a href="docs.html">Документы</a>
+        <a href="news.html">Новости</a>
+        <a href="autopark.html">Автопарк</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> · Вооружённые Силы Российской Федерации</span>
+      <span>1-я ОБрСпН · в/ч №12132</span>
+    </div>
+  </div>
+</footer>
+
+<div class="search-modal" id="searchModal">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      <input class="search-input" placeholder="Поиск..." spellcheck="false">
+      <button class="search-close-kbd">Esc</button>
+    </div>
+    <div class="search-results"></div>
+  </div>
+</div>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Вход администратора</h3>
+    <div class="modal-sub">Доступ к управлению контентом</div>
+    <form>
+      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
+      <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-back" id="personModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="pModalTitle">Редактировать</h3>
+    <form id="pForm">
+      <input type="hidden" name="ctx">
+      <div id="pFormFields"></div>
+      <div style="display:flex;gap:10px;justify-content:space-between;margin-top:8px">
+        <button type="button" class="btn btn-ghost btn-sm btn-danger" id="pDeleteBtn" style="display:none">Удалить</button>
+        <button class="btn btn-gold btn-sm" type="submit" style="margin-left:auto">Сохранить</button>
+      </div>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-back" id="subModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="sModalTitle">Подразделение</h3>
+    <form id="sForm">
+      <input type="hidden" name="id">
+      <div class="form-group"><label>Полное название</label><input name="name" required></div>
+      <div class="form-group"><label>Аббревиатура</label><input name="short" required placeholder="ВП"></div>
+      <div style="display:flex;gap:10px;justify-content:space-between;margin-top:8px">
+        <button type="button" class="btn btn-ghost btn-sm btn-danger" id="sDeleteBtn" style="display:none">Удалить подразделение</button>
+        <button class="btn btn-gold btn-sm" type="submit" style="margin-left:auto">Сохранить</button>
+      </div>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="main.js"></script>
+<script src="auth.js"></script>
+<script src="select-enhance.js"></script>
+<script src="composition-engine.js"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+
+const $=id=>document.getElementById(id);
+const tree=$("compTree");
+let STATE=null;let editing=false;
+const toast=$("toast");
+function showToast(t,type){toast.textContent=t;toast.className="toast show "+(type||"");setTimeout(()=>toast.classList.remove("show"),1800)}
+
+function esc(s){return VSRF_COMP.esc(s)}
+
+function render(){
+  document.body.classList.toggle("admin-editing",editing);
+  const hqBody=VSRF_COMP.HQ_SLOTS.map(slot=>{
+    const p=STATE.hq[slot.key]||{};
+    const inner=p.name
+      ? `<div class="compose-person">
+          <span class="compose-person-badge">${esc(slot.badge)}</span>
+          <span class="compose-person-name">${esc(p.name)}</span>
+          ${p.code?`<span class="compose-member-code">${esc(p.code)}</span>`:""}
+          ${p.tag?`<span class="compose-person-tag">${esc(p.tag)}</span>`:""}
+        </div>`
+      : `<div class="compose-empty">Должность вакантна</div>`;
+    const actions=editing?`<button class="mini-icon-btn" data-edit-hq="${slot.key}">✎</button>`:"";
+    return `<div class="compose-slot">
+      <div class="compose-slot-title">${esc(slot.label)}</div>
+      <div class="compose-slot-body">${inner}${actions}</div>
+    </div>`;
+  }).join("");
+
+  const subsHtml=STATE.subs.map(sub=>{
+    const rows=(sub.members||[]).map((m,i)=>{
+      const r=VSRF_COMP.rankInfo(m.rank);
+      return `<div class="compose-sub-row">
+        <span class="compose-sub-row-rank">${esc(r.short)}</span>
+        <span class="compose-sub-row-name">${esc(m.name)}${m.role?` <span style="color:var(--muted);font-size:11px">· ${esc(m.role)}</span>`:""}</span>
+        ${m.code?`<span class="compose-sub-row-code">${esc(m.code)}</span>`:""}
+        <div class="compose-sub-row-actions">
+          <button class="mini-icon-btn" data-edit-member="${sub.id}:${i}">✎</button>
+          <button class="mini-icon-btn danger" data-del-member="${sub.id}:${i}">×</button>
+        </div>
+      </div>`;
+    }).join("")||`<div class="compose-empty" style="padding:8px 12px">Пусто</div>`;
+    const editBtn=editing?`<button class="mini-icon-btn" data-edit-sub="${sub.id}" title="Настройки подразделения">⚙</button>`:"";
+    const addBtn=editing?`<button class="compose-add-btn" data-add-member="${sub.id}">+ Добавить участника</button>`:"";
+    return `<div class="compose-sub">
+      <div class="compose-sub-head">
+        <span class="compose-sub-badge">${esc(sub.short)}</span>
+        <div class="compose-sub-name">${esc(sub.name)}</div>
+        ${editBtn}
+      </div>
+      <div class="compose-sub-body">${rows}</div>
+      <div class="compose-sub-actions">${addBtn}</div>
+    </div>`;
+  }).join("");
+
+  const addSubBtn=editing?`<div style="padding:14px 20px 20px"><button class="compose-add-btn" id="addSubBtn" style="width:100%">+ Добавить подразделение</button></div>`:"";
+
+  tree.innerHTML=`
+    <div class="compose-node">
+      <div class="compose-node-head">
+        <div class="compose-node-name">Командование бригады</div>
+        <span class="compose-node-badge">Штаб</span>
+      </div>
+      <div class="compose-node-body">${hqBody}</div>
+    </div>
+    <div class="compose-node">
+      <div class="compose-node-head">
+        <div class="compose-node-name">Подразделения</div>
+        <span class="compose-node-badge">${STATE.subs.length} шт.</span>
+      </div>
+      <div class="compose-subs">${subsHtml}</div>
+      ${addSubBtn}
+    </div>
+  `;
+}
+
+async function boot(){STATE=await VSRF_COMP.load();render()}
+
+$("editModeBtn").addEventListener("click",()=>{
+  editing=!editing;
+  $("editModeBtn").textContent=editing?"✓ Готово":"✎ Режим редактирования";
+  render();
+});
+
+const pModal=$("personModal"),pForm=$("pForm"),pFields=$("pFormFields"),pDel=$("pDeleteBtn");
+const sModal=$("subModal"),sForm=$("sForm"),sDel=$("sDeleteBtn");
+pModal.addEventListener("click",e=>{if(e.target===pModal) pModal.classList.remove("active")});
+pModal.querySelector(".modal-close").addEventListener("click",()=>pModal.classList.remove("active"));
+sModal.addEventListener("click",e=>{if(e.target===sModal) sModal.classList.remove("active")});
+sModal.querySelector(".modal-close").addEventListener("click",()=>sModal.classList.remove("active"));
+
+function openHqEdit(key){
+  const slot=VSRF_COMP.HQ_SLOTS.find(s=>s.key===key);
+  const p=STATE.hq[key]||{};
+  $("pModalTitle").textContent=slot.label;
+  pForm.ctx.value="hq:"+key;
+  pFields.innerHTML=`
+    <div class="form-group"><label>ФИО</label><input name="name" value="${esc(p.name||"")}" placeholder="Иван Иванов"></div>
+    <div class="form-group"><label>Код (телефон/позывной)</label><input name="code" value="${esc(p.code||"")}" placeholder="123-456"></div>
+    <div class="form-group"><label>Заметка</label><input name="tag" value="${esc(p.tag||"")}" placeholder="ком. бриг"></div>
+  `;
+  pDel.style.display=p.name?"":"none";
+  pForm.querySelector(".form-msg").className="form-msg";
+  pModal.classList.add("active");
+}
+
+function openMemberEdit(subId,memberIdx){
+  const sub=STATE.subs.find(s=>s.id===subId);if(!sub) return;
+  const m=memberIdx>=0?sub.members[memberIdx]:{rank:"maj",name:"",code:"",role:""};
+  $("pModalTitle").textContent=(memberIdx>=0?"Изменить":"Новый участник")+" · "+sub.name;
+  pForm.ctx.value=`member:${subId}:${memberIdx}`;
+  pFields.innerHTML=`
+    <div class="form-group"><label>Звание</label>
+      <select name="rank" class="form-select-custom">
+        ${VSRF_COMP.RANKS.map(r=>`<option value="${r.key}" ${r.key===m.rank?"selected":""}>${esc(r.label)}</option>`).join("")}
+      </select>
+    </div>
+    <div class="form-group"><label>ФИО</label><input name="name" value="${esc(m.name||"")}" required></div>
+    <div class="form-group"><label>Должность / роль</label><input name="role" value="${esc(m.role||"")}" placeholder="Ком. батальона ВП"></div>
+    <div class="form-group"><label>Код (телефон/позывной)</label><input name="code" value="${esc(m.code||"")}" placeholder="123-456"></div>
+  `;
+  pDel.style.display=memberIdx>=0?"":"none";
+  pForm.querySelector(".form-msg").className="form-msg";
+  pModal.classList.add("active");
+  const sel=pForm.querySelector('select[name="rank"]');if(window.VSRF_SELECT) VSRF_SELECT.enhance(sel);
+}
+
+pForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const ctx=pForm.ctx.value.split(":");
+  const data={};pForm.querySelectorAll("input,select").forEach(el=>{if(el.name&&el.name!=="ctx") data[el.name]=el.value.trim()});
+  if(ctx[0]==="hq"){
+    STATE.hq[ctx[1]]={name:data.name,code:data.code,tag:data.tag};
+  }else{
+    const sub=STATE.subs.find(s=>s.id===ctx[1]);if(!sub) return;
+    const idx=parseInt(ctx[2]);
+    const m={rank:data.rank,name:data.name,code:data.code,role:data.role};
+    if(idx>=0) sub.members[idx]=m;else sub.members.push(m);
+  }
+  await VSRF_COMP.save(STATE);
+  pModal.classList.remove("active");render();showToast("Сохранено","success");
+});
+
+pDel.addEventListener("click",async()=>{
+  if(!confirm("Удалить?")) return;
+  const ctx=pForm.ctx.value.split(":");
+  if(ctx[0]==="hq"){STATE.hq[ctx[1]]={name:"",code:"",tag:""}}
+  else{const sub=STATE.subs.find(s=>s.id===ctx[1]);if(sub) sub.members.splice(parseInt(ctx[2]),1)}
+  await VSRF_COMP.save(STATE);
+  pModal.classList.remove("active");render();showToast("Удалено","success");
+});
+
+function openSubEdit(subId){
+  const sub=subId?STATE.subs.find(s=>s.id===subId):null;
+  $("sModalTitle").textContent=sub?"Настройки подразделения":"Новое подразделение";
+  sForm.reset();
+  sForm.id.value=sub?sub.id:"";
+  if(sub){sForm.name.value=sub.name;sForm.short.value=sub.short}
+  sDel.style.display=sub?"":"none";
+  sModal.classList.add("active");
+}
+
+sForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const id=sForm.id.value;const name=sForm.name.value.trim();const short=sForm.short.value.trim();
+  if(id){const sub=STATE.subs.find(s=>s.id===id);if(sub){sub.name=name;sub.short=short}}
+  else{STATE.subs.push({id:VSRF_COMP.uid(),name,short,members:[]})}
+  await VSRF_COMP.save(STATE);
+  sModal.classList.remove("active");render();showToast("Сохранено","success");
+});
+
+sDel.addEventListener("click",async()=>{
+  const id=sForm.id.value;if(!id) return;
+  if(!confirm("Удалить подразделение и всех его участников?")) return;
+  STATE.subs=STATE.subs.filter(s=>s.id!==id);
+  await VSRF_COMP.save(STATE);
+  sModal.classList.remove("active");render();showToast("Удалено","success");
+});
+
+tree.addEventListener("click",e=>{
+  const hq=e.target.closest("[data-edit-hq]");if(hq) return openHqEdit(hq.dataset.editHq);
+  const em=e.target.closest("[data-edit-member]");if(em){const [s,i]=em.dataset.editMember.split(":");return openMemberEdit(s,parseInt(i))}
+  const am=e.target.closest("[data-add-member]");if(am) return openMemberEdit(am.dataset.addMember,-1);
+  const dm=e.target.closest("[data-del-member]");if(dm){
+    if(!confirm("Удалить участника?")) return;
+    const [s,i]=dm.dataset.delMember.split(":");
+    const sub=STATE.subs.find(x=>x.id===s);if(sub) sub.members.splice(parseInt(i),1);
+    VSRF_COMP.save(STATE).then(()=>{render();showToast("Удалено","success")});
+    return;
+  }
+  const es=e.target.closest("[data-edit-sub]");if(es) return openSubEdit(es.dataset.editSub);
+  if(e.target.id==="addSubBtn") return openSubEdit(null);
+});
+
+function updateAdmin(){
+  const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  $("adminBar").style.display=isAdmin?"flex":"none";
+  if(!isAdmin&&editing){editing=false;render()}
+}
+if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
+
+boot();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
