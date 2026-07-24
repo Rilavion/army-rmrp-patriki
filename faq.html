@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<link rel="apple-touch-icon" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<link rel="shortcut icon" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
 <title>ВС РФ — в/ч №12132 · FAQ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,8 +75,13 @@
           <input type="text" id="faqSearch" placeholder="Найти вопрос...">
         </div>
         <div class="faq-cats" id="faqCats"></div>
-        <button class="btn btn-gold btn-sm" id="faqAdd" data-admin>+ Добавить вопрос</button>
+        <div class="faq-admin-actions" data-admin>
+          <button class="btn btn-gold btn-sm" id="faqAdd">+ Добавить</button>
+          <button class="btn btn-ghost btn-sm" id="faqReset" title="Вернуть 8 стартовых вопросов">↺ Сброс</button>
+          <button class="btn btn-ghost btn-sm" id="faqClear" title="Удалить все вопросы">🗑 Всё</button>
+        </div>
       </div>
+      <div class="faq-mode-hint" id="faqModeHint" data-admin></div>
 
       <div class="faq-list" id="faqList"></div>
       <div class="faq-empty" id="faqEmpty" style="display:none">Ничего не найдено. Попробуйте другой запрос.</div>
@@ -177,12 +185,7 @@ let ITEMS=[];
 let ACTIVE_CAT="all";
 let QUERY="";
 
-async function boot(){
-  ITEMS=await VSRF_FAQ.loadAll();
-  render();
-  const h=location.hash.slice(1);
-  if(h){setTimeout(()=>{const el=document.getElementById("faq-"+h);if(el){el.scrollIntoView({behavior:"smooth",block:"center"});el.classList.add("faq-item-open")}},300)}
-}
+
 
 function render(){
   const cats=Array.from(new Set(ITEMS.map(x=>x.cat).filter(Boolean)));
@@ -252,10 +255,40 @@ $("faqForm").addEventListener("submit",async e=>{
   if(window.VSRF_SOUND) window.VSRF_SOUND.play("success");
 });
 $("faqAdd").addEventListener("click",()=>openEdit(null));
+$("faqReset").addEventListener("click",async()=>{
+  if(!confirm("Вернуть 8 стартовых вопросов? Ваши изменения (локальные) будут потеряны.")) return;
+  VSRF_FAQ.resetDefaults();
+  ITEMS=await VSRF_FAQ.loadAll();render();updateModeHint();
+  if(window.VSRF_SEARCH) window.VSRF_SEARCH.invalidate();
+});
+$("faqClear").addEventListener("click",async()=>{
+  if(!confirm("Удалить ВСЕ вопросы? Это действие нельзя отменить.")) return;
+  if(VSRF_FAQ.getMode()==="supabase"){
+    for(const it of ITEMS.slice()) await VSRF_FAQ.remove(it.id);
+  }else{
+    VSRF_FAQ.clearAll();
+  }
+  ITEMS=await VSRF_FAQ.loadAll();render();updateModeHint();
+  if(window.VSRF_SEARCH) window.VSRF_SEARCH.invalidate();
+});
+function updateModeHint(){
+  const el=$("faqModeHint");if(!el) return;
+  const m=VSRF_FAQ.getMode();
+  el.innerHTML=m==="supabase"
+    ? '<svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Хранение: Supabase (общее для всех)'
+    : '<svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"/></svg> Хранение: локально в браузере (только у вас)';
+}
 
-if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(boot);
-else boot();
+async function reboot(){
+  ITEMS=await VSRF_FAQ.loadAll();
+  render();
+  updateModeHint();
+  const h=location.hash.slice(1);
+  if(h){setTimeout(()=>{const el=document.getElementById("faq-"+h);if(el){el.scrollIntoView({behavior:"smooth",block:"center"});el.classList.add("faq-item-open")}},300)}
+}
+if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(reboot);
+else reboot();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a20201ab0927f10d',t:'MTc4NDg4NjQ3OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2022b8ece40f3ab',t:'MTc4NDg4ODE5NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

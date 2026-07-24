@@ -108,12 +108,23 @@ select,option{color-scheme:inherit}
 .brand-label{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--gold)}
 .brand-name{font-size:14px;font-weight:700}
 
-.nav{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.nav{display:flex;gap:2px;flex-wrap:nowrap;align-items:center;min-width:0}
 .nav a{
-  position:relative;padding:10px 14px;border-radius:999px;color:var(--muted);
-  border:1px solid transparent;transition:.3s ease;font-size:14px;
-  text-decoration:none;cursor:pointer;
+  position:relative;padding:10px 12px;border-radius:999px;color:var(--muted);
+  border:1px solid transparent;transition:.3s ease;font-size:13.5px;
+  text-decoration:none;cursor:pointer;white-space:nowrap;
   display:inline-flex;align-items:center;gap:8px;
+}
+@media (max-width:1200px){
+  .nav a{padding:8px 10px;font-size:13px}
+  .brand-text{display:none}
+}
+@media (max-width:1050px){
+  .nav a{padding:7px 9px;font-size:12.5px;letter-spacing:0}
+  .search-btn span,.search-btn .kbd{display:none}
+  .search-btn{width:42px;justify-content:center;padding:0}
+  .login-btn span{display:none}
+  .login-btn{width:42px;justify-content:center;padding:0;border-radius:12px}
 }
 .nav a::after{
   content:"";position:absolute;left:50%;bottom:4px;width:0;height:2px;
@@ -2644,3 +2655,6 @@ body[class*="holiday-"] .hero h1{
 .fs-sound-vol{margin-top:8px;display:flex;align-items:center;gap:10px}
 .fs-sound-vol input[type=range]{flex:1;accent-color:var(--gold);height:4px}
 .fs-sound-vol span{font-size:11px;color:var(--muted);letter-spacing:.06em;min-width:32px;text-align:right}
+
+.faq-admin-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.faq-mode-hint{margin:-14px 0 22px;padding:8px 14px;border-radius:10px;background:var(--input-bg);border:1px dashed var(--line);color:var(--muted);font-size:11.5px;letter-spacing:.05em;display:inline-flex;align-items:center;gap:6px}

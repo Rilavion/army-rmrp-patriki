@@ -11,24 +11,40 @@ window.VSRF_FAQ=(function(){
     {id:"discipline",cat:"Служба",q:"Что делать при нарушении устава?",a:"Разбирательство ведёт непосредственный командир. Меры — от замечания до дисциплинарного взыскания. Все взыскания фиксируются в личном деле. Подробнее — «Дисциплинарный устав»."}
   ];
 
-  function readLocal(){try{return JSON.parse(localStorage.getItem(KEY)||"null")||DEFAULTS.slice()}catch(e){return DEFAULTS.slice()}}
-  function writeLocal(list){try{localStorage.setItem(KEY,JSON.stringify(list))}catch(e){}}
+  function readLocal(){
+    try{
+      const raw=localStorage.getItem(KEY);
+      if(raw===null){
+        const seed=DEFAULTS.slice();
+        writeLocal(seed);
+        return seed;
+      }
+      return JSON.parse(raw)||[];
+    }catch(e){return []}
+  }
+  function writeLocal(list){try{localStorage.setItem(KEY,JSON.stringify(list||[]))}catch(e){}}
+
+  let mode="local";
 
   async function loadAll(){
     const auth=window.VSRF_AUTH;
     if(auth&&auth.state&&auth.state.client){
       try{
         const {data,error}=await auth.state.client.from("faq").select("*").order("sort",{ascending:true});
-        if(!error&&data&&data.length) return data.map(r=>({id:r.id,cat:r.cat||"Общее",q:r.q||"",a:r.a||"",sort:r.sort||0}));
+        if(!error&&data){
+          mode="supabase";
+          return data.map(r=>({id:r.id,cat:r.cat||"Общее",q:r.q||"",a:r.a||"",sort:r.sort||0}));
+        }
       }catch(e){}
     }
+    mode="local";
     return readLocal();
   }
   async function save(item){
-    const auth=window.VSRF_AUTH;
-    if(auth&&auth.state&&auth.state.client&&auth.state.user){
+    if(mode==="supabase"){
+      const client=window.VSRF_AUTH.state.client;
       try{
-        const {error}=await auth.state.client.from("faq").upsert(item);
+        const {error}=await client.from("faq").upsert(item);
         if(!error) return true;
       }catch(e){}
     }
@@ -39,14 +55,20 @@ window.VSRF_FAQ=(function(){
     return true;
   }
   async function remove(id){
-    const auth=window.VSRF_AUTH;
-    if(auth&&auth.state&&auth.state.client&&auth.state.user){
-      try{await auth.state.client.from("faq").delete().eq("id",id);return true}catch(e){}
+    if(mode==="supabase"){
+      const client=window.VSRF_AUTH.state.client;
+      try{
+        const {error}=await client.from("faq").delete().eq("id",id);
+        if(!error) return true;
+      }catch(e){}
     }
     writeLocal(readLocal().filter(x=>x.id!==id));
     return true;
   }
+  function getMode(){return mode}
+  function resetDefaults(){writeLocal(DEFAULTS.slice())}
+  function clearAll(){writeLocal([])}
   function makeId(){return "faq_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
-  return {DEFAULTS,loadAll,save,remove,makeId,readLocal,writeLocal};
+  return {DEFAULTS,loadAll,save,remove,makeId,readLocal,writeLocal,getMode,resetDefaults,clearAll};
 })();
