@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ВС РФ - в/ч №12132 · Главная</title>
-<link rel="icon" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<title>ВС РФ — в/ч №12132 · Главная</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -78,6 +77,7 @@
       <div class="about-grid">
         <div class="card reveal">
           <div class="card-body">
+            <span class="badge">Официальное представление</span>
             <h2>О воинской части</h2>
             <h3>1-я отдельная гвардейская бригада специального назначения</h3>
             <p>Вооружённые Силы Российской Федерации — государственная военная структура, обеспечивающая защиту страны, её граждан и государственных интересов. Основная деятельность направлена на поддержание обороноспособности, охрану военных объектов и выполнение задач, предусмотренных законодательством.</p>
@@ -85,7 +85,7 @@
           </div>
         </div>
         <div class="about-media reveal-r">
-          <img src="https://lh3.googleusercontent.com/d/1fojpNn0mNP33p2i2JxCA7Yt5jpvEMtXB=s800" alt="Строй" loading="lazy">
+          <img src="https://lh3.googleusercontent.com/d/1fojpNn0mNP33p2i2JxCA7Yt5jpvEMtXB=s800" alt="Воинская часть" loading="lazy">
         </div>
       </div>
     </div>
@@ -94,6 +94,7 @@
   <section class="section">
     <div class="container">
       <div class="section-head reveal">
+        <span class="badge">Каталог документов</span>
         <h2>Уставы подразделения</h2>
         <p>Внутренние уставы организации, регламентирующие порядок службы, взаимоотношения между военнослужащими и деятельность подразделений.</p>
       </div>
@@ -123,8 +124,37 @@
   <div class="container">
     <div class="footer-inner">
       <div class="footer-brand">
-        <h4>1-я ОБрСпН · в/ч №12132</h4>
-        <p>Вооружённые Силы Российской Федерации. Отдельная гвардейская бригада специального назначения. Служим Отечеству.</p>
+        <h4>Настройки сайта</h4>
+        <div class="footer-settings">
+          <div class="footer-settings-row">
+            <span class="footer-settings-label">
+              <svg viewBox="0 0 24 24"><path d="M13 3l-1.5 6H15l-3.5 12v-8H9l1.5-10H13z"/></svg>
+              Анимации
+            </span>
+            <label class="fs-switch"><input type="checkbox" id="fsAnim" checked><span class="fs-switch-track"><span class="fs-switch-thumb"></span></span></label>
+          </div>
+          <div>
+            <div class="footer-settings-label" style="margin-bottom:8px">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+              Фон
+            </div>
+            <div class="fs-modes" id="fsModes">
+              <button class="fs-mode" data-bg="grid" title="Сеть с частицами">
+                <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zm10 0h6v6h-6zm-10 10h6v6H4zm10 0h6v6h-6z"/></svg>
+                Сеть
+              </button>
+              <button class="fs-mode" data-bg="stars" title="Военные звёзды">
+                <svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.7 1.5 7L12 17.3 5.7 21l1.5-7L2 9.3l7-.8z"/></svg>
+                Звёзды
+              </button>
+              <button class="fs-mode" data-bg="radar" title="Радар">
+                <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3z"/><circle cx="12" cy="12" r="1.5"/></svg>
+                Радар
+              </button>
+            </div>
+          </div>
+          <div class="footer-note">Настройки сохраняются в браузере</div>
+        </div>
       </div>
       <div class="footer-col">
         <h5>Разделы</h5>
@@ -196,7 +226,7 @@ const BOOKS=[
   {slug:"disciplinarnyy-ustav",theme:"t4",title:"Дисциплинарный устав",code:"1781813587291"},
   {slug:"ustav-voennoy-politsii",theme:"t5",title:"Устав военной полиции",code:"1781813632975"}
 ];
-const DEFAULT_EMBLEM="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Middle_Emblem_of_the_Russian_Navy.svg/1280px-Middle_Emblem_of_the_Russian_Navy.svg.png";
+const DEFAULT_EMBLEM="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg";
 document.getElementById("booksGrid").innerHTML=BOOKS.map(d=>`
   <a class="book-card reveal" href="ustav.html#doc/${d.slug}" data-transition>
     <div class="b3d">
@@ -243,7 +273,34 @@ async function loadNewsPreview(){
 
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(()=>loadNewsPreview());
 else loadNewsPreview();
+
+(function initBgSettings(){
+  function apply(){
+    if(!window.VSRF_BG) return;
+    const anim=document.getElementById("fsAnim");
+    const modes=document.querySelectorAll(".fs-mode");
+    const en=window.VSRF_BG.isEnabled();
+    const cur=window.VSRF_BG.getMode();
+    if(anim) anim.checked=en;
+    modes.forEach(m=>{
+      m.classList.toggle("active",m.dataset.bg===cur);
+      m.disabled=!en;
+    });
+  }
+  function bind(){
+    const anim=document.getElementById("fsAnim");
+    const modes=document.querySelectorAll(".fs-mode");
+    if(!anim) return;
+    anim.addEventListener("change",()=>{window.VSRF_BG&&window.VSRF_BG.setEnabled(anim.checked);apply()});
+    modes.forEach(m=>m.addEventListener("click",()=>{
+      if(!window.VSRF_BG||!window.VSRF_BG.isEnabled()) return;
+      window.VSRF_BG.setMode(m.dataset.bg);apply();
+    }));
+  }
+  if(window.VSRF_BG){bind();apply()}
+  else document.addEventListener("vsrf-bg-ready",()=>{bind();apply()});
+})();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1fb7a07294cf10b',t:'MTc4NDgxODAwOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2017f476c049dc1',t:'MTc4NDg4MTEzNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>

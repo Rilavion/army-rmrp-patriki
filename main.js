@@ -221,8 +221,10 @@
     const c=document.getElementById("bgCanvas");
     if(!c) return;
     const ctx=c.getContext("2d");
-    let W=0,H=0,parts=[],raf;
-    const N=Math.min(70,Math.max(30,Math.floor(window.innerWidth/24)));
+    let W=0,H=0,raf=null;
+    let mode=localStorage.getItem("vsrf-bg-mode")||"grid";
+    let enabled=localStorage.getItem("vsrf-bg-enabled")!=="0";
+    let parts=[],stars=[],radarAngle=0;
 
     function resize(){
       W=c.width=window.innerWidth*devicePixelRatio;
@@ -231,23 +233,33 @@
       c.style.height=window.innerHeight+"px";
     }
     function rand(a,b){return a+Math.random()*(b-a)}
-    function build(){
+    function getColor(){return root.getAttribute("data-theme")==="light"?"61,90,73":"205,168,90"}
+    function getBg(){return root.getAttribute("data-theme")==="light"?"rgba(232,226,200,":"rgba(8,15,11,"}
+
+    function buildParts(){
+      const N=Math.min(70,Math.max(30,Math.floor(window.innerWidth/24)));
       parts=[];
       for(let i=0;i<N;i++){
-        parts.push({
+        parts.push({x:rand(0,W),y:rand(0,H),vx:rand(-.15,.15)*devicePixelRatio,vy:rand(-.15,.15)*devicePixelRatio,r:rand(.8,2.4)*devicePixelRatio,a:rand(.15,.55)});
+      }
+    }
+    function buildStars(){
+      const N=Math.min(180,Math.max(80,Math.floor(window.innerWidth/10)));
+      stars=[];
+      for(let i=0;i<N;i++){
+        const isBig=Math.random()<.05;
+        stars.push({
           x:rand(0,W),y:rand(0,H),
-          vx:rand(-.15,.15)*devicePixelRatio,
-          vy:rand(-.15,.15)*devicePixelRatio,
-          r:rand(.8,2.4)*devicePixelRatio,
-          a:rand(.15,.55)
+          r:isBig?rand(1.8,3.2)*devicePixelRatio:rand(.4,1.4)*devicePixelRatio,
+          a:rand(.1,.75),
+          tw:rand(.005,.02),
+          phase:rand(0,Math.PI*2),
+          isBig
         });
       }
     }
-    function getColor(){
-      const light=root.getAttribute("data-theme")==="light";
-      return light?"61,90,73":"205,168,90";
-    }
-    function drawGrid(){
+
+    function renderGrid(){
       const light=root.getAttribute("data-theme")==="light";
       const step=80*devicePixelRatio;
       ctx.strokeStyle=light?"rgba(61,90,73,.06)":"rgba(205,168,90,.045)";
@@ -257,10 +269,6 @@
       ctx.strokeStyle=light?"rgba(61,90,73,.11)":"rgba(205,168,90,.08)";
       for(let x=0;x<W;x+=step*4){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
       for(let y=0;y<H;y+=step*4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-    }
-    function tick(){
-      ctx.clearRect(0,0,W,H);
-      drawGrid();
       const color=getColor();
       for(let i=0;i<parts.length;i++){
         const p=parts[i];
@@ -284,17 +292,134 @@
         ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
         ctx.fill();
       }
+    }
+
+    function renderStars(){
+      const color=getColor();
+      const light=root.getAttribute("data-theme")==="light";
+      for(let i=0;i<stars.length;i++){
+        const s=stars[i];
+        s.phase+=s.tw;
+        const alpha=s.a*(.55+Math.sin(s.phase)*.45);
+        ctx.beginPath();
+        ctx.fillStyle=`rgba(${color},${alpha})`;
+        ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+        ctx.fill();
+        if(s.isBig){
+          ctx.strokeStyle=`rgba(${color},${alpha*.5})`;
+          ctx.lineWidth=1;
+          ctx.beginPath();
+          ctx.moveTo(s.x-s.r*3,s.y);ctx.lineTo(s.x+s.r*3,s.y);
+          ctx.moveTo(s.x,s.y-s.r*3);ctx.lineTo(s.x,s.y+s.r*3);
+          ctx.stroke();
+        }
+      }
+      const step=200*devicePixelRatio;
+      ctx.strokeStyle=`rgba(${color},.03)`;
+      ctx.lineWidth=1;
+      for(let x=0;x<W;x+=step){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+      for(let y=0;y<H;y+=step){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    }
+
+    function renderRadar(){
+      const color=getColor();
+      const cx=W/2,cy=H/2;
+      const R=Math.max(W,H)*.75;
+      ctx.strokeStyle=`rgba(${color},.06)`;
+      ctx.lineWidth=1*devicePixelRatio;
+      for(let i=1;i<=6;i++){
+        ctx.beginPath();
+        ctx.arc(cx,cy,R*i/6,0,Math.PI*2);
+        ctx.stroke();
+      }
+      for(let i=0;i<8;i++){
+        const a=i*Math.PI/4;
+        ctx.beginPath();
+        ctx.moveTo(cx,cy);
+        ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
+        ctx.stroke();
+      }
+      radarAngle+=.008;
+      const sweepWidth=Math.PI/3;
+      const grad=ctx.createLinearGradient(
+        cx,cy,
+        cx+Math.cos(radarAngle)*R,cy+Math.sin(radarAngle)*R
+      );
+      grad.addColorStop(0,`rgba(${color},.18)`);
+      grad.addColorStop(1,`rgba(${color},0)`);
+      ctx.fillStyle=grad;
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,R,radarAngle-sweepWidth,radarAngle);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle=`rgba(${color},.4)`;
+      ctx.lineWidth=1.5*devicePixelRatio;
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.lineTo(cx+Math.cos(radarAngle)*R,cy+Math.sin(radarAngle)*R);
+      ctx.stroke();
+      for(let i=0;i<parts.length;i++){
+        const p=parts[i];
+        p.x+=p.vx*.3;p.y+=p.vy*.3;
+        if(p.x<0) p.x=W;if(p.x>W) p.x=0;
+        if(p.y<0) p.y=H;if(p.y>H) p.y=0;
+        const dx=p.x-cx,dy=p.y-cy;
+        const ang=Math.atan2(dy,dx);
+        const diff=((radarAngle-ang)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+        const glow=diff<sweepWidth?(1-diff/sweepWidth):0;
+        ctx.beginPath();
+        ctx.fillStyle=`rgba(${color},${.18+glow*.7})`;
+        ctx.arc(p.x,p.y,p.r*(1+glow),0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    function tick(){
+      ctx.clearRect(0,0,W,H);
+      if(mode==="grid") renderGrid();
+      else if(mode==="stars") renderStars();
+      else if(mode==="radar") renderRadar();
       raf=requestAnimationFrame(tick);
     }
-    resize();build();tick();
+
+    function start(){
+      if(!enabled){stop();c.style.opacity="0";return}
+      c.style.opacity="1";
+      if(mode==="stars"&&!stars.length) buildStars();
+      if((mode==="grid"||mode==="radar")&&!parts.length) buildParts();
+      if(!raf) tick();
+    }
+    function stop(){if(raf){cancelAnimationFrame(raf);raf=null}}
+
+    function applyMode(m){
+      mode=m;localStorage.setItem("vsrf-bg-mode",m);
+      parts=[];stars=[];
+      start();
+    }
+    function toggleEnabled(v){
+      enabled=v;localStorage.setItem("vsrf-bg-enabled",v?"1":"0");
+      if(v) start();else{stop();c.style.opacity="0"}
+    }
+
+    resize();
+    start();
+
     let rt;
     window.addEventListener("resize",()=>{
       clearTimeout(rt);
-      rt=setTimeout(()=>{resize();build()},200);
+      rt=setTimeout(()=>{resize();parts=[];stars=[];start()},200);
     });
     document.addEventListener("visibilitychange",()=>{
-      if(document.hidden){cancelAnimationFrame(raf)}
-      else{tick()}
+      if(document.hidden) stop();else if(enabled) start();
     });
+
+    window.VSRF_BG={
+      setMode:applyMode,
+      setEnabled:toggleEnabled,
+      getMode:()=>mode,
+      isEnabled:()=>enabled
+    };
+    document.dispatchEvent(new CustomEvent("vsrf-bg-ready"));
   }
 })();

@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Автопарк - ВС РФ · в/ч №12132</title>
-<link rel="icon" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<title>Автопарк — ВС РФ · в/ч №12132</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -92,8 +91,37 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   <div class="container">
     <div class="footer-inner">
       <div class="footer-brand">
-        <h4>1-я ОБрСпН · в/ч №12132</h4>
-        <p>Вооружённые Силы Российской Федерации. Отдельная гвардейская бригада специального назначения.</p>
+        <h4>Настройки сайта</h4>
+        <div class="footer-settings">
+          <div class="footer-settings-row">
+            <span class="footer-settings-label">
+              <svg viewBox="0 0 24 24"><path d="M13 3l-1.5 6H15l-3.5 12v-8H9l1.5-10H13z"/></svg>
+              Анимации
+            </span>
+            <label class="fs-switch"><input type="checkbox" id="fsAnim" checked><span class="fs-switch-track"><span class="fs-switch-thumb"></span></span></label>
+          </div>
+          <div>
+            <div class="footer-settings-label" style="margin-bottom:8px">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+              Фон
+            </div>
+            <div class="fs-modes" id="fsModes">
+              <button class="fs-mode" data-bg="grid">
+                <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zm10 0h6v6h-6zm-10 10h6v6H4zm10 0h6v6h-6z"/></svg>
+                Сеть
+              </button>
+              <button class="fs-mode" data-bg="stars">
+                <svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.7 1.5 7L12 17.3 5.7 21l1.5-7L2 9.3l7-.8z"/></svg>
+                Звёзды
+              </button>
+              <button class="fs-mode" data-bg="radar">
+                <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3z"/><circle cx="12" cy="12" r="1.5"/></svg>
+                Радар
+              </button>
+            </div>
+          </div>
+          <div class="footer-note">Настройки сохраняются в браузере</div>
+        </div>
       </div>
       <div class="footer-col">
         <h5>Разделы</h5>
@@ -230,21 +258,21 @@ function cardHtml(v){
   const media=v.image
     ? `<img src="${esc(v.image)}" alt="${esc(v.title)}" loading="lazy">`
     : `<div class="auto-placeholder">
-        <svg viewBox="0 0 24 24" width="80" height="80" fill="currentColor" style="opacity:.35"><path d="M3 17h1a2 2 0 0 0 4 0h8a2 2 0 0 0 4 0h1v-4l-2-4h-4V6H5a2 2 0 0 0-2 2v9zm3-9h8v3H6V8z"/></svg>
+        <svg viewBox="0 0 24 24" width="72" height="72" fill="currentColor" style="opacity:.35"><path d="M3 17h1a2 2 0 0 0 4 0h8a2 2 0 0 0 4 0h1v-4l-2-4h-4V6H5a2 2 0 0 0-2 2v9zm3-9h8v3H6V8z"/></svg>
       </div>`;
   const edit=isAdmin?`<button class="veh-edit-btn admin-only" data-edit="${v.id}" title="Редактировать">✎</button>`:"";
   const t=tagInfo(v.tag);
   const tagBadge=t?`<span class="auto-tag ${t.cls}">${t.label}</span>`:"";
+  const specs=[];
+  if(v.crew) specs.push(`<span class="auto-spec"><span class="auto-spec-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span><span class="auto-spec-val">${esc(v.crew)}</span></span>`);
+  if(v.speed) specs.push(`<span class="auto-spec"><span class="auto-spec-icon"><svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44zm-9.79 6.84a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/></svg></span><span class="auto-spec-val">${esc(v.speed)}</span></span>`);
+  if(v.price) specs.push(`<span class="auto-spec"><span class="auto-spec-icon"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></span><span class="auto-spec-val">${esc(v.price)}</span></span>`);
+  if(v.rank) specs.push(`<span class="auto-spec"><span class="auto-spec-icon"><svg viewBox="0 0 24 24"><path d="M12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28z"/></svg></span><span class="auto-spec-val">${esc(v.rank)}</span></span>`);
   return `<div class="auto-card" data-veh-id="${v.id}">
     <div class="auto-thumb">${media}${tagBadge}${edit}</div>
     <div class="auto-body">
       <div class="auto-title">${esc(v.title)}</div>
-      <div class="auto-specs">
-        <div class="auto-spec"><span class="auto-spec-label">Экипаж</span><span class="auto-spec-val">${esc(v.crew||"—")}</span></div>
-        <div class="auto-spec"><span class="auto-spec-label">Скорость</span><span class="auto-spec-val">${esc(v.speed||"—")}</span></div>
-        <div class="auto-spec"><span class="auto-spec-label">Гос. цена</span><span class="auto-spec-val">${esc(v.price||"—")}</span></div>
-        <div class="auto-spec"><span class="auto-spec-label">Доступ с должности</span><span class="auto-spec-val">${esc(v.rank||"—")}</span></div>
-      </div>
+      <div class="auto-specs">${specs.join("")}</div>
     </div>
   </div>`;
 }
@@ -394,7 +422,30 @@ form.addEventListener("submit",async e=>{
 });
 
 load();
+
+(function initBgSettings(){
+  function apply(){
+    if(!window.VSRF_BG) return;
+    const anim=document.getElementById("fsAnim");
+    const modes=document.querySelectorAll(".fs-mode");
+    const en=window.VSRF_BG.isEnabled();
+    const cur=window.VSRF_BG.getMode();
+    if(anim) anim.checked=en;
+    modes.forEach(m=>{m.classList.toggle("active",m.dataset.bg===cur);m.disabled=!en});
+  }
+  function bind(){
+    const anim=document.getElementById("fsAnim");
+    const modes=document.querySelectorAll(".fs-mode");
+    if(!anim) return;
+    anim.addEventListener("change",()=>{window.VSRF_BG&&window.VSRF_BG.setEnabled(anim.checked);apply()});
+    modes.forEach(m=>m.addEventListener("click",()=>{
+      if(!window.VSRF_BG||!window.VSRF_BG.isEnabled()) return;
+      window.VSRF_BG.setMode(m.dataset.bg);apply();
+    }));
+  }
+  if(window.VSRF_BG){bind();apply()}else document.addEventListener("vsrf-bg-ready",()=>{bind();apply()});
+})();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1fa2110bd74f11d',t:'MTc4NDgwMzg3OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2017f3d2e9b9dc1',t:'MTc4NDg4MTEzNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
