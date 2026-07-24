@@ -51,12 +51,17 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <a href="news.html" data-page="news.html" data-transition>Новости</a>
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
+      <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
     </nav>
     <div class="header-actions">
       <button class="search-btn" data-open-search title="Поиск (Ctrl+K)">
         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
         <span>Поиск</span>
         <span class="kbd">Ctrl K</span>
+      </button>
+      <button class="icon-btn" data-open-notify title="Уведомления" style="position:relative">
+        <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        <span class="vsrf-notify-badge" data-notify-badge></span>
       </button>
       <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
         <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -120,6 +125,14 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
               </button>
             </div>
           </div>
+          <div class="footer-settings-row fs-sound-row">
+            <span class="footer-settings-label">
+              <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+              Звуки
+            </span>
+            <label class="fs-switch"><input type="checkbox" id="fsSound"><span class="fs-switch-track"><span class="fs-switch-thumb"></span></span></label>
+          </div>
+          <div class="fs-sound-vol"><span>тише</span><input type="range" id="fsSoundVol" min="0" max="1" step="0.05"><span id="fsSoundVolVal">35%</span></div>
           <div class="footer-note">Настройки сохраняются в браузере</div>
         </div>
       </div>
@@ -135,6 +148,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
         <h5>Ресурсы</h5>
         <a href="autopark.html">Автопарк</a>
         <a href="map.html">Карта</a>
+        <a href="faq.html">FAQ</a>
         <a href="lk.html">Личный кабинет</a>
       </div>
     </div>
@@ -219,6 +233,11 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 <script src="config.js"></script>
 <script src="main.js"></script>
 <script src="holiday-engine.js"></script>
+<script src="sound-engine.js"></script>
+<script src="faq-engine.js"></script>
+<script src="search-engine.js"></script>
+<script src="notify-engine.js"></script>
+
 <script src="auth.js"></script>
 <script src="select-enhance.js"></script>
 <script src="draft-engine.js"></script>
@@ -474,7 +493,21 @@ load();
   }
   if(window.VSRF_BG){bind();apply()}else document.addEventListener("vsrf-bg-ready",()=>{bind();apply()});
 })();
+
+
+(function initSoundSettings(){
+  const s=document.getElementById("fsSound");
+  const v=document.getElementById("fsSoundVol");
+  const vv=document.getElementById("fsSoundVolVal");
+  if(!s||!window.VSRF_SOUND) return;
+  s.checked=VSRF_SOUND.isEnabled();
+  v.value=VSRF_SOUND.getVolume();
+  vv.textContent=Math.round(VSRF_SOUND.getVolume()*100)+"%";
+  s.addEventListener("change",()=>VSRF_SOUND.setEnabled(s.checked));
+  v.addEventListener("input",()=>{VSRF_SOUND.setVolume(v.value);vv.textContent=Math.round(v.value*100)+"%"});
+})();
+
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a201bf7eb9e19dc1',t:'MTc4NDg4Mzc2OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2020303cf4df10d',t:'MTc4NDg4NjUzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
