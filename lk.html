@@ -69,7 +69,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <div id="lkGuest" class="lk-guest" style="display:none">
         <svg viewBox="0 0 24 24"><path d="M12 17a2 2 0 0 0 2-2 2 2 0 0 0-2-2 2 2 0 0 0-2 2 2 2 0 0 0 2 2m6-9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h1V6a5 5 0 0 1 5-5 5 5 0 0 1 5 5v2h1M12 2.9A3.1 3.1 0 0 0 8.9 6V8h6.2V6A3.1 3.1 0 0 0 12 2.9z"/></svg>
         <h2>Личный кабинет</h2>
-        <p>Доступ к личному кабинету имеют только авторизованные администраторы. Войдите в систему для управления сайтом.</p>
+        <p>Доступ имеют только авторизованные администраторы. Войдите в систему для управления сайтом.</p>
         <button class="btn btn-gold" data-open-login>Войти</button>
       </div>
 
@@ -83,73 +83,40 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
           <button class="lk-logout" id="lkLogout">Выйти</button>
         </div>
 
-        <div class="lk-stats" id="lkStats">
-          <div class="lk-stat lk-stat-loading" style="--stat-color:#f0d89b"><span class="lk-stat-icon">📰</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Новостей</div></div>
-          <div class="lk-stat lk-stat-loading" style="--stat-color:#8fd97a"><span class="lk-stat-icon">🚙</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Техники</div></div>
-          <div class="lk-stat lk-stat-loading" style="--stat-color:#7ac3f0"><span class="lk-stat-icon">📖</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Уставов</div></div>
-          <div class="lk-stat lk-stat-loading" style="--stat-color:#c99af7"><span class="lk-stat-icon">🎓</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Уроков</div></div>
-          <div class="lk-stat lk-stat-loading" style="--stat-color:#e8b56a"><span class="lk-stat-icon">📚</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Категорий</div></div>
-          <div class="lk-stat lk-stat-loading" style="--stat-color:#ff7a7a"><span class="lk-stat-icon">👥</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Составов</div></div>
-        </div>
-
         <div class="lk-grid">
-          <div>
-            <div class="lk-panel" style="margin-bottom:20px">
-              <div class="lk-panel-head">
-                <span class="lk-panel-title">Быстрые действия</span>
-              </div>
-              <div class="lk-panel-body">
-                <div class="lk-quick">
-                  <a class="lk-quick-btn" href="news.html"><span class="lk-quick-icon">＋</span>Новая новость</a>
-                  <a class="lk-quick-btn" href="autopark.html"><span class="lk-quick-icon">🚙</span>Добавить технику</a>
-                  <a class="lk-quick-btn" href="training.html"><span class="lk-quick-icon">🎓</span>Новый урок обучения</a>
-                  <a class="lk-quick-btn" href="ustav.html"><span class="lk-quick-icon">📖</span>Редактировать уставы</a>
-                  <a class="lk-quick-btn" href="composition.html"><span class="lk-quick-icon">👥</span>Изменить состав</a>
-                  <a class="lk-quick-btn" href="docs.html"><span class="lk-quick-icon">📄</span>Оформить документ</a>
-                </div>
-              </div>
+          <div class="lk-panel">
+            <div class="lk-panel-head">
+              <span class="lk-panel-title">Журнал аудита</span>
             </div>
-
-            <div class="lk-panel">
-              <div class="lk-panel-head">
-                <span class="lk-panel-title">Последние изменения</span>
-              </div>
-              <div class="lk-panel-body">
-                <div class="lk-activity" id="lkActivity">
-                  <div class="lk-act-empty">Загрузка...</div>
-                </div>
+            <div class="lk-panel-body">
+              <div class="lk-audit" id="lkAudit">
+                <div class="lk-act-empty">Загрузка активности...</div>
               </div>
             </div>
           </div>
 
           <div class="lk-panel">
             <div class="lk-panel-head">
-              <span class="lk-panel-title">Профиль</span>
+              <span class="lk-panel-title">Праздничные темы</span>
             </div>
             <div class="lk-panel-body">
-              <form class="lk-profile-form" id="lkProfileForm">
-                <div class="form-group">
-                  <label>Отображаемое имя</label>
-                  <input type="text" name="display_name" placeholder="Иван Иванов">
-                </div>
-                <div class="form-group">
-                  <label>Должность / роль</label>
-                  <input type="text" name="role_title" placeholder="Администратор сайта">
-                </div>
-                <button class="btn btn-gold btn-sm" type="submit" style="width:100%">Сохранить профиль</button>
-                <div class="lk-profile-msg" id="lkProfileMsg"></div>
-              </form>
 
-              <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line)">
-                <form class="lk-profile-form" id="lkPasswordForm">
-                  <div class="form-group">
-                    <label>Новый пароль</label>
-                    <input type="password" name="password" placeholder="минимум 8 символов" minlength="8" required>
-                  </div>
-                  <button class="btn btn-ghost btn-sm" type="submit" style="width:100%">Сменить пароль</button>
-                  <div class="lk-profile-msg" id="lkPasswordMsg"></div>
-                </form>
+              <div class="hf-panel">
+                <div class="hf-panel-title">Выбор темы</div>
+                <div class="hf-presets" id="hfPresets"></div>
               </div>
+
+              <div class="hf-panel">
+                <div class="hf-panel-title">Свой текст баннера</div>
+                <input class="hf-input" id="hfBanner" placeholder="25 АПРЕЛЯ — ДЕНЬ ТАНКИСТА" maxlength="80">
+                <div class="hf-hint">Оставьте пустым — используется стандартный текст выбранной темы. Отображается на всех страницах сайта. При открытии сайта — красивое приветствие на весь экран.</div>
+                <div class="hf-banner-toggle">
+                  <span>Показывать баннер сверху</span>
+                  <label class="fs-switch"><input type="checkbox" id="hfShow" checked><span class="fs-switch-track"><span class="fs-switch-thumb"></span></span></label>
+                </div>
+              </div>
+
+              <button class="btn btn-ghost btn-sm" id="hfPreview" style="width:100%;margin-top:4px">👁 Показать приветствие</button>
             </div>
           </div>
         </div>
@@ -221,17 +188,18 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 <script src="config.js"></script>
 <script src="main.js"></script>
 <script src="auth.js"></script>
+<script src="holiday-engine.js"></script>
 <script src="lk-engine.js"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
-
 const $=id=>document.getElementById(id);
 const lkGuest=$("lkGuest"),lkApp=$("lkApp");
 
-function initials(s){
-  const p=(s||"").trim().split(/[\s@.]+/);
-  return (p.slice(0,2).map(x=>x[0]||"").join("")||"?").toUpperCase();
-}
+function initials(s){const p=(s||"").trim().split(/[\s@.]+/);return (p.slice(0,2).map(x=>x[0]||"").join("")||"?").toUpperCase()}
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+const TYPE_COLORS={news:"#f0d89b",vehicle:"#8fd97a",ustav:"#7ac3f0",lesson:"#c99af7"};
+const TYPE_LABELS={news:"Новость",vehicle:"Техника",ustav:"Устав",lesson:"Урок"};
 
 async function boot(){
   await VSRF_LK.waitReady();
@@ -243,62 +211,57 @@ async function boot(){
   $("lkAvatar").textContent=initials(displayName);
   $("lkHello").textContent="С возвращением, "+displayName;
   $("lkEmail").textContent=s.user.email+" · онлайн";
-  const form=$("lkProfileForm");
-  form.display_name.value=meta.display_name||"";
-  form.role_title.value=meta.role_title||"";
-
-  renderStats();
-  renderActivity();
+  renderAudit();
+  renderHolidayUI();
 }
 
-async function renderStats(){
-  const st=await VSRF_LK.stats();
-  const cards=document.querySelectorAll(".lk-stat");
-  const map=[st.news,st.vehicles,st.ustavy,st.tLessons,st.tCats,st.comp];
-  cards.forEach((c,i)=>{
-    c.classList.remove("lk-stat-loading");
-    c.querySelector(".lk-stat-num").textContent=map[i]==null?"—":map[i];
-  });
-}
-
-async function renderActivity(){
-  const box=$("lkActivity");
+async function renderAudit(){
+  const box=$("lkAudit");
   const items=await VSRF_LK.recent();
-  if(!items.length){box.innerHTML=`<div class="lk-act-empty">Пока нет действий. Создайте первую запись!</div>`;return}
+  if(!items.length){box.innerHTML=`<div class="lk-act-empty">Пока нет действий на сайте.<br>Создайте первую запись — и здесь появится история.</div>`;return}
   box.innerHTML=items.map(it=>{
-    const when=it.at?new Date(it.at).toLocaleDateString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
-    return `<a class="lk-act-item" href="${it.href}">
-      <span class="lk-act-icon">${it.icon}</span>
-      <div class="lk-act-body">
-        <div class="lk-act-title">${escapeHtml(it.title)}</div>
-        <div class="lk-act-meta">${when}</div>
+    const when=it.at?new Date(it.at).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
+    const color=TYPE_COLORS[it.type]||"var(--gold)";
+    const label=TYPE_LABELS[it.type]||"Запись";
+    return `<a class="lk-audit-item" href="${it.href}" style="--item-color:${color}">
+      <span class="lk-audit-icon">${it.icon}</span>
+      <div class="lk-audit-body">
+        <div class="lk-audit-title">${esc(it.title)}</div>
+        <div class="lk-audit-meta">
+          <span class="lk-audit-meta-type">${label}</span>
+          <span class="lk-audit-meta-sep">·</span>
+          <span>${when}</span>
+        </div>
       </div>
     </a>`;
   }).join("");
 }
-function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+function renderHolidayUI(){
+  const cfg=VSRF_HOLIDAY.readCfg();
+  const wrap=$("hfPresets");
+  wrap.innerHTML=Object.keys(VSRF_HOLIDAY.PRESETS).map(id=>{
+    const p=VSRF_HOLIDAY.PRESETS[id];
+    return `<button class="hf-preset ${cfg.preset===id?"active":""}" data-preset="${id}" style="--hf-color:${p.color}">
+      <span class="hf-preset-icon">${p.icon}</span>${esc(p.label)}
+    </button>`;
+  }).join("");
+  wrap.querySelectorAll("[data-preset]").forEach(b=>b.addEventListener("click",()=>{
+    VSRF_HOLIDAY.setPreset(b.dataset.preset);
+    renderHolidayUI();
+  }));
+  $("hfBanner").value=cfg.customBanner||"";
+  $("hfShow").checked=cfg.showBanner!==false;
+}
+$("hfBanner").addEventListener("input",e=>VSRF_HOLIDAY.setBanner(e.target.value));
+$("hfShow").addEventListener("change",e=>VSRF_HOLIDAY.toggleBanner(e.target.checked));
+$("hfPreview").addEventListener("click",()=>{
+  Object.keys(sessionStorage).forEach(k=>{if(k.indexOf("vsrf-holiday-welcome-")===0) sessionStorage.removeItem(k)});
+  VSRF_HOLIDAY.maybeShowWelcome();
+});
 
 $("lkLogout").addEventListener("click",async()=>{
   if(window.VSRF_AUTH.signOut){await window.VSRF_AUTH.signOut();location.href="index.html"}
-});
-
-$("lkProfileForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const msg=$("lkProfileMsg");msg.className="lk-profile-msg info";msg.textContent="Сохранение...";
-  const r=await VSRF_LK.updateProfile({
-    display_name:e.target.display_name.value.trim(),
-    role_title:e.target.role_title.value.trim()
-  });
-  if(r.ok){msg.className="lk-profile-msg success";msg.textContent="Профиль обновлён";boot()}
-  else{msg.className="lk-profile-msg error";msg.textContent=r.error||"Ошибка"}
-});
-
-$("lkPasswordForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const msg=$("lkPasswordMsg");msg.className="lk-profile-msg info";msg.textContent="Смена пароля...";
-  const r=await VSRF_LK.updatePassword(e.target.password.value);
-  if(r.ok){msg.className="lk-profile-msg success";msg.textContent="Пароль изменён";e.target.reset()}
-  else{msg.className="lk-profile-msg error";msg.textContent=r.error||"Ошибка"}
 });
 
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(boot);
@@ -326,6 +289,6 @@ boot();
   if(window.VSRF_BG){bind();apply()}else document.addEventListener("vsrf-bg-ready",()=>{bind();apply()});
 })();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a201a608bbe29dc1',t:'MTc4NDg4MjcyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a201bfc38c1d9dc1',t:'MTc4NDg4Mzc3OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
