@@ -104,6 +104,35 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
               <div class="hf-panel">
                 <div class="hf-panel-title">Выбор темы</div>
                 <div class="hf-presets" id="hfPresets"></div>
+
+                <div class="hf-custom" id="hfCustom">
+                  <div class="hf-row">
+                    <div class="hf-field">
+                      <span class="hf-field-label">Основной цвет</span>
+                      <div class="hf-color-row"><input type="color" id="hfCustomColor" value="#cda85a"><span class="hf-color-code" id="hfCustomColorCode">#CDA85A</span></div>
+                    </div>
+                    <div class="hf-field">
+                      <span class="hf-field-label">Второй цвет</span>
+                      <div class="hf-color-row"><input type="color" id="hfCustomColor2" value="#f0d89b"><span class="hf-color-code" id="hfCustomColor2Code">#F0D89B</span></div>
+                    </div>
+                  </div>
+                  <div class="hf-field">
+                    <span class="hf-field-label">Название праздника</span>
+                    <input class="hf-input" id="hfCustomLabel" placeholder="Название" maxlength="40">
+                  </div>
+                  <div class="hf-field">
+                    <span class="hf-field-label">Иконка</span>
+                    <div class="hf-icon-grid" id="hfIconGrid"></div>
+                  </div>
+                  <div class="hf-field">
+                    <span class="hf-field-label">Эффект на фоне</span>
+                    <div class="hf-fx-grid" id="hfFxGrid"></div>
+                  </div>
+                  <div class="hf-preview-box">
+                    <span class="hf-preview-icon" id="hfPreviewIcon">✦</span>
+                    <span class="hf-preview-text" id="hfPreviewText">МОЙ ПРАЗДНИК</span>
+                  </div>
+                </div>
               </div>
 
               <div class="hf-panel">
@@ -237,13 +266,19 @@ async function renderAudit(){
   }).join("");
 }
 
+const HF_ICONS=["✦","★","⚔","◈","❆","⚜","☀","✧","♛","⚑","☭","⚓","✈","☘","♥","☆","❋","✺","☯","✵"];
+
 function renderHolidayUI(){
   const cfg=VSRF_HOLIDAY.readCfg();
   const wrap=$("hfPresets");
   wrap.innerHTML=Object.keys(VSRF_HOLIDAY.PRESETS).map(id=>{
     const p=VSRF_HOLIDAY.PRESETS[id];
-    return `<button class="hf-preset ${cfg.preset===id?"active":""}" data-preset="${id}" style="--hf-color:${p.color}">
-      <span class="hf-preset-icon">${p.icon}</span>${esc(p.label)}
+    const isActive=cfg.preset===id;
+    const color=id==="custom"?(cfg.custom&&cfg.custom.color||p.color):p.color;
+    const icon=id==="custom"?(cfg.custom&&cfg.custom.icon||p.icon):p.icon;
+    const label=id==="custom"?(cfg.custom&&cfg.custom.label||p.label):p.label;
+    return `<button class="hf-preset ${isActive?"active":""}" data-preset="${id}" style="--hf-color:${color}">
+      <span class="hf-preset-icon">${icon}</span>${esc(label)}
     </button>`;
   }).join("");
   wrap.querySelectorAll("[data-preset]").forEach(b=>b.addEventListener("click",()=>{
@@ -252,9 +287,42 @@ function renderHolidayUI(){
   }));
   $("hfBanner").value=cfg.customBanner||"";
   $("hfShow").checked=cfg.showBanner!==false;
+
+  const custom=$("hfCustom");
+  custom.classList.toggle("visible",cfg.preset==="custom");
+  const cc=cfg.custom||{};
+  $("hfCustomColor").value=cc.color||"#cda85a";
+  $("hfCustomColorCode").textContent=(cc.color||"#cda85a").toUpperCase();
+  $("hfCustomColor2").value=cc.color2||"#f0d89b";
+  $("hfCustomColor2Code").textContent=(cc.color2||"#f0d89b").toUpperCase();
+  $("hfCustomLabel").value=cc.label||"";
+  custom.style.setProperty("--hf-color",cc.color||"#cda85a");
+  $("hfPreviewIcon").textContent=cc.icon||"✦";
+  $("hfPreviewText").textContent=(cfg.customBanner||cc.label||"МОЙ ПРАЗДНИК").toUpperCase();
+
+  const iconGrid=$("hfIconGrid");
+  iconGrid.innerHTML=HF_ICONS.map(i=>`<button class="hf-icon-btn ${cc.icon===i?"active":""}" data-icon="${i}">${i}</button>`).join("");
+  iconGrid.querySelectorAll("[data-icon]").forEach(b=>b.addEventListener("click",()=>{
+    VSRF_HOLIDAY.setCustom({icon:b.dataset.icon});renderHolidayUI();
+  }));
+
+  const fxGrid=$("hfFxGrid");
+  const FX_EMOJI={none:"⊘",confetti:"🎉",snow:"❄",rain:"💧",sparks:"✨",leaves:"🍂",hearts:"♥",fireworks:"🎆"};
+  fxGrid.innerHTML=Object.keys(VSRF_HOLIDAY.FX_LABELS).map(k=>`<button class="hf-fx-btn ${cc.fx===k?"active":""}" data-fx="${k}"><span class="hf-fx-emoji">${FX_EMOJI[k]||"·"}</span>${esc(VSRF_HOLIDAY.FX_LABELS[k])}</button>`).join("");
+  fxGrid.querySelectorAll("[data-fx]").forEach(b=>b.addEventListener("click",()=>{
+    VSRF_HOLIDAY.setCustom({fx:b.dataset.fx});renderHolidayUI();
+  }));
 }
-$("hfBanner").addEventListener("input",e=>VSRF_HOLIDAY.setBanner(e.target.value));
+$("hfBanner").addEventListener("input",e=>{VSRF_HOLIDAY.setBanner(e.target.value);
+  const cfg=VSRF_HOLIDAY.readCfg();if(cfg.preset==="custom"){$("hfPreviewText").textContent=(e.target.value||cfg.custom.label||"МОЙ ПРАЗДНИК").toUpperCase()}
+});
 $("hfShow").addEventListener("change",e=>VSRF_HOLIDAY.toggleBanner(e.target.checked));
+$("hfCustomColor").addEventListener("input",e=>{VSRF_HOLIDAY.setCustom({color:e.target.value});$("hfCustomColorCode").textContent=e.target.value.toUpperCase();$("hfCustom").style.setProperty("--hf-color",e.target.value)});
+$("hfCustomColor2").addEventListener("input",e=>{VSRF_HOLIDAY.setCustom({color2:e.target.value});$("hfCustomColor2Code").textContent=e.target.value.toUpperCase()});
+$("hfCustomLabel").addEventListener("input",e=>{VSRF_HOLIDAY.setCustom({label:e.target.value});
+  const cfg=VSRF_HOLIDAY.readCfg();$("hfPreviewText").textContent=(cfg.customBanner||e.target.value||"МОЙ ПРАЗДНИК").toUpperCase();
+  document.querySelectorAll('.hf-preset[data-preset="custom"]').forEach(el=>{const s=el.querySelector(':scope > :not(.hf-preset-icon)');if(!s){el.lastChild.textContent=e.target.value||"Свой праздник"}});
+});
 $("hfPreview").addEventListener("click",()=>{
   Object.keys(sessionStorage).forEach(k=>{if(k.indexOf("vsrf-holiday-welcome-")===0) sessionStorage.removeItem(k)});
   VSRF_HOLIDAY.maybeShowWelcome();
@@ -289,6 +357,6 @@ boot();
   if(window.VSRF_BG){bind();apply()}else document.addEventListener("vsrf-bg-ready",()=>{bind();apply()});
 })();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a201bfc38c1d9dc1',t:'MTc4NDg4Mzc3OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a201e0d25d22f143',t:'MTc4NDg4NTEzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
