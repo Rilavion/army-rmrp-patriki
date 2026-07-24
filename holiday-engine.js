@@ -25,6 +25,33 @@ window.VSRF_HOLIDAY=(function(){
   }
   function writeCfg(cfg){try{localStorage.setItem("vsrf-holiday",JSON.stringify(cfg))}catch(e){}}
 
+  async function pullRemote(){
+    const auth=window.VSRF_AUTH;
+    if(!auth||!auth.state||!auth.state.client) return null;
+    try{
+      const {data,error}=await auth.state.client.from("holiday_state").select("state").eq("id",1).maybeSingle();
+      if(error||!data||!data.state) return null;
+      const remote=data.state;
+      if(!remote.custom) remote.custom=JSON.parse(JSON.stringify(DEFAULT_CFG.custom));
+      const cur=readCfg();
+      if(JSON.stringify(cur)!==JSON.stringify(remote)){
+        writeCfg(remote);
+        apply();
+        maybeShowWelcome();
+        document.dispatchEvent(new CustomEvent("vsrf-holiday-updated",{detail:remote}));
+      }
+      return remote;
+    }catch(e){return null}
+  }
+  async function pushRemote(cfg){
+    const auth=window.VSRF_AUTH;
+    if(!auth||!auth.state||!auth.state.client||!auth.state.user) return false;
+    try{
+      const {error}=await auth.state.client.from("holiday_state").upsert({id:1,state:cfg,updated_at:new Date().toISOString()});
+      return !error;
+    }catch(e){return false}
+  }
+
   function activePreset(cfg){
     const p=PRESETS[cfg.preset]||PRESETS.none;
     if(cfg.preset==="custom"){
@@ -248,28 +275,36 @@ window.VSRF_HOLIDAY=(function(){
     const cfg=readCfg();cfg.preset=id;
     sessionStorage.removeItem("vsrf-holiday-hidden");
     Object.keys(sessionStorage).forEach(k=>{if(k.indexOf("vsrf-holiday-welcome-")===0) sessionStorage.removeItem(k)});
-    writeCfg(cfg);apply();
+    writeCfg(cfg);apply();pushRemote(cfg);
   }
   function setBanner(text){
     const cfg=readCfg();cfg.customBanner=text||"";
     sessionStorage.removeItem("vsrf-holiday-hidden");
-    writeCfg(cfg);apply();
+    writeCfg(cfg);apply();pushRemote(cfg);
   }
   function toggleBanner(v){
     const cfg=readCfg();cfg.showBanner=!!v;
     sessionStorage.removeItem("vsrf-holiday-hidden");
-    writeCfg(cfg);apply();
+    writeCfg(cfg);apply();pushRemote(cfg);
   }
   function setCustom(patch){
     const cfg=readCfg();
     cfg.custom={...DEFAULT_CFG.custom,...(cfg.custom||{}),...(patch||{})};
-    writeCfg(cfg);apply();
+    writeCfg(cfg);apply();pushRemote(cfg);
   }
 
-  return {PRESETS,FX_LABELS,readCfg,writeCfg,apply,setPreset,setBanner,toggleBanner,setCustom,maybeShowWelcome,activePreset};
+  return {PRESETS,FX_LABELS,readCfg,writeCfg,apply,setPreset,setBanner,toggleBanner,setCustom,maybeShowWelcome,activePreset,pullRemote,pushRemote};
 })();
 
 document.addEventListener("DOMContentLoaded",function(){
   window.VSRF_HOLIDAY.apply();
   setTimeout(()=>window.VSRF_HOLIDAY.maybeShowWelcome(),600);
+  function tryPull(){
+    if(window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.client){
+      window.VSRF_HOLIDAY.pullRemote();
+    }
+  }
+  if(window.VSRF_AUTH&&window.VSRF_AUTH.onChange) window.VSRF_AUTH.onChange(tryPull);
+  setTimeout(tryPull,300);
+  setInterval(tryPull,120000);
 });
