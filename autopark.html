@@ -135,6 +135,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
         <h5>Ресурсы</h5>
         <a href="autopark.html">Автопарк</a>
         <a href="map.html">Карта</a>
+        <a href="lk.html">Личный кабинет</a>
         <a href="#" data-open-login>Личный кабинет</a>
       </div>
     </div>
@@ -220,6 +221,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 <script src="main.js"></script>
 <script src="auth.js"></script>
 <script src="select-enhance.js"></script>
+<script src="draft-engine.js"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -277,6 +279,21 @@ function cardHtml(v){
   </div>`;
 }
 
+function renderSkeleton(){
+  grid.innerHTML=Array(6).fill(0).map(()=>`
+    <div class="sk-auto-card"><div class="skeleton skeleton-img"></div>
+      <div class="sk-body">
+        <div class="skeleton skeleton-title"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <div class="skeleton skeleton-tag" style="width:70px;height:22px"></div>
+          <div class="skeleton skeleton-tag" style="width:70px;height:22px"></div>
+          <div class="skeleton skeleton-tag" style="width:70px;height:22px"></div>
+          <div class="skeleton skeleton-tag" style="width:70px;height:22px"></div>
+        </div>
+      </div>
+    </div>`).join("");
+}
+
 function render(){
   if(!VEHICLES.length){
     grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><h3>Нет техники</h3><p>Добавьте первую единицу через админ-панель.</p></div>`;
@@ -292,6 +309,7 @@ function readLocal(){try{return JSON.parse(localStorage.getItem("vsrf-vehicles")
 function writeLocal(list){localStorage.setItem("vsrf-vehicles",JSON.stringify(list))}
 
 async function load(){
+  renderSkeleton();
   const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
   if(s&&s.available&&s.client){
     try{
@@ -334,7 +352,17 @@ function openEdit(v){
   modal.classList.add("active");
 }
 
-addBtn.addEventListener("click",()=>openEdit());
+let vehDraftHandle=null;
+addBtn.addEventListener("click",()=>{
+  openEdit();
+  if(window.VSRF_DRAFT&&!vehDraftHandle){
+    vehDraftHandle=VSRF_DRAFT.attach(form,"veh-new");
+    VSRF_DRAFT.offerRestore("veh-new",data=>{
+      Object.keys(data||{}).forEach(k=>{const el=form.elements[k];if(el&&el.type!=="file") el.value=data[k]});
+      if(form.tag) form.tag.dispatchEvent(new Event("__vsrf_refresh"));
+    });
+  }
+});
 grid.addEventListener("click",e=>{
   const b=e.target.closest("[data-edit]");
   if(!b) return;
@@ -406,6 +434,7 @@ form.addEventListener("submit",async e=>{
         if(error) throw error;
       }
       msg.className="form-msg success";msg.textContent="Готово";
+      if(window.VSRF_DRAFT&&!form.id.value) VSRF_DRAFT.clear("veh-new");
       setTimeout(()=>{modal.classList.remove("active");load()},500);
     }catch(err){msg.className="form-msg error";msg.textContent=friendlyDbError(err);msg.style.whiteSpace="pre-wrap"}
   }else{
@@ -446,6 +475,6 @@ load();
   if(window.VSRF_BG){bind();apply()}else document.addEventListener("vsrf-bg-ready",()=>{bind();apply()});
 })();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2017f3d2e9b9dc1',t:'MTc4NDg4MTEzNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a201a5b7ae639dc1',t:'MTc4NDg4MjcxMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>

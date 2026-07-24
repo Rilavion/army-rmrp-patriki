@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Личный кабинет — ВС РФ · в/ч №12132</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style id="vsrf-admin-guard">
+[data-admin]{display:none !important}
+body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
+body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
+</style>
+<script>
+(function(){
+  function apply(){var s=window.VSRF_AUTH&&window.VSRF_AUTH.state;if(!s||!s.ready) return;document.body.classList.toggle("vsrf-is-admin",!!s.user)}
+  document.addEventListener("DOMContentLoaded",function(){
+    apply();
+    if(window.VSRF_AUTH&&window.VSRF_AUTH.onChange) window.VSRF_AUTH.onChange(apply);
+    else{var t=setInterval(function(){if(window.VSRF_AUTH){clearInterval(t);apply();window.VSRF_AUTH.onChange(apply)}},80);setTimeout(function(){clearInterval(t)},4000)}
+  });
+})();
+</script>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise"></div>
+<div class="page-transition-overlay" id="overlay"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-text">
+        <span class="brand-label">Вооружённые Силы РФ</span>
+        <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
+      </div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="training.html" data-page="training.html" data-transition>Обучение</a>
+      <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
+      <a href="docs.html" data-page="docs.html" data-transition data-admin>Документы</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="login-btn" data-open-login>
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        <span>Войти</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="section" style="padding-top:32px">
+    <div class="container lk-wrap">
+
+      <div id="lkGuest" class="lk-guest" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M12 17a2 2 0 0 0 2-2 2 2 0 0 0-2-2 2 2 0 0 0-2 2 2 2 0 0 0 2 2m6-9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h1V6a5 5 0 0 1 5-5 5 5 0 0 1 5 5v2h1M12 2.9A3.1 3.1 0 0 0 8.9 6V8h6.2V6A3.1 3.1 0 0 0 12 2.9z"/></svg>
+        <h2>Личный кабинет</h2>
+        <p>Доступ к личному кабинету имеют только авторизованные администраторы. Войдите в систему для управления сайтом.</p>
+        <button class="btn btn-gold" data-open-login>Войти</button>
+      </div>
+
+      <div id="lkApp" style="display:none">
+        <div class="lk-head">
+          <div class="lk-avatar" id="lkAvatar">?</div>
+          <div class="lk-head-body">
+            <div class="lk-hello" id="lkHello">С возвращением</div>
+            <div class="lk-email" id="lkEmail">—</div>
+          </div>
+          <button class="lk-logout" id="lkLogout">Выйти</button>
+        </div>
+
+        <div class="lk-stats" id="lkStats">
+          <div class="lk-stat lk-stat-loading" style="--stat-color:#f0d89b"><span class="lk-stat-icon">📰</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Новостей</div></div>
+          <div class="lk-stat lk-stat-loading" style="--stat-color:#8fd97a"><span class="lk-stat-icon">🚙</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Техники</div></div>
+          <div class="lk-stat lk-stat-loading" style="--stat-color:#7ac3f0"><span class="lk-stat-icon">📖</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Уставов</div></div>
+          <div class="lk-stat lk-stat-loading" style="--stat-color:#c99af7"><span class="lk-stat-icon">🎓</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Уроков</div></div>
+          <div class="lk-stat lk-stat-loading" style="--stat-color:#e8b56a"><span class="lk-stat-icon">📚</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Категорий</div></div>
+          <div class="lk-stat lk-stat-loading" style="--stat-color:#ff7a7a"><span class="lk-stat-icon">👥</span><div class="lk-stat-num">0</div><div class="lk-stat-label">Составов</div></div>
+        </div>
+
+        <div class="lk-grid">
+          <div>
+            <div class="lk-panel" style="margin-bottom:20px">
+              <div class="lk-panel-head">
+                <span class="lk-panel-title">Быстрые действия</span>
+              </div>
+              <div class="lk-panel-body">
+                <div class="lk-quick">
+                  <a class="lk-quick-btn" href="news.html"><span class="lk-quick-icon">＋</span>Новая новость</a>
+                  <a class="lk-quick-btn" href="autopark.html"><span class="lk-quick-icon">🚙</span>Добавить технику</a>
+                  <a class="lk-quick-btn" href="training.html"><span class="lk-quick-icon">🎓</span>Новый урок обучения</a>
+                  <a class="lk-quick-btn" href="ustav.html"><span class="lk-quick-icon">📖</span>Редактировать уставы</a>
+                  <a class="lk-quick-btn" href="composition.html"><span class="lk-quick-icon">👥</span>Изменить состав</a>
+                  <a class="lk-quick-btn" href="docs.html"><span class="lk-quick-icon">📄</span>Оформить документ</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="lk-panel">
+              <div class="lk-panel-head">
+                <span class="lk-panel-title">Последние изменения</span>
+              </div>
+              <div class="lk-panel-body">
+                <div class="lk-activity" id="lkActivity">
+                  <div class="lk-act-empty">Загрузка...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lk-panel">
+            <div class="lk-panel-head">
+              <span class="lk-panel-title">Профиль</span>
+            </div>
+            <div class="lk-panel-body">
+              <form class="lk-profile-form" id="lkProfileForm">
+                <div class="form-group">
+                  <label>Отображаемое имя</label>
+                  <input type="text" name="display_name" placeholder="Иван Иванов">
+                </div>
+                <div class="form-group">
+                  <label>Должность / роль</label>
+                  <input type="text" name="role_title" placeholder="Администратор сайта">
+                </div>
+                <button class="btn btn-gold btn-sm" type="submit" style="width:100%">Сохранить профиль</button>
+                <div class="lk-profile-msg" id="lkProfileMsg"></div>
+              </form>
+
+              <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line)">
+                <form class="lk-profile-form" id="lkPasswordForm">
+                  <div class="form-group">
+                    <label>Новый пароль</label>
+                    <input type="password" name="password" placeholder="минимум 8 символов" minlength="8" required>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" type="submit" style="width:100%">Сменить пароль</button>
+                  <div class="lk-profile-msg" id="lkPasswordMsg"></div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h4>Настройки сайта</h4>
+        <div class="footer-settings">
+          <div class="footer-settings-row">
+            <span class="footer-settings-label"><svg viewBox="0 0 24 24"><path d="M13 3l-1.5 6H15l-3.5 12v-8H9l1.5-10H13z"/></svg>Анимации</span>
+            <label class="fs-switch"><input type="checkbox" id="fsAnim" checked><span class="fs-switch-track"><span class="fs-switch-thumb"></span></span></label>
+          </div>
+          <div>
+            <div class="footer-settings-label" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>Фон</div>
+            <div class="fs-modes">
+              <button class="fs-mode" data-bg="grid"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zm10 0h6v6h-6zm-10 10h6v6H4zm10 0h6v6h-6z"/></svg>Сеть</button>
+              <button class="fs-mode" data-bg="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.7 1.5 7L12 17.3 5.7 21l1.5-7L2 9.3l7-.8z"/></svg>Звёзды</button>
+              <button class="fs-mode" data-bg="radar"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3z"/><circle cx="12" cy="12" r="1.5"/></svg>Радар</button>
+            </div>
+          </div>
+          <div class="footer-note">Настройки сохраняются в браузере</div>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Разделы</h5>
+        <a href="index.html">Главная</a>
+        <a href="ustav.html">Уставы</a>
+        <a href="training.html">Обучение</a>
+        <a href="composition.html">Состав</a>
+        <a href="news.html">Новости</a>
+      </div>
+      <div class="footer-col">
+        <h5>Ресурсы</h5>
+        <a href="docs.html" data-admin>Документы</a>
+        <a href="autopark.html">Автопарк</a>
+        <a href="map.html">Карта</a>
+        <a href="lk.html">Личный кабинет</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> · Вооружённые Силы Российской Федерации</span>
+      <span>1-я ОБрСпН · в/ч №12132</span>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Вход администратора</h3>
+    <div class="modal-sub">Доступ к управлению контентом</div>
+    <form>
+      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
+      <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="main.js"></script>
+<script src="auth.js"></script>
+<script src="lk-engine.js"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+
+const $=id=>document.getElementById(id);
+const lkGuest=$("lkGuest"),lkApp=$("lkApp");
+
+function initials(s){
+  const p=(s||"").trim().split(/[\s@.]+/);
+  return (p.slice(0,2).map(x=>x[0]||"").join("")||"?").toUpperCase();
+}
+
+async function boot(){
+  await VSRF_LK.waitReady();
+  const s=window.VSRF_AUTH.state;
+  if(!s.user){lkGuest.style.display="";lkApp.style.display="none";return}
+  lkGuest.style.display="none";lkApp.style.display="";
+  const meta=s.user.user_metadata||{};
+  const displayName=meta.display_name||s.user.email.split("@")[0];
+  $("lkAvatar").textContent=initials(displayName);
+  $("lkHello").textContent="С возвращением, "+displayName;
+  $("lkEmail").textContent=s.user.email+" · онлайн";
+  const form=$("lkProfileForm");
+  form.display_name.value=meta.display_name||"";
+  form.role_title.value=meta.role_title||"";
+
+  renderStats();
+  renderActivity();
+}
+
+async function renderStats(){
+  const st=await VSRF_LK.stats();
+  const cards=document.querySelectorAll(".lk-stat");
+  const map=[st.news,st.vehicles,st.ustavy,st.tLessons,st.tCats,st.comp];
+  cards.forEach((c,i)=>{
+    c.classList.remove("lk-stat-loading");
+    c.querySelector(".lk-stat-num").textContent=map[i]==null?"—":map[i];
+  });
+}
+
+async function renderActivity(){
+  const box=$("lkActivity");
+  const items=await VSRF_LK.recent();
+  if(!items.length){box.innerHTML=`<div class="lk-act-empty">Пока нет действий. Создайте первую запись!</div>`;return}
+  box.innerHTML=items.map(it=>{
+    const when=it.at?new Date(it.at).toLocaleDateString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
+    return `<a class="lk-act-item" href="${it.href}">
+      <span class="lk-act-icon">${it.icon}</span>
+      <div class="lk-act-body">
+        <div class="lk-act-title">${escapeHtml(it.title)}</div>
+        <div class="lk-act-meta">${when}</div>
+      </div>
+    </a>`;
+  }).join("");
+}
+function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+$("lkLogout").addEventListener("click",async()=>{
+  if(window.VSRF_AUTH.signOut){await window.VSRF_AUTH.signOut();location.href="index.html"}
+});
+
+$("lkProfileForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const msg=$("lkProfileMsg");msg.className="lk-profile-msg info";msg.textContent="Сохранение...";
+  const r=await VSRF_LK.updateProfile({
+    display_name:e.target.display_name.value.trim(),
+    role_title:e.target.role_title.value.trim()
+  });
+  if(r.ok){msg.className="lk-profile-msg success";msg.textContent="Профиль обновлён";boot()}
+  else{msg.className="lk-profile-msg error";msg.textContent=r.error||"Ошибка"}
+});
+
+$("lkPasswordForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const msg=$("lkPasswordMsg");msg.className="lk-profile-msg info";msg.textContent="Смена пароля...";
+  const r=await VSRF_LK.updatePassword(e.target.password.value);
+  if(r.ok){msg.className="lk-profile-msg success";msg.textContent="Пароль изменён";e.target.reset()}
+  else{msg.className="lk-profile-msg error";msg.textContent=r.error||"Ошибка"}
+});
+
+if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(boot);
+boot();
+
+(function initBgSettings(){
+  function apply(){
+    if(!window.VSRF_BG) return;
+    const anim=document.getElementById("fsAnim");
+    const modes=document.querySelectorAll(".fs-mode");
+    const en=window.VSRF_BG.isEnabled();const cur=window.VSRF_BG.getMode();
+    if(anim) anim.checked=en;
+    modes.forEach(m=>{m.classList.toggle("active",m.dataset.bg===cur);m.disabled=!en});
+  }
+  function bind(){
+    const anim=document.getElementById("fsAnim");
+    const modes=document.querySelectorAll(".fs-mode");
+    if(!anim) return;
+    anim.addEventListener("change",()=>{window.VSRF_BG&&window.VSRF_BG.setEnabled(anim.checked);apply()});
+    modes.forEach(m=>m.addEventListener("click",()=>{
+      if(!window.VSRF_BG||!window.VSRF_BG.isEnabled()) return;
+      window.VSRF_BG.setMode(m.dataset.bg);apply();
+    }));
+  }
+  if(window.VSRF_BG){bind();apply()}else document.addEventListener("vsrf-bg-ready",()=>{bind();apply()});
+})();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a201a608bbe29dc1',t:'MTc4NDg4MjcyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

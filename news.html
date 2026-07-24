@@ -119,6 +119,7 @@
         <h5>Ресурсы</h5>
         <a href="autopark.html">Автопарк</a>
         <a href="map.html">Карта</a>
+        <a href="lk.html">Личный кабинет</a>
         <a href="#" data-open-login>Личный кабинет</a>
       </div>
     </div>
@@ -193,6 +194,7 @@
 <script src="news.js"></script>
 <script src="news-reader.js"></script>
 <script src="select-enhance.js"></script>
+<script src="draft-engine.js"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -279,8 +281,32 @@ function openNews(id){
 function closeNews(){VSRF_NEWS_READER.close()}
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&editNewsModal.classList.contains("active")) editNewsModal.classList.remove("active")});
 
+function renderSkeleton(){
+  heroSlot.innerHTML=`<div class="news-hero" style="min-height:420px;background:transparent;border:0;box-shadow:none;padding:0;display:grid;grid-template-columns:1.4fr 1fr;gap:0">
+    <div class="skeleton skeleton-block" style="border-radius:26px 0 0 26px"></div>
+    <div style="padding:44px;display:flex;flex-direction:column;gap:14px;justify-content:center">
+      <div class="skeleton skeleton-tag"></div>
+      <div class="skeleton skeleton-text" style="width:40%"></div>
+      <div class="skeleton skeleton-title" style="width:90%;height:32px"></div>
+      <div class="skeleton skeleton-text"></div>
+      <div class="skeleton skeleton-text" style="width:75%"></div>
+    </div>
+  </div>`;
+  grid.innerHTML=Array(3).fill(0).map(()=>`
+    <div class="sk-news-card"><div class="skeleton skeleton-img"></div>
+      <div class="sk-body">
+        <div class="skeleton skeleton-text" style="width:30%"></div>
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-text" style="width:80%"></div>
+      </div>
+    </div>`).join("");
+  listEl.innerHTML="";
+}
+
 async function load(){
   const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  renderSkeleton();
   LOADED=await VSRF_NEWS.fetchNews();
   if(!LOADED.length){
     heroSlot.innerHTML="";grid.innerHTML="";
@@ -311,7 +337,18 @@ document.getElementById("deptSelect").innerHTML=VSRF_NEWS.deptsList().map(t=>`<o
 VSRF_SELECT.enhance(document.getElementById("tagSelect"));
 VSRF_SELECT.enhance(document.getElementById("deptSelect"));
 
-addBtn.addEventListener("click",()=>openEdit());
+let draftHandle=null;
+addBtn.addEventListener("click",()=>{
+  openEdit();
+  if(window.VSRF_DRAFT&&!draftHandle){
+    draftHandle=VSRF_DRAFT.attach(newsForm,"news-new");
+    VSRF_DRAFT.offerRestore("news-new",data=>{
+      Object.keys(data||{}).forEach(k=>{const el=newsForm.elements[k];if(el&&el.type!=="file") el.value=data[k]});
+      if(newsForm.tag) newsForm.tag.dispatchEvent(new Event("__vsrf_refresh"));
+      if(newsForm.dept) newsForm.dept.dispatchEvent(new Event("__vsrf_refresh"));
+    });
+  }
+});
 function openEdit(item){
   document.getElementById("editNewsTitle").textContent=item?"Редактировать новость":"Новая новость";
   newsForm.reset();
@@ -370,6 +407,7 @@ newsForm.addEventListener("submit",async e=>{
       if(error) throw error;
     }
     msg.className="form-msg success";msg.textContent="Готово";
+    if(window.VSRF_DRAFT) VSRF_DRAFT.clear("news-new");
     setTimeout(()=>{editNewsModal.classList.remove("active");load()},500);
   }catch(err){msg.className="form-msg error";msg.textContent=err.message||"Ошибка сохранения"}
 });
@@ -408,5 +446,5 @@ if(location.hash&&location.hash.indexOf("#news-")===0){
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2017f681b099dc1',t:'MTc4NDg4MTE0Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a201a6378cb99dc1',t:'MTc4NDg4MjczMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
