@@ -1347,9 +1347,9 @@ select,option{color-scheme:inherit}
 .doc-emblem-wrap{text-align:center;margin-bottom:8pt;line-height:0}
 .doc-emblem-wrap img{
   width:calc(70pt * var(--doc-emblem-scale));
-  height:calc(70pt * var(--doc-emblem-scale));
-  object-fit:contain;display:inline-block;
-  transition:width .25s,height .25s;
+  height:auto;max-height:calc(90pt * var(--doc-emblem-scale));
+  display:inline-block;
+  transition:width .25s,max-height .25s;
 }
 .doc-ministry{text-align:center;font-weight:bold;font-size:var(--doc-ministry-size);letter-spacing:.01em;margin-bottom:14pt;line-height:1.35}
 .doc-date-line{text-align:center;font-size:var(--doc-body-size);margin:6pt 0 4pt}
@@ -1391,13 +1391,9 @@ select,option{color-scheme:inherit}
 .doc-letter-head-left{display:flex;gap:10pt}
 .doc-letter-emblem{
   width:calc(48pt * var(--doc-emblem-scale));
-  height:calc(48pt * var(--doc-emblem-scale));
-  min-width:calc(48pt * var(--doc-emblem-scale));
-  min-height:calc(48pt * var(--doc-emblem-scale));
-  max-width:calc(48pt * var(--doc-emblem-scale));
-  max-height:calc(48pt * var(--doc-emblem-scale));
-  object-fit:contain;display:block;aspect-ratio:1/1;flex-shrink:0;
-  transition:width .25s,height .25s;
+  height:auto;max-height:calc(60pt * var(--doc-emblem-scale));
+  display:block;flex-shrink:0;
+  transition:width .25s,max-height .25s;
 }
 .doc-letter-info{font-size:9.5pt;line-height:1.45}
 .doc-letter-info .doc-strong{font-weight:bold;margin-top:2pt}
