@@ -1,5 +1,5 @@
 window.VSRF_DOC_TEMPLATES=(function(){
-  const EMBLEM="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Emblem_of_the_Russian_Ministry_of_Defence.svg/512px-Emblem_of_the_Russian_Ministry_of_Defence.svg.png";
+  const EMBLEM="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg";
 
   const COMMON_SEAL={key:"seal_url",label:"URL печати (изображение)",type:"text",default:""};
   const COMMON_SIG_IMG={key:"sig_url",label:"URL подписи (изображение)",type:"text",default:""};
@@ -250,11 +250,10 @@ window.VSRF_DOC_TEMPLATES=(function(){
       <div class="doc-inner">
         <div class="doc-emblem-wrap"><img src="${EMBLEM}" alt="" crossorigin="anonymous"></div>
         <div class="doc-ministry">${ministry}</div>
-        <div class="doc-date-line">${esc(v.date)}</div>
         <div class="doc-title-word">ПРИКАЗ</div>
         <div class="doc-title-sub">${nl2br(v.title)}</div>
-        <div class="doc-reqs doc-reqs-two">
-          <span>${esc(v.city)}</span><span>${esc(v.number)}</span>
+        <div class="doc-reqs">
+          <span>${esc(v.date)}</span><span>${esc(v.city)}</span><span>${esc(v.number)}</span>
         </div>
         <div class="doc-p doc-preamble">${nl2br(v.preamble)}</div>
         ${items}
