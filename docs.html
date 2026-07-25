@@ -62,68 +62,89 @@
 
       <div class="docs-tabs" id="docsTabs"></div>
 
-      <div class="docs-layout">
-        <div class="doc-panel doc-panel-fields">
-          <h4 id="docPanelTitle">Поля документа</h4>
-          <form id="docForm"></form>
-        </div>
+      <div class="docs-toolbar">
+        <button class="btn btn-ghost btn-sm doc-fab-btn" data-toggle-panel="fields">📝 Поля документа</button>
+        <button class="btn btn-ghost btn-sm doc-fab-btn" data-toggle-panel="style">🎨 Оформление</button>
+        <span class="docs-toolbar-hint">Панели можно перетаскивать за заголовок</span>
+      </div>
 
+      <div class="docs-layout">
         <div class="docs-preview">
           <div class="docs-preview-inner" id="docsPreview"></div>
         </div>
 
-        <div class="doc-panel doc-panel-style">
-          <h4>Оформление</h4>
-
-          <div class="doc-emblem-scale">
-            <div class="doc-emblem-scale-label"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Масштаб эмблемы</div>
-            <div class="doc-emblem-scale-btns" id="emblemScaleBtns">
-              <button class="doc-emblem-scale-btn" data-scale="1">1×</button>
-              <button class="doc-emblem-scale-btn" data-scale="2">2×</button>
-              <button class="doc-emblem-scale-btn" data-scale="3">3×</button>
+        <div class="doc-float" id="docFloatFields" data-panel="fields" style="left:20px;top:180px">
+          <div class="doc-float-head" data-drag>
+            <span class="doc-float-title">📝 <span id="docPanelTitle">Поля документа</span></span>
+            <div class="doc-float-actions">
+              <button class="doc-float-btn" data-collapse title="Свернуть">–</button>
+              <button class="doc-float-btn" data-close title="Скрыть">✕</button>
             </div>
           </div>
-
-          <div class="doc-font-panel">
-            <div class="doc-font-head">
-              <span class="doc-font-panel-title">Размеры шрифтов (px)</span>
-              <button class="doc-font-reset" id="fontResetBtn" title="Сбросить к стандарту">↺</button>
-            </div>
-            <div class="doc-font-rows" id="fontRows"></div>
+          <div class="doc-float-body">
+            <form id="docForm"></form>
           </div>
+        </div>
 
-          <h4 style="margin-top:16px">Печать (изображение)</h4>
-          <div class="seal-controls">
-            <input type="url" id="sealUrlInput" placeholder="https://... (URL картинки печати)">
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-ghost btn-sm" id="sealLoadBtn" type="button" style="flex:1;min-height:36px">🖼 Из URL</button>
-              <label class="btn btn-ghost btn-sm" style="flex:1;min-height:36px;cursor:pointer">
-                📁 Файл<input type="file" id="sealFileInput" accept="image/*" hidden>
-              </label>
-              <button class="btn btn-ghost btn-sm" id="sealClearBtn" type="button" style="min-height:36px;padding:0 10px">×</button>
+        <div class="doc-float" id="docFloatStyle" data-panel="style" style="right:20px;top:180px">
+          <div class="doc-float-head" data-drag>
+            <span class="doc-float-title">🎨 Оформление</span>
+            <div class="doc-float-actions">
+              <button class="doc-float-btn" data-collapse title="Свернуть">–</button>
+              <button class="doc-float-btn" data-close title="Скрыть">✕</button>
             </div>
-            <div id="sealPreview" style="display:none"><img id="sealPreviewImg" src=""></div>
           </div>
-
-          <h4 style="margin-top:14px">Подпись (изображение)</h4>
-          <div class="seal-controls">
-            <input type="url" id="sigUrlInput" placeholder="https://... (URL картинки подписи)">
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-ghost btn-sm" id="sigLoadBtn" type="button" style="flex:1;min-height:36px">🖼 Из URL</button>
-              <label class="btn btn-ghost btn-sm" style="flex:1;min-height:36px;cursor:pointer">
-                📁 Файл<input type="file" id="sigFileInput" accept="image/*" hidden>
-              </label>
-              <button class="btn btn-ghost btn-sm" id="sigClearBtn" type="button" style="min-height:36px;padding:0 10px">×</button>
+          <div class="doc-float-body">
+            <div class="doc-emblem-scale">
+              <div class="doc-emblem-scale-label"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Масштаб эмблемы</div>
+              <div class="doc-emblem-scale-btns" id="emblemScaleBtns">
+                <button class="doc-emblem-scale-btn" data-scale="1">1×</button>
+                <button class="doc-emblem-scale-btn" data-scale="2">2×</button>
+                <button class="doc-emblem-scale-btn" data-scale="3">3×</button>
+              </div>
             </div>
-            <div id="sigPreview" style="display:none"><img id="sigPreviewImg" src=""></div>
-          </div>
 
-          <div class="doc-actions">
-            <div id="perPageCopy"></div>
-            <button class="btn btn-gold btn-sm" id="copyAllBtn">📋 Скопировать всё как PNG</button>
-            <button class="btn btn-ghost btn-sm" id="downloadBtn">💾 Скачать (все страницы)</button>
-            <button class="btn btn-ghost btn-sm" id="printBtn">🖨 Печать / PDF</button>
-            <button class="btn btn-ghost btn-sm" id="resetBtn">↺ Сбросить поля</button>
+            <div class="doc-font-panel">
+              <div class="doc-font-head">
+                <span class="doc-font-panel-title">Размеры шрифтов (px)</span>
+                <button class="doc-font-reset" id="fontResetBtn" title="Сбросить к стандарту">↺</button>
+              </div>
+              <div class="doc-font-rows" id="fontRows"></div>
+            </div>
+
+            <h4 style="margin-top:16px">Печать (изображение)</h4>
+            <div class="seal-controls">
+              <input type="url" id="sealUrlInput" placeholder="https://... (URL картинки печати)">
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-ghost btn-sm" id="sealLoadBtn" type="button" style="flex:1;min-height:36px">🖼 Из URL</button>
+                <label class="btn btn-ghost btn-sm" style="flex:1;min-height:36px;cursor:pointer">
+                  📁 Файл<input type="file" id="sealFileInput" accept="image/*" hidden>
+                </label>
+                <button class="btn btn-ghost btn-sm" id="sealClearBtn" type="button" style="min-height:36px;padding:0 10px">×</button>
+              </div>
+              <div id="sealPreview" style="display:none"><img id="sealPreviewImg" src=""></div>
+            </div>
+
+            <h4 style="margin-top:14px">Подпись (изображение)</h4>
+            <div class="seal-controls">
+              <input type="url" id="sigUrlInput" placeholder="https://... (URL картинки подписи)">
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-ghost btn-sm" id="sigLoadBtn" type="button" style="flex:1;min-height:36px">🖼 Из URL</button>
+                <label class="btn btn-ghost btn-sm" style="flex:1;min-height:36px;cursor:pointer">
+                  📁 Файл<input type="file" id="sigFileInput" accept="image/*" hidden>
+                </label>
+                <button class="btn btn-ghost btn-sm" id="sigClearBtn" type="button" style="min-height:36px;padding:0 10px">×</button>
+              </div>
+              <div id="sigPreview" style="display:none"><img id="sigPreviewImg" src=""></div>
+            </div>
+
+            <div class="doc-actions">
+              <div id="perPageCopy"></div>
+              <button class="btn btn-gold btn-sm" id="copyAllBtn">📋 Скопировать всё как PNG</button>
+              <button class="btn btn-ghost btn-sm" id="downloadBtn">💾 Скачать (все страницы)</button>
+              <button class="btn btn-ghost btn-sm" id="printBtn">🖨 Печать / PDF</button>
+              <button class="btn btn-ghost btn-sm" id="resetBtn">↺ Сбросить поля</button>
+            </div>
           </div>
         </div>
       </div>
@@ -531,9 +552,98 @@ renderDoc=function(){_origRenderDoc();applyEmblemScale();applyFontSizes()};
 const _origTabsClick=tabs.onclick;
 tabs.addEventListener("click",e=>{const b=e.target.closest("[data-tpl]");if(b) setTimeout(renderFontRows,0)});
 
+(function initFloatingPanels(){
+  const panels=document.querySelectorAll(".doc-float");
+  const stateKey="vsrf-doc-panels-v1";
+  const state=(()=>{try{return JSON.parse(localStorage.getItem(stateKey)||"{}")}catch(e){return {}}})();
+  function save(){try{localStorage.setItem(stateKey,JSON.stringify(state))}catch(e){}}
+  let zTop=100;
+
+  panels.forEach(panel=>{
+    const id=panel.dataset.panel;
+    const st=state[id]||{};
+    if(st.hidden) panel.style.display="none";
+    if(st.collapsed) panel.classList.add("collapsed");
+    if(st.x!=null){panel.style.left=st.x+"px";panel.style.right="auto"}
+    if(st.y!=null){panel.style.top=st.y+"px"}
+    if(st.w) panel.style.width=st.w+"px";
+    if(st.h) panel.style.height=st.h+"px";
+
+    const head=panel.querySelector("[data-drag]");
+    let dragging=false,offX=0,offY=0;
+    head.addEventListener("mousedown",e=>{
+      if(e.target.closest(".doc-float-btn")) return;
+      dragging=true;
+      const r=panel.getBoundingClientRect();
+      panel.style.left=r.left+"px";panel.style.right="auto";panel.style.top=r.top+"px";
+      offX=e.clientX-r.left;offY=e.clientY-r.top;
+      panel.style.zIndex=(++zTop);
+      document.body.style.userSelect="none";
+      e.preventDefault();
+    });
+    head.addEventListener("touchstart",e=>{
+      if(e.target.closest(".doc-float-btn")) return;
+      dragging=true;
+      const t=e.touches[0];
+      const r=panel.getBoundingClientRect();
+      panel.style.left=r.left+"px";panel.style.right="auto";panel.style.top=r.top+"px";
+      offX=t.clientX-r.left;offY=t.clientY-r.top;
+      panel.style.zIndex=(++zTop);
+    },{passive:true});
+    function move(cx,cy){
+      const w=panel.offsetWidth,h=panel.offsetHeight;
+      let x=cx-offX,y=cy-offY;
+      x=Math.max(4,Math.min(window.innerWidth-w-4,x));
+      y=Math.max(60,Math.min(window.innerHeight-40,y));
+      panel.style.left=x+"px";panel.style.top=y+"px";
+    }
+    document.addEventListener("mousemove",e=>{if(dragging) move(e.clientX,e.clientY)});
+    document.addEventListener("touchmove",e=>{if(dragging){const t=e.touches[0];move(t.clientX,t.clientY)}},{passive:true});
+    function stopDrag(){
+      if(!dragging) return;
+      dragging=false;document.body.style.userSelect="";
+      const r=panel.getBoundingClientRect();
+      state[id]=state[id]||{};state[id].x=Math.round(r.left);state[id].y=Math.round(r.top);save();
+    }
+    document.addEventListener("mouseup",stopDrag);
+    document.addEventListener("touchend",stopDrag);
+    panel.addEventListener("mousedown",()=>{panel.style.zIndex=(++zTop)});
+
+    panel.querySelector("[data-collapse]").addEventListener("click",()=>{
+      panel.classList.toggle("collapsed");
+      state[id]=state[id]||{};state[id].collapsed=panel.classList.contains("collapsed");save();
+    });
+    panel.querySelector("[data-close]").addEventListener("click",()=>{
+      panel.style.display="none";
+      state[id]=state[id]||{};state[id].hidden=true;save();
+    });
+
+    const ro=new ResizeObserver(()=>{
+      state[id]=state[id]||{};
+      state[id].w=Math.round(panel.offsetWidth);
+      state[id].h=Math.round(panel.offsetHeight);
+      save();
+    });
+    ro.observe(panel);
+  });
+
+  document.querySelectorAll("[data-toggle-panel]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const id=btn.dataset.togglePanel;
+      const panel=document.querySelector(`.doc-float[data-panel="${id}"]`);
+      if(!panel) return;
+      const hidden=panel.style.display==="none";
+      panel.style.display=hidden?"flex":"none";
+      panel.classList.remove("collapsed");
+      state[id]=state[id]||{};state[id].hidden=!hidden;state[id].collapsed=false;save();
+      if(hidden){panel.style.zIndex=(++zTop)}
+    });
+  });
+})();
+
 values=loadValues()||VSRF_DOC_TEMPLATES.defaults(currentTemplate);
 renderTabs();renderForm();renderDoc();syncSealUI();renderFontRows();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a20be554ecd19dad',t:'MTc4NDk5MDE3NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a20bf7b58a61ec55',t:'MTc4NDk5MDkyOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
