@@ -63,12 +63,17 @@
       <div class="docs-tabs" id="docsTabs"></div>
 
       <div class="docs-layout">
+        <div class="doc-panel doc-panel-fields">
+          <h4 id="docPanelTitle">Поля документа</h4>
+          <form id="docForm"></form>
+        </div>
+
         <div class="docs-preview">
           <div class="docs-preview-inner" id="docsPreview"></div>
         </div>
-        <div class="doc-panel">
-          <h4 id="docPanelTitle">Поля документа</h4>
-          <form id="docForm"></form>
+
+        <div class="doc-panel doc-panel-style">
+          <h4>Оформление</h4>
 
           <div class="doc-emblem-scale">
             <div class="doc-emblem-scale-label"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Масштаб эмблемы</div>
@@ -79,7 +84,15 @@
             </div>
           </div>
 
-          <h4 style="margin-top:20px">Печать (изображение)</h4>
+          <div class="doc-font-panel">
+            <div class="doc-font-head">
+              <span class="doc-font-panel-title">Размеры шрифтов (px)</span>
+              <button class="doc-font-reset" id="fontResetBtn" title="Сбросить к стандарту">↺</button>
+            </div>
+            <div class="doc-font-rows" id="fontRows"></div>
+          </div>
+
+          <h4 style="margin-top:16px">Печать (изображение)</h4>
           <div class="seal-controls">
             <input type="url" id="sealUrlInput" placeholder="https://... (URL картинки печати)">
             <div style="display:flex;gap:6px">
@@ -222,7 +235,7 @@ tabs.addEventListener("click",e=>{
   const b=e.target.closest("[data-tpl]");if(!b) return;
   currentTemplate=b.dataset.tpl;
   values=loadValues()||VSRF_DOC_TEMPLATES.defaults(currentTemplate);
-  renderTabs();renderForm();renderDoc();syncSealUI();
+  renderTabs();renderForm();renderDoc();syncSealUI();renderFontRows();
 });
 
 function loadValues(){
@@ -456,12 +469,71 @@ document.getElementById("emblemScaleBtns").addEventListener("click",e=>{
   const b=e.target.closest("[data-scale]");if(!b) return;
   setEmblemScale(+b.dataset.scale);
 });
+const FONT_VARS=[
+  {key:"ministry",label:"Шапка (Мин. обороны)",cssVar:"--doc-ministry-size",def:14,min:8,max:32},
+  {key:"title",label:"ПРИКАЗ / УКАЗ",cssVar:"--doc-title-size",def:20,min:12,max:48},
+  {key:"subtitle",label:"Подзаголовок (О…)",cssVar:"--doc-subtitle-size",def:15,min:10,max:32},
+  {key:"reqs",label:"Дата · Город · Номер",cssVar:"--doc-reqs-size",def:14,min:10,max:24},
+  {key:"body",label:"Основной текст",cssVar:"--doc-body-size",def:14,min:10,max:24},
+  {key:"word",label:"ПРИКАЗЫВАЮ",cssVar:"--doc-word-size",def:15,min:10,max:28},
+  {key:"sign",label:"Подпись",cssVar:"--doc-sign-size",def:14,min:10,max:22}
+];
+function getFontSizes(){
+  try{const raw=localStorage.getItem("vsrf-doc-fonts-"+currentTemplate);const parsed=raw?JSON.parse(raw):{};const o={};FONT_VARS.forEach(f=>o[f.key]=+parsed[f.key]||f.def);return o}
+  catch(e){const o={};FONT_VARS.forEach(f=>o[f.key]=f.def);return o}
+}
+function setFontSize(key,val){
+  const sizes=getFontSizes();sizes[key]=+val||FONT_VARS.find(f=>f.key===key).def;
+  try{localStorage.setItem("vsrf-doc-fonts-"+currentTemplate,JSON.stringify(sizes))}catch(e){}
+  applyFontSizes();
+}
+function resetFontSizes(){
+  try{localStorage.removeItem("vsrf-doc-fonts-"+currentTemplate)}catch(e){}
+  renderFontRows();applyFontSizes();
+}
+function applyFontSizes(){
+  const sizes=getFontSizes();
+  preview.querySelectorAll(".a4").forEach(el=>{
+    FONT_VARS.forEach(f=>el.style.setProperty(f.cssVar,sizes[f.key]+"px"));
+  });
+}
+function renderFontRows(){
+  const sizes=getFontSizes();
+  const wrap=document.getElementById("fontRows");
+  wrap.innerHTML=FONT_VARS.map(f=>`<div class="doc-font-row">
+    <label class="doc-font-label" title="${f.label}">${f.label}</label>
+    <div class="doc-font-input">
+      <input type="range" data-font="${f.key}" min="${f.min}" max="${f.max}" value="${sizes[f.key]}" step="1">
+      <input type="number" data-fontnum="${f.key}" min="${f.min}" max="${f.max}" value="${sizes[f.key]}">
+      <span class="doc-font-unit">px</span>
+    </div>
+  </div>`).join("");
+  wrap.querySelectorAll("[data-font]").forEach(el=>{
+    el.addEventListener("input",()=>{
+      setFontSize(el.dataset.font,el.value);
+      const num=wrap.querySelector(`[data-fontnum="${el.dataset.font}"]`);
+      if(num) num.value=el.value;
+    });
+  });
+  wrap.querySelectorAll("[data-fontnum]").forEach(el=>{
+    el.addEventListener("input",()=>{
+      setFontSize(el.dataset.fontnum,el.value);
+      const rng=wrap.querySelector(`[data-font="${el.dataset.fontnum}"]`);
+      if(rng) rng.value=el.value;
+    });
+  });
+}
+document.getElementById("fontResetBtn").addEventListener("click",resetFontSizes);
+
 const _origRenderDoc=renderDoc;
-renderDoc=function(){_origRenderDoc();applyEmblemScale()};
+renderDoc=function(){_origRenderDoc();applyEmblemScale();applyFontSizes()};
+
+const _origTabsClick=tabs.onclick;
+tabs.addEventListener("click",e=>{const b=e.target.closest("[data-tpl]");if(b) setTimeout(renderFontRows,0)});
 
 values=loadValues()||VSRF_DOC_TEMPLATES.defaults(currentTemplate);
-renderTabs();renderForm();renderDoc();syncSealUI();
+renderTabs();renderForm();renderDoc();syncSealUI();renderFontRows();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a20be554ecd19dad',t:'MTc4NDk5MDE3NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
