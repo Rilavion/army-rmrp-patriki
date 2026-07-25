@@ -1,5 +1,5 @@
 window.VSRF_DOC_TEMPLATES=(function(){
-  const EMBLEM="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg";
+  const EMBLEM="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Emblem_of_the_Russian_Ministry_of_Defence.svg/512px-Emblem_of_the_Russian_Ministry_of_Defence.svg.png";
 
   const COMMON_SEAL={key:"seal_url",label:"URL печати (изображение)",type:"text",default:""};
   const COMMON_SIG_IMG={key:"sig_url",label:"URL подписи (изображение)",type:"text",default:""};
@@ -43,6 +43,26 @@ window.VSRF_DOC_TEMPLATES=(function(){
         {key:"sig_role1",label:"Подпись — должность",type:"text",default:"Командир Бригады"},
         {key:"sig_rank",label:"Подпись — звание",type:"text",default:"Генерал-лейтенант"},
         {key:"sig_name",label:"Подпись — ФИО",type:"text",default:"В.В. Прайд"},
+        COMMON_SEAL,COMMON_SIG_IMG
+      ]
+    },
+    prikaz_kadr:{
+      name:"Приказ (кадровый)",
+      description:"Приказ о кадровых перестановках, назначениях, присвоении званий",
+      fields:[
+        {key:"ministry_line1",label:"Шапка — строка 1",type:"text",default:"МИНИСТЕРСТВО ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ"},
+        {key:"ministry_line2",label:"Шапка — строка 2",type:"text",default:"ПЕРВАЯ ПАТРИАРШАЯ МОТОСТРЕЛКОВАЯ БРИГАДА"},
+        {key:"ministry_line3",label:"Шапка — строка 3",type:"text",default:"ВОИНСКАЯ ЧАСТЬ №12132"},
+        {key:"date",label:"Дата",type:"text",default:"23 Июля 2026"},
+        {key:"title",label:"Наименование приказа",type:"textarea",default:"О кадровых перестановках"},
+        {key:"city",label:"Город",type:"text",default:"г. Москва"},
+        {key:"number",label:"Номер приказа",type:"text",default:"№227"},
+        {key:"preamble",label:"Преамбула",type:"textarea",default:"В соответствии с частью «1» статьи «10» Федерального закона «Об Обороне» №52-ФЗ, ПРИКАЗЫВАЮ:"},
+        {key:"items",label:"Пункты приказа (каждый с новой строки, нумерация автоматическая)",type:"textarea",default:"Назначить на должность Заместителя Начальника отдела Кадров военного комиссариата Льва Волкова с личным номером 790-004.\nВ связи с назначением на должность присвоить Льву Волкову воинское звание Капитан.\nНазначить на должность Заместителя Начальника отдела Кадров военного комиссариата Романа Крэй с личным номером 739-996.\nВ связи с назначением на должность присвоить Роману Крэй воинское звание Капитан.\nУстановить испытательный срок продолжительностью 21 календарный день с целью проверки профпригодности.\nНастоящий Приказ вступает в законную силу с момента его подписания и опубликования."},
+        {key:"sig_role1",label:"Подпись — должность строка 1",type:"text",default:"Командир Бригады"},
+        {key:"sig_role2",label:"Подпись — должность строка 2",type:"text",default:""},
+        {key:"sig_rank",label:"Подпись — звание",type:"text",default:"Генерал-лейтенант"},
+        {key:"sig_name",label:"Подпись — ФИО с инициалами",type:"text",default:"В.В. Прайд"},
         COMMON_SEAL,COMMON_SIG_IMG
       ]
     },
@@ -118,13 +138,13 @@ window.VSRF_DOC_TEMPLATES=(function(){
           МОСКОВСКИЙ ВОЕННЫЙ ОКРУГ ВООРУЖЁННЫХ СИЛ<br>
           РОССИЙСКОЙ ФЕДЕРАЦИИ
         </div>
-        <div class="doc-title-word">П&nbsp;&nbsp;Р&nbsp;&nbsp;И&nbsp;&nbsp;К&nbsp;&nbsp;А&nbsp;&nbsp;З</div>
+        <div class="doc-title-word">ПРИКАЗ</div>
         <div class="doc-title-sub">${nl2br(v.title)}</div>
         <div class="doc-reqs">
           <span>${esc(v.date)}</span><span>${esc(v.city)}</span><span>${esc(v.number)}</span>
         </div>
         <div class="doc-p doc-preamble">${nl2br(v.preamble)}</div>
-        <div class="doc-word">П&nbsp;Р&nbsp;И&nbsp;К&nbsp;А&nbsp;З&nbsp;Ы&nbsp;В&nbsp;А&nbsp;Ю:</div>
+        <div class="doc-word">ПРИКАЗЫВАЮ:</div>
         <div class="doc-p"><b>1.</b> Сформировать оперативную группу из числа военнослужащих органов военной полиции 1-й Мотострелковой бригады Московской области в следующем составе:</div>`:`<div class="doc-pagenum">${pageNum}</div>
         <div class="doc-p"><i>(продолжение списка личного состава)</i></div>`;
       pages.push(`<div class="doc-page a4" data-page-idx="${pageNum}">
@@ -204,7 +224,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
           МОСКОВСКИЙ ВОЕННЫЙ ОКРУГ ВООРУЖЁННЫХ СИЛ<br>
           РОССИЙСКОЙ ФЕДЕРАЦИИ
         </div>
-        <div class="doc-title-word">У&nbsp;&nbsp;К&nbsp;&nbsp;А&nbsp;&nbsp;З</div>
+        <div class="doc-title-word">УКАЗ</div>
         <div class="doc-title-sub">${nl2br(v.title)}</div>
         <div class="doc-reqs">
           <span>${esc(v.date)}</span><span>${esc(v.city)}</span><span>${esc(v.number)}</span>
@@ -222,8 +242,38 @@ window.VSRF_DOC_TEMPLATES=(function(){
     </div>`;
   }
 
+  function renderPrikazKadr(v){
+    const itemsArr=String(v.items||"").split("\n").map(m=>m.trim()).filter(Boolean);
+    const items=itemsArr.map((it,i)=>`<div class="doc-p doc-p-item"><b>${i+1}.</b> ${nl2br(it)}</div>`).join("");
+    const ministry=[v.ministry_line1,v.ministry_line2,v.ministry_line3].filter(Boolean).map(esc).join("<br>");
+    return `<div class="doc-page a4" data-page-idx="1">
+      <div class="doc-inner">
+        <div class="doc-emblem-wrap"><img src="${EMBLEM}" alt="" crossorigin="anonymous"></div>
+        <div class="doc-ministry">${ministry}</div>
+        <div class="doc-date-line">${esc(v.date)}</div>
+        <div class="doc-title-word">ПРИКАЗ</div>
+        <div class="doc-title-sub">${nl2br(v.title)}</div>
+        <div class="doc-reqs doc-reqs-two">
+          <span>${esc(v.city)}</span><span>${esc(v.number)}</span>
+        </div>
+        <div class="doc-p doc-preamble">${nl2br(v.preamble)}</div>
+        ${items}
+        <div class="doc-sign-block">
+          <div class="doc-sign-left">
+            <div>${esc(v.sig_role1)}</div>
+            ${v.sig_role2?`<div>${esc(v.sig_role2)}</div>`:""}
+            <div>${esc(v.sig_rank)}</div>
+          </div>
+          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name,v.sig_url)}</div>
+          <div class="doc-sign-right">${esc(v.sig_name)}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
   function render(templateId,values){
     if(templateId==="prikaz") return renderPrikaz(values);
+    if(templateId==="prikaz_kadr") return renderPrikazKadr(values);
     if(templateId==="letter") return renderLetter(values);
     if(templateId==="ukaz") return renderUkaz(values);
     return "<div>Неизвестный шаблон</div>";

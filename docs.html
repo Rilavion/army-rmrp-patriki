@@ -3,32 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Документы - ВС РФ · в/ч №12132</title>
-<link rel="icon" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<title>Документы — ВС РФ · в/ч №12132</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<style id="vsrf-admin-guard">
-[data-admin]{display:none !important}
-body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
-body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
-</style>
-<script>
-(function(){
-  var VSRF_ADMIN_GUARD=true;
-  function apply(){
-    var s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
-    if(!s||!s.ready) return;
-    document.body.classList.toggle("vsrf-is-admin",!!s.user);
-  }
-  document.addEventListener("DOMContentLoaded",function(){
-    apply();
-    if(window.VSRF_AUTH&&window.VSRF_AUTH.onChange) window.VSRF_AUTH.onChange(apply);
-    else{var t=setInterval(function(){if(window.VSRF_AUTH){clearInterval(t);apply();window.VSRF_AUTH.onChange(apply)}},80);setTimeout(function(){clearInterval(t)},4000);}
-  });
-})();
-</script>
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -38,7 +17,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 <header class="topbar">
   <div class="topbar-inner">
     <a class="brand" href="index.html">
-      <div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-icon">ВС</div>
       <div class="brand-text">
         <span class="brand-label">Вооружённые Силы РФ</span>
         <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
@@ -53,7 +32,6 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <a href="news.html" data-page="news.html" data-transition>Новости</a>
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
-            <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
     </nav>
     <div class="header-actions">
       <button class="search-btn" data-open-search title="Поиск (Ctrl+K)">
@@ -91,6 +69,15 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
         <div class="doc-panel">
           <h4 id="docPanelTitle">Поля документа</h4>
           <form id="docForm"></form>
+
+          <div class="doc-emblem-scale">
+            <div class="doc-emblem-scale-label"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Масштаб эмблемы</div>
+            <div class="doc-emblem-scale-btns" id="emblemScaleBtns">
+              <button class="doc-emblem-scale-btn" data-scale="1">1×</button>
+              <button class="doc-emblem-scale-btn" data-scale="2">2×</button>
+              <button class="doc-emblem-scale-btn" data-scale="3">3×</button>
+            </div>
+          </div>
 
           <h4 style="margin-top:20px">Печать (изображение)</h4>
           <div class="seal-controls">
@@ -199,10 +186,6 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="config.js"></script>
 <script src="main.js"></script>
-<script src="sound-engine.js"></script>
-<script src="faq-engine.js"></script>
-<script src="search-engine.js"></script>
-<script src="notify-engine.js"></script>
 <script src="auth.js"></script>
 <script src="docs-templates.js"></script>
 <script>
@@ -222,6 +205,7 @@ let values={};
 
 const TICONS={
   prikaz:'<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8m-6-6l6 6m-8 5h4m-4 4h4"/></svg>',
+  prikaz_kadr:'<svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>',
   letter:'<svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4l-8 5-8-5V6l8 5 8-5z"/></svg>',
   ukaz:'<svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>'
 };
@@ -456,9 +440,28 @@ function updateAdmin(){
 }
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 
+function getEmblemScale(){
+  try{return parseInt(localStorage.getItem("vsrf-doc-emblem-scale-"+currentTemplate)||"1")||1}catch(e){return 1}
+}
+function setEmblemScale(n){
+  try{localStorage.setItem("vsrf-doc-emblem-scale-"+currentTemplate,String(n))}catch(e){}
+  applyEmblemScale();
+}
+function applyEmblemScale(){
+  const n=getEmblemScale();
+  preview.querySelectorAll(".a4").forEach(el=>el.style.setProperty("--doc-emblem-scale",n));
+  document.querySelectorAll("#emblemScaleBtns [data-scale]").forEach(b=>b.classList.toggle("active",+b.dataset.scale===n));
+}
+document.getElementById("emblemScaleBtns").addEventListener("click",e=>{
+  const b=e.target.closest("[data-scale]");if(!b) return;
+  setEmblemScale(+b.dataset.scale);
+});
+const _origRenderDoc=renderDoc;
+renderDoc=function(){_origRenderDoc();applyEmblemScale()};
+
 values=loadValues()||VSRF_DOC_TEMPLATES.defaults(currentTemplate);
 renderTabs();renderForm();renderDoc();syncSealUI();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9db77aac0e92c',t:'MTc4NDgwMTAyNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
