@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="home-page-body">
 <canvas id="bgCanvas"></canvas>
 <div class="bg-noise"></div>
 <div class="page-transition-overlay" id="overlay"></div>
@@ -60,96 +60,54 @@
   </div>
 </header>
 
-<main>
-  <section class="hero-v3">
-    <div class="hero-v3-photo" style="background-image:url('fon.png')"></div>
-    <div class="hero-v3-veil"></div>
+<main class="home-onepage">
+  <section class="hero-v4">
+    <div class="hero-v4-photo" style="background-image:url('fon.png')"></div>
+    <div class="hero-v4-veil"></div>
 
-    <div class="container hero-v3-inner">
-      <div class="hero-v3-content reveal-l">
-        <div class="hero-v3-kicker">1-я отдельная гвардейская</div>
-        <h1 class="hero-v3-title">
-          <span>Бригада</span>
-          <span>специального</span>
-          <span class="hero-v3-title-accent">назначения</span>
+    <div class="container hero-v4-inner">
+      <div class="hero-v4-content">
+        <div class="hero-v4-kicker">1-я отдельная гвардейская</div>
+        <h1 class="hero-v4-title">
+          <span>Бригада специального</span>
+          <span class="hero-v4-title-accent">назначения</span>
         </h1>
-        <div class="hero-v3-badge">
-          <span class="hero-v3-badge-star">★</span>
-          <span class="hero-v3-badge-text">в/ч №12132</span>
-          <span class="hero-v3-badge-star">★</span>
+        <div class="hero-v4-badge">
+          <span class="hero-v4-badge-star">★</span>
+          <span>в/ч №12132</span>
+          <span class="hero-v4-badge-star">★</span>
         </div>
-        <p class="hero-v3-lead">
-          Всегда на шаг впереди. Там, где другие не справляются — мы выполняем задачу.<br>
-          <b>Честь. Долг. Отвага.</b>
+        <p class="hero-v4-lead">
+          Всегда на шаг впереди. Там, где другие не справляются — мы выполняем задачу. <b>Честь. Долг. Отвага.</b>
         </p>
-        <div class="hero-v3-cta">
-          <a class="btn btn-gold" href="#about">Подробнее о бригаде →</a>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <section class="features-band">
-    <div class="container features-grid">
-      <div class="feature reveal">
-        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div>
-        <div class="feature-body">
-          <h4>Боевой опыт</h4>
-          <p>Участие в сложнейших операциях</p>
+        <div class="hero-v4-about">
+          <div class="hero-v4-about-label">О бригаде</div>
+          <p>1-я ОБрСпН — элитное соединение Вооружённых Сил РФ. Выполняем специальные задачи в тылу противника, ведение разведки и участие в антитеррористических операциях.</p>
         </div>
-      </div>
-      <div class="feature reveal">
-        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg></div>
-        <div class="feature-body">
-          <h4>Высокая подготовка</h4>
-          <p>Элитная подготовка спецназовцев</p>
-        </div>
-      </div>
-      <div class="feature reveal">
-        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-        <div class="feature-body">
-          <h4>Современное вооружение</h4>
-          <p>Передовое оружие и экипировка</p>
-        </div>
-      </div>
-      <div class="feature reveal">
-        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM8 4h8v10l-4-2-4 2V4z"/></svg></div>
-        <div class="feature-body">
-          <h4>Честь и долг</h4>
-          <p>Служба Родине превыше всего</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <section class="section" id="about">
-    <div class="container about-v3">
-      <div class="about-v3-text reveal-l">
-        <span class="badge">О бригаде</span>
-        <h2>1-я отдельная гвардейская бригада специального назначения</h2>
-        <p>1-я ОБрСпН, в/ч №12132 — элитное соединение Вооружённых Сил Российской Федерации. Бригада предназначена для выполнения специальных задач в тылу противника, ведения разведки, а также для участия в антитеррористических операциях и защиты интересов государства.</p>
-        <p>В состав бригады входят военная комендатура, Силы специальных операций, рота охраны и обеспечения, военный комиссариат, медицинская рота и военная академия. Личный состав руководствуется внутренними уставами и присягой на верность Родине.</p>
-        <div class="about-v3-actions">
-          <a class="btn btn-gold btn-sm" href="composition.html" data-transition>Личный состав</a>
-          <a class="btn btn-ghost btn-sm" href="ustav.html" data-transition>Уставы</a>
+        <div class="hero-v4-cta">
+          <a class="btn btn-gold" href="ustav.html" data-transition>Уставы</a>
+          <a class="btn btn-ghost" href="composition.html" data-transition>Личный состав</a>
+          <a class="btn btn-ghost" href="news.html" data-transition>Новости →</a>
         </div>
       </div>
-      <div class="about-v3-media reveal-r">
-        <img src="https://lh3.googleusercontent.com/d/1fojpNn0mNP33p2i2JxCA7Yt5jpvEMtXB=s800" alt="Воинская часть" loading="lazy">
-      </div>
-    </div>
-  </section>
 
-  <section class="section news-section">
-    <div class="container">
-      <div class="section-head-row reveal">
-        <div>
-          <span class="badge">Оперативная сводка</span>
-          <h2>Новости бригады</h2>
+      <div class="hero-v4-emblem">
+        <div class="hero-v4-emblem-ring"></div>
+        <div class="hero-v4-emblem-ring hero-v4-emblem-ring-2"></div>
+        <div class="hero-v4-emblem-inner">
+          <img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="Эмблема">
         </div>
-        <a class="btn btn-ghost btn-sm" href="news.html" data-transition>Все новости →</a>
       </div>
-      <div id="newsPreview"></div>
+
+      <div class="hero-v4-newsline" id="heroNewsline">
+        <span class="hero-v4-newsline-label">◉ Оперативная сводка</span>
+        <div class="hero-v4-newsline-track" id="heroNewsTrack">
+          <span class="hero-v4-newsline-hint">Загрузка сводки...</span>
+        </div>
+        <a class="hero-v4-newsline-more" href="news.html" data-transition>Все →</a>
+      </div>
     </div>
   </section>
 </main>
@@ -273,35 +231,25 @@ function openNews(id){
   VSRF_NEWS_READER.open(n);
 }
 
+function fmtDate(d){
+  try{const dt=d instanceof Date?d:new Date(d);return dt.toLocaleDateString("ru-RU",{day:"2-digit",month:"2-digit"})}
+  catch(e){return ""}
+}
 async function loadNewsPreview(){
-  const el=document.getElementById("newsPreview");
-  el.className="news-preview-grid";
-  el.innerHTML=Array(3).fill(0).map(()=>`
-    <div class="sk-news-card"><div class="skeleton skeleton-img"></div>
-      <div class="sk-body">
-        <div class="skeleton skeleton-text" style="width:30%"></div>
-        <div class="skeleton skeleton-title"></div>
-        <div class="skeleton skeleton-text"></div>
-        <div class="skeleton skeleton-text" style="width:80%"></div>
-      </div>
-    </div>`).join("");
+  const track=document.getElementById("heroNewsTrack");
+  if(!track) return;
   const list=await VSRF_NEWS.fetchNews(6);
   PREVIEW=list||[];
   if(!list||!list.length){
-    el.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM5 8h5v2H5zm14 8H5v-2h14zm0-4h-7v-2h7z"/></svg><h3>Новостей пока нет</h3><p>Как только появятся публикации — они отобразятся здесь.</p></div>`;
+    track.innerHTML=`<span class="hero-v4-newsline-hint">Публикаций пока нет</span>`;
     return;
   }
-  const now=new Date();
-  const active=list.filter(n=>VSRF_NEWS.daysBetween(now,n.date)<=5);
-  const showActive=active.length?active:[list[0]];
-  const N=showActive.length;
-  let layoutClass="news-preview-grid";
-  if(N===1) layoutClass="news-preview-solo";
-  else if(N===2) layoutClass="news-preview-duo";
-  else if(N===3) layoutClass="news-preview-trio";
-  el.className=layoutClass;
-  el.innerHTML=showActive.map(VSRF_NEWS.cardHtml).join("");
-  el.querySelectorAll(".news-card").forEach(c=>c.addEventListener("click",()=>openNews(c.dataset.newsId)));
+  track.innerHTML=list.slice(0,5).map(n=>`
+    <button class="hero-v4-news-item" data-news-id="${n.id}">
+      <span class="hero-v4-news-date">${fmtDate(n.date)}</span>
+      <span class="hero-v4-news-title">${(n.title||"Без заголовка").replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]))}</span>
+    </button>`).join('<span class="hero-v4-news-sep">·</span>');
+  track.querySelectorAll("[data-news-id]").forEach(b=>b.addEventListener("click",()=>openNews(b.dataset.newsId)));
 }
 
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(()=>loadNewsPreview());
@@ -346,6 +294,6 @@ else loadNewsPreview();
   v.addEventListener("input",()=>{VSRF_SOUND.setVolume(v.value);vv.textContent=Math.round(v.value*100)+"%"});
 })();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21ad8154970ec3f',t:'MTc4NTE0NjkxOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21ae7634d30ec3f',t:'MTc4NTE0NzU0Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
