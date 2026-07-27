@@ -32,6 +32,7 @@
     const b=document.getElementById("burger");
     const nav=document.getElementById("mainNav");
     if(!b||!nav) return;
+    if(nav.parentElement!==document.body) document.body.appendChild(nav);
     let backdrop=document.querySelector(".nav-backdrop");
     if(!backdrop){
       backdrop=document.createElement("div");
