@@ -61,25 +61,12 @@
   </div>
 </header>
 
-<button class="home-gear-fab" data-open-settings title="Панель сайта">
-  <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z"/></svg>
-</button>
-<div class="home-hover-hint" data-open-settings>
-  <span>▲</span>
-  <span>Панель сайта</span>
-</div>
-
 <main class="home-onepage">
   <section class="hero-v4" id="heroV4">
     <div class="hero-v4-photo" style="background-image:url('fon.png')"></div>
     <div class="hero-v4-veil"></div>
     <div class="hero-v4-vignette"></div>
     <canvas class="hero-v4-particles" id="heroParticles"></canvas>
-    <div class="hero-v4-spot" id="heroSpot"></div>
-    <div class="hero-v4-corner hero-v4-corner-tl"></div>
-    <div class="hero-v4-corner hero-v4-corner-tr"></div>
-    <div class="hero-v4-corner hero-v4-corner-bl"></div>
-    <div class="hero-v4-corner hero-v4-corner-br"></div>
 
     <div class="container hero-v4-inner">
       <div class="hero-v4-content">
@@ -267,17 +254,22 @@ async function loadNewsPreview(){
   PREVIEW=list||[];
   if(!list||!list.length){
     track.innerHTML=`<span class="hero-v4-newsline-hint">Публикаций пока нет</span>`;
+    track.dataset.count="0";
     return;
   }
   const PLACEHOLDER='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%232a4838" width="100" height="100"/><text x="50" y="55" text-anchor="middle" font-family="serif" font-size="34" fill="%23cda85a" opacity="0.7">★</text></svg>';
-  track.innerHTML=list.slice(0,4).map(n=>{
+  const show=list.slice(0,4);
+  track.dataset.count=String(show.length);
+  track.innerHTML=show.map(n=>{
     const img=VSRF_NEWS.firstImage(n)||PLACEHOLDER;
     const title=esc(n.title||"Без заголовка");
+    const body=esc((n.body||"").slice(0,120));
     return `<button class="hero-v4-news-card" data-news-id="${n.id}" title="${title}">
       <span class="hero-v4-news-thumb"><img src="${esc(img)}" alt="" loading="lazy" onerror="this.src='${PLACEHOLDER}'"></span>
       <span class="hero-v4-news-body">
         <span class="hero-v4-news-date">${fmtDate(n.date)}</span>
         <span class="hero-v4-news-title">${title}</span>
+        <span class="hero-v4-news-excerpt">${body}</span>
       </span>
     </button>`;
   }).join("");
@@ -335,23 +327,6 @@ else loadNewsPreview();
   resize();
   window.addEventListener("resize",resize);
   loop();
-
-  const spot=document.getElementById("heroSpot");
-  const hero=document.getElementById("heroV4");
-  if(spot&&hero){
-    let tx=0,ty=0,cx=0,cy=0,active=false;
-    hero.addEventListener("mousemove",e=>{
-      const r=hero.getBoundingClientRect();
-      tx=e.clientX-r.left;ty=e.clientY-r.top;
-      if(!active){active=true;spot.classList.add("active")}
-    });
-    hero.addEventListener("mouseleave",()=>{active=false;spot.classList.remove("active")});
-    (function follow(){
-      cx+=(tx-cx)*.12;cy+=(ty-cy)*.12;
-      spot.style.transform=`translate(${cx-200}px,${cy-200}px)`;
-      requestAnimationFrame(follow);
-    })();
-  }
 
   const emblem=document.getElementById("heroEmblem");
   if(emblem){
@@ -412,6 +387,6 @@ else loadNewsPreview();
   v.addEventListener("input",()=>{VSRF_SOUND.setVolume(v.value);vv.textContent=Math.round(v.value*100)+"%"});
 })();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21b1212bae4ec3f',t:'MTc4NTE0OTI5NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21b27d43afef131',t:'MTc4NTE1MDE4NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
