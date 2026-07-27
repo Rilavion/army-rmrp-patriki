@@ -32,15 +32,21 @@
     const b=document.getElementById("burger");
     const nav=document.getElementById("mainNav");
     if(!b||!nav) return;
+    let backdrop=document.querySelector(".nav-backdrop");
+    if(!backdrop){
+      backdrop=document.createElement("div");
+      backdrop.className="nav-backdrop";
+      document.body.appendChild(backdrop);
+    }
+    function open(){b.classList.add("open");nav.classList.add("open");backdrop.classList.add("visible")}
+    function close(){b.classList.remove("open");nav.classList.remove("open");backdrop.classList.remove("visible")}
     b.addEventListener("click",()=>{
-      b.classList.toggle("open");
-      nav.classList.toggle("open");
+      if(nav.classList.contains("open")) close();else open();
     });
+    backdrop.addEventListener("click",close);
+    document.addEventListener("keydown",e=>{if(e.key==="Escape") close()});
     nav.querySelectorAll("a").forEach(a=>{
-      a.addEventListener("click",()=>{
-        b.classList.remove("open");
-        nav.classList.remove("open");
-      });
+      a.addEventListener("click",close);
     });
   }
 
