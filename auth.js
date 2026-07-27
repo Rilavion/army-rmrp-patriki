@@ -92,8 +92,17 @@ window.VSRF_AUTH=(function(){
     }catch(e){return {ok:false,error:e.message||"Ошибка входа"}}
   }
 
+  function bootAuth(){
+    if(window.supabase||!document.querySelector('script[src*="supabase-loader"]')){
+      init();
+    }else{
+      window.addEventListener("vsrf-supabase-loaded",()=>init(),{once:true});
+      setTimeout(()=>{if(!state.ready) init()},4000);
+    }
+  }
+
   document.addEventListener("DOMContentLoaded",()=>{
-    init();
+    bootAuth();
     const m=document.getElementById("loginModal");
     if(m){
       m.addEventListener("click",e=>{if(e.target===m) closeModal()});
