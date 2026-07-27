@@ -91,22 +91,22 @@ window.VSRF_USTAV=(function(){
       try{
         const {data,error}=await s.client.from("ustavy").select("*").order("sort_order",{ascending:true,nullsFirst:true});
         if(error) throw error;
-        if(data&&data.length){
-          const remoteSlugs=data.map(r=>r.slug);
-          const list=data.map(row=>{
-            const base=DEFAULT_DATA.find(d=>d.slug===row.slug)||{slug:row.slug,theme:"t1",code:"",meta:"",emblem:DEFAULT_EMBLEM};
+        if(data){
+          return data.map(row=>{
             let parsed={};
             try{parsed=typeof row.content==="string"?JSON.parse(row.content):(row.content||{})}catch(e){parsed={}}
-            return Object.assign({},base,parsed,{
-              slug:row.slug,title:row.title||base.title,
-              theme:row.theme||parsed.theme||base.theme,
-              code:row.code||parsed.code||base.code,
-              meta:row.meta||parsed.meta||base.meta,
-              emblem:row.emblem||parsed.emblem||base.emblem||DEFAULT_EMBLEM
+            const sig=parsed.signature||null;
+            if(sig&&sig.role&&!sig.title) sig.title=sig.role;
+            return Object.assign({},parsed,{
+              slug:row.slug,
+              title:row.title||parsed.title||row.slug,
+              theme:row.theme||parsed.theme||"t1",
+              code:row.code||parsed.code||"",
+              meta:row.meta||parsed.meta||"",
+              emblem:row.emblem||parsed.emblem||DEFAULT_EMBLEM,
+              signature:sig
             });
           });
-          DEFAULT_DATA.forEach(d=>{if(!remoteSlugs.includes(d.slug)) list.push(Object.assign({},d,local[d.slug]||{}))});
-          return list;
         }
       }catch(e){}
     }
