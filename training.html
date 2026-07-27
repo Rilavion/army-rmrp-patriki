@@ -117,8 +117,8 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
           <path d="M100 10 L180 40 L180 130 Q180 200 100 230 Q20 200 20 130 L20 40 Z" fill="none" stroke="url(#shieldG)" stroke-width="2"/>
           <path d="M100 25 L166 50 L166 128 Q166 188 100 214 Q34 188 34 128 L34 50 Z" fill="rgba(21,36,29,.6)" stroke="rgba(205,168,90,.35)" stroke-width="1"/>
           <text x="100" y="118" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="72" font-weight="700" fill="url(#shieldG)">★</text>
-          <text x="100" y="160" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" letter-spacing="4" fill="#cda85a">ACADEMIA</text>
-          <text x="100" y="182" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" letter-spacing="3" fill="#cda85a" opacity=".7">MILITARIS</text>
+          <text x="100" y="160" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" letter-spacing="4" fill="#cda85a">УЧЕБНЫЙ</text>
+          <text x="100" y="182" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" letter-spacing="3" fill="#cda85a" opacity=".7">ЦЕНТР</text>
         </svg>
       </div>
     </div>
@@ -210,11 +210,21 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 <div class="modal-back" id="lessonModal">
   <div class="modal modal-xl">
     <button class="modal-close" aria-label="Закрыть">✕</button>
-    <div class="lesson-view-hero" id="lessonHero"></div>
+    <div class="lesson-view-hero-v2" id="lessonHero"></div>
     <div style="padding:0 4px">
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px" id="lessonTags"></div>
       <h2 class="news-modal-title" id="lessonTitle"></h2>
-      <div class="news-modal-body" id="lessonBody" style="margin-top:16px"></div>
+      <div id="lessonMediaBox" style="display:none;margin-top:20px">
+        <div class="lesson-media-head">
+          <div>
+            <div class="badge" id="lessonMediaLabel">Видеоматериал</div>
+            <h3 class="lesson-media-title">Учебный ролик</h3>
+          </div>
+          <a class="btn btn-ghost btn-sm" id="lessonMediaOpen" target="_blank" rel="noopener">Открыть в новой вкладке ↗</a>
+        </div>
+        <div class="lesson-media-frame" id="lessonMediaFrame"></div>
+      </div>
+      <div class="news-modal-body" id="lessonBody" style="margin-top:24px"></div>
       <div id="lessonTestBox" style="display:none;margin-top:24px">
         <div class="train-test-head">
           <div>
@@ -244,16 +254,18 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
     <form id="lessonForm">
       <input type="hidden" name="id">
       <div class="form-group"><label>Название урока</label><input name="title" required placeholder="Строевая подготовка. Занятие №1"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="form-group"><label>Категория</label><select name="category" id="lessonCatSelect" class="form-select-custom" required></select></div>
-        <div class="form-group"><label>URL обложки (необязательно)</label><input name="image" type="url" placeholder="https://..."></div>
-      </div>
+      <div class="form-group"><label>Категория</label><select name="category" id="lessonCatSelect" class="form-select-custom" required></select></div>
       <div class="form-group"><label>Краткое описание</label><textarea name="excerpt" required style="min-height:70px"></textarea></div>
       <div class="form-group"><label>Полный материал урока</label><textarea name="content" style="min-height:180px" placeholder="Разделяйте абзацы пустой строкой"></textarea></div>
       <div class="form-group">
+        <label>Медиа: видео / презентация (необязательно)</label>
+        <input name="media_url" type="url" placeholder="https://youtu.be/... или https://docs.google.com/presentation/... или https://vk.com/video...">
+        <div style="margin-top:6px;font-size:12px;color:var(--muted)">Поддерживаются: YouTube, VK Видео, RuTube, Vimeo, Google Slides, Яндекс.Диск (видео). Ссылку возьмите со страницы ролика/презентации — сайт сам подставит корректный embed-код.</div>
+      </div>
+      <div class="form-group">
         <label>Ссылка на Google-тест (Google Forms)</label>
         <input name="test_url" type="url" placeholder="https://docs.google.com/forms/d/e/.../viewform или https://forms.gle/...">
-        <div style="margin-top:6px;font-size:12px;color:var(--muted)">Ссылку берите со страницы формы (кнопка «Отправить» → «Ссылка»). Форма встроится через iframe с автоматическим `?embedded=true`.</div>
+        <div style="margin-top:6px;font-size:12px;color:var(--muted)">Ссылку берите со страницы формы (кнопка «Отправить» → «Ссылка»). Форма встроится через iframe.</div>
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
         <button type="button" class="btn btn-ghost btn-sm" id="lessonFormCancel">Отмена</button>
@@ -328,6 +340,53 @@ async function boot(){
 }
 
 function esc(s){return VSRF_TRAIN.esc(s)}
+
+function mediaKindLabel(url){
+  const kind=mediaKind(url);
+  return {youtube:"Видео",vk:"VK",rutube:"RuTube",vimeo:"Vimeo",slides:"Презентация",yadisk:"Видео",generic:"Медиа"}[kind]||"Медиа";
+}
+function mediaKind(url){
+  const u=(url||"").toLowerCase();
+  if(/youtube\.com|youtu\.be/.test(u)) return "youtube";
+  if(/vk\.com\/video/.test(u)) return "vk";
+  if(/rutube\.ru/.test(u)) return "rutube";
+  if(/vimeo\.com/.test(u)) return "vimeo";
+  if(/docs\.google\.com\/presentation/.test(u)) return "slides";
+  if(/disk\.yandex/.test(u)) return "yadisk";
+  return "generic";
+}
+function mediaEmbed(url){
+  if(!url) return "";
+  const kind=mediaKind(url);
+  let src=url;
+  if(kind==="youtube"){
+    let id="";
+    const m1=url.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
+    const m2=url.match(/[?&]v=([A-Za-z0-9_-]{6,})/);
+    const m3=url.match(/youtube\.com\/embed\/([A-Za-z0-9_-]{6,})/);
+    id=(m1&&m1[1])||(m2&&m2[1])||(m3&&m3[1])||"";
+    src=id?`https://www.youtube.com/embed/${id}`:url;
+  }else if(kind==="vk"){
+    const m=url.match(/video(-?\d+)_(\d+)/);
+    if(m) src=`https://vk.com/video_ext.php?oid=${m[1]}&id=${m[2]}&hd=2`;
+  }else if(kind==="rutube"){
+    const m=url.match(/rutube\.ru\/video\/([A-Za-z0-9]+)/);
+    if(m) src=`https://rutube.ru/play/embed/${m[1]}`;
+  }else if(kind==="vimeo"){
+    const m=url.match(/vimeo\.com\/(\d+)/);
+    if(m) src=`https://player.vimeo.com/video/${m[1]}`;
+  }else if(kind==="slides"){
+    src=url.replace(/\/pub\?/,"/embed?").replace(/\/edit(#.*)?$/,"/embed?start=false&loop=false&delayms=5000");
+    if(!/\/embed/.test(src)&&/\/d\/([A-Za-z0-9_-]+)/.test(src)){
+      const id=src.match(/\/d\/([A-Za-z0-9_-]+)/)[1];
+      src=`https://docs.google.com/presentation/d/${id}/embed?start=false&loop=false&delayms=5000`;
+    }
+  }else if(kind==="yadisk"){
+    if(!/\/embed/.test(src)) src=src+(src.includes("?")?"&":"?")+"embed=1";
+  }
+  return `<iframe src="${esc(src)}" frameborder="0" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture" loading="lazy"></iframe>`;
+}
+
 function rootCats(){return CATS.filter(c=>!c.parent).sort((a,b)=>(a.sort||0)-(b.sort||0))}
 function subCats(pid){return CATS.filter(c=>c.parent===pid).sort((a,b)=>(a.sort||0)-(b.sort||0))}
 function findCat(id){return CATS.find(c=>c.id===id)}
@@ -425,14 +484,30 @@ function renderGrid(){
     const catName=cat?cat.name:"—";
     const catColor=cat?(cat.color||"#cda85a"):"#cda85a";
     const parent=cat&&cat.parent?findCat(cat.parent):null;
-    const img=l.image?`<img src="${esc(l.image)}" alt="${esc(l.title)}" loading="lazy">`:`<div class="lesson-placeholder"><svg viewBox="0 0 24 24" width="60" height="60" fill="currentColor" style="opacity:.4"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9M18.82 9L12 12.72 5.18 9 12 5.28M17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73"/></svg></div>`;
-    const test=l.test_url?`<span class="lesson-v2-test">✓ ТЕСТ</span>`:"";
+    const test=l.test_url?`<span class="lesson-v2-badge lesson-v2-badge-test">Тест</span>`:"";
+    const media=l.media_url?`<span class="lesson-v2-badge lesson-v2-badge-media">${mediaKindLabel(l.media_url)}</span>`:"";
     const idx=String(i+1).padStart(2,"0");
     return `<article class="lesson-v2" data-lesson-id="${l.id}" style="--cat-color:${catColor}">
-      <div class="lesson-v2-thumb">${img}
-        <div class="lesson-v2-thumb-overlay"></div>
+      <div class="lesson-v2-cover">
+        <svg class="lesson-v2-cover-pattern" viewBox="0 0 400 220" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg${i}" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="${catColor}" stop-opacity=".28"/>
+              <stop offset="1" stop-color="${catColor}" stop-opacity="0"/>
+            </linearGradient>
+            <pattern id="pt${i}" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+              <path d="M0 15 L30 15 M15 0 L15 30" stroke="${catColor}" stroke-width=".5" opacity=".18"/>
+            </pattern>
+          </defs>
+          <rect width="400" height="220" fill="url(#lg${i})"/>
+          <rect width="400" height="220" fill="url(#pt${i})"/>
+          <circle cx="330" cy="60" r="80" fill="${catColor}" opacity=".08"/>
+          <circle cx="330" cy="60" r="50" fill="none" stroke="${catColor}" stroke-width="1" opacity=".35"/>
+          <circle cx="330" cy="60" r="30" fill="none" stroke="${catColor}" stroke-width=".8" opacity=".5" stroke-dasharray="3 3"/>
+          <text x="330" y="72" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="42" font-weight="700" fill="${catColor}" opacity=".85">◈</text>
+        </svg>
         <span class="lesson-v2-num">${idx}</span>
-        ${test}
+        <div class="lesson-v2-badges">${media}${test}</div>
       </div>
       <div class="lesson-v2-body">
         <div class="lesson-v2-cat">
@@ -456,15 +531,44 @@ function openLesson(id){
   const catName=cat?cat.name:"—";
   const catColor=cat?(cat.color||"#cda85a"):"#cda85a";
   const parent=cat&&cat.parent?findCat(cat.parent):null;
-  const img=l.image?`<img src="${esc(l.image)}" alt="">`:"";
-  $("lessonHero").innerHTML=img;
-  $("lessonHero").style.display=l.image?"":"none";
+  const hero=$("lessonHero");
+  hero.style.setProperty("--cat-color",catColor);
+  hero.innerHTML=`
+    <svg class="lesson-hero-pattern" viewBox="0 0 800 240" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="lgh" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="${catColor}" stop-opacity=".35"/>
+          <stop offset="1" stop-color="${catColor}" stop-opacity="0"/>
+        </linearGradient>
+        <pattern id="pth" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M0 20 L40 20 M20 0 L20 40" stroke="${catColor}" stroke-width=".6" opacity=".2"/>
+        </pattern>
+      </defs>
+      <rect width="800" height="240" fill="url(#lgh)"/>
+      <rect width="800" height="240" fill="url(#pth)"/>
+      <circle cx="680" cy="60" r="120" fill="${catColor}" opacity=".06"/>
+      <circle cx="680" cy="60" r="80" fill="none" stroke="${catColor}" stroke-width="1.2" opacity=".3"/>
+      <text x="680" y="90" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="72" font-weight="700" fill="${catColor}" opacity=".8">◈</text>
+    </svg>
+    <div class="lesson-hero-caption">${parent?esc(parent.name)+" · ":""}${esc(catName)}</div>`;
+  hero.style.display="";
   $("lessonTitle").textContent=l.title;
   $("lessonTags").innerHTML=`
     ${parent?`<span class="lesson-badge" style="position:static;color:${catColor};border-color:${catColor}66">${esc(parent.name)}</span>`:""}
     <span class="lesson-badge" style="position:static;color:${catColor};border-color:${catColor}66">${esc(catName)}</span>
+    ${l.media_url?`<span class="lesson-badge lesson-badge-media" style="position:static">▶ ${mediaKindLabel(l.media_url)}</span>`:""}
     ${l.test_url?`<span class="lesson-badge lesson-badge-test" style="position:static">✓ С тестом</span>`:""}
   `;
+  const mediaBox=$("lessonMediaBox");
+  if(l.media_url){
+    mediaBox.style.display="";
+    $("lessonMediaFrame").innerHTML=mediaEmbed(l.media_url);
+    $("lessonMediaLabel").textContent=mediaKindLabel(l.media_url);
+    $("lessonMediaOpen").href=l.media_url;
+  }else{
+    mediaBox.style.display="none";
+    $("lessonMediaFrame").innerHTML="";
+  }
   const body=(l.content||l.excerpt||"").split(/\n{2,}/).map(p=>`<p>${esc(p).replace(/\n/g,"<br>")}</p>`).join("");
   $("lessonBody").innerHTML=body||`<p style="opacity:.6">Материал будет добавлен позже.</p>`;
   const testBox=$("lessonTestBox");
@@ -483,6 +587,7 @@ function openLesson(id){
 function closeLesson(){
   lessonModal.classList.remove("active");
   $("lessonTestIframe").src="";
+  $("lessonMediaFrame").innerHTML="";
   history.replaceState(null,"",location.pathname);
 }
 lessonModal.addEventListener("click",e=>{if(e.target===lessonModal) closeLesson()});
@@ -508,9 +613,9 @@ function openLessonEdit(l){
   if(l){
     lessonForm.title.value=l.title||"";
     lessonForm.category.value=l.category||"";
-    lessonForm.image.value=l.image||"";
     lessonForm.excerpt.value=l.excerpt||"";
     lessonForm.content.value=l.content||"";
+    lessonForm.media_url.value=l.media_url||"";
     lessonForm.test_url.value=l.test_url||"";
   }else if(activeCat){
     lessonForm.category.value=activeSub||activeCat;
@@ -539,9 +644,9 @@ lessonForm.addEventListener("submit",async e=>{
     id:lessonForm.id.value||VSRF_TRAIN.uid("l"),
     title:lessonForm.title.value.trim(),
     category:lessonForm.category.value,
-    image:lessonForm.image.value.trim()||null,
     excerpt:lessonForm.excerpt.value.trim(),
     content:lessonForm.content.value.trim(),
+    media_url:lessonForm.media_url.value.trim()||null,
     test_url:lessonForm.test_url.value.trim()||null,
     sort:Date.now()
   };
@@ -712,6 +817,6 @@ boot().then(()=>{
 })();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9dba3b9d1e92c',t:'MTc4NDgwMTAzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21ba2a3af709dbf',t:'MTc4NTE1NTIxNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21bc64ffdd59db5',t:'MTc4NTE1NjY3Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
