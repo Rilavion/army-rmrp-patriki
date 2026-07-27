@@ -90,9 +90,10 @@ window.VSRF_USTAV=(function(){
     if(s&&s.available&&s.client){
       try{
         const {data,error}=await s.client.from("ustavy").select("*").order("sort_order",{ascending:true,nullsFirst:true});
+        console.log("[VSRF_USTAV] Supabase запрос:",{ok:!error,rows:data?data.length:0,error:error?error.message:null});
         if(error) throw error;
         if(data){
-          return data.map(row=>{
+          const mapped=data.map(row=>{
             let parsed={};
             try{parsed=typeof row.content==="string"?JSON.parse(row.content):(row.content||{})}catch(e){parsed={}}
             const sig=parsed.signature||null;
@@ -107,9 +108,12 @@ window.VSRF_USTAV=(function(){
               signature:sig
             });
           });
+          console.log("[VSRF_USTAV] загружено уставов:",mapped.length,mapped.map(x=>x.slug));
+          return mapped;
         }
-      }catch(e){}
+      }catch(e){console.warn("[VSRF_USTAV] Ошибка загрузки:",e.message)}
     }
+    console.warn("[VSRF_USTAV] Fallback на DEFAULT_DATA (Supabase недоступен)");
     const list=DEFAULT_DATA.map(d=>Object.assign({},d,local[d.slug]||{}));
     Object.keys(local).forEach(slug=>{
       if(!list.find(x=>x.slug===slug)) list.push(local[slug]);
