@@ -579,18 +579,33 @@ select,option{color-scheme:inherit}
 [data-theme="light"] .chip{background:rgba(61,90,73,.06)}
 
 .doc-grid{display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;align-items:start}
-.doc-sidebar{position:sticky;top:150px}
-.doc-sidebar-inner{padding:20px;border-radius:var(--radius);border:1px solid var(--line);background:var(--bg2);transition:background .5s ease}
-.mini-book{height:400px;margin-bottom:18px;perspective:1800px}
+.doc-sidebar{position:sticky;top:150px;max-height:calc(100vh - 170px)}
+.doc-sidebar-inner{padding:20px;border-radius:var(--radius);border:1px solid var(--line);background:var(--bg2);transition:background .5s ease;display:flex;flex-direction:column;max-height:calc(100vh - 170px);min-height:0}
+.mini-book{height:280px;margin-bottom:14px;perspective:1800px;flex-shrink:0}
 .mini-book .b3d{height:100%;transform:rotateY(-14deg) rotateX(4deg)}
 .mini-book .b-front{padding:26px 18px 22px}
 .mini-book .b-emblem{width:82px;height:82px}
 .mini-book .b-divider{margin:14px 0 10px}
 .mini-book .b-front h3{font-size:20px}
-.toc{list-style:none;max-height:50vh;overflow-y:auto;padding-right:4px}
-.toc::-webkit-scrollbar{width:6px}
-.toc::-webkit-scrollbar-track{background:transparent}
-.toc::-webkit-scrollbar-thumb{background:rgba(205,168,90,.2);border-radius:3px}
+.toc{
+  list-style:none;margin:0;padding:0 8px 0 0;
+  flex:1 1 auto;min-height:0;
+  overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:thin;scrollbar-color:rgba(205,168,90,.35) transparent;
+  mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%);
+}
+.toc::-webkit-scrollbar{width:8px}
+.toc::-webkit-scrollbar-track{background:transparent;margin:4px 0}
+.toc::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,rgba(205,168,90,.6),rgba(205,168,90,.3));
+  border-radius:4px;border:1px solid rgba(205,168,90,.25);
+  transition:background .3s ease;
+}
+.toc::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,var(--gold),rgba(205,168,90,.5));
+  box-shadow:0 0 6px rgba(205,168,90,.4);
+}
 .toc li{margin-bottom:2px}
 .toc a{
   display:block;padding:10px 14px;border-radius:14px;color:var(--muted);font-size:13px;
