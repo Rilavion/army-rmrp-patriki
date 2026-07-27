@@ -48,9 +48,6 @@
         <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
         <span class="vsrf-notify-badge" data-notify-badge></span>
       </button>
-      <button class="icon-btn" data-open-settings title="Панель сайта" aria-label="Настройки">
-        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z"/></svg>
-      </button>
       <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
         <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -73,9 +70,16 @@
 </div>
 
 <main class="home-onepage">
-  <section class="hero-v4">
+  <section class="hero-v4" id="heroV4">
     <div class="hero-v4-photo" style="background-image:url('fon.png')"></div>
     <div class="hero-v4-veil"></div>
+    <div class="hero-v4-vignette"></div>
+    <canvas class="hero-v4-particles" id="heroParticles"></canvas>
+    <div class="hero-v4-spot" id="heroSpot"></div>
+    <div class="hero-v4-corner hero-v4-corner-tl"></div>
+    <div class="hero-v4-corner hero-v4-corner-tr"></div>
+    <div class="hero-v4-corner hero-v4-corner-bl"></div>
+    <div class="hero-v4-corner hero-v4-corner-br"></div>
 
     <div class="container hero-v4-inner">
       <div class="hero-v4-content">
@@ -105,11 +109,18 @@
         </div>
       </div>
 
-      <div class="hero-v4-emblem">
+      <div class="hero-v4-emblem" id="heroEmblem">
+        <div class="hero-v4-emblem-glow"></div>
         <div class="hero-v4-emblem-ring"></div>
         <div class="hero-v4-emblem-ring hero-v4-emblem-ring-2"></div>
-        <div class="hero-v4-emblem-inner">
-          <img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="Эмблема">
+        <div class="hero-v4-emblem-star" aria-hidden="true">
+          <svg viewBox="0 0 200 200"><polygon points="100,10 122,74 190,74 135,114 156,180 100,140 44,180 65,114 10,74 78,74" fill="none" stroke="#cda85a" stroke-width="1" opacity=".55"/></svg>
+        </div>
+        <div class="hero-v4-emblem-3d">
+          <div class="hero-v4-emblem-inner">
+            <img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="Эмблема">
+            <span class="hero-v4-emblem-shine"></span>
+          </div>
         </div>
       </div>
 
@@ -276,6 +287,92 @@ async function loadNewsPreview(){
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(()=>loadNewsPreview());
 else loadNewsPreview();
 
+(function heroParticles(){
+  const c=document.getElementById("heroParticles");if(!c) return;
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const ctx=c.getContext("2d");
+  let W=0,H=0,parts=[],raf=0;
+  function resize(){
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    W=c.width=c.clientWidth*dpr;H=c.height=c.clientHeight*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const w=c.clientWidth,h=c.clientHeight;
+    const N=Math.min(60,Math.max(20,Math.round(w*h/22000)));
+    parts=[];
+    for(let i=0;i<N;i++) parts.push(spawn(w,h,true));
+  }
+  function spawn(w,h,initial){
+    return {
+      x:Math.random()*w,
+      y:initial?Math.random()*h:h+10,
+      vx:(Math.random()-.5)*.3,
+      vy:-.15-Math.random()*.4,
+      r:.6+Math.random()*1.8,
+      a:.15+Math.random()*.4,
+      phase:Math.random()*Math.PI*2,
+      tw:.003+Math.random()*.01
+    };
+  }
+  function loop(){
+    raf=requestAnimationFrame(loop);
+    const w=c.clientWidth,h=c.clientHeight;
+    ctx.clearRect(0,0,w,h);
+    for(let i=parts.length-1;i>=0;i--){
+      const p=parts[i];
+      p.phase+=p.tw;
+      p.x+=p.vx+Math.sin(p.phase)*.15;
+      p.y+=p.vy;
+      const alpha=p.a*(0.6+Math.sin(p.phase*2)*0.4);
+      ctx.beginPath();
+      ctx.fillStyle=`rgba(240,216,155,${alpha})`;
+      ctx.shadowBlur=8;ctx.shadowColor="rgba(205,168,90,0.6)";
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fill();
+      if(p.y<-20||p.x<-20||p.x>w+20){parts.splice(i,1);parts.push(spawn(w,h,false))}
+    }
+    ctx.shadowBlur=0;
+  }
+  resize();
+  window.addEventListener("resize",resize);
+  loop();
+
+  const spot=document.getElementById("heroSpot");
+  const hero=document.getElementById("heroV4");
+  if(spot&&hero){
+    let tx=0,ty=0,cx=0,cy=0,active=false;
+    hero.addEventListener("mousemove",e=>{
+      const r=hero.getBoundingClientRect();
+      tx=e.clientX-r.left;ty=e.clientY-r.top;
+      if(!active){active=true;spot.classList.add("active")}
+    });
+    hero.addEventListener("mouseleave",()=>{active=false;spot.classList.remove("active")});
+    (function follow(){
+      cx+=(tx-cx)*.12;cy+=(ty-cy)*.12;
+      spot.style.transform=`translate(${cx-200}px,${cy-200}px)`;
+      requestAnimationFrame(follow);
+    })();
+  }
+
+  const emblem=document.getElementById("heroEmblem");
+  if(emblem){
+    const three=emblem.querySelector(".hero-v4-emblem-3d");
+    emblem.addEventListener("mousemove",e=>{
+      const r=emblem.getBoundingClientRect();
+      const rx=((e.clientY-r.top)/r.height-.5)*-20;
+      const ry=((e.clientX-r.left)/r.width-.5)*20;
+      three.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg) scale(1.05)`;
+    });
+    emblem.addEventListener("mouseleave",()=>{three.style.transform=""});
+  }
+})();
+
+(function ensureSettingsPanel(){
+  document.querySelectorAll("[data-open-settings]").forEach(el=>{
+    if(el.dataset.spBound) return;el.dataset.spBound="1";
+    el.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();if(window.VSRF_SETTINGS_PANEL) window.VSRF_SETTINGS_PANEL.open();else alert("Панель настроек загружается...")});
+  });
+})();
+
 (function initBgSettings(){
   function apply(){
     if(!window.VSRF_BG) return;
@@ -315,6 +412,6 @@ else loadNewsPreview();
   v.addEventListener("input",()=>{VSRF_SOUND.setVolume(v.value);vv.textContent=Math.round(v.value*100)+"%"});
 })();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21b1212bae4ec3f',t:'MTc4NTE0OTI5NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
