@@ -125,23 +125,40 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </section>
 
   <section class="train-body">
-    <div class="container">
+    <div class="container train-layout">
 
-      <div class="train-cats-strip" id="catsStrip"></div>
-
-      <div class="train-toolbar">
-        <div class="train-search">
+      <aside class="train-side">
+        <div class="train-side-search">
           <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
-          <input type="text" id="trainSearch" placeholder="Найти урок...">
+          <input type="text" id="trainSearch" placeholder="Поиск по картотеке...">
         </div>
-        <div class="train-subcats" id="subcatsStrip"></div>
-        <div class="train-admin admin-only" id="trainAdminBar" style="display:none">
-          <button class="btn btn-ghost btn-sm" id="manageCatsBtn">⚙ Категории</button>
-          <button class="btn btn-gold btn-sm" id="addLessonBtn">＋ Новый урок</button>
-        </div>
-      </div>
 
-      <div class="train-grid-v2" id="trainGrid"></div>
+        <div class="train-side-title">
+          <span class="train-side-title-line"></span>
+          <span>Картотека направлений</span>
+        </div>
+        <div class="train-side-list" id="catsStrip"></div>
+
+        <div class="train-side-title" id="subsTitle" style="display:none">
+          <span class="train-side-title-line"></span>
+          <span>Подкатегории</span>
+        </div>
+        <div class="train-side-subs" id="subcatsStrip"></div>
+
+        <div class="train-side-admin admin-only" id="trainAdminBar" style="display:none">
+          <div class="train-side-title"><span class="train-side-title-line"></span><span>Управление</span></div>
+          <button class="btn btn-ghost btn-sm" id="manageCatsBtn" style="width:100%;justify-content:center">⚙ Категории</button>
+          <button class="btn btn-gold btn-sm" id="addLessonBtn" style="width:100%;justify-content:center;margin-top:8px">＋ Новый урок</button>
+        </div>
+      </aside>
+
+      <div class="train-main">
+        <div class="train-main-head">
+          <div class="train-main-head-title" id="trainMainTitle">Все материалы</div>
+          <div class="train-main-head-count"><span id="trainMainCount">0</span> записей</div>
+        </div>
+        <div class="train-dossier" id="trainGrid"></div>
+      </div>
     </div>
   </section>
 </main>
@@ -204,45 +221,6 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
       <div class="form-msg"></div>
     </form>
-  </div>
-</div>
-
-<div class="modal-back" id="lessonModal">
-  <div class="modal modal-xl">
-    <button class="modal-close" aria-label="Закрыть">✕</button>
-    <div class="lesson-view-hero-v2" id="lessonHero"></div>
-    <div style="padding:0 4px">
-      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px" id="lessonTags"></div>
-      <h2 class="news-modal-title" id="lessonTitle"></h2>
-      <div id="lessonMediaBox" style="display:none;margin-top:20px">
-        <div class="lesson-media-head">
-          <div>
-            <div class="badge" id="lessonMediaLabel">Видеоматериал</div>
-            <h3 class="lesson-media-title">Учебный ролик</h3>
-          </div>
-          <a class="btn btn-ghost btn-sm" id="lessonMediaOpen" target="_blank" rel="noopener">Открыть в новой вкладке ↗</a>
-        </div>
-        <div class="lesson-media-frame" id="lessonMediaFrame"></div>
-      </div>
-      <div class="news-modal-body" id="lessonBody" style="margin-top:24px"></div>
-      <div id="lessonTestBox" style="display:none;margin-top:24px">
-        <div class="train-test-head">
-          <div>
-            <div class="badge">Зачётный тест</div>
-            <h3 style="font-family:'Cormorant Garamond',serif;font-size:26px;margin:8px 0 4px">Пройдите тест</h3>
-            <p style="color:var(--muted);font-size:13px">По итогам обучения — контрольное тестирование</p>
-          </div>
-          <a class="btn btn-gold btn-sm" id="lessonTestOpen" target="_blank" rel="noopener">Открыть в новой вкладке ↗</a>
-        </div>
-        <div class="train-test-iframe">
-          <iframe id="lessonTestIframe" src="" width="100%" height="600" frameborder="0" marginheight="0" marginwidth="0">Загрузка…</iframe>
-        </div>
-      </div>
-      <div class="admin-only" id="lessonAdminBar" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end">
-        <button class="btn btn-ghost btn-sm" id="lessonEditBtn">✎ Редактировать</button>
-        <button class="btn btn-ghost btn-sm btn-danger" id="lessonDelBtn">Удалить</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -404,20 +382,20 @@ const subcatsStrip=$("subcatsStrip");
 
 function renderCatDropdown(){
   const roots=rootCats();
-  const items=[`<button class="train-cat-chip ${activeCat===null?'active':''}" data-cat="__all" style="--chip-color:#cda85a">
-    <span class="train-cat-chip-icon">▼</span>
-    <span class="train-cat-chip-name">Все направления</span>
-    <span class="train-cat-chip-count">${LESSONS.length}</span>
+  const items=[`<button class="train-side-item ${activeCat===null?'active':''}" data-cat="__all" style="--chip-color:#cda85a">
+    <span class="train-side-item-bar"></span>
+    <span class="train-side-item-name">Все направления</span>
+    <span class="train-side-item-count">${LESSONS.length}</span>
   </button>`];
   roots.forEach(c=>{
     const cnt=LESSONS.filter(l=>{
       if(l.category===c.id) return true;
       return subCats(c.id).some(s=>s.id===l.category);
     }).length;
-    items.push(`<button class="train-cat-chip ${activeCat===c.id?'active':''}" data-cat="${c.id}" style="--chip-color:${c.color||'#cda85a'}">
-      <span class="train-cat-chip-icon">◈</span>
-      <span class="train-cat-chip-name">${esc(c.name)}</span>
-      <span class="train-cat-chip-count">${cnt}</span>
+    items.push(`<button class="train-side-item ${activeCat===c.id?'active':''}" data-cat="${c.id}" style="--chip-color:${c.color||'#cda85a'}">
+      <span class="train-side-item-bar"></span>
+      <span class="train-side-item-name">${esc(c.name)}</span>
+      <span class="train-side-item-count">${cnt}</span>
     </button>`);
   });
   catsStrip.innerHTML=items.join("");
@@ -429,15 +407,22 @@ function renderCatDropdown(){
 }
 
 function renderSubDropdown(){
-  if(!activeCat){subcatsStrip.style.display="none";subcatsStrip.innerHTML="";return}
+  const subsTitle=document.getElementById("subsTitle");
+  if(!activeCat){subcatsStrip.innerHTML="";if(subsTitle) subsTitle.style.display="none";return}
   const subs=subCats(activeCat);
-  if(!subs.length){subcatsStrip.style.display="none";subcatsStrip.innerHTML="";return}
-  subcatsStrip.style.display="";
-  const items=[`<button class="train-sub-chip ${activeSub===null?'active':''}" data-sub="__all">Все</button>`];
+  if(!subs.length){subcatsStrip.innerHTML="";if(subsTitle) subsTitle.style.display="none";return}
+  if(subsTitle) subsTitle.style.display="";
+  const items=[`<button class="train-side-item ${activeSub===null?'active':''}" data-sub="__all" style="--chip-color:#cda85a">
+    <span class="train-side-item-bar"></span>
+    <span class="train-side-item-name">Все</span>
+    <span class="train-side-item-count">${subs.reduce((n,s)=>n+LESSONS.filter(l=>l.category===s.id).length,0)}</span>
+  </button>`];
   subs.forEach(s=>{
     const cnt=LESSONS.filter(l=>l.category===s.id).length;
-    items.push(`<button class="train-sub-chip ${activeSub===s.id?'active':''}" data-sub="${s.id}" style="--chip-color:${s.color||'#cda85a'}">
-      <span class="train-sub-chip-dot"></span>${esc(s.name)}<span class="train-sub-chip-count">${cnt}</span>
+    items.push(`<button class="train-side-item ${activeSub===s.id?'active':''}" data-sub="${s.id}" style="--chip-color:${s.color||'#cda85a'}">
+      <span class="train-side-item-bar"></span>
+      <span class="train-side-item-name">${esc(s.name)}</span>
+      <span class="train-side-item-count">${cnt}</span>
     </button>`);
   });
   subcatsStrip.innerHTML=items.join("");
@@ -479,119 +464,125 @@ function renderGrid(){
     });
     return;
   }
+  const trainMainCount=document.getElementById("trainMainCount");
+  const trainMainTitle=document.getElementById("trainMainTitle");
+  if(trainMainCount) trainMainCount.textContent=list.length;
+  if(trainMainTitle){
+    if(activeSub){const c=findCat(activeSub);trainMainTitle.textContent=c?c.name:"Материалы"}
+    else if(activeCat){const c=findCat(activeCat);trainMainTitle.textContent=c?c.name:"Материалы"}
+    else trainMainTitle.textContent="Все материалы";
+  }
   grid.innerHTML=list.map((l,i)=>{
     const cat=findCat(l.category);
     const catName=cat?cat.name:"—";
     const catColor=cat?(cat.color||"#cda85a"):"#cda85a";
     const parent=cat&&cat.parent?findCat(cat.parent):null;
-    const test=l.test_url?`<span class="lesson-v2-badge lesson-v2-badge-test">Тест</span>`:"";
-    const media=l.media_url?`<span class="lesson-v2-badge lesson-v2-badge-media">${mediaKindLabel(l.media_url)}</span>`:"";
-    const idx=String(i+1).padStart(2,"0");
-    return `<article class="lesson-v2" data-lesson-id="${l.id}" style="--cat-color:${catColor}">
-      <div class="lesson-v2-cover">
-        <svg class="lesson-v2-cover-pattern" viewBox="0 0 400 220" preserveAspectRatio="none" aria-hidden="true">
-          <defs>
-            <linearGradient id="lg${i}" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="${catColor}" stop-opacity=".28"/>
-              <stop offset="1" stop-color="${catColor}" stop-opacity="0"/>
-            </linearGradient>
-            <pattern id="pt${i}" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
-              <path d="M0 15 L30 15 M15 0 L15 30" stroke="${catColor}" stroke-width=".5" opacity=".18"/>
-            </pattern>
-          </defs>
-          <rect width="400" height="220" fill="url(#lg${i})"/>
-          <rect width="400" height="220" fill="url(#pt${i})"/>
-          <circle cx="330" cy="60" r="80" fill="${catColor}" opacity=".08"/>
-          <circle cx="330" cy="60" r="50" fill="none" stroke="${catColor}" stroke-width="1" opacity=".35"/>
-          <circle cx="330" cy="60" r="30" fill="none" stroke="${catColor}" stroke-width=".8" opacity=".5" stroke-dasharray="3 3"/>
-          <text x="330" y="72" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="42" font-weight="700" fill="${catColor}" opacity=".85">◈</text>
-        </svg>
-        <span class="lesson-v2-num">${idx}</span>
-        <div class="lesson-v2-badges">${media}${test}</div>
-      </div>
-      <div class="lesson-v2-body">
-        <div class="lesson-v2-cat">
-          <span class="lesson-v2-cat-dot"></span>
-          ${parent?esc(parent.name)+" · ":""}${esc(catName)}
+    const idx=String(i+1).padStart(3,"0");
+    const meta=[];
+    if(l.media_url) meta.push(`<span class="dossier-meta-item dossier-meta-media" title="${mediaKindLabel(l.media_url)}"><svg viewBox="0 0 24 24" width="12" height="12"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>${mediaKindLabel(l.media_url)}</span>`);
+    if(l.test_url) meta.push(`<span class="dossier-meta-item dossier-meta-test"><svg viewBox="0 0 24 24" width="12" height="12"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Есть тест</span>`);
+    if(!meta.length) meta.push(`<span class="dossier-meta-item dossier-meta-plain">Материал</span>`);
+    return `<article class="dossier" data-lesson-id="${l.id}" style="--cat-color:${catColor}">
+      <div class="dossier-row">
+        <div class="dossier-index">
+          <div class="dossier-index-label">ДЕЛО</div>
+          <div class="dossier-index-num">№${idx}</div>
+          <div class="dossier-index-stamp">УТВ.</div>
         </div>
-        <h3 class="lesson-v2-title">${esc(l.title)}</h3>
-        <p class="lesson-v2-excerpt">${esc(l.excerpt||"")}</p>
-        <div class="lesson-v2-more">Изучить материал <span>→</span></div>
+        <div class="dossier-content">
+          <div class="dossier-cat">
+            <span class="dossier-cat-dot"></span>
+            ${parent?esc(parent.name)+" · ":""}${esc(catName)}
+          </div>
+          <h3 class="dossier-title">${esc(l.title)}</h3>
+          <p class="dossier-excerpt">${esc(l.excerpt||"")}</p>
+          <div class="dossier-meta">${meta.join("")}</div>
+        </div>
+        <div class="dossier-cta">
+          <button class="dossier-toggle" aria-label="Развернуть">
+            <span class="dossier-toggle-icon"></span>
+          </button>
+          <div class="dossier-cta-hint">Развернуть</div>
+        </div>
       </div>
-    </div>`;
+      <div class="dossier-expand"></div>
+    </article>`;
   }).join("");
-  grid.querySelectorAll(".lesson-v2").forEach(c=>c.addEventListener("click",()=>openLesson(c.dataset.lessonId)));
+  grid.querySelectorAll(".dossier").forEach(c=>{
+    const row=c.querySelector(".dossier-row");
+    row.addEventListener("click",e=>{
+      if(e.target.closest(".dossier-actions")) return;
+      toggleDossier(c);
+    });
+  });
 }
 
-const lessonModal=$("lessonModal");
-function openLesson(id){
+function toggleDossier(el){
+  const id=el.dataset.lessonId;
+  const isOpen=el.classList.contains("open");
+  document.querySelectorAll(".dossier.open").forEach(o=>{
+    o.classList.remove("open");
+    const box=o.querySelector(".dossier-expand");
+    if(box) box.innerHTML="";
+    const h=o.querySelector(".dossier-cta-hint");if(h) h.textContent="Развернуть";
+  });
+  if(isOpen){history.replaceState(null,"",location.pathname);return}
   const l=LESSONS.find(x=>String(x.id)===String(id));if(!l) return;
   currentLesson=l;
   const cat=findCat(l.category);
-  const catName=cat?cat.name:"—";
   const catColor=cat?(cat.color||"#cda85a"):"#cda85a";
-  const parent=cat&&cat.parent?findCat(cat.parent):null;
-  const hero=$("lessonHero");
-  hero.style.setProperty("--cat-color",catColor);
-  hero.innerHTML=`
-    <svg class="lesson-hero-pattern" viewBox="0 0 800 240" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="lgh" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="${catColor}" stop-opacity=".35"/>
-          <stop offset="1" stop-color="${catColor}" stop-opacity="0"/>
-        </linearGradient>
-        <pattern id="pth" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-          <path d="M0 20 L40 20 M20 0 L20 40" stroke="${catColor}" stroke-width=".6" opacity=".2"/>
-        </pattern>
-      </defs>
-      <rect width="800" height="240" fill="url(#lgh)"/>
-      <rect width="800" height="240" fill="url(#pth)"/>
-      <circle cx="680" cy="60" r="120" fill="${catColor}" opacity=".06"/>
-      <circle cx="680" cy="60" r="80" fill="none" stroke="${catColor}" stroke-width="1.2" opacity=".3"/>
-      <text x="680" y="90" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="72" font-weight="700" fill="${catColor}" opacity=".8">◈</text>
-    </svg>
-    <div class="lesson-hero-caption">${parent?esc(parent.name)+" · ":""}${esc(catName)}</div>`;
-  hero.style.display="";
-  $("lessonTitle").textContent=l.title;
-  $("lessonTags").innerHTML=`
-    ${parent?`<span class="lesson-badge" style="position:static;color:${catColor};border-color:${catColor}66">${esc(parent.name)}</span>`:""}
-    <span class="lesson-badge" style="position:static;color:${catColor};border-color:${catColor}66">${esc(catName)}</span>
-    ${l.media_url?`<span class="lesson-badge lesson-badge-media" style="position:static">▶ ${mediaKindLabel(l.media_url)}</span>`:""}
-    ${l.test_url?`<span class="lesson-badge lesson-badge-test" style="position:static">✓ С тестом</span>`:""}
-  `;
-  const mediaBox=$("lessonMediaBox");
-  if(l.media_url){
-    mediaBox.style.display="";
-    $("lessonMediaFrame").innerHTML=mediaEmbed(l.media_url);
-    $("lessonMediaLabel").textContent=mediaKindLabel(l.media_url);
-    $("lessonMediaOpen").href=l.media_url;
-  }else{
-    mediaBox.style.display="none";
-    $("lessonMediaFrame").innerHTML="";
-  }
   const body=(l.content||l.excerpt||"").split(/\n{2,}/).map(p=>`<p>${esc(p).replace(/\n/g,"<br>")}</p>`).join("");
-  $("lessonBody").innerHTML=body||`<p style="opacity:.6">Материал будет добавлен позже.</p>`;
-  const testBox=$("lessonTestBox");
-  if(l.test_url){
-    testBox.style.display="";
-    $("lessonTestIframe").src=VSRF_TRAIN.extractFormEmbed(l.test_url);
-    $("lessonTestOpen").href=l.test_url;
-  }else{
-    testBox.style.display="none";$("lessonTestIframe").src="";
-  }
+  const mediaBlock=l.media_url?`
+    <div class="dossier-block">
+      <div class="dossier-block-head"><span class="dossier-block-tag">▶ ${mediaKindLabel(l.media_url)}</span><a class="dossier-block-open" href="${esc(l.media_url)}" target="_blank" rel="noopener">Открыть источник ↗</a></div>
+      <div class="dossier-media">${mediaEmbed(l.media_url)}</div>
+    </div>`:"";
+  const testBlock=l.test_url?`
+    <div class="dossier-block">
+      <div class="dossier-block-head"><span class="dossier-block-tag dossier-block-tag-test">✓ Зачётный тест</span><a class="dossier-block-open" href="${esc(l.test_url)}" target="_blank" rel="noopener">Открыть в новой вкладке ↗</a></div>
+      <div class="dossier-test"><iframe src="${esc(VSRF_TRAIN.extractFormEmbed(l.test_url))}" frameborder="0"></iframe></div>
+    </div>`:"";
   const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
-  $("lessonAdminBar").style.display=isAdmin?"flex":"none";
-  lessonModal.classList.add("active");
+  const adminBar=isAdmin?`
+    <div class="dossier-admin admin-only">
+      <button class="btn btn-ghost btn-sm" data-dossier-edit>✎ Редактировать</button>
+      <button class="btn btn-ghost btn-sm btn-danger" data-dossier-del>Удалить</button>
+    </div>`:"";
+  const box=el.querySelector(".dossier-expand");
+  box.innerHTML=`
+    <div class="dossier-expand-inner">
+      <div class="dossier-body">${body||`<p style="opacity:.6">Материал будет добавлен позже.</p>`}</div>
+      ${mediaBlock}
+      ${testBlock}
+      ${adminBar}
+    </div>`;
+  el.classList.add("open");
+  const hint=el.querySelector(".dossier-cta-hint");if(hint) hint.textContent="Свернуть";
+  if(isAdmin){
+    box.querySelector("[data-dossier-edit]")?.addEventListener("click",e=>{e.stopPropagation();openLessonEdit(l)});
+    box.querySelector("[data-dossier-del]")?.addEventListener("click",async e=>{
+      e.stopPropagation();
+      if(!confirm("Удалить урок «"+l.title+"»?")) return;
+      await VSRF_TRAIN.removeLesson(l.id);
+      LESSONS=LESSONS.filter(x=>x.id!==l.id);
+      renderGrid();renderCatDropdown();renderSubDropdown();updateStats();
+    });
+  }
   history.replaceState(null,"","#l-"+id);
+  setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"start"}),100);
+}
+
+function openLesson(id){
+  const el=document.querySelector(`.dossier[data-lesson-id="${id}"]`);
+  if(el){toggleDossier(el)}
 }
 function closeLesson(){
-  lessonModal.classList.remove("active");
-  $("lessonTestIframe").src="";
-  $("lessonMediaFrame").innerHTML="";
-  history.replaceState(null,"",location.pathname);
+  document.querySelectorAll(".dossier.open").forEach(o=>{
+    o.classList.remove("open");
+    const box=o.querySelector(".dossier-expand");if(box) box.innerHTML="";
+    const h=o.querySelector(".dossier-cta-hint");if(h) h.textContent="Развернуть";
+  });
 }
-lessonModal.addEventListener("click",e=>{if(e.target===lessonModal) closeLesson()});
-lessonModal.querySelector(".modal-close").addEventListener("click",closeLesson);
 document.addEventListener("keydown",e=>{if(e.key==="Escape") closeLesson()});
 
 const lessonForm=$("lessonForm"),editLessonModal=$("editLessonModal");
@@ -625,14 +616,6 @@ function openLessonEdit(l){
   editLessonModal.classList.add("active");
 }
 $("addLessonBtn").addEventListener("click",()=>openLessonEdit());
-$("lessonEditBtn").addEventListener("click",()=>{closeLesson();if(currentLesson) openLessonEdit(currentLesson)});
-$("lessonDelBtn").addEventListener("click",async()=>{
-  if(!currentLesson) return;
-  if(!confirm("Удалить урок «"+currentLesson.title+"»?")) return;
-  await VSRF_TRAIN.removeLesson(currentLesson.id);
-  LESSONS=LESSONS.filter(x=>x.id!==currentLesson.id);
-  closeLesson();renderGrid();renderCatDropdown();renderSubDropdown();
-});
 editLessonModal.addEventListener("click",e=>{if(e.target===editLessonModal) editLessonModal.classList.remove("active")});
 editLessonModal.querySelector(".modal-close").addEventListener("click",()=>editLessonModal.classList.remove("active"));
 $("lessonFormCancel").addEventListener("click",()=>editLessonModal.classList.remove("active"));
@@ -817,6 +800,6 @@ boot().then(()=>{
 })();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9dba3b9d1e92c',t:'MTc4NDgwMTAzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21bc64ffdd59db5',t:'MTc4NTE1NjY3Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21be001c85a9db5',t:'MTc4NTE1NzcyOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
