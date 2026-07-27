@@ -93,7 +93,7 @@ select,option{color-scheme:inherit}
   min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:nowrap;
 }
 .brand{display:flex;align-items:center;gap:14px;cursor:pointer;text-decoration:none;color:inherit;flex-shrink:0;min-width:0}
-.header-actions{flex-shrink:0}
+.header-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
 .brand-icon{
   width:48px;height:48px;border-radius:14px;display:grid;place-items:center;
   background:linear-gradient(145deg,var(--green1),var(--green3));
@@ -2798,7 +2798,7 @@ body.home-page-body .fab-stack{display:none !important}
   grid-template-columns:minmax(0,1fr) auto;
   grid-template-rows:1fr auto;
   gap:30px 40px;align-items:center;
-  padding:24px 20px 44px;
+  padding:24px 20px 68px;
 }
 .hero-v4-content{grid-column:1;grid-row:1;max-width:640px;min-width:0;animation:heroSlideL .9s cubic-bezier(.2,.9,.2,1) both}
 .hero-v4-emblem{grid-column:2;grid-row:1;justify-self:end;animation:heroSlideR 1s cubic-bezier(.2,.9,.2,1) both .15s}
