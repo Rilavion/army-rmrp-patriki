@@ -79,35 +79,69 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 </header>
 
 <main>
-  <section class="section" style="padding-top:60px">
+  <section class="train-hero">
+    <div class="train-hero-bg"></div>
+    <div class="train-hero-veil"></div>
+    <canvas class="train-hero-particles" id="trainParticles"></canvas>
+
+    <div class="container train-hero-inner">
+      <div class="train-hero-content">
+        <div class="train-hero-kicker">
+          <span class="train-hero-kicker-dot"></span>
+          Учебный центр · 1-я ОБрСпН
+        </div>
+        <h1 class="train-hero-title">
+          <span>Военная</span>
+          <span class="train-hero-title-accent">подготовка</span>
+        </h1>
+        <p class="train-hero-lead">
+          Курсы, инструктажи и учебные материалы для военнослужащих.<br>
+          По окончании обучения — прохождение зачётного теста.
+        </p>
+        <div class="train-hero-stats">
+          <div class="train-hero-stat"><span class="train-hero-stat-num" id="statLessons">—</span><span class="train-hero-stat-lbl">Уроков</span></div>
+          <div class="train-hero-stat-sep"></div>
+          <div class="train-hero-stat"><span class="train-hero-stat-num" id="statCats">—</span><span class="train-hero-stat-lbl">Направлений</span></div>
+          <div class="train-hero-stat-sep"></div>
+          <div class="train-hero-stat"><span class="train-hero-stat-num" id="statTests">—</span><span class="train-hero-stat-lbl">С тестом</span></div>
+        </div>
+      </div>
+      <div class="train-hero-shield">
+        <svg viewBox="0 0 200 240" aria-hidden="true">
+          <defs>
+            <linearGradient id="shieldG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#f0d89b"/>
+              <stop offset="1" stop-color="#8f6b2a"/>
+            </linearGradient>
+          </defs>
+          <path d="M100 10 L180 40 L180 130 Q180 200 100 230 Q20 200 20 130 L20 40 Z" fill="none" stroke="url(#shieldG)" stroke-width="2"/>
+          <path d="M100 25 L166 50 L166 128 Q166 188 100 214 Q34 188 34 128 L34 50 Z" fill="rgba(21,36,29,.6)" stroke="rgba(205,168,90,.35)" stroke-width="1"/>
+          <text x="100" y="118" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="72" font-weight="700" fill="url(#shieldG)">★</text>
+          <text x="100" y="160" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" letter-spacing="4" fill="#cda85a">ACADEMIA</text>
+          <text x="100" y="182" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" letter-spacing="3" fill="#cda85a" opacity=".7">MILITARIS</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="train-body">
     <div class="container">
-      <div class="section-head reveal">
-        <h2>Обучающий материал</h2>
-        <p>Курсы, инструктажи и учебные материалы для военнослужащих. По окончании — прохождение зачётного теста.</p>
+
+      <div class="train-cats-strip" id="catsStrip"></div>
+
+      <div class="train-toolbar">
+        <div class="train-search">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+          <input type="text" id="trainSearch" placeholder="Найти урок...">
+        </div>
+        <div class="train-subcats" id="subcatsStrip"></div>
+        <div class="train-admin admin-only" id="trainAdminBar" style="display:none">
+          <button class="btn btn-ghost btn-sm" id="manageCatsBtn">⚙ Категории</button>
+          <button class="btn btn-gold btn-sm" id="addLessonBtn">＋ Новый урок</button>
+        </div>
       </div>
 
-      <div class="train-controls reveal">
-        <div class="dropdown" id="catDropdown">
-          <button class="dropdown-btn" id="catDropBtn">
-            <span class="dropdown-dot" id="catDropDot" style="background:#cda85a"></span>
-            <span id="catDropLabel">Все категории</span>
-            <span class="dropdown-arrow">▾</span>
-          </button>
-          <div class="dropdown-menu" id="catDropMenu"></div>
-        </div>
-        <div class="dropdown" id="subDropdown" style="display:none">
-          <button class="dropdown-btn" id="subDropBtn">
-            <span id="subDropLabel">Все подкатегории</span>
-            <span class="dropdown-arrow">▾</span>
-          </button>
-          <div class="dropdown-menu" id="subDropMenu"></div>
-        </div>
-        <div style="flex:1"></div>
-        <button class="btn btn-ghost btn-sm admin-only" id="manageCatsBtn" style="display:none">⚙ Категории</button>
-        <button class="btn btn-gold btn-sm admin-only" id="addLessonBtn" style="display:none">＋ Новый урок</button>
-      </div>
-
-      <div class="train-grid" id="trainGrid" style="margin-top:24px"></div>
+      <div class="train-grid-v2" id="trainGrid"></div>
     </div>
   </section>
 </main>
@@ -283,19 +317,14 @@ let activeCat=null;let activeSub=null;let currentLesson=null;
 
 const $=id=>document.getElementById(id);
 const grid=$("trainGrid");
-
-const catDrop=$("catDropdown"),subDrop=$("subDropdown");
-const catDropBtn=$("catDropBtn"),subDropBtn=$("subDropBtn");
-const catDropMenu=$("catDropMenu"),subDropMenu=$("subDropMenu");
-const catDropLabel=$("catDropLabel"),subDropLabel=$("subDropLabel");
-const catDropDot=$("catDropDot");
+let searchQuery="";
 
 async function boot(){
   CATS=await VSRF_TRAIN.loadCats();
   LESSONS=await VSRF_TRAIN.loadLessons();
   const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
   if(s&&s.available){try{localStorage.removeItem("vsrf-train-cats");localStorage.removeItem("vsrf-train-lessons")}catch(e){}}
-  renderCatDropdown();renderSubDropdown();renderGrid();updateAdmin();
+  renderCatDropdown();renderSubDropdown();renderGrid();updateStats();updateAdmin();updateStats();
 }
 
 function esc(s){return VSRF_TRAIN.esc(s)}
@@ -303,60 +332,73 @@ function rootCats(){return CATS.filter(c=>!c.parent).sort((a,b)=>(a.sort||0)-(b.
 function subCats(pid){return CATS.filter(c=>c.parent===pid).sort((a,b)=>(a.sort||0)-(b.sort||0))}
 function findCat(id){return CATS.find(c=>c.id===id)}
 
+function updateStats(){
+  const roots=rootCats();
+  const withTest=LESSONS.filter(l=>l.test_url).length;
+  $("statLessons").textContent=LESSONS.length;
+  $("statCats").textContent=roots.length;
+  $("statTests").textContent=withTest;
+}
+
+const catsStrip=$("catsStrip");
+const subcatsStrip=$("subcatsStrip");
+
 function renderCatDropdown(){
   const roots=rootCats();
-  const items=[`<div class="dropdown-item ${activeCat===null?'active':''}" data-cat="__all"><span class="dropdown-dot" style="background:#cda85a"></span>Все категории<span class="dropdown-count">${LESSONS.length}</span></div>`];
+  const items=[`<button class="train-cat-chip ${activeCat===null?'active':''}" data-cat="__all" style="--chip-color:#cda85a">
+    <span class="train-cat-chip-icon">▼</span>
+    <span class="train-cat-chip-name">Все направления</span>
+    <span class="train-cat-chip-count">${LESSONS.length}</span>
+  </button>`];
   roots.forEach(c=>{
     const cnt=LESSONS.filter(l=>{
       if(l.category===c.id) return true;
       return subCats(c.id).some(s=>s.id===l.category);
     }).length;
-    items.push(`<div class="dropdown-item ${activeCat===c.id?'active':''}" data-cat="${c.id}"><span class="dropdown-dot" style="background:${c.color||'#cda85a'}"></span>${esc(c.name)}<span class="dropdown-count">${cnt}</span></div>`);
+    items.push(`<button class="train-cat-chip ${activeCat===c.id?'active':''}" data-cat="${c.id}" style="--chip-color:${c.color||'#cda85a'}">
+      <span class="train-cat-chip-icon">◈</span>
+      <span class="train-cat-chip-name">${esc(c.name)}</span>
+      <span class="train-cat-chip-count">${cnt}</span>
+    </button>`);
   });
-  catDropMenu.innerHTML=items.join("");
-  const cur=activeCat?findCat(activeCat):null;
-  catDropLabel.textContent=cur?cur.name:"Все категории";
-  catDropDot.style.background=cur?(cur.color||"#cda85a"):"#cda85a";
+  catsStrip.innerHTML=items.join("");
+  catsStrip.querySelectorAll("[data-cat]").forEach(b=>b.addEventListener("click",()=>{
+    activeCat=b.dataset.cat==="__all"?null:b.dataset.cat;
+    activeSub=null;
+    renderCatDropdown();renderSubDropdown();renderGrid();updateStats();
+  }));
 }
+
 function renderSubDropdown(){
-  if(!activeCat){subDrop.style.display="none";return}
+  if(!activeCat){subcatsStrip.style.display="none";subcatsStrip.innerHTML="";return}
   const subs=subCats(activeCat);
-  if(!subs.length){subDrop.style.display="none";return}
-  subDrop.style.display="";
-  const items=[`<div class="dropdown-item ${activeSub===null?'active':''}" data-sub="__all">Все подкатегории</div>`];
+  if(!subs.length){subcatsStrip.style.display="none";subcatsStrip.innerHTML="";return}
+  subcatsStrip.style.display="";
+  const items=[`<button class="train-sub-chip ${activeSub===null?'active':''}" data-sub="__all">Все</button>`];
   subs.forEach(s=>{
     const cnt=LESSONS.filter(l=>l.category===s.id).length;
-    items.push(`<div class="dropdown-item ${activeSub===s.id?'active':''}" data-sub="${s.id}"><span class="dropdown-dot" style="background:${s.color||'#cda85a'}"></span>${esc(s.name)}<span class="dropdown-count">${cnt}</span></div>`);
+    items.push(`<button class="train-sub-chip ${activeSub===s.id?'active':''}" data-sub="${s.id}" style="--chip-color:${s.color||'#cda85a'}">
+      <span class="train-sub-chip-dot"></span>${esc(s.name)}<span class="train-sub-chip-count">${cnt}</span>
+    </button>`);
   });
-  subDropMenu.innerHTML=items.join("");
-  const cur=activeSub?findCat(activeSub):null;
-  subDropLabel.textContent=cur?cur.name:"Все подкатегории";
+  subcatsStrip.innerHTML=items.join("");
+  subcatsStrip.querySelectorAll("[data-sub]").forEach(b=>b.addEventListener("click",()=>{
+    activeSub=b.dataset.sub==="__all"?null:b.dataset.sub;
+    renderSubDropdown();renderGrid();
+  }));
 }
 
-catDropBtn.addEventListener("click",()=>{catDrop.classList.toggle("open");subDrop.classList.remove("open")});
-subDropBtn.addEventListener("click",()=>{subDrop.classList.toggle("open");catDrop.classList.remove("open")});
-document.addEventListener("click",e=>{
-  if(!catDrop.contains(e.target)) catDrop.classList.remove("open");
-  if(!subDrop.contains(e.target)) subDrop.classList.remove("open");
-});
-catDropMenu.addEventListener("click",e=>{
-  const it=e.target.closest("[data-cat]");if(!it) return;
-  activeCat=it.dataset.cat==="__all"?null:it.dataset.cat;
-  activeSub=null;
-  catDrop.classList.remove("open");
-  renderCatDropdown();renderSubDropdown();renderGrid();
-});
-subDropMenu.addEventListener("click",e=>{
-  const it=e.target.closest("[data-sub]");if(!it) return;
-  activeSub=it.dataset.sub==="__all"?null:it.dataset.sub;
-  subDrop.classList.remove("open");
-  renderSubDropdown();renderGrid();
-});
+$("trainSearch").addEventListener("input",e=>{searchQuery=e.target.value.trim().toLowerCase();renderGrid()});
 
 function filteredLessons(){
-  if(activeSub) return LESSONS.filter(l=>l.category===activeSub);
-  if(activeCat){const ids=[activeCat,...subCats(activeCat).map(s=>s.id)];return LESSONS.filter(l=>ids.includes(l.category))}
-  return LESSONS.slice();
+  let list;
+  if(activeSub) list=LESSONS.filter(l=>l.category===activeSub);
+  else if(activeCat){const ids=[activeCat,...subCats(activeCat).map(s=>s.id)];list=LESSONS.filter(l=>ids.includes(l.category))}
+  else list=LESSONS.slice();
+  if(searchQuery){
+    list=list.filter(l=>(l.title+" "+(l.excerpt||"")+" "+(l.content||"")).toLowerCase().includes(searchQuery));
+  }
+  return list;
 }
 
 function renderGrid(){
@@ -378,22 +420,32 @@ function renderGrid(){
     });
     return;
   }
-  grid.innerHTML=list.map(l=>{
+  grid.innerHTML=list.map((l,i)=>{
     const cat=findCat(l.category);
     const catName=cat?cat.name:"—";
     const catColor=cat?(cat.color||"#cda85a"):"#cda85a";
-    const img=l.image?`<img src="${esc(l.image)}" alt="${esc(l.title)}" loading="lazy">`:`<div class="lesson-placeholder"><svg viewBox="0 0 24 24" width="46" height="46" fill="currentColor" style="opacity:.55"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9M18.82 9L12 12.72 5.18 9 12 5.28M17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73"/></svg></div>`;
-    const test=l.test_url?`<span class="lesson-badge lesson-badge-test">✓ С тестом</span>`:"";
-    return `<div class="lesson-card" data-lesson-id="${l.id}">
-      <div class="lesson-thumb" style="--cat-color:${catColor}">${img}<span class="lesson-badge" style="color:${catColor};border-color:${catColor}66">${esc(catName)}</span>${test}</div>
-      <div class="lesson-body">
-        <h3 class="lesson-title">${esc(l.title)}</h3>
-        <p class="lesson-excerpt">${esc(l.excerpt||"")}</p>
-        <div class="lesson-more">Открыть урок →</div>
+    const parent=cat&&cat.parent?findCat(cat.parent):null;
+    const img=l.image?`<img src="${esc(l.image)}" alt="${esc(l.title)}" loading="lazy">`:`<div class="lesson-placeholder"><svg viewBox="0 0 24 24" width="60" height="60" fill="currentColor" style="opacity:.4"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9M18.82 9L12 12.72 5.18 9 12 5.28M17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73"/></svg></div>`;
+    const test=l.test_url?`<span class="lesson-v2-test">✓ ТЕСТ</span>`:"";
+    const idx=String(i+1).padStart(2,"0");
+    return `<article class="lesson-v2" data-lesson-id="${l.id}" style="--cat-color:${catColor}">
+      <div class="lesson-v2-thumb">${img}
+        <div class="lesson-v2-thumb-overlay"></div>
+        <span class="lesson-v2-num">${idx}</span>
+        ${test}
+      </div>
+      <div class="lesson-v2-body">
+        <div class="lesson-v2-cat">
+          <span class="lesson-v2-cat-dot"></span>
+          ${parent?esc(parent.name)+" · ":""}${esc(catName)}
+        </div>
+        <h3 class="lesson-v2-title">${esc(l.title)}</h3>
+        <p class="lesson-v2-excerpt">${esc(l.excerpt||"")}</p>
+        <div class="lesson-v2-more">Изучить материал <span>→</span></div>
       </div>
     </div>`;
   }).join("");
-  grid.querySelectorAll(".lesson-card").forEach(c=>c.addEventListener("click",()=>openLesson(c.dataset.lessonId)));
+  grid.querySelectorAll(".lesson-v2").forEach(c=>c.addEventListener("click",()=>openLesson(c.dataset.lessonId)));
 }
 
 const lessonModal=$("lessonModal");
@@ -560,7 +612,7 @@ $("catsList").addEventListener("click",async e=>{
     CATS=CATS.filter(x=>x.id!==c.id&&x.parent!==c.id);
     LESSONS=LESSONS.filter(l=>l.category!==c.id&&!CATS.every(cc=>cc.id!==l.category));
     if(activeCat===c.id||activeSub===c.id){activeCat=null;activeSub=null}
-    renderCatsList();renderCatDropdown();renderSubDropdown();renderGrid();
+    renderCatsList();renderCatDropdown();renderSubDropdown();renderGrid();updateStats();
   }
 });
 function openCatEdit(cat,parent){
@@ -585,7 +637,7 @@ $("catDeleteBtn").addEventListener("click",async()=>{
   CATS=CATS.filter(x=>x.id!==c.id&&x.parent!==c.id);
   LESSONS=LESSONS.filter(l=>CATS.some(cc=>cc.id===l.category));
   catEditModal.classList.remove("active");
-  renderCatsList();renderCatDropdown();renderSubDropdown();renderGrid();
+  renderCatsList();renderCatDropdown();renderSubDropdown();renderGrid();updateStats();
 });
 catForm.addEventListener("submit",async e=>{
   e.preventDefault();
@@ -623,8 +675,43 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(st=>{
 boot().then(()=>{
   if(location.hash.startsWith("#l-")){const id=location.hash.slice(3);setTimeout(()=>openLesson(id),300)}
 });
+
+(function trainHeroParticles(){
+  const c=document.getElementById("trainParticles");if(!c) return;
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const ctx=c.getContext("2d");
+  let W=0,H=0,parts=[];
+  function resize(){
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    W=c.width=c.clientWidth*dpr;H=c.height=c.clientHeight*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const w=c.clientWidth,h=c.clientHeight;
+    const N=Math.min(50,Math.max(15,Math.round(w*h/28000)));
+    parts=[];
+    for(let i=0;i<N;i++) parts.push(spawn(w,h,true));
+  }
+  function spawn(w,h,initial){
+    return {x:Math.random()*w,y:initial?Math.random()*h:h+10,vx:(Math.random()-.5)*.25,vy:-.12-Math.random()*.35,r:.5+Math.random()*1.6,a:.15+Math.random()*.4,phase:Math.random()*Math.PI*2,tw:.003+Math.random()*.009};
+  }
+  function loop(){
+    requestAnimationFrame(loop);
+    const w=c.clientWidth,h=c.clientHeight;
+    ctx.clearRect(0,0,w,h);
+    for(let i=parts.length-1;i>=0;i--){
+      const p=parts[i];p.phase+=p.tw;
+      p.x+=p.vx+Math.sin(p.phase)*.12;p.y+=p.vy;
+      const alpha=p.a*(0.6+Math.sin(p.phase*2)*0.4);
+      ctx.beginPath();ctx.fillStyle=`rgba(240,216,155,${alpha})`;
+      ctx.shadowBlur=6;ctx.shadowColor="rgba(205,168,90,0.5)";
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+      if(p.y<-20||p.x<-20||p.x>w+20){parts.splice(i,1);parts.push(spawn(w,h,false))}
+    }
+    ctx.shadowBlur=0;
+  }
+  resize();window.addEventListener("resize",resize);loop();
+})();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9dba3b9d1e92c',t:'MTc4NDgwMTAzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21b60ff28a3f131',t:'MTc4NTE1MjUyNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21ba2a3af709dbf',t:'MTc4NTE1NTIxNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
