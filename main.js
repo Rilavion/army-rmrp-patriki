@@ -33,14 +33,61 @@
     const nav=document.getElementById("mainNav");
     if(!b||!nav) return;
     if(nav.parentElement!==document.body) document.body.appendChild(nav);
+
+    if(!nav.querySelector(".nav-header")){
+      const links=Array.from(nav.querySelectorAll("a"));
+      const currentPage=(location.pathname.split("/").pop()||"index.html").toLowerCase();
+      links.forEach(a=>{if((a.dataset.page||"").toLowerCase()===currentPage) a.classList.add("active")});
+
+      const publicPages=["index.html","ustav.html","training.html","composition.html","news.html","autopark.html","map.html","faq.html"];
+      const adminPages=["lk.html","docs.html"];
+      const publicLinks=links.filter(a=>publicPages.includes((a.dataset.page||"").toLowerCase()));
+      const adminLinks=links.filter(a=>adminPages.includes((a.dataset.page||"").toLowerCase()));
+      adminLinks.forEach(a=>a.setAttribute("data-admin",""));
+
+      nav.innerHTML="";
+      const header=document.createElement("div");
+      header.className="nav-header";
+      header.innerHTML=`<div class="nav-header-emblem"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt=""></div>
+        <div class="nav-header-label">В/Ч №12132</div>
+        <div class="nav-header-unit">1-я ОБрСпН</div>`;
+      nav.appendChild(header);
+
+      const sec1=document.createElement("div");
+      sec1.className="nav-section";
+      sec1.innerHTML='<div class="nav-section-title">Разделы</div>';
+      const g1=document.createElement("div");
+      g1.className="nav-links";
+      publicLinks.forEach(a=>g1.appendChild(a));
+      sec1.appendChild(g1);
+      nav.appendChild(sec1);
+
+      if(adminLinks.length){
+        const sec2=document.createElement("div");
+        sec2.className="nav-section";
+        sec2.setAttribute("data-admin","");
+        sec2.innerHTML='<div class="nav-section-title">Служебное</div>';
+        const g2=document.createElement("div");
+        g2.className="nav-links";
+        adminLinks.forEach(a=>g2.appendChild(a));
+        sec2.appendChild(g2);
+        nav.appendChild(sec2);
+      }
+
+      const footer=document.createElement("div");
+      footer.className="nav-footer";
+      footer.innerHTML='<div class="nav-footer-motto">Честь · Долг · Отвага</div><div class="nav-footer-sub">Служим Отечеству</div>';
+      nav.appendChild(footer);
+    }
+
     let backdrop=document.querySelector(".nav-backdrop");
     if(!backdrop){
       backdrop=document.createElement("div");
       backdrop.className="nav-backdrop";
       document.body.appendChild(backdrop);
     }
-    function open(){b.classList.add("open");nav.classList.add("open");backdrop.classList.add("visible")}
-    function close(){b.classList.remove("open");nav.classList.remove("open");backdrop.classList.remove("visible")}
+    function open(){b.classList.add("open");nav.classList.add("open");backdrop.classList.add("visible");document.body.style.overflow="hidden"}
+    function close(){b.classList.remove("open");nav.classList.remove("open");backdrop.classList.remove("visible");document.body.style.overflow=""}
     b.addEventListener("click",()=>{
       if(nav.classList.contains("open")) close();else open();
     });
