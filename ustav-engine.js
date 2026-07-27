@@ -84,9 +84,30 @@ window.VSRF_USTAV=(function(){
     return toc;
   }
 
+  function waitReady(timeoutMs){
+    return new Promise(resolve=>{
+      const deadline=Date.now()+(timeoutMs||5000);
+      function check(){
+        const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+        if(s&&s.ready){resolve(s);return true}
+        return false;
+      }
+      if(check()) return;
+      const t=setInterval(()=>{
+        if(check()){clearInterval(t);return}
+        if(Date.now()>deadline){clearInterval(t);console.warn("[VSRF_USTAV] waitReady timeout");resolve(window.VSRF_AUTH&&window.VSRF_AUTH.state||null)}
+      },80);
+      if(window.VSRF_AUTH&&window.VSRF_AUTH.onChange){
+        window.VSRF_AUTH.onChange(st=>{if(st&&st.ready){clearInterval(t);resolve(st)}});
+      }
+    });
+  }
+
   async function loadAll(){
     const local=readLocal();
+    await waitReady(5000);
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+    console.log("[VSRF_USTAV] loadAll: auth state =",{ready:s&&s.ready,available:s&&s.available,hasClient:!!(s&&s.client)});
     if(s&&s.available&&s.client){
       try{
         const {data,error}=await s.client.from("ustavy").select("*").order("sort_order",{ascending:true,nullsFirst:true});
@@ -169,5 +190,5 @@ window.VSRF_USTAV=(function(){
     return (s||"").toLowerCase().split("").map(c=>map[c]!==undefined?map[c]:c).join("").replace(/[^a-z0-9-]/g,"").replace(/-+/g,"-").replace(/^-|-$/g,"").slice(0,50)||"ustav-"+Date.now();
   }
 
-  return {DEFAULT_DATA,THEMES,DEFAULT_EMBLEM,render,buildToc,loadAll,save,remove,esc,paragraphs,makeSlug};
+  return {DEFAULT_DATA,THEMES,DEFAULT_EMBLEM,render,buildToc,loadAll,save,remove,esc,paragraphs,makeSlug,waitReady};
 })();
