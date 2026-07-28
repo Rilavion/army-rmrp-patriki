@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<title>ВС РФ — в/ч №12132 · Информационная доска</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style id="vsrf-admin-guard">
+[data-admin]{display:none !important}
+body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
+body.vsrf-is-admin [data-admin]:not(.nav a){display:initial !important}
+body.vsrf-is-admin .info-admin-bar{display:flex !important}
+</style>
+<script>
+(function(){
+  function apply(){
+    var s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+    if(!s||!s.ready) return;
+    document.body.classList.toggle("vsrf-is-admin",!!s.user);
+    document.body.classList.toggle("is-admin",!!s.user);
+  }
+  document.addEventListener("DOMContentLoaded",function(){
+    apply();
+    if(window.VSRF_AUTH&&window.VSRF_AUTH.onChange) window.VSRF_AUTH.onChange(apply);
+    else{var t=setInterval(function(){if(window.VSRF_AUTH){clearInterval(t);apply();window.VSRF_AUTH.onChange(apply)}},80);setTimeout(function(){clearInterval(t)},4000);}
+  });
+})();
+</script>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-text">
+        <span class="brand-label">Вооружённые Силы РФ</span>
+        <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
+      </div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="info.html" data-page="info.html" data-transition class="active">Информация</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="training.html" data-page="training.html" data-transition>Обучение</a>
+      <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
+      <a href="docs.html" data-page="docs.html" data-transition data-admin>Документы</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+      <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
+      <a href="lk.html" data-page="lk.html" data-transition data-admin>Личный кабинет</a>
+    </nav>
+    <div class="header-actions">
+      <button class="search-btn" data-open-search title="Поиск (Ctrl+K)">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <span>Поиск</span><span class="kbd">Ctrl K</span>
+      </button>
+      <button class="icon-btn" data-open-notify title="Уведомления" style="position:relative">
+        <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        <span class="vsrf-notify-badge" data-notify-badge></span>
+      </button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="login-btn" data-open-login>
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        <span>Войти</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="info-hero">
+    <div class="info-hero-bg"></div>
+    <div class="info-hero-veil"></div>
+    <canvas class="info-hero-particles" id="infoParticles"></canvas>
+    <div class="container info-hero-inner">
+      <div class="info-hero-content">
+        <div class="info-hero-kicker">
+          <span class="info-hero-kicker-dot"></span>
+          Информационная доска
+        </div>
+        <h1 class="info-hero-title" id="infoTitle">Вооружённые Силы Российской Федерации</h1>
+        <div class="info-hero-subtitle" id="infoSubtitle">Структура, функции и условия службы</div>
+        <p class="info-hero-intro" id="infoIntro">Загрузка...</p>
+        <div class="info-admin-bar" data-admin style="display:none">
+          <button class="btn btn-gold btn-sm" id="infoEditBtn">✎ Редактировать</button>
+          <button class="btn btn-ghost btn-sm" id="infoResetBtn">↺ Сбросить к стандарту</button>
+        </div>
+      </div>
+      <div class="info-hero-mark" aria-hidden="true">
+        <svg viewBox="0 0 240 240">
+          <defs>
+            <linearGradient id="infoG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#f0d89b"/>
+              <stop offset="1" stop-color="#8f6b2a"/>
+            </linearGradient>
+          </defs>
+          <circle cx="120" cy="120" r="112" fill="none" stroke="url(#infoG)" stroke-width="1.5" opacity=".55"/>
+          <circle cx="120" cy="120" r="96" fill="none" stroke="url(#infoG)" stroke-width="1" opacity=".35" stroke-dasharray="4 4"/>
+          <circle cx="120" cy="120" r="70" fill="rgba(21,36,29,.7)" stroke="url(#infoG)" stroke-width="1.5"/>
+          <text x="120" y="112" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="64" font-weight="700" fill="url(#infoG)">ВС</text>
+          <text x="120" y="148" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" letter-spacing="4" fill="#cda85a">РОССИИ</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="info-body">
+    <div class="container">
+      <div id="infoSections" class="info-sections">
+        <div class="info-loading">Загрузка данных...</div>
+      </div>
+      <div class="info-footer-note" id="infoFooter"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="brand-icon" style="width:44px;height:44px"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt=""></div>
+        <p style="color:var(--muted);font-size:13px;margin-top:12px">1-я отдельная гвардейская бригада специального назначения. в/ч №12132.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Разделы</h5>
+        <a href="index.html">Главная</a>
+        <a href="info.html">Информация</a>
+        <a href="ustav.html">Уставы</a>
+        <a href="composition.html">Состав</a>
+        <a href="news.html">Новости</a>
+      </div>
+      <div class="footer-col">
+        <h5>Ресурсы</h5>
+        <a href="autopark.html">Автопарк</a>
+        <a href="map.html">Карта</a>
+        <a href="faq.html">FAQ</a>
+        <a href="lk.html">Личный кабинет</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> · Вооружённые Силы Российской Федерации</span>
+      <span>1-я ОБрСпН · в/ч №12132</span>
+    </div>
+  </div>
+</footer>
+
+<div class="fab-stack" id="fabStack">
+  <button class="fab" id="fabUp" title="Наверх">
+    <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg>
+  </button>
+</div>
+
+<div class="search-modal" id="searchModal">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      <input class="search-input" placeholder="Поиск..." spellcheck="false">
+      <button class="search-close-kbd">Esc</button>
+    </div>
+    <div class="search-results"></div>
+  </div>
+</div>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Вход администратора</h3>
+    <div class="modal-sub">Доступ к управлению контентом</div>
+    <form>
+      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
+      <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-back" id="infoEditModal">
+  <div class="modal modal-xl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Редактирование информационной доски</h3>
+    <div class="modal-sub">Изменения сохраняются в Supabase (видны всем). Локальная копия — как резерв.</div>
+    <div class="info-edit-note">💡 Формат JSON. Каждая секция — объект с <code>id</code>, <code>icon</code>, <code>title</code>, <code>subtitle</code> и одним из типов контента: <code>items</code> (список), <code>cards</code> (карточки), <code>grid</code> (сетка «метка+текст»), <code>steps</code> (шаги с номерами).</div>
+    <textarea id="infoEditArea" style="width:100%;min-height:520px;font-family:'JetBrains Mono','Courier New',monospace;font-size:12.5px;padding:14px;border-radius:10px;background:var(--input-bg);border:1px solid var(--line);color:var(--text);line-height:1.55;resize:vertical" spellcheck="false"></textarea>
+    <div class="form-msg" id="infoEditMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" id="infoEditCancel">Отмена</button>
+      <button class="btn btn-ghost btn-sm" id="infoEditFormat">Форматировать JSON</button>
+      <button class="btn btn-gold btn-sm" id="infoEditSave">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script src="supabase-loader.js?v=50"></script>
+<script src="config.js?v=50"></script>
+<script src="auth.js?v=50"></script>
+<script src="info-engine.js?v=50"></script>
+<script src="main.js?v=50"></script>
+<script src="holiday-engine.js?v=50"></script>
+<script src="sound-engine.js?v=50"></script>
+<script src="settings-panel.js?v=50"></script>
+<script src="faq-engine.js?v=50"></script>
+<script src="search-engine.js?v=50"></script>
+<script src="notify-engine.js?v=50"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+const $=id=>document.getElementById(id);
+const esc=s=>window.VSRF_INFO.esc(s);
+let DATA=null;
+
+function render(){
+  if(!DATA) return;
+  $("infoTitle").textContent=DATA.title||"";
+  $("infoSubtitle").textContent=DATA.subtitle||"";
+  $("infoIntro").textContent=DATA.intro||"";
+  const sec=$("infoSections");
+  if(!DATA.sections||!DATA.sections.length){
+    sec.innerHTML=`<div class="info-loading">Информация будет добавлена позже.</div>`;
+    return;
+  }
+  sec.innerHTML=DATA.sections.map((s,i)=>{
+    let inner="";
+    if(Array.isArray(s.items)&&s.items.length){
+      inner=`<ul class="info-list">${s.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
+    }
+    if(Array.isArray(s.cards)&&s.cards.length){
+      inner+=`<div class="info-cards">${s.cards.map(c=>`
+        <div class="info-card">
+          <div class="info-card-heading">${esc(c.heading||"")}</div>
+          <p class="info-card-text">${esc(c.text||"")}</p>
+        </div>`).join("")}</div>`;
+    }
+    if(Array.isArray(s.grid)&&s.grid.length){
+      inner+=`<div class="info-grid">${s.grid.map(g=>`
+        <div class="info-grid-item">
+          <div class="info-grid-label">${esc(g.label||"")}</div>
+          <div class="info-grid-text">${esc(g.text||"")}</div>
+        </div>`).join("")}</div>`;
+    }
+    if(Array.isArray(s.steps)&&s.steps.length){
+      inner+=`<div class="info-steps">${s.steps.map(st=>`
+        <div class="info-step">
+          <div class="info-step-num">${esc(st.n||"")}</div>
+          <div class="info-step-body">
+            <div class="info-step-title">${esc(st.title||"")}</div>
+            <div class="info-step-text">${esc(st.text||"")}</div>
+          </div>
+        </div>`).join("")}</div>`;
+    }
+    if(typeof s.text==="string"&&s.text.trim()){
+      inner+=`<div class="info-text">${esc(s.text).replace(/\n/g,"<br>")}</div>`;
+    }
+    return `<article class="info-section" style="animation-delay:${i*80}ms">
+      <div class="info-section-head">
+        <div class="info-section-icon">${esc(s.icon||"◈")}</div>
+        <div>
+          <h2 class="info-section-title">${esc(s.title||"")}</h2>
+          ${s.subtitle?`<div class="info-section-subtitle">${esc(s.subtitle)}</div>`:""}
+        </div>
+      </div>
+      <div class="info-section-body">${inner}</div>
+    </article>`;
+  }).join("");
+  $("infoFooter").innerHTML=DATA.footer?`<div class="info-footer-inner">${esc(DATA.footer).replace(/\n/g,"<br>")}</div>`:"";
+}
+
+async function boot(){
+  DATA=await VSRF_INFO.load();
+  render();
+}
+boot();
+if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(()=>boot());
+
+const editModal=$("infoEditModal");
+const editArea=$("infoEditArea");
+const editMsg=$("infoEditMsg");
+function openEdit(){
+  editArea.value=JSON.stringify(DATA,null,2);
+  editMsg.className="form-msg";editMsg.textContent="";
+  editModal.classList.add("active");
+}
+function closeEdit(){editModal.classList.remove("active")}
+$("infoEditBtn").addEventListener("click",openEdit);
+editModal.querySelector(".modal-close").addEventListener("click",closeEdit);
+$("infoEditCancel").addEventListener("click",closeEdit);
+editModal.addEventListener("click",e=>{if(e.target===editModal) closeEdit()});
+$("infoEditFormat").addEventListener("click",()=>{
+  try{editArea.value=JSON.stringify(JSON.parse(editArea.value),null,2);editMsg.className="form-msg success";editMsg.textContent="✓ Форматирование выполнено"}
+  catch(e){editMsg.className="form-msg error";editMsg.textContent="Ошибка JSON: "+e.message}
+});
+$("infoEditSave").addEventListener("click",async()=>{
+  let payload;
+  try{payload=JSON.parse(editArea.value)}
+  catch(e){editMsg.className="form-msg error";editMsg.textContent="Некорректный JSON: "+e.message;return}
+  editMsg.className="form-msg info";editMsg.textContent="Сохранение...";
+  const r=await VSRF_INFO.save(payload);
+  if(r.remote){editMsg.className="form-msg success";editMsg.textContent="✓ Сохранено в Supabase"}
+  else{editMsg.className="form-msg info";editMsg.textContent="Сохранено локально"+(r.error?" ("+r.error+")":"")}
+  DATA=payload;render();
+  setTimeout(closeEdit,900);
+});
+$("infoResetBtn").addEventListener("click",async()=>{
+  if(!confirm("Сбросить контент к стандартному? Локальные правки будут потеряны (Supabase не изменится).")) return;
+  DATA=VSRF_INFO.resetDefault();render();
+});
+
+(function infoParticles(){
+  const c=document.getElementById("infoParticles");if(!c) return;
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const ctx=c.getContext("2d");
+  let parts=[];
+  function resize(){
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    c.width=c.clientWidth*dpr;c.height=c.clientHeight*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const w=c.clientWidth,h=c.clientHeight;
+    const N=Math.min(45,Math.max(15,Math.round(w*h/28000)));
+    parts=[];
+    for(let i=0;i<N;i++) parts.push(spawn(w,h,true));
+  }
+  function spawn(w,h,initial){
+    return {x:Math.random()*w,y:initial?Math.random()*h:h+10,vx:(Math.random()-.5)*.2,vy:-.1-Math.random()*.3,r:.5+Math.random()*1.6,a:.15+Math.random()*.4,phase:Math.random()*Math.PI*2,tw:.003+Math.random()*.009};
+  }
+  function loop(){
+    requestAnimationFrame(loop);
+    const w=c.clientWidth,h=c.clientHeight;
+    ctx.clearRect(0,0,w,h);
+    for(let i=parts.length-1;i>=0;i--){
+      const p=parts[i];p.phase+=p.tw;
+      p.x+=p.vx+Math.sin(p.phase)*.12;p.y+=p.vy;
+      const alpha=p.a*(0.6+Math.sin(p.phase*2)*0.4);
+      ctx.beginPath();ctx.fillStyle=`rgba(240,216,155,${alpha})`;
+      ctx.shadowBlur=6;ctx.shadowColor="rgba(205,168,90,0.5)";
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+      if(p.y<-20||p.x<-20||p.x>w+20){parts.splice(i,1);parts.push(spawn(w,h,false))}
+    }
+    ctx.shadowBlur=0;
+  }
+  resize();window.addEventListener("resize",resize);loop();
+})();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
+</html>
