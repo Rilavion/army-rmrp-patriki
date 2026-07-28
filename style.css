@@ -3595,10 +3595,13 @@ body[class*="holiday-"] .hero-v4-newsline{border-color:color-mix(in srgb,var(--h
 
 
 /* ===== Информационная доска v2 ===== */
-.info2-hero{position:relative;min-height:min(560px,72vh);overflow:hidden;isolation:isolate}
+.info2-hero{position:relative;min-height:min(560px,72vh);overflow:hidden;isolation:isolate;padding-bottom:80px}
 .info2-hero::after{
-  content:"";position:absolute;bottom:0;left:0;right:0;height:180px;pointer-events:none;z-index:1;
-  background:linear-gradient(180deg,transparent 0%,var(--bg) 100%);
+  content:"";position:absolute;bottom:0;left:-40px;right:-40px;height:60%;pointer-events:none;z-index:1;
+  background:linear-gradient(180deg,transparent 0%,rgba(8,15,11,.25) 40%,rgba(8,15,11,.7) 75%,var(--bg) 100%);
+}
+[data-theme="light"] .info2-hero::after{
+  background:linear-gradient(180deg,transparent 0%,rgba(232,226,200,.3) 40%,rgba(232,226,200,.75) 75%,var(--bg) 100%);
 }
 .info2-hero-bg{
   position:absolute;inset:0;z-index:-3;
@@ -3674,7 +3677,7 @@ body[class*="holiday-"] .hero-v4-newsline{border-color:color-mix(in srgb,var(--h
 .info2-hero-scroll-text{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);opacity:.7;font-weight:700}
 
 /* ===== Body ===== */
-.info2-body{padding:30px 0 100px;position:relative}
+.info2-body{padding:0 0 100px;margin-top:-140px;position:relative;z-index:2}
 .info2-layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:38px;align-items:start}
 @media (max-width:900px){.info2-layout{grid-template-columns:1fr;gap:24px}}
 
