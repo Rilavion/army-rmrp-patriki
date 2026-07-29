@@ -80,44 +80,30 @@ body.vsrf-is-admin .info-admin-bar{display:flex !important}
 </header>
 
 <main>
-  <section class="info2-hero">
-    <div class="info2-hero-bg"></div>
-    <div class="info2-hero-grid-lines" aria-hidden="true"></div>
-    <div class="info2-hero-veil"></div>
-    <canvas class="info2-hero-particles" id="infoParticles"></canvas>
-
-    <div class="container info2-hero-inner">
-      <div class="info2-hero-crest" aria-hidden="true">
-        <svg viewBox="0 0 400 100" preserveAspectRatio="xMidYMid meet">
-          <line x1="0" y1="50" x2="150" y2="50" stroke="#cda85a" stroke-width="1" opacity=".5"/>
-          <circle cx="170" cy="50" r="5" fill="#cda85a"/>
-          <circle cx="200" cy="50" r="8" fill="none" stroke="#cda85a" stroke-width="1.5"/>
-          <circle cx="230" cy="50" r="5" fill="#cda85a"/>
-          <line x1="250" y1="50" x2="400" y2="50" stroke="#cda85a" stroke-width="1" opacity=".5"/>
-        </svg>
+  <section class="info3-head">
+    <div class="container">
+      <div class="info3-ribbon">
+        <span class="info3-ribbon-line"></span>
+        <span class="info3-ribbon-emblem">★</span>
+        <span class="info3-ribbon-name">1-я ОБрСпН · в/ч №12132</span>
+        <span class="info3-ribbon-emblem">★</span>
+        <span class="info3-ribbon-line"></span>
       </div>
 
-      <div class="info2-hero-kicker">Информационная доска · Официальный источник</div>
-      <h1 class="info2-hero-title" id="infoTitle">Вооружённые Силы Российской Федерации</h1>
-      <div class="info2-hero-subtitle" id="infoSubtitle">Структура, функции и условия службы</div>
+      <h1 class="info3-title" id="infoTitle">Вооружённые Силы Российской Федерации</h1>
+      <div class="info3-subtitle" id="infoSubtitle">Структура, функции и условия службы</div>
 
-      <p class="info2-hero-intro" id="infoIntro">Загрузка...</p>
+      <div class="info3-intro-wrap">
+        <div class="info3-intro-mark">«</div>
+        <p class="info3-intro" id="infoIntro">Загрузка...</p>
+      </div>
 
-      <div class="info2-hero-actions">
-        <a class="btn btn-gold info2-cta" href="#sections-start">
-          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-          Смотреть разделы
-        </a>
-        <button class="btn btn-ghost info2-cta info-admin-bar" data-admin style="display:none" id="infoEditBtn">
-          <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75z"/></svg>
-          Редактировать
+      <div class="info3-head-actions info-admin-bar" data-admin style="display:none">
+        <button class="btn btn-gold btn-sm" id="infoEditBtn">
+          <svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:6px"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75z"/></svg>
+          Редактировать информацию
         </button>
       </div>
-    </div>
-
-    <div class="info2-hero-scroll" aria-hidden="true">
-      <span></span>
-      <div class="info2-hero-scroll-text">Прокрутить</div>
     </div>
   </section>
 
@@ -722,6 +708,6 @@ $("infoJsonApply").addEventListener("click",()=>{
   resize();window.addEventListener("resize",resize);loop();
 })();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a225767f6ec435a5',t:'MTc4NTI1ODI2NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
