@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=68">
+<link rel="stylesheet" href="style.css?v=70">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -129,6 +129,8 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
           <button class="btn btn-ghost btn-sm" id="vpSyncBtn" title="Запросить свежий список из Discord">
             <span id="vpSyncBtnLabel">↻ Синхронизировать</span>
           </button>
+          <button class="btn btn-ghost btn-sm" id="vpArchiveBtn" title="Архив проверок и статистика">📊 Архив</button>
+          <button class="btn btn-gold btn-sm" id="vpSaveArchiveBtn" title="Сохранить текущие проверки в архив">💾 В архив</button>
           <button class="btn btn-gold btn-sm" id="vpSettingsBtn" data-admin title="Настройка ролей и отделов">⚙ Настройки</button>
         </div>
       </div>
@@ -140,6 +142,128 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
     </div>
   </section>
 </main>
+
+<div class="modal-back" id="vpSaveArchiveModal">
+  <div class="modal modal-lg">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Сохранение проверок в архив</h3>
+    <div class="modal-sub">В архив попадут <b>только проверенные</b> люди (хотя бы одна отметка). Не проверенные автоматически исключаются.</div>
+
+    <div class="form-group">
+      <label>Название записи</label>
+      <input type="text" id="vpArcTitle" class="msg-input" placeholder="Например: Проверка от 15.11.2026">
+    </div>
+    <div class="msg-row">
+      <div class="form-group msg-flex-1">
+        <label>Период — с</label>
+        <input type="date" id="vpArcFrom" class="msg-input">
+      </div>
+      <div class="form-group msg-flex-1">
+        <label>Период — по</label>
+        <input type="date" id="vpArcTo" class="msg-input">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Примечание (опц.)</label>
+      <textarea id="vpArcNotes" class="msg-input msg-textarea msg-textarea-sm" placeholder="Комментарий к отчёту..."></textarea>
+    </div>
+
+    <div class="vp-arc-preview" id="vpArcPreview"></div>
+
+    <div class="form-group">
+      <label class="doc-toggle-row"><input type="checkbox" id="vpArcClear"><span>Очистить все текущие отметки после сохранения (начать новую неделю с нуля)</span></label>
+    </div>
+
+    <div class="form-msg" id="vpArcMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--gold-b)">
+      <button class="btn btn-ghost btn-sm" id="vpArcCancel">Отмена</button>
+      <button class="btn btn-gold btn-sm" id="vpArcConfirm">💾 Сохранить в архив</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="vpArchiveModal">
+  <div class="modal modal-xxl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Архив проверок и статистика</h3>
+    <div class="modal-sub">Все сохранённые проверки. Можно выбрать период, посмотреть детали, отправить отчёт в Discord.</div>
+
+    <div class="vp-arc-tabs">
+      <button class="vp-arc-tab active" data-arc-tab="list">📋 Список</button>
+      <button class="vp-arc-tab" data-arc-tab="stats">📈 Статистика</button>
+      <button class="vp-arc-tab" data-arc-tab="settings" data-admin>⚙ Канал отчётов</button>
+    </div>
+
+    <div class="vp-arc-tab-body" data-arc-body="list">
+      <div class="vp-arc-list" id="vpArcList">
+        <div class="apps-empty">Загрузка...</div>
+      </div>
+    </div>
+
+    <div class="vp-arc-tab-body" data-arc-body="stats" style="display:none">
+      <div class="vp-stats-toolbar">
+        <label>Период:
+          <select id="vpStatsPeriod" class="vp-search" style="max-width:180px">
+            <option value="week">Последняя неделя</option>
+            <option value="month" selected>Последний месяц</option>
+            <option value="quarter">Квартал</option>
+            <option value="year">Год</option>
+            <option value="all">Всё время</option>
+          </select>
+        </label>
+      </div>
+      <div class="vp-stats-body" id="vpStatsBody">
+        <div class="apps-empty">Загрузка...</div>
+      </div>
+    </div>
+
+    <div class="vp-arc-tab-body" data-arc-body="settings" style="display:none">
+      <div class="form-group">
+        <label>Канал Discord для отправки отчётов</label>
+        <select id="vpReportChannel" class="msg-input"></select>
+        <div class="msg-help">Бот будет отправлять сюда все отчёты о проверках. Только Администратор может менять.</div>
+      </div>
+      <div class="form-msg" id="vpArcSetMsg"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-gold btn-sm" id="vpArcSetSave">Сохранить настройки</button>
+      </div>
+    </div>
+
+    <div class="form-msg" id="vpArcModalMsg"></div>
+  </div>
+</div>
+
+<div class="modal-back" id="vpArcDetailModal">
+  <div class="modal modal-xxl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="vpArcDetailTitle">Просмотр записи архива</h3>
+    <div class="modal-sub" id="vpArcDetailSub"></div>
+    <div class="vp-arc-detail-body" id="vpArcDetailBody"></div>
+    <div class="form-msg" id="vpArcDetailMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--gold-b)">
+      <button class="btn btn-ghost btn-sm" id="vpArcDetailDelete" data-admin>🗑 Удалить (admin)</button>
+      <button class="btn btn-ghost btn-sm" id="vpArcDetailEdit" data-admin>✎ Редактировать (admin)</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" id="vpArcDetailClose">Закрыть</button>
+      <button class="btn btn-gold btn-sm" id="vpArcDetailSend">📤 Отправить в Discord</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="vpArcEditModal">
+  <div class="modal modal-lg">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Редактирование записи архива</h3>
+    <div class="modal-sub">Изменить название и примечание. Данные о проверках менять нельзя — это снимок во времени.</div>
+    <div class="form-group"><label>Название</label><input type="text" id="vpArcEditTitle" class="msg-input"></div>
+    <div class="form-group"><label>Примечание</label><textarea id="vpArcEditNotes" class="msg-input msg-textarea msg-textarea-sm"></textarea></div>
+    <div class="form-msg" id="vpArcEditMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:1px solid var(--gold-b)">
+      <button class="btn btn-ghost btn-sm" id="vpArcEditCancel">Отмена</button>
+      <button class="btn btn-gold btn-sm" id="vpArcEditSave">Сохранить</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-back" id="vpSettingsModal">
   <div class="modal modal-xxl">
@@ -251,18 +375,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=68"></script>
-<script src="config.js?v=68"></script>
-<script src="auth.js?v=68"></script>
-<script src="roles-engine.js?v=68"></script>
-<script src="vp-engine.js?v=68"></script>
-<script src="main.js?v=68"></script>
-<script src="holiday-engine.js?v=68"></script>
-<script src="sound-engine.js?v=68"></script>
-<script src="settings-panel.js?v=68"></script>
-<script src="faq-engine.js?v=68"></script>
-<script src="search-engine.js?v=68"></script>
-<script src="notify-engine.js?v=68"></script>
+<script src="supabase-loader.js?v=70"></script>
+<script src="config.js?v=70"></script>
+<script src="auth.js?v=70"></script>
+<script src="roles-engine.js?v=70"></script>
+<script src="vp-engine.js?v=70"></script>
+<script src="main.js?v=70"></script>
+<script src="holiday-engine.js?v=70"></script>
+<script src="sound-engine.js?v=70"></script>
+<script src="settings-panel.js?v=70"></script>
+<script src="faq-engine.js?v=70"></script>
+<script src="search-engine.js?v=70"></script>
+<script src="notify-engine.js?v=70"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -840,7 +964,336 @@ function softRefresh(){
 }
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible") softRefresh()});
 window.addEventListener("focus",softRefresh);
+
+/* ============ АРХИВ И СТАТИСТИКА ============ */
+
+function ruDate(d){try{return new Date(d).toLocaleDateString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric"})}catch(e){return String(d||"")}}
+function ruDateTime(d){try{return new Date(d).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}catch(e){return String(d||"")}}
+function isoDate(d){const dt=new Date(d);return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0")}
+
+async function openSaveArchive(){
+  const snap=VSRF_VP.buildSnapshot(ALL_MEMBERS,ALL_CHECKS,ALL_MAPPING,HIDE_NO_DEPT);
+  const stats=VSRF_VP.calcSnapshotStats(snap);
+  if(stats.total===0){alert("Нет проверенных людей — сначала поставьте хотя бы одну отметку в таблице.");return}
+  const today=new Date();
+  const weekAgo=new Date(today);weekAgo.setDate(today.getDate()-7);
+  $("vpArcTitle").value="Проверка за "+ruDate(weekAgo)+" — "+ruDate(today);
+  $("vpArcFrom").value=isoDate(weekAgo);
+  $("vpArcTo").value=isoDate(today);
+  $("vpArcNotes").value="";
+  $("vpArcClear").checked=false;
+  const preview=$("vpArcPreview");
+  preview.innerHTML=`
+    <div class="vp-arc-preview-title">Что будет сохранено:</div>
+    <div class="vp-arc-preview-stats">
+      <div class="vp-arc-stat"><div class="vp-arc-stat-num">${stats.total}</div><div class="vp-arc-stat-lbl">всего проверенных</div></div>
+      <div class="vp-arc-stat vp-arc-stat-ok"><div class="vp-arc-stat-num">${stats.checked}</div><div class="vp-arc-stat-lbl">полностью</div></div>
+      <div class="vp-arc-stat vp-arc-stat-warn"><div class="vp-arc-stat-num">${stats.partial}</div><div class="vp-arc-stat-lbl">частично</div></div>
+      <div class="vp-arc-stat"><div class="vp-arc-stat-num">${snap.groups.length}</div><div class="vp-arc-stat-lbl">отдел${snap.groups.length===1?"":"ов"}</div></div>
+    </div>`;
+  $("vpArcMsg").textContent="";$("vpArcMsg").className="form-msg";
+  $("vpSaveArchiveModal").classList.add("active");
+}
+
+$("vpSaveArchiveBtn").addEventListener("click",openSaveArchive);
+$("vpArcCancel").addEventListener("click",()=>$("vpSaveArchiveModal").classList.remove("active"));
+$("vpSaveArchiveModal").querySelector(".modal-close").addEventListener("click",()=>$("vpSaveArchiveModal").classList.remove("active"));
+$("vpSaveArchiveModal").addEventListener("click",e=>{if(e.target===$("vpSaveArchiveModal"))$("vpSaveArchiveModal").classList.remove("active")});
+
+$("vpArcConfirm").addEventListener("click",async()=>{
+  const msg=$("vpArcMsg");
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  const snap=VSRF_VP.buildSnapshot(ALL_MEMBERS,ALL_CHECKS,ALL_MAPPING,HIDE_NO_DEPT);
+  const from=$("vpArcFrom").value?new Date($("vpArcFrom").value).toISOString():null;
+  const to=$("vpArcTo").value?new Date($("vpArcTo").value+"T23:59:59").toISOString():new Date().toISOString();
+  const r=await VSRF_VP.saveArchive({
+    title:$("vpArcTitle").value.trim()||null,
+    period_from:from,period_to:to,
+    snapshot:snap,
+    notes:$("vpArcNotes").value.trim()||null
+  });
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  msg.className="form-msg ok";msg.textContent="✓ Сохранено · запись #"+r.id;
+  if($("vpArcClear").checked){
+    const ids=Object.keys(ALL_CHECKS);
+    if(ids.length){await VSRF_VP.resetChecksBulk(ids);for(const id of ids) delete ALL_CHECKS[id]}
+  }
+  LAST_RENDER_HASH="";renderAll(true);
+  setTimeout(()=>{$("vpSaveArchiveModal").classList.remove("active")},1200);
+});
+
+/* ---------- Модалка «Архив и статистика» ---------- */
+
+let CURRENT_ARC_TAB="list";
+let LOADED_ARCHIVES=[];
+let VP_SETTINGS_STATE=null;
+
+function switchArcTab(name){
+  CURRENT_ARC_TAB=name;
+  document.querySelectorAll(".vp-arc-tab").forEach(t=>t.classList.toggle("active",t.dataset.arcTab===name));
+  document.querySelectorAll(".vp-arc-tab-body").forEach(b=>b.style.display=b.dataset.arcBody===name?"":"none");
+  if(name==="list") loadArchivesList();
+  if(name==="stats") loadStats();
+  if(name==="settings") loadArcSettings();
+}
+
+async function openArchiveModal(){
+  $("vpArchiveModal").classList.add("active");
+  switchArcTab("list");
+}
+$("vpArchiveBtn").addEventListener("click",openArchiveModal);
+$("vpArchiveModal").querySelector(".modal-close").addEventListener("click",()=>$("vpArchiveModal").classList.remove("active"));
+$("vpArchiveModal").addEventListener("click",e=>{if(e.target===$("vpArchiveModal"))$("vpArchiveModal").classList.remove("active")});
+document.querySelectorAll(".vp-arc-tab").forEach(t=>t.addEventListener("click",()=>switchArcTab(t.dataset.arcTab)));
+
+async function loadArchivesList(){
+  const box=$("vpArcList");
+  box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
+  LOADED_ARCHIVES=await VSRF_VP.fetchArchives(100);
+  if(!LOADED_ARCHIVES.length){box.innerHTML=`<div class="apps-empty"><h3>Архив пуст</h3><p>Сохраните первую проверку кнопкой «💾 В архив» на главной странице.</p></div>`;return}
+  box.innerHTML=LOADED_ARCHIVES.map(a=>{
+    const pct=a.members_total?Math.round(a.members_checked*100/a.members_total):0;
+    const sent=a.report_message_id?`<span class="vp-arc-item-sent" title="Отчёт отправлен ${ruDateTime(a.report_sent_at)}">📤 отправлено</span>`:`<span class="vp-arc-item-nosent">не отправлено</span>`;
+    return `<div class="vp-arc-item" data-arc-id="${a.id}">
+      <div class="vp-arc-item-head">
+        <div class="vp-arc-item-title">${esc(a.title||"Без названия")}</div>
+        <div class="vp-arc-item-date">${ruDateTime(a.saved_at)}</div>
+      </div>
+      <div class="vp-arc-item-body">
+        <div class="vp-arc-item-stat"><b>${a.members_total||0}</b> чел.</div>
+        <div class="vp-arc-item-stat vp-arc-stat-ok"><b>${a.members_checked||0}</b> полностью (${pct}%)</div>
+        <div class="vp-arc-item-stat vp-arc-stat-warn"><b>${a.members_partial||0}</b> частично</div>
+        <div class="vp-arc-item-by">✎ ${esc(a.saved_by_name||"—")}</div>
+      </div>
+      <div class="vp-arc-item-foot">
+        ${a.period_from?`<span class="vp-arc-item-period">${ruDate(a.period_from)} — ${ruDate(a.period_to)}</span>`:""}
+        ${sent}
+        <button class="btn btn-ghost btn-sm" data-arc-open="${a.id}">Открыть →</button>
+      </div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("[data-arc-open]").forEach(b=>b.addEventListener("click",()=>openArcDetail(parseInt(b.dataset.arcOpen))));
+}
+
+async function loadStats(){
+  const box=$("vpStatsBody");
+  box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
+  const period=$("vpStatsPeriod").value;
+  const now=new Date();
+  let from=null;
+  if(period==="week"){from=new Date(now);from.setDate(now.getDate()-7)}
+  else if(period==="month"){from=new Date(now);from.setMonth(now.getMonth()-1)}
+  else if(period==="quarter"){from=new Date(now);from.setMonth(now.getMonth()-3)}
+  else if(period==="year"){from=new Date(now);from.setFullYear(now.getFullYear()-1)}
+  const all=await VSRF_VP.fetchArchives(500);
+  const list=from?all.filter(a=>new Date(a.saved_at)>=from):all;
+  if(!list.length){box.innerHTML=`<div class="apps-empty"><h3>Нет данных за этот период</h3></div>`;return}
+  let sumTotal=0,sumChecked=0,sumPartial=0;
+  const perDept={};
+  const keys=["medbook","narko","driver","passport","personal_file","weapon_license","attestation"];
+  const keyLabels={medbook:"Мед.Книжка",narko:"Справка Нарк.",driver:"Вод.Права",passport:"Паспорт",personal_file:"Лич.Дело",weapon_license:"Лиц.Оружия",attestation:"Аттестация"};
+  const docsSum={};for(const k of keys) docsSum[k]={yes:0,no:0,absent:0};
+  for(const a of list){
+    sumTotal+=a.members_total||0;sumChecked+=a.members_checked||0;sumPartial+=a.members_partial||0;
+    const s=a.stats||{};const t=s.totals||{};
+    for(const k of keys){
+      if(t[k]){docsSum[k].yes+=t[k].yes||0;docsSum[k].no+=t[k].no||0;docsSum[k].absent+=t[k].absent||0}
+    }
+  }
+  const chartMax=Math.max(1,...list.map(a=>a.members_checked||0));
+  const chartHtml=list.slice().reverse().map(a=>{
+    const h=Math.round((a.members_checked||0)*100/chartMax);
+    return `<div class="vp-chart-bar" title="${ruDate(a.saved_at)}: ${a.members_checked} полностью из ${a.members_total}">
+      <div class="vp-chart-fill" style="height:${h}%"></div>
+      <div class="vp-chart-num">${a.members_checked||0}</div>
+      <div class="vp-chart-lbl">${ruDate(a.saved_at)}</div>
+    </div>`;
+  }).join("");
+  box.innerHTML=`
+    <div class="vp-stats-cards">
+      <div class="vp-stats-card"><div class="vp-stats-card-num">${list.length}</div><div class="vp-stats-card-lbl">отчётов за период</div></div>
+      <div class="vp-stats-card"><div class="vp-stats-card-num">${sumTotal}</div><div class="vp-stats-card-lbl">всего проверок</div></div>
+      <div class="vp-stats-card vp-arc-stat-ok"><div class="vp-stats-card-num">${sumChecked}</div><div class="vp-stats-card-lbl">полностью</div></div>
+      <div class="vp-stats-card vp-arc-stat-warn"><div class="vp-stats-card-num">${sumPartial}</div><div class="vp-stats-card-lbl">частично</div></div>
+    </div>
+    <div class="vp-stats-section">
+      <div class="vp-stats-section-title">Динамика «полностью проверено» по датам</div>
+      <div class="vp-chart">${chartHtml}</div>
+    </div>
+    <div class="vp-stats-section">
+      <div class="vp-stats-section-title">Суммарно по типам документов (за период)</div>
+      <div class="vp-docs-grid">
+        ${keys.map(k=>{
+          const tot=docsSum[k].yes+docsSum[k].no+docsSum[k].absent;
+          const pct=tot?Math.round(docsSum[k].yes*100/tot):0;
+          return `<div class="vp-doc-card">
+            <div class="vp-doc-name">${keyLabels[k]}</div>
+            <div class="vp-doc-bar"><div class="vp-doc-fill" style="width:${pct}%"></div></div>
+            <div class="vp-doc-nums">
+              <span class="vp-arc-stat-ok">✓ ${docsSum[k].yes}</span>
+              <span class="vp-arc-stat-bad">✕ ${docsSum[k].no}</span>
+              ${docsSum[k].absent?`<span class="vp-arc-stat-neu">○ ${docsSum[k].absent}</span>`:""}
+              <span class="vp-doc-pct">${pct}% ДА</span>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+}
+$("vpStatsPeriod").addEventListener("change",loadStats);
+
+async function loadArcSettings(){
+  const isAdmin=window.VSRF_ROLES&&window.VSRF_ROLES.isAdmin();
+  const sel=$("vpReportChannel");
+  const [settings,channels]=await Promise.all([VSRF_VP.fetchSettings(),VSRF_VP.fetchDsChannels()]);
+  VP_SETTINGS_STATE=settings||{};
+  const cur=(settings&&settings.report_channel_id)||"";
+  if(!channels.length){
+    sel.innerHTML=`<option value="">— бот ещё не синхронизировал каналы —</option>`;
+  } else {
+    const byParent=new Map();
+    for(const c of channels){const k=c.parent_name||"Без категории";if(!byParent.has(k)) byParent.set(k,[]);byParent.get(k).push(c)}
+    const parts=[`<option value="">— не выбрано —</option>`];
+    for(const [pn,list] of byParent){
+      parts.push(`<optgroup label="${esc(pn)}">`);
+      for(const c of list) parts.push(`<option value="${c.channel_id}" ${c.channel_id===cur?"selected":""}>#${esc(c.name)}</option>`);
+      parts.push(`</optgroup>`);
+    }
+    sel.innerHTML=parts.join("");
+  }
+  sel.disabled=!isAdmin;
+  $("vpArcSetSave").disabled=!isAdmin;
+  $("vpArcSetSave").style.display=isAdmin?"":"none";
+}
+$("vpArcSetSave").addEventListener("click",async()=>{
+  const msg=$("vpArcSetMsg");
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  const sel=$("vpReportChannel");
+  const chId=sel.value||null;
+  const opt=sel.options[sel.selectedIndex];
+  const chName=opt?opt.textContent.replace(/^#/,""):null;
+  const r=await VSRF_VP.saveSettings({report_channel_id:chId,report_channel_name:chName});
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  msg.className="form-msg ok";msg.textContent="✓ Сохранено";
+  setTimeout(()=>{msg.textContent=""},2500);
+});
+
+/* ---------- Детали архивной записи ---------- */
+
+let CURRENT_ARC=null;
+
+async function openArcDetail(id){
+  CURRENT_ARC=await VSRF_VP.fetchArchiveFull(id);
+  if(!CURRENT_ARC){alert("Запись не найдена");return}
+  const isAdmin=window.VSRF_ROLES&&window.VSRF_ROLES.isAdmin();
+  $("vpArcDetailTitle").textContent="📋 "+(CURRENT_ARC.title||"Без названия");
+  $("vpArcDetailSub").innerHTML=`Сохранено: <b>${esc(CURRENT_ARC.saved_by_name||"—")}</b> · ${ruDateTime(CURRENT_ARC.saved_at)}${CURRENT_ARC.period_from?` · период ${ruDate(CURRENT_ARC.period_from)} — ${ruDate(CURRENT_ARC.period_to)}`:""}${CURRENT_ARC.notes?`<br><i>${esc(CURRENT_ARC.notes)}</i>`:""}`;
+  const snap=CURRENT_ARC.snapshot||{};
+  const st=CURRENT_ARC.stats||{};
+  const KEY_LABELS={medbook:"МК",narko:"Н",driver:"ВП",passport:"П",personal_file:"ЛД",weapon_license:"ЛО",attestation:"АТ"};
+  const KEYS=Object.keys(KEY_LABELS);
+  const rowsHtml=(snap.groups||[]).map(g=>{
+    return `<div class="vp-arc-det-group">
+      <div class="vp-arc-det-group-title">▍ ${esc(g.name)} <span class="vp-table-count">${g.list.length}</span></div>
+      <div class="vp-table-wrap">
+        <table class="vp-table">
+          <thead><tr>
+            <th class="vp-th-name">ФИО</th>
+            <th>Должность</th>
+            <th>Статик</th>
+            ${KEYS.map(k=>`<th>${KEY_LABELS[k]}</th>`).join("")}
+            <th>Проверил</th>
+          </tr></thead>
+          <tbody>${g.list.map(m=>{
+            return `<tr>
+              <td class="vp-td-name"><div class="vp-fio">${esc(m.parsed_fio)}</div><div class="vp-nick">${esc(m.raw_nick||"")}</div></td>
+              <td class="vp-td-pos">${esc(m.position||"—")}</td>
+              <td class="vp-td-static">${esc(m.parsed_static||"—")}</td>
+              ${KEYS.map(k=>{
+                const v=m[k];
+                const cls=v==="yes"?"vp-cell-yes":v==="no"?"vp-cell-no":v==="absent"?"vp-cell-absent":"vp-cell-none";
+                const ic=v==="yes"?"✓":v==="no"?"✕":v==="absent"?"○":"·";
+                return `<td class="vp-cell ${cls}"><div class="vp-pill-t" style="font-size:14px;font-weight:700">${ic}</div></td>`;
+              }).join("")}
+              <td class="vp-td-checker">${m.checked_by_name?`<div class="vp-checker">${esc(m.checked_by_name)}</div>`:`<span class="vp-checker-empty">—</span>`}</td>
+            </tr>`;
+          }).join("")}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join("");
+  $("vpArcDetailBody").innerHTML=`
+    <div class="vp-stats-cards" style="margin-bottom:14px">
+      <div class="vp-stats-card"><div class="vp-stats-card-num">${CURRENT_ARC.members_total||0}</div><div class="vp-stats-card-lbl">всего</div></div>
+      <div class="vp-stats-card vp-arc-stat-ok"><div class="vp-stats-card-num">${CURRENT_ARC.members_checked||0}</div><div class="vp-stats-card-lbl">полностью</div></div>
+      <div class="vp-stats-card vp-arc-stat-warn"><div class="vp-stats-card-num">${CURRENT_ARC.members_partial||0}</div><div class="vp-stats-card-lbl">частично</div></div>
+    </div>
+    ${rowsHtml}
+    ${CURRENT_ARC.report_message_id?`<div class="vp-arc-det-sent">✓ Отчёт был отправлен в Discord ${ruDateTime(CURRENT_ARC.report_sent_at)} ${CURRENT_ARC.report_sent_by_name?"пользователем "+esc(CURRENT_ARC.report_sent_by_name):""}</div>`:""}
+  `;
+  $("vpArcDetailMsg").textContent="";$("vpArcDetailMsg").className="form-msg";
+  $("vpArcDetailDelete").style.display=isAdmin?"":"none";
+  $("vpArcDetailEdit").style.display=isAdmin?"":"none";
+  $("vpArcDetailModal").classList.add("active");
+}
+
+$("vpArcDetailClose").addEventListener("click",()=>$("vpArcDetailModal").classList.remove("active"));
+$("vpArcDetailModal").querySelector(".modal-close").addEventListener("click",()=>$("vpArcDetailModal").classList.remove("active"));
+$("vpArcDetailModal").addEventListener("click",e=>{if(e.target===$("vpArcDetailModal"))$("vpArcDetailModal").classList.remove("active")});
+
+$("vpArcDetailDelete").addEventListener("click",async()=>{
+  if(!CURRENT_ARC) return;
+  if(!confirm("Удалить запись архива «"+(CURRENT_ARC.title||"Без названия")+"» БЕЗ ВОЗМОЖНОСТИ ВОССТАНОВЛЕНИЯ?")) return;
+  const r=await VSRF_VP.deleteArchive(CURRENT_ARC.id);
+  if(!r.ok){alert("Ошибка: "+r.error);return}
+  $("vpArcDetailModal").classList.remove("active");
+  loadArchivesList();
+});
+
+$("vpArcDetailEdit").addEventListener("click",()=>{
+  if(!CURRENT_ARC) return;
+  $("vpArcEditTitle").value=CURRENT_ARC.title||"";
+  $("vpArcEditNotes").value=CURRENT_ARC.notes||"";
+  $("vpArcEditMsg").textContent="";
+  $("vpArcEditModal").classList.add("active");
+});
+$("vpArcEditCancel").addEventListener("click",()=>$("vpArcEditModal").classList.remove("active"));
+$("vpArcEditModal").querySelector(".modal-close").addEventListener("click",()=>$("vpArcEditModal").classList.remove("active"));
+$("vpArcEditModal").addEventListener("click",e=>{if(e.target===$("vpArcEditModal"))$("vpArcEditModal").classList.remove("active")});
+$("vpArcEditSave").addEventListener("click",async()=>{
+  if(!CURRENT_ARC) return;
+  const msg=$("vpArcEditMsg");
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  const r=await VSRF_VP.updateArchive(CURRENT_ARC.id,{title:$("vpArcEditTitle").value.trim()||null,notes:$("vpArcEditNotes").value.trim()||null});
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  msg.className="form-msg ok";msg.textContent="✓ Сохранено";
+  CURRENT_ARC.title=$("vpArcEditTitle").value.trim()||null;
+  CURRENT_ARC.notes=$("vpArcEditNotes").value.trim()||null;
+  setTimeout(()=>{$("vpArcEditModal").classList.remove("active");loadArchivesList();openArcDetail(CURRENT_ARC.id)},700);
+});
+
+$("vpArcDetailSend").addEventListener("click",async()=>{
+  if(!CURRENT_ARC) return;
+  const msg=$("vpArcDetailMsg");
+  const settings=await VSRF_VP.fetchSettings();
+  if(!settings||!settings.report_channel_id){
+    msg.className="form-msg error";
+    msg.textContent="Канал отчётов не настроен. Админ должен выбрать канал в модалке «Архив» → вкладка «Канал отчётов».";
+    return;
+  }
+  if(!confirm("Отправить отчёт в канал #"+(settings.report_channel_name||"?")+"?\nОтчёт будет оформлен как приказ с таблицами и сравнением с предыдущим.")) return;
+  msg.className="form-msg info";msg.textContent="Отправка запроса боту...";
+  $("vpArcDetailSend").disabled=true;
+  const r=await VSRF_VP.requestReport(CURRENT_ARC.id,settings.report_channel_id);
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;$("vpArcDetailSend").disabled=false;return}
+  msg.textContent="Бот формирует отчёт...";
+  const res=await VSRF_VP.pollReportStatus(r.id,60000);
+  $("vpArcDetailSend").disabled=false;
+  if(!res.ok){msg.className="form-msg error";msg.textContent="Не отправлено: "+(res.error||res.status);return}
+  msg.className="form-msg ok";msg.textContent="✓ Отчёт отправлен в Discord";
+  setTimeout(()=>openArcDetail(CURRENT_ARC.id),1200);
+});
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25034c0ab389dbf',t:'MTc4NTcwNjQ2MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25068531aec9dbf',t:'MTc4NTcwODU3Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
