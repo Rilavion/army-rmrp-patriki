@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=63">
+<link rel="stylesheet" href="style.css?v=64">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -212,18 +212,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=63"></script>
-<script src="config.js?v=63"></script>
-<script src="auth.js?v=63"></script>
-<script src="roles-engine.js?v=63"></script>
-<script src="vp-engine.js?v=63"></script>
-<script src="main.js?v=63"></script>
-<script src="holiday-engine.js?v=63"></script>
-<script src="sound-engine.js?v=63"></script>
-<script src="settings-panel.js?v=63"></script>
-<script src="faq-engine.js?v=63"></script>
-<script src="search-engine.js?v=63"></script>
-<script src="notify-engine.js?v=63"></script>
+<script src="supabase-loader.js?v=64"></script>
+<script src="config.js?v=64"></script>
+<script src="auth.js?v=64"></script>
+<script src="roles-engine.js?v=64"></script>
+<script src="vp-engine.js?v=64"></script>
+<script src="main.js?v=64"></script>
+<script src="holiday-engine.js?v=64"></script>
+<script src="sound-engine.js?v=64"></script>
+<script src="settings-panel.js?v=64"></script>
+<script src="faq-engine.js?v=64"></script>
+<script src="search-engine.js?v=64"></script>
+<script src="notify-engine.js?v=64"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -233,9 +233,12 @@ let ALL_MEMBERS=[];
 let ALL_MAPPING=[];
 let ALL_CHECKS={};
 let ALL_ROLES=[];
+let ALL_GROUPS=[];
 let SEARCH_Q="";
 let CURRENT_CHECKER="";
 try{CURRENT_CHECKER=localStorage.getItem("vsrf-vp-checker-name")||""}catch(e){}
+let RENDER_LOCK=false;
+let LAST_RENDER_HASH="";
 
 const COLS=[
   {key:"medbook",label:"Мед. Книжка",options:["yes","no"]},
@@ -305,28 +308,20 @@ function renderTable(g){
   </div>`;
 }
 
-async function renderAll(){
-  const box=$("vpTables");
-  box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
-  const [members,mapping,checks]=await Promise.all([VSRF_VP.fetchMembers(),VSRF_VP.fetchMapping(),VSRF_VP.fetchChecks()]);
-  ALL_MEMBERS=members;
-  ALL_MAPPING=mapping;
-  ALL_CHECKS=Object.fromEntries(checks.map(c=>[c.discord_id,c]));
-
-  if(!members.length){
-    box.innerHTML=`<div class="apps-empty">
-      <div class="apps-empty-icon">◎</div>
-      <h3>Список пуст</h3>
-      <p>Бот ещё не синхронизировал участников Discord.<br>Нажмите «Синхронизировать» вверху страницы.</p>
-    </div>`;
-    return;
+function stateHash(){
+  let h=SEARCH_Q+"|"+ALL_MEMBERS.length+"|"+ALL_MAPPING.length+"|";
+  for(const m of ALL_MEMBERS) h+=m.discord_id+":"+(m.updated_at||"")+";";
+  for(const k of Object.keys(ALL_CHECKS).sort()){
+    const c=ALL_CHECKS[k];
+    h+=k+"="+(c.medbook||"")+(c.narko||"")+(c.driver||"")+(c.passport||"")+(c.personal_file||"")+(c.weapon_license||"")+(c.attestation||"")+"|";
   }
+  return h;
+}
 
-  const groups=VSRF_VP.groupByDept(members,mapping);
-  const html=groups.map(renderTable).filter(Boolean).join("");
-  box.innerHTML=html||`<div class="apps-empty"><h3>Ничего не найдено</h3><p>Попробуй изменить поисковый запрос.</p></div>`;
-
+function bindRowHandlers(box){
   box.querySelectorAll(".vp-sel").forEach(sel=>{
+    if(sel.dataset.bound) return;
+    sel.dataset.bound="1";
     sel.addEventListener("change",async e=>{
       const id=sel.dataset.id;
       const key=sel.dataset.check;
@@ -342,11 +337,14 @@ async function renderAll(){
       const tr=sel.closest("tr");
       const checker=tr.querySelector(".vp-td-checker");
       checker.innerHTML=name!=="—"?`<div class="vp-checker">${esc(name)}</div>`:`<span class="vp-checker-empty">—</span>`;
+      LAST_RENDER_HASH=stateHash();
       refreshCheckerList();
     });
   });
 
   box.querySelectorAll("[data-reset-row]").forEach(btn=>{
+    if(btn.dataset.bound) return;
+    btn.dataset.bound="1";
     btn.addEventListener("click",async e=>{
       const id=btn.dataset.resetRow;
       const mem=ALL_MEMBERS.find(x=>x.discord_id===id);
@@ -355,25 +353,68 @@ async function renderAll(){
       const r=await VSRF_VP.resetCheck(id);
       if(!r.ok){alert("Ошибка: "+r.error);return}
       delete ALL_CHECKS[id];
-      renderAll();
+      LAST_RENDER_HASH="";
+      renderAll(true);
     });
   });
 
   box.querySelectorAll("[data-reset-table]").forEach(btn=>{
+    if(btn.dataset.bound) return;
+    btn.dataset.bound="1";
     btn.addEventListener("click",async e=>{
       const groupName=btn.dataset.resetTable;
-      const g=groups.find(x=>x.name===groupName);
+      const g=ALL_GROUPS.find(x=>x.name===groupName);
       if(!g) return;
       if(!confirm("Сбросить ВСЕ проверки отдела «"+groupName+"» ("+g.list.length+" человек)?\nЭто действие нельзя отменить.")) return;
       const ids=g.list.map(x=>x.discord_id);
       const r=await VSRF_VP.resetChecksBulk(ids);
       if(!r.ok){alert("Ошибка: "+r.error);return}
       for(const id of ids) delete ALL_CHECKS[id];
-      renderAll();
+      LAST_RENDER_HASH="";
+      renderAll(true);
     });
   });
+}
 
-  refreshCheckerList();
+async function renderAll(force){
+  if(RENDER_LOCK) return;
+  RENDER_LOCK=true;
+  try{
+    const box=$("vpTables");
+    const isEmpty=!box.querySelector(".vp-table-block");
+    if(force||isEmpty){
+      box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
+    }
+    const [members,mapping,checks]=await Promise.all([VSRF_VP.fetchMembers(),VSRF_VP.fetchMapping(),VSRF_VP.fetchChecks()]);
+    ALL_MEMBERS=members;
+    ALL_MAPPING=mapping;
+    ALL_CHECKS=Object.fromEntries(checks.map(c=>[c.discord_id,c]));
+
+    if(!members.length){
+      box.innerHTML=`<div class="apps-empty">
+        <div class="apps-empty-icon">◎</div>
+        <h3>Список пуст</h3>
+        <p>Бот ещё не синхронизировал участников Discord.<br>Нажмите «Синхронизировать» вверху страницы.</p>
+      </div>`;
+      LAST_RENDER_HASH=stateHash();
+      return;
+    }
+
+    ALL_GROUPS=VSRF_VP.groupByDept(members,mapping);
+
+    const hash=stateHash();
+    if(!force&&hash===LAST_RENDER_HASH){
+      return;
+    }
+    LAST_RENDER_HASH=hash;
+
+    const html=ALL_GROUPS.map(renderTable).filter(Boolean).join("");
+    box.innerHTML=html||`<div class="apps-empty"><h3>Ничего не найдено</h3><p>Попробуй изменить поисковый запрос.</p></div>`;
+    bindRowHandlers(box);
+    refreshCheckerList();
+  } finally {
+    RENDER_LOCK=false;
+  }
 }
 
 function refreshCheckerList(){
@@ -387,7 +428,7 @@ function refreshCheckerList(){
   list.innerHTML=Array.from(set).sort().map(n=>`<option value="${esc(n)}">`).join("");
 }
 
-$("vpSearch").addEventListener("input",()=>{SEARCH_Q=$("vpSearch").value.trim();renderAll()});
+$("vpSearch").addEventListener("input",()=>{SEARCH_Q=$("vpSearch").value.trim();LAST_RENDER_HASH="";renderAll(true)});
 
 $("vpCheckerInput").value=CURRENT_CHECKER;
 $("vpCheckerInput").addEventListener("input",()=>{
@@ -404,7 +445,7 @@ $("vpSyncBtn").addEventListener("click",async()=>{
   const res=await VSRF_VP.pollSyncStatus(r.id,120000);
   if(!res.ok){st.textContent="Не удалось: "+(res.error||res.message||res.status);st.className="vp-sync-status vp-sync-err";return}
   st.textContent="Готово · участников: "+res.members_scanned;st.className="vp-sync-status vp-sync-ok";
-  renderAll();
+  LAST_RENDER_HASH="";renderAll(true);
   setTimeout(()=>{st.textContent="";st.className="vp-sync-status"},4000);
 });
 
@@ -456,7 +497,7 @@ $("vpMapSave").addEventListener("click",async()=>{
   for(const id of toRemove) await VSRF_VP.removeMapping(id);
   if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
   msg.className="form-msg ok";msg.textContent="Сохранено";
-  setTimeout(()=>{$("vpSettingsModal").classList.remove("active");msg.textContent="";renderAll()},700);
+  setTimeout(()=>{$("vpSettingsModal").classList.remove("active");msg.textContent="";LAST_RENDER_HASH="";renderAll(true)},700);
 });
 $("vpSettingsBtn").addEventListener("click",openMapping);
 
@@ -470,7 +511,7 @@ function applyGuard(){
   if(!isStaff){LAST_GUARD_STATE=key;return}
   if(LAST_GUARD_STATE===key) return;
   LAST_GUARD_STATE=key;
-  renderAll();
+  renderAll(true);
 }
 if(window.VSRF_ROLES){VSRF_ROLES.onChange(()=>applyGuard())}
 setTimeout(applyGuard,600);
@@ -480,13 +521,13 @@ let SOFT_TIMER=null;
 function softRefresh(){
   if(SOFT_TIMER) clearTimeout(SOFT_TIMER);
   SOFT_TIMER=setTimeout(()=>{
-    if(document.visibilityState==="visible"&&window.VSRF_ROLES&&window.VSRF_ROLES.isStaff()) renderAll();
+    if(document.visibilityState==="visible"&&window.VSRF_ROLES&&window.VSRF_ROLES.isStaff()) renderAll(false);
   },400);
 }
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible") softRefresh()});
 window.addEventListener("focus",softRefresh);
 setInterval(softRefresh,30000);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24cfd58d816e84a',t:'MTc4NTY3MjczMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d22e33a6fe924',t:'MTc4NTY3NDI3MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
