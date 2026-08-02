@@ -72,6 +72,10 @@ window.VSRF_VP=(function(){
     return {ok:true,checker:name};
   }
 
+  async function saveEvidence(discordId,url,checkerName){
+    return saveCheck(discordId,{evidence_url:url||null},checkerName);
+  }
+
   async function resetCheck(discordId){
     const c=await client();if(!c) return {ok:false,error:"no client"};
     const {error}=await c.from("vp_checks").delete().eq("discord_id",discordId);
@@ -165,6 +169,7 @@ window.VSRF_VP=(function(){
           personal_file:c.personal_file||null,
           weapon_license:c.weapon_license||null,
           attestation:c.attestation||null,
+          evidence_url:c.evidence_url||null,
           checked_by_name:c.checked_by_name||null,
           checked_at:c.checked_at||null
         });
@@ -326,5 +331,5 @@ window.VSRF_VP=(function(){
     return (member.parsed_static||"").trim()||"—";
   }
 
-  return {fetchMembers,fetchRoles,fetchMapping,saveMappingBatch,fetchChecks,saveCheck,resetCheck,resetChecksBulk,requestSync,pollSyncStatus,fetchBotStatus,fetchSettings,saveSettings,fetchArchives,fetchArchiveFull,buildSnapshot,calcSnapshotStats,saveArchive,deleteArchive,updateArchive,requestReport,pollReportStatus,fetchDsChannels,filterMembers,groupByDept,positionFor,staticFor};
+  return {fetchMembers,fetchRoles,fetchMapping,saveMappingBatch,fetchChecks,saveCheck,saveEvidence,resetCheck,resetChecksBulk,requestSync,pollSyncStatus,fetchBotStatus,fetchSettings,saveSettings,fetchArchives,fetchArchiveFull,buildSnapshot,calcSnapshotStats,saveArchive,deleteArchive,updateArchive,requestReport,pollReportStatus,fetchDsChannels,filterMembers,groupByDept,positionFor,staticFor};
 })();

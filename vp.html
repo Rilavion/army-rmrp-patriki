@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=70">
+<link rel="stylesheet" href="style.css?v=71">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -250,6 +250,26 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
+<div class="modal-back" id="vpEvidenceModal">
+  <div class="modal modal-lg">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>🔗 Доказательство проверки</h3>
+    <div class="modal-sub">При отметке <b>НЕТ</b> хотя бы по одному документу — необходимо приложить ссылку на скриншот/подтверждение. Ссылка сохраняется в архиве, но <b>НЕ идёт в Discord-отчёт</b>.</div>
+    <div class="form-group" id="vpEvHead"></div>
+    <div class="form-group">
+      <label>Ссылка на скриншот / imgur / yapx / диск (обязательна при НЕТ)</label>
+      <input type="url" id="vpEvUrl" class="msg-input" placeholder="https://imgur.com/... или https://disk.yandex.ru/...">
+    </div>
+    <div class="form-msg" id="vpEvMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--gold-b)">
+      <button class="btn btn-ghost btn-sm" id="vpEvClear">Очистить</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" id="vpEvCancel">Отмена</button>
+      <button class="btn btn-gold btn-sm" id="vpEvSave">Сохранить</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-back" id="vpArcEditModal">
   <div class="modal modal-lg">
     <button class="modal-close" aria-label="Закрыть">✕</button>
@@ -375,18 +395,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=70"></script>
-<script src="config.js?v=70"></script>
-<script src="auth.js?v=70"></script>
-<script src="roles-engine.js?v=70"></script>
-<script src="vp-engine.js?v=70"></script>
-<script src="main.js?v=70"></script>
-<script src="holiday-engine.js?v=70"></script>
-<script src="sound-engine.js?v=70"></script>
-<script src="settings-panel.js?v=70"></script>
-<script src="faq-engine.js?v=70"></script>
-<script src="search-engine.js?v=70"></script>
-<script src="notify-engine.js?v=70"></script>
+<script src="supabase-loader.js?v=71"></script>
+<script src="config.js?v=71"></script>
+<script src="auth.js?v=71"></script>
+<script src="roles-engine.js?v=71"></script>
+<script src="vp-engine.js?v=71"></script>
+<script src="main.js?v=71"></script>
+<script src="holiday-engine.js?v=71"></script>
+<script src="sound-engine.js?v=71"></script>
+<script src="settings-panel.js?v=71"></script>
+<script src="faq-engine.js?v=71"></script>
+<script src="search-engine.js?v=71"></script>
+<script src="notify-engine.js?v=71"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -407,17 +427,17 @@ let HIDE_NO_DEPT=false;
 try{HIDE_NO_DEPT=localStorage.getItem("vsrf-vp-hide-nodept")==="1"}catch(e){}
 
 const COLS=[
-  {key:"medbook",label:"Мед.Книжка",short:"МК",opts:["yes","no"]},
-  {key:"narko",label:"Спр.Нарк",short:"Н",opts:["yes","no"]},
-  {key:"driver",label:"Вод.Права",short:"ВП",opts:["yes","no"]},
-  {key:"passport",label:"Паспорт",short:"П",opts:["yes","no"]},
-  {key:"personal_file",label:"Лич.Дело",short:"ЛД",opts:["yes","no"]},
-  {key:"weapon_license",label:"Лиц.Оружия",short:"ЛО",opts:["yes","no","absent"]},
-  {key:"attestation",label:"Аттестация",short:"АТ",opts:["yes","no"]}
+  {key:"medbook",label:"Мед. Книжка",short:"МК",opts:["yes","no","none"]},
+  {key:"narko",label:"Справка Нарк.",short:"Н",opts:["yes","no","none"]},
+  {key:"driver",label:"Вод. Права",short:"ВП",opts:["yes","no","none"]},
+  {key:"passport",label:"Паспорт",short:"П",opts:["yes","no","none"]},
+  {key:"personal_file",label:"Личное Дело",short:"ЛД",opts:["yes","no","none"]},
+  {key:"weapon_license",label:"Лицензия на Оружие",short:"ЛО",opts:["yes","no","absent","none"]},
+  {key:"attestation",label:"Аттестация",short:"АТ",opts:["yes","no","none"]}
 ];
 
-const OPT_LABEL={yes:"ДА",no:"НЕТ",absent:"Отс.",null:"—"};
-const OPT_ICON={yes:"✓",no:"✕",absent:"○",null:"—"};
+const OPT_LABEL={yes:"ДА",no:"НЕТ",absent:"Отс.",none:"—",null:"—"};
+const OPT_ICON={yes:"✓",no:"✕",absent:"○",none:"—",null:"—"};
 
 function checkerReady(){return !!(CURRENT_CHECKER&&CURRENT_CHECKER.trim())}
 
@@ -451,8 +471,9 @@ function nextValue(cur,opts){
 }
 
 function cellClass(val){
-  return {yes:"vp-cell-yes",no:"vp-cell-no",absent:"vp-cell-absent"}[val]||"vp-cell-none";
+  return {yes:"vp-cell-yes",no:"vp-cell-no",absent:"vp-cell-absent",none:"vp-cell-none"}[val]||"vp-cell-none";
 }
+function normalizeVal(v){return v==="none"?null:v}
 
 function renderRow(m,index){
   const check=ALL_CHECKS[m.discord_id]||{};
@@ -462,13 +483,22 @@ function renderRow(m,index){
     const val=check[c.key]||null;
     const opts=c.opts;
     return `<td class="vp-cell ${cellClass(val)}">
-      <button class="vp-pill-btn" data-check="${c.key}" data-id="${m.discord_id}" data-cur="${val==null?'':val}" data-opts='${JSON.stringify(opts)}' title="Клик — цикл (${opts.map(o=>OPT_LABEL[o]).join(' → ')})">
+      <button class="vp-pill-btn" data-check="${c.key}" data-id="${m.discord_id}" data-cur="${val==null?'':val}" data-opts='${JSON.stringify(opts)}' title="${esc(c.label)}: клик циклом (${opts.map(o=>OPT_LABEL[o]).join(' → ')})">
         <span class="vp-pill-i">${OPT_ICON[val]}</span>
         <span class="vp-pill-t">${OPT_LABEL[val]}</span>
       </button>
     </td>`;
   }).join("");
   const checker=check.checked_by_name?`<div class="vp-checker" title="${esc(new Date(check.checked_at).toLocaleString("ru-RU"))}">${esc(check.checked_by_name)}</div>`:`<span class="vp-checker-empty">—</span>`;
+  const hasNo=COLS.some(c=>check[c.key]==="no");
+  const evUrl=check.evidence_url||"";
+  const evBtn=hasNo
+    ? (evUrl
+        ? `<a class="vp-ev-btn vp-ev-ok" href="${esc(evUrl)}" target="_blank" rel="noopener" data-ev-open="${m.discord_id}" title="Открыть доказательство: ${esc(evUrl)}">🔗</a>`
+        : `<button class="vp-ev-btn vp-ev-req" data-ev-edit="${m.discord_id}" title="Требуется ссылка на доказательство (есть НЕТ)">⚠</button>`)
+    : (evUrl
+        ? `<a class="vp-ev-btn vp-ev-info" href="${esc(evUrl)}" target="_blank" rel="noopener" title="Доказательство: ${esc(evUrl)}">🔗</a>`
+        : `<button class="vp-ev-btn vp-ev-empty" data-ev-edit="${m.discord_id}" title="Добавить ссылку на доказательство">＋</button>`);
   const idx=String(index+1).padStart(2,"0");
   return `<tr data-id="${m.discord_id}">
     <td class="vp-td-idx">${idx}</td>
@@ -479,6 +509,7 @@ function renderRow(m,index){
     <td class="vp-td-pos">${esc(position)}</td>
     <td class="vp-td-static">${esc(staticId)}</td>
     ${cells}
+    <td class="vp-td-ev">${evBtn}</td>
     <td class="vp-td-actions">
       <button class="vp-row-btn vp-row-yes" data-row-all="yes" data-id="${m.discord_id}" title="Отметить все ДА">✓✓</button>
       <button class="vp-row-btn vp-row-no" data-row-all="no" data-id="${m.discord_id}" title="Отметить все НЕТ">✕✕</button>
@@ -516,16 +547,26 @@ function renderTable(g){
       </div>
       <button class="vp-table-reset" data-reset-table="${esc(g.name)}" title="Обнулить проверки во всей таблице">↺ Сбросить отдел</button>
     </div>
+    <div class="vp-legend-strip">
+      <div class="vp-legend-title">Обозначения:</div>
+      ${COLS.map(c=>`<span class="vp-legend-item" title="${esc(c.label)}"><b>${esc(c.short)}</b> — ${esc(c.label)}</span>`).join("")}
+      <div class="vp-legend-sep"></div>
+      <span class="vp-legend-item"><span class="vp-legend-icon vp-legend-yes">✓</span> ДА</span>
+      <span class="vp-legend-item"><span class="vp-legend-icon vp-legend-no">✕</span> НЕТ (нужна ссылка)</span>
+      <span class="vp-legend-item"><span class="vp-legend-icon vp-legend-abs">○</span> Отсутствует (только ЛО)</span>
+      <span class="vp-legend-item"><span class="vp-legend-icon vp-legend-none">—</span> Не проверено</span>
+    </div>
     <div class="vp-table-wrap">
       <table class="vp-table">
         <thead><tr>
           <th class="vp-th-idx">№</th>
           <th class="vp-th-name">ФИО</th>
-          <th>Должность</th>
-          <th>Статик</th>
-          ${COLS.map(c=>`<th title="${esc(c.label)}">${esc(c.short)}</th>`).join("")}
-          <th class="vp-th-actions">Быстро</th>
-          <th>Проверил</th>
+          <th title="Должность/звание">Должн.</th>
+          <th title="Статик — числовой ID персонажа">Статик</th>
+          ${COLS.map(c=>`<th title="${esc(c.label)} — наведите курсор для полного названия">${esc(c.short)}</th>`).join("")}
+          <th title="Ссылка-доказательство (обязательна если есть хоть один НЕТ)">Дока</th>
+          <th class="vp-th-actions" title="Быстрые действия: ✓✓ все ДА, ✕✕ все НЕТ, ↺ сбросить">Быстро</th>
+          <th title="Кто последний проверял">Проверил</th>
         </tr></thead>
         <tbody>${rows.map((r,i)=>renderRow(r,i)).join("")}</tbody>
       </table>
@@ -592,15 +633,25 @@ function bindTableHandlers(box){
       const key=btn.dataset.check;
       const opts=JSON.parse(btn.dataset.opts);
       const cur=btn.dataset.cur||null;
-      const val=nextValue(cur,opts);
-      const ok=await saveOne(id,key,val);
+      let val=nextValue(cur,opts);
+      const saveVal=normalizeVal(val);
+      const ok=await saveOne(id,key,saveVal);
       if(!ok) return;
-      updateCellUI(id,key,val);
+      updateCellUI(id,key,saveVal);
       updateRowCheckerUI(id);
       updateAllProgress();
+      updateEvBtnUI(id);
       refreshCheckerList();
       LAST_RENDER_HASH=stateHash();
+      if(saveVal==="no"){
+        const cur=(ALL_CHECKS[id]&&ALL_CHECKS[id].evidence_url)||"";
+        if(!cur) openEvidenceModal(id,true);
+      }
     });
+  });
+
+  box.querySelectorAll("[data-ev-edit]").forEach(btn=>{
+    btn.addEventListener("click",()=>openEvidenceModal(btn.dataset.evEdit,false));
   });
 
   box.querySelectorAll("[data-row-all]").forEach(btn=>{
@@ -614,8 +665,13 @@ function bindTableHandlers(box){
       }
       updateRowCheckerUI(id);
       updateAllProgress();
+      updateEvBtnUI(id);
       refreshCheckerList();
       LAST_RENDER_HASH=stateHash();
+      if(val==="no"){
+        const cur=(ALL_CHECKS[id]&&ALL_CHECKS[id].evidence_url)||"";
+        if(!cur) openEvidenceModal(id,true);
+      }
     });
   });
 
@@ -630,6 +686,7 @@ function bindTableHandlers(box){
       delete ALL_CHECKS[id];
       for(const c of COLS) updateCellUI(id,c.key,null);
       updateRowCheckerUI(id);
+      updateEvBtnUI(id);
       updateAllProgress();
       LAST_RENDER_HASH=stateHash();
     });
@@ -648,11 +705,34 @@ function bindTableHandlers(box){
         delete ALL_CHECKS[id];
         for(const c of COLS) updateCellUI(id,c.key,null);
         updateRowCheckerUI(id);
+        updateEvBtnUI(id);
       }
       updateAllProgress();
       LAST_RENDER_HASH=stateHash();
     });
   });
+}
+
+function updateEvBtnUI(id){
+  const tr=document.querySelector(`tr[data-id="${id}"]`);
+  if(!tr) return;
+  const c=ALL_CHECKS[id]||{};
+  const hasNo=COLS.some(col=>c[col.key]==="no");
+  const evUrl=c.evidence_url||"";
+  const td=tr.querySelector(".vp-td-ev");
+  if(!td) return;
+  let html="";
+  if(hasNo){
+    if(evUrl) html=`<a class="vp-ev-btn vp-ev-ok" href="${esc(evUrl)}" target="_blank" rel="noopener" title="Открыть доказательство: ${esc(evUrl)}">🔗</a>`;
+    else html=`<button class="vp-ev-btn vp-ev-req" data-ev-edit="${id}" title="Требуется ссылка на доказательство">⚠</button>`;
+  } else if(evUrl){
+    html=`<a class="vp-ev-btn vp-ev-info" href="${esc(evUrl)}" target="_blank" rel="noopener" title="Доказательство: ${esc(evUrl)}">🔗</a>`;
+  } else {
+    html=`<button class="vp-ev-btn vp-ev-empty" data-ev-edit="${id}" title="Добавить ссылку на доказательство">＋</button>`;
+  }
+  td.innerHTML=html;
+  const editBtn=td.querySelector("[data-ev-edit]");
+  if(editBtn) editBtn.addEventListener("click",()=>openEvidenceModal(editBtn.dataset.evEdit,false));
 }
 
 function updateAllProgress(){
@@ -965,6 +1045,74 @@ function softRefresh(){
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible") softRefresh()});
 window.addEventListener("focus",softRefresh);
 
+/* ============ EVIDENCE (доказательство при НЕТ) ============ */
+
+let CURRENT_EV_ID=null;
+let CURRENT_EV_REQUIRED=false;
+
+function openEvidenceModal(discordId,required){
+  CURRENT_EV_ID=discordId;
+  CURRENT_EV_REQUIRED=!!required;
+  const mem=ALL_MEMBERS.find(m=>m.discord_id===discordId);
+  const check=ALL_CHECKS[discordId]||{};
+  const noList=COLS.filter(c=>check[c.key]==="no").map(c=>c.label);
+  $("vpEvHead").innerHTML=`
+    <div class="vp-ev-head-name"><b>${esc(mem?(mem.parsed_fio||mem.display_name):discordId)}</b> · <span class="vp-nick">${esc(mem?mem.raw_nick:"")}</span></div>
+    ${noList.length?`<div class="vp-ev-head-no">✕ НЕТ по: <b>${noList.map(esc).join(", ")}</b></div>`:`<div class="vp-ev-head-info">Нет отметок «НЕТ» — ссылка опциональна</div>`}
+  `;
+  $("vpEvUrl").value=check.evidence_url||"";
+  $("vpEvMsg").textContent="";$("vpEvMsg").className="form-msg";
+  $("vpEvUrl").className="msg-input"+(required?" vp-ev-required":"");
+  $("vpEvClear").style.display=(check.evidence_url&&!required)?"":"none";
+  $("vpEvidenceModal").classList.add("active");
+  setTimeout(()=>$("vpEvUrl").focus(),80);
+}
+
+$("vpEvCancel").addEventListener("click",()=>$("vpEvidenceModal").classList.remove("active"));
+$("vpEvidenceModal").querySelector(".modal-close").addEventListener("click",()=>{
+  if(CURRENT_EV_REQUIRED&&!$("vpEvUrl").value.trim()){
+    if(!confirm("Ссылка НЕ была указана, но она обязательна при НЕТ.\nЗакрыть без сохранения? Отметки останутся без доказательства (в отчёт всё равно уйдёт, но в архиве будет пусто).")) return;
+  }
+  $("vpEvidenceModal").classList.remove("active");
+});
+$("vpEvidenceModal").addEventListener("click",e=>{if(e.target===$("vpEvidenceModal")) $("vpEvidenceModal").classList.remove("active")});
+
+$("vpEvClear").addEventListener("click",async()=>{
+  if(!CURRENT_EV_ID) return;
+  if(!confirm("Удалить ссылку-доказательство?")) return;
+  const r=await VSRF_VP.saveEvidence(CURRENT_EV_ID,null,CURRENT_CHECKER);
+  if(!r.ok){$("vpEvMsg").className="form-msg error";$("vpEvMsg").textContent=r.error;return}
+  if(ALL_CHECKS[CURRENT_EV_ID]) ALL_CHECKS[CURRENT_EV_ID].evidence_url=null;
+  updateEvBtnUI(CURRENT_EV_ID);
+  $("vpEvidenceModal").classList.remove("active");
+});
+
+$("vpEvSave").addEventListener("click",async()=>{
+  const url=$("vpEvUrl").value.trim();
+  const msg=$("vpEvMsg");
+  if(CURRENT_EV_REQUIRED&&!url){
+    msg.className="form-msg error";msg.textContent="Ссылка обязательна — вы поставили НЕТ";
+    return;
+  }
+  if(url&&!/^https?:\/\/\S+/i.test(url)){
+    msg.className="form-msg error";msg.textContent="Ссылка должна начинаться с http:// или https://";
+    return;
+  }
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  const r=await VSRF_VP.saveEvidence(CURRENT_EV_ID,url||null,CURRENT_CHECKER);
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  if(!ALL_CHECKS[CURRENT_EV_ID]) ALL_CHECKS[CURRENT_EV_ID]={};
+  ALL_CHECKS[CURRENT_EV_ID].evidence_url=url||null;
+  ALL_CHECKS[CURRENT_EV_ID].checked_by_name=r.checker||CURRENT_CHECKER;
+  ALL_CHECKS[CURRENT_EV_ID].checked_at=new Date().toISOString();
+  updateEvBtnUI(CURRENT_EV_ID);
+  updateRowCheckerUI(CURRENT_EV_ID);
+  refreshCheckerList();
+  LAST_RENDER_HASH=stateHash();
+  msg.className="form-msg ok";msg.textContent="✓ Сохранено";
+  setTimeout(()=>$("vpEvidenceModal").classList.remove("active"),400);
+});
+
 /* ============ АРХИВ И СТАТИСТИКА ============ */
 
 function ruDate(d){try{return new Date(d).toLocaleDateString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric"})}catch(e){return String(d||"")}}
@@ -1201,7 +1349,8 @@ async function openArcDetail(id){
             <th class="vp-th-name">ФИО</th>
             <th>Должность</th>
             <th>Статик</th>
-            ${KEYS.map(k=>`<th>${KEY_LABELS[k]}</th>`).join("")}
+            ${KEYS.map(k=>`<th title="${esc(k)}">${KEY_LABELS[k]}</th>`).join("")}
+            <th title="Ссылка-доказательство">Дока</th>
             <th>Проверил</th>
           </tr></thead>
           <tbody>${g.list.map(m=>{
@@ -1212,9 +1361,10 @@ async function openArcDetail(id){
               ${KEYS.map(k=>{
                 const v=m[k];
                 const cls=v==="yes"?"vp-cell-yes":v==="no"?"vp-cell-no":v==="absent"?"vp-cell-absent":"vp-cell-none";
-                const ic=v==="yes"?"✓":v==="no"?"✕":v==="absent"?"○":"·";
+                const ic=v==="yes"?"✓":v==="no"?"✕":v==="absent"?"○":"—";
                 return `<td class="vp-cell ${cls}"><div class="vp-pill-t" style="font-size:14px;font-weight:700">${ic}</div></td>`;
               }).join("")}
+              <td class="vp-td-ev">${m.evidence_url?`<a class="vp-ev-btn vp-ev-ok" href="${esc(m.evidence_url)}" target="_blank" rel="noopener" title="${esc(m.evidence_url)}">🔗</a>`:`<span class="vp-checker-empty">—</span>`}</td>
               <td class="vp-td-checker">${m.checked_by_name?`<div class="vp-checker">${esc(m.checked_by_name)}</div>`:`<span class="vp-checker-empty">—</span>`}</td>
             </tr>`;
           }).join("")}</tbody>
@@ -1294,6 +1444,6 @@ $("vpArcDetailSend").addEventListener("click",async()=>{
   setTimeout(()=>openArcDetail(CURRENT_ARC.id),1200);
 });
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25068531aec9dbf',t:'MTc4NTcwODU3Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2509cefbacce91d',t:'MTc4NTcxMDcyNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
