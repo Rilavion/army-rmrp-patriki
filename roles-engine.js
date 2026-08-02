@@ -24,15 +24,31 @@ window.VSRF_ROLES=(function(){
   async function loadMyRole(){
     await waitReady(5000);
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
-    if(!s||!s.user||!s.client){myRole=null;emit();return null}
+    if(!s||!s.user||!s.client){
+      myRole=null;
+      console.log("[VSRF_ROLES] Нет клиента/пользователя. auth.state =",s);
+      emit();apply();return null;
+    }
+    console.log("[VSRF_ROLES] Загружаем роль для user_id =",s.user.id,"email =",s.user.email);
     try{
       const {data,error}=await s.client.from("user_roles").select("role,display_name").eq("user_id",s.user.id).maybeSingle();
-      if(error) throw error;
-      myRole=data?data.role:null;
-      const displayName=data?data.display_name:null;
-      if(displayName) try{localStorage.setItem("vsrf-my-display-name",displayName)}catch(e){}
+      if(error){
+        console.error("[VSRF_ROLES] Ошибка запроса:",error.message,error);
+        if(error.message&&error.message.toLowerCase().includes("recursion")){
+          console.error("[VSRF_ROLES] 🔴 БЕСКОНЕЧНАЯ РЕКУРСИЯ в RLS-политике. Выполни SUPABASE-APPS-FIX.sql в Supabase SQL Editor.");
+        }
+        myRole=null;
+      }else{
+        myRole=data?data.role:null;
+        console.log("[VSRF_ROLES] ✓ Роль:",myRole||"(нет записи в user_roles)");
+        const displayName=data?data.display_name:null;
+        if(displayName) try{localStorage.setItem("vsrf-my-display-name",displayName)}catch(e){}
+        if(!data){
+          console.warn("[VSRF_ROLES] Записи в user_roles для этого user_id НЕТ. Выполни в SQL Editor:\ninsert into public.user_roles(user_id,role,display_name) values ('"+s.user.id+"','admin','Твоё Имя') on conflict(user_id) do update set role='admin';");
+        }
+      }
     }catch(e){
-      console.warn("[VSRF_ROLES] loadMyRole failed:",e.message);
+      console.error("[VSRF_ROLES] Исключение:",e.message);
       myRole=null;
     }
     emit();
