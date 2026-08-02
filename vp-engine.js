@@ -57,12 +57,13 @@ window.VSRF_VP=(function(){
     return data||[];
   }
 
-  async function saveCheck(discordId,patch){
+  async function saveCheck(discordId,patch,checkerOverride){
     const c=await client();if(!c) return {ok:false,error:"no client"};
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
-    const displayName=(function(){
+    const autoName=(function(){
       try{return localStorage.getItem("vsrf-my-display-name")||(s&&s.user&&s.user.email)||"vp"}catch(e){return "vp"}
     })();
+    const displayName=(checkerOverride&&String(checkerOverride).trim())||autoName;
     const row={
       discord_id:discordId,
       ...patch,
@@ -73,7 +74,22 @@ window.VSRF_VP=(function(){
     };
     const {error}=await c.from("vp_checks").upsert(row,{onConflict:"discord_id"});
     if(error) return {ok:false,error:error.message};
+    return {ok:true,checker:displayName};
+  }
+
+  async function resetCheck(discordId){
+    const c=await client();if(!c) return {ok:false,error:"no client"};
+    const {error}=await c.from("vp_checks").delete().eq("discord_id",discordId);
+    if(error) return {ok:false,error:error.message};
     return {ok:true};
+  }
+
+  async function resetChecksBulk(discordIds){
+    const c=await client();if(!c) return {ok:false,error:"no client"};
+    if(!discordIds||!discordIds.length) return {ok:true,count:0};
+    const {error}=await c.from("vp_checks").delete().in("discord_id",discordIds);
+    if(error) return {ok:false,error:error.message};
+    return {ok:true,count:discordIds.length};
   }
 
   async function requestSync(){
@@ -134,5 +150,5 @@ window.VSRF_VP=(function(){
     return member.parsed_static||"—";
   }
 
-  return {fetchMembers,fetchRoles,fetchMapping,saveMapping,removeMapping,fetchChecks,saveCheck,requestSync,pollSyncStatus,groupByDept,positionFor};
+  return {fetchMembers,fetchRoles,fetchMapping,saveMapping,removeMapping,fetchChecks,saveCheck,resetCheck,resetChecksBulk,requestSync,pollSyncStatus,groupByDept,positionFor};
 })();

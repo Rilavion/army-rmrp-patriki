@@ -40,8 +40,9 @@
       links.forEach(a=>{if((a.dataset.page||"").toLowerCase()===currentPage) a.classList.add("active")});
 
       const publicPages=["index.html","info.html","ustav.html","training.html","composition.html","news.html","autopark.html","map.html","faq.html"];
-      const staffPages=["apps.html"];
-      const adminPages=["lk.html","docs.html"];
+      const staffPages=["apps.html","vp.html"];
+      const adminOnlyPages=["message.html"];
+      const adminPages=["lk.html","docs.html","message.html"];
       const publicLinks=links.filter(a=>publicPages.includes((a.dataset.page||"").toLowerCase()));
       const staffLinks=links.filter(a=>staffPages.includes((a.dataset.page||"").toLowerCase()));
       const adminLinks=links.filter(a=>adminPages.includes((a.dataset.page||"").toLowerCase()));
