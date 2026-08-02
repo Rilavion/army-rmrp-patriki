@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=62">
+<link rel="stylesheet" href="style.css?v=63">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -44,6 +44,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
       <a href="apps.html" data-page="apps.html" data-transition data-staff>Заявления</a>
       <a href="vp.html" data-page="vp.html" data-transition data-staff class="active">Проверки ВП</a>
+      <a href="message.html" data-page="message.html" data-transition data-admin>Сообщения</a>
       <a href="lk.html" data-page="lk.html" data-transition data-admin>Личный кабинет</a>
     </nav>
     <div class="header-actions">
@@ -100,9 +101,13 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
       <div class="vp-toolbar">
         <div class="vp-toolbar-left">
-          <input type="search" class="vp-search" id="vpSearch" placeholder="Поиск по ФИО, статику, должности...">
+          <input type="search" class="vp-search" id="vpSearch" placeholder="Поиск по ФИО, званию, роли...">
         </div>
         <div class="vp-toolbar-right">
+          <label class="vp-checker-select-lbl">Проверяющий:
+            <input type="text" class="vp-checker-select" id="vpCheckerInput" list="vpCheckerList" placeholder="Ваше имя" autocomplete="off">
+            <datalist id="vpCheckerList"></datalist>
+          </label>
           <span class="vp-sync-status" id="vpSyncStatus"></span>
           <button class="btn btn-ghost btn-sm" id="vpSyncBtn" title="Запросить у бота свежий список из Discord">↻ Синхронизировать</button>
           <button class="btn btn-gold btn-sm" id="vpSettingsBtn" data-admin title="Настройка ролей и колонок">⚙ Настройки</button>
@@ -207,18 +212,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=62"></script>
-<script src="config.js?v=62"></script>
-<script src="auth.js?v=62"></script>
-<script src="roles-engine.js?v=62"></script>
-<script src="vp-engine.js?v=62"></script>
-<script src="main.js?v=62"></script>
-<script src="holiday-engine.js?v=62"></script>
-<script src="sound-engine.js?v=62"></script>
-<script src="settings-panel.js?v=62"></script>
-<script src="faq-engine.js?v=62"></script>
-<script src="search-engine.js?v=62"></script>
-<script src="notify-engine.js?v=62"></script>
+<script src="supabase-loader.js?v=63"></script>
+<script src="config.js?v=63"></script>
+<script src="auth.js?v=63"></script>
+<script src="roles-engine.js?v=63"></script>
+<script src="vp-engine.js?v=63"></script>
+<script src="main.js?v=63"></script>
+<script src="holiday-engine.js?v=63"></script>
+<script src="sound-engine.js?v=63"></script>
+<script src="settings-panel.js?v=63"></script>
+<script src="faq-engine.js?v=63"></script>
+<script src="search-engine.js?v=63"></script>
+<script src="notify-engine.js?v=63"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -229,6 +234,8 @@ let ALL_MAPPING=[];
 let ALL_CHECKS={};
 let ALL_ROLES=[];
 let SEARCH_Q="";
+let CURRENT_CHECKER="";
+try{CURRENT_CHECKER=localStorage.getItem("vsrf-vp-checker-name")||""}catch(e){}
 
 const COLS=[
   {key:"medbook",label:"Мед. Книжка",options:["yes","no"]},
@@ -249,7 +256,8 @@ function matchesSearch(m){
   return (m.parsed_fio||"").toLowerCase().includes(q)
     || (m.parsed_static||"").toLowerCase().includes(q)
     || (m.display_name||"").toLowerCase().includes(q)
-    || (m.raw_nick||"").toLowerCase().includes(q);
+    || (m.raw_nick||"").toLowerCase().includes(q)
+    || (m.role_names||[]).join(" ").toLowerCase().includes(q);
 }
 
 function renderRow(m){
@@ -267,9 +275,9 @@ function renderRow(m){
   return `<tr data-id="${m.discord_id}">
     <td class="vp-td-name"><div class="vp-fio">${esc(m.parsed_fio||m.display_name||"—")}</div><div class="vp-nick">${esc(m.raw_nick||"")}</div></td>
     <td class="vp-td-pos">${esc(position)}</td>
-    <td class="vp-td-static">${esc(m.parsed_static||"—")}</td>
     ${cells}
     <td class="vp-td-checker">${checker}</td>
+    <td class="vp-td-reset"><button class="vp-reset-btn" data-reset-row="${m.discord_id}" title="Сбросить проверку этого человека">↺</button></td>
   </tr>`;
 }
 
@@ -277,15 +285,19 @@ function renderTable(g){
   const rows=g.list.filter(matchesSearch);
   if(!rows.length) return "";
   return `<div class="vp-table-block">
-    <div class="vp-table-title"><span class="vp-table-dot"></span>${esc(g.name)} <span class="vp-table-count">${rows.length}</span></div>
+    <div class="vp-table-title">
+      <span class="vp-table-dot"></span>${esc(g.name)}
+      <span class="vp-table-count">${rows.length}</span>
+      <button class="vp-table-reset" data-reset-table="${esc(g.name)}" title="Сбросить все проверки в этой таблице">↺ Сбросить отдел</button>
+    </div>
     <div class="vp-table-wrap">
       <table class="vp-table">
         <thead><tr>
           <th class="vp-th-name">ФИО</th>
-          <th>Должность</th>
-          <th>Статик</th>
+          <th>Звание / Должность</th>
           ${COLS.map(c=>`<th>${c.label}</th>`).join("")}
           <th>Проверил(а)</th>
+          <th></th>
         </tr></thead>
         <tbody>${rows.map(renderRow).join("")}</tbody>
       </table>
@@ -323,18 +335,65 @@ async function renderAll(){
       td.classList.remove("vp-cell-yes","vp-cell-no","vp-cell-absent");
       td.classList.add(OPT_CLASS[val]);
       const patch={};patch[key]=val;
-      const r=await VSRF_VP.saveCheck(id,patch);
+      const r=await VSRF_VP.saveCheck(id,patch,CURRENT_CHECKER);
       if(!r.ok){alert("Ошибка: "+r.error);return}
-      ALL_CHECKS[id]=Object.assign({},ALL_CHECKS[id]||{},patch,{checked_by_name:(function(){try{return localStorage.getItem("vsrf-my-display-name")||""}catch(e){return ""}})(),checked_at:new Date().toISOString()});
+      const name=r.checker||CURRENT_CHECKER||"—";
+      ALL_CHECKS[id]=Object.assign({},ALL_CHECKS[id]||{},patch,{checked_by_name:name,checked_at:new Date().toISOString()});
       const tr=sel.closest("tr");
       const checker=tr.querySelector(".vp-td-checker");
-      const name=ALL_CHECKS[id].checked_by_name||"—";
       checker.innerHTML=name!=="—"?`<div class="vp-checker">${esc(name)}</div>`:`<span class="vp-checker-empty">—</span>`;
+      refreshCheckerList();
     });
   });
+
+  box.querySelectorAll("[data-reset-row]").forEach(btn=>{
+    btn.addEventListener("click",async e=>{
+      const id=btn.dataset.resetRow;
+      const mem=ALL_MEMBERS.find(x=>x.discord_id===id);
+      const who=mem?(mem.parsed_fio||mem.display_name):id;
+      if(!confirm("Сбросить все проверки для «"+who+"»?")) return;
+      const r=await VSRF_VP.resetCheck(id);
+      if(!r.ok){alert("Ошибка: "+r.error);return}
+      delete ALL_CHECKS[id];
+      renderAll();
+    });
+  });
+
+  box.querySelectorAll("[data-reset-table]").forEach(btn=>{
+    btn.addEventListener("click",async e=>{
+      const groupName=btn.dataset.resetTable;
+      const g=groups.find(x=>x.name===groupName);
+      if(!g) return;
+      if(!confirm("Сбросить ВСЕ проверки отдела «"+groupName+"» ("+g.list.length+" человек)?\nЭто действие нельзя отменить.")) return;
+      const ids=g.list.map(x=>x.discord_id);
+      const r=await VSRF_VP.resetChecksBulk(ids);
+      if(!r.ok){alert("Ошибка: "+r.error);return}
+      for(const id of ids) delete ALL_CHECKS[id];
+      renderAll();
+    });
+  });
+
+  refreshCheckerList();
+}
+
+function refreshCheckerList(){
+  const set=new Set();
+  for(const c of Object.values(ALL_CHECKS)){
+    if(c.checked_by_name) set.add(c.checked_by_name);
+  }
+  if(CURRENT_CHECKER) set.add(CURRENT_CHECKER);
+  const list=$("vpCheckerList");
+  if(!list) return;
+  list.innerHTML=Array.from(set).sort().map(n=>`<option value="${esc(n)}">`).join("");
 }
 
 $("vpSearch").addEventListener("input",()=>{SEARCH_Q=$("vpSearch").value.trim();renderAll()});
+
+$("vpCheckerInput").value=CURRENT_CHECKER;
+$("vpCheckerInput").addEventListener("input",()=>{
+  CURRENT_CHECKER=$("vpCheckerInput").value.trim();
+  try{localStorage.setItem("vsrf-vp-checker-name",CURRENT_CHECKER)}catch(e){}
+});
 
 $("vpSyncBtn").addEventListener("click",async()=>{
   const st=$("vpSyncStatus");
@@ -428,6 +487,6 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 window.addEventListener("focus",softRefresh);
 setInterval(softRefresh,30000);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24cba5d99c19d45',t:'MTc4NTY2OTk5MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24cfd58d816e84a',t:'MTc4NTY3MjczMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
