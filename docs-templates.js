@@ -3,17 +3,24 @@ window.VSRF_DOC_TEMPLATES=(function(){
 
   const TOGGLES=[
     {key:"show_sig",label:"Показывать подпись №1",type:"toggle",default:"1"},
-    {key:"show_sig2",label:"Показывать подпись №2",type:"toggle",default:"0"},
-    {key:"show_seal",label:"Показывать печать",type:"toggle",default:"1"}
+    {key:"show_seal",label:"Показывать печать №1",type:"toggle",default:"1"},
+    {key:"show_sig2",label:"Показывать подпись №2 (второй подписант)",type:"toggle",default:"0"},
+    {key:"show_seal2",label:"Показывать печать №2",type:"toggle",default:"0"},
+    {key:"sig2_position",label:"Позиция подписи №2",type:"select",default:"right",options:[
+      {value:"right",label:"Справа от основной"},
+      {value:"left",label:"Слева от основной"},
+      {value:"below",label:"Снизу отдельным блоком"}
+    ]}
   ];
   const SIG2=[
     {key:"sig2_role1",label:"Подпись №2 — должность строка 1",type:"text",default:""},
     {key:"sig2_role2",label:"Подпись №2 — должность строка 2",type:"text",default:""},
     {key:"sig2_rank",label:"Подпись №2 — звание",type:"text",default:""},
     {key:"sig2_name",label:"Подпись №2 — ФИО с инициалами",type:"text",default:""},
-    {key:"sig2_url",label:"Подпись №2 — URL изображения (опц.)",type:"text",default:""}
+    {key:"sig2_url",label:"Подпись №2 — URL изображения (опц.)",type:"text",default:""},
+    {key:"seal2_url",label:"URL печати №2 (изображение)",type:"text",default:""}
   ];
-  const COMMON_SEAL={key:"seal_url",label:"URL печати (изображение)",type:"text",default:""};
+  const COMMON_SEAL={key:"seal_url",label:"URL печати №1 (изображение)",type:"text",default:""};
   const COMMON_SIG_IMG={key:"sig_url",label:"URL подписи №1 (изображение)",type:"text",default:""};
 
   function withCommon(main){return [...main,...SIG2,COMMON_SEAL,COMMON_SIG_IMG,...TOGGLES]}
@@ -123,37 +130,50 @@ window.VSRF_DOC_TEMPLATES=(function(){
     </svg></div>`;
   }
 
-  function signColumn(role1,role2,rank,name,sigUrl,showSig){
+  function signSet(role1,role2,rank,name,sigUrl,sealUrl,showSig,showSeal){
     if(!name&&!role1&&!rank) return "";
     const rows=[];
     if(role1) rows.push(`<div>${esc(role1)}</div>`);
     if(role2) rows.push(`<div>${esc(role2)}</div>`);
     if(rank) rows.push(`<div>${esc(rank)}</div>`);
-    return `<div class="doc-sign-col">
-      <div class="doc-sign-col-left">${rows.join("")}</div>
-      <div class="doc-sign-col-center">${showSig?signatureImg(name,sigUrl):`<div class="doc-signature doc-signature-hidden"></div>`}</div>
-      <div class="doc-sign-col-right">${esc(name||"")}</div>
+    const sigHtml=showSig?signatureImg(name,sigUrl):`<div class="doc-signature doc-signature-hidden"></div>`;
+    const sealHtml=sealBlock(sealUrl,showSeal);
+    return `<div class="doc-sign-set">
+      <div class="doc-sign-set-left">${rows.join("")}</div>
+      <div class="doc-sign-set-center">${sigHtml}</div>
+      <div class="doc-sign-set-right">${esc(name||"")}</div>
+      <div class="doc-sign-set-seal">${sealHtml}</div>
     </div>`;
   }
 
   function renderSignBlock(v){
     const showSig=truthy(v.show_sig==null?"1":v.show_sig);
-    const showSig2=truthy(v.show_sig2==null?"0":v.show_sig2);
     const showSeal=truthy(v.show_seal==null?"1":v.show_seal);
-    const has2=showSig2&&(v.sig2_name||v.sig2_role1||v.sig2_rank);
-    const col1=signColumn(v.sig_role1,v.sig_role2,v.sig_rank,v.sig_name,v.sig_url,showSig);
-    const col2=has2?signColumn(v.sig2_role1,v.sig2_role2,v.sig2_rank,v.sig2_name,v.sig2_url,showSig2):"";
-    const seal=sealBlock(v.seal_url,showSeal);
-    if(has2){
-      return `<div class="doc-sign-block doc-sign-block-2">
-        ${col1}
-        <div class="doc-sign-seal-mid">${seal}</div>
-        ${col2}
+    const showSig2=truthy(v.show_sig2==null?"0":v.show_sig2);
+    const showSeal2=truthy(v.show_seal2==null?"0":v.show_seal2);
+    const pos=v.sig2_position||"right";
+    const has2=(showSig2||showSeal2)&&(v.sig2_name||v.sig2_role1||v.sig2_rank||showSeal2);
+    const set1=signSet(v.sig_role1,v.sig_role2,v.sig_rank,v.sig_name,v.sig_url,v.seal_url,showSig,showSeal);
+    const set2=has2?signSet(v.sig2_role1,v.sig2_role2,v.sig2_rank,v.sig2_name,v.sig2_url,v.seal2_url,showSig2,showSeal2):"";
+    if(!has2){
+      return `<div class="doc-sign-block-wrap doc-sb-single">${set1}</div>`;
+    }
+    if(pos==="below"){
+      return `<div class="doc-sign-block-wrap doc-sb-stacked">
+        ${set1}
+        <div class="doc-sb-sep"></div>
+        ${set2}
       </div>`;
     }
-    return `<div class="doc-sign-block">
-      ${col1}
-      <div class="doc-sign-seal-side">${seal}</div>
+    if(pos==="left"){
+      return `<div class="doc-sign-block-wrap doc-sb-side">
+        ${set2}
+        ${set1}
+      </div>`;
+    }
+    return `<div class="doc-sign-block-wrap doc-sb-side">
+      ${set1}
+      ${set2}
     </div>`;
   }
 

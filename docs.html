@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=68">
+<link rel="stylesheet" href="style.css?v=69">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -221,12 +221,12 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="supabase-loader.js?v=68"></script>
+<script src="supabase-loader.js?v=69"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="config.js"></script>
 <script src="main.js"></script>
 <script src="auth.js"></script>
-<script src="roles-engine.js?v=68"></script>
+<script src="roles-engine.js?v=69"></script>
 <script src="docs-templates.js"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
@@ -275,9 +275,9 @@ function saveValues(){
 function renderForm(){
   const t=VSRF_DOC_TEMPLATES.TEMPLATES[currentTemplate];
   $("docPanelTitle").textContent=t.name+" — поля";
-  const hidden=new Set(["seal_url","sig_url","sig2_url"]);
-  const toggles=t.fields.filter(f=>f.type==="toggle");
-  const mainFields=t.fields.filter(f=>f.type!=="toggle"&&!hidden.has(f.key));
+  const hidden=new Set(["seal_url","sig_url","sig2_url","seal2_url"]);
+  const controls=t.fields.filter(f=>f.type==="toggle"||f.type==="select");
+  const mainFields=t.fields.filter(f=>f.type!=="toggle"&&f.type!=="select"&&!hidden.has(f.key));
   const html=[];
   html.push(mainFields.map(f=>{
     const v=VSRF_DOC_TEMPLATES.esc(values[f.key]==null?"":values[f.key]);
@@ -286,22 +286,29 @@ function renderForm(){
     }
     return `<div class="form-group"><label>${f.label}</label><input name="${f.key}" value="${v}"></div>`;
   }).join(""));
-  if(toggles.length){
-    html.push(`<div class="doc-toggles-block"><div class="doc-toggles-title">Отображение подписей и печати</div>`);
-    html.push(toggles.map(f=>{
-      const on=String(values[f.key]==null?f.default:values[f.key])==="1";
-      return `<label class="doc-toggle-row"><input type="checkbox" name="${f.key}" ${on?"checked":""}><span>${f.label}</span></label>`;
+  if(controls.length){
+    html.push(`<div class="doc-toggles-block"><div class="doc-toggles-title">Отображение подписей и печатей</div>`);
+    html.push(controls.map(f=>{
+      const curRaw=values[f.key]==null?f.default:values[f.key];
+      if(f.type==="toggle"){
+        const on=String(curRaw)==="1";
+        return `<label class="doc-toggle-row"><input type="checkbox" name="${f.key}" ${on?"checked":""}><span>${f.label}</span></label>`;
+      }
+      if(f.type==="select"){
+        const opts=(f.options||[]).map(o=>`<option value="${o.value}" ${String(curRaw)===o.value?"selected":""}>${o.label}</option>`).join("");
+        return `<div class="doc-toggle-row doc-toggle-select"><label>${f.label}</label><select name="${f.key}">${opts}</select></div>`;
+      }
+      return "";
     }).join(""));
     html.push(`</div>`);
   }
   form.innerHTML=html.join("");
-  form.querySelectorAll("input,textarea").forEach(el=>{
-    el.addEventListener("input",()=>{
-      values[el.name]=el.type==="checkbox"?(el.checked?"1":"0"):el.value;
+  form.querySelectorAll("input,textarea,select").forEach(el=>{
+    const evt=(el.tagName==="SELECT"||el.type==="checkbox")?"change":"input";
+    el.addEventListener(evt,()=>{
+      if(el.type==="checkbox") values[el.name]=el.checked?"1":"0";
+      else values[el.name]=el.value;
       saveValues();renderDoc();
-    });
-    if(el.type==="checkbox") el.addEventListener("change",()=>{
-      values[el.name]=el.checked?"1":"0";saveValues();renderDoc();
     });
   });
 }
@@ -698,6 +705,6 @@ tabs.addEventListener("click",e=>{const b=e.target.closest("[data-tpl]");if(b) s
 values=loadValues()||VSRF_DOC_TEMPLATES.defaults(currentTemplate);
 renderTabs();renderForm();renderDoc();syncSealUI();renderFontRows();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25033a97b789dbf',t:'MTc4NTcwNjQxNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2504d802fb79dbf',t:'MTc4NTcwNzQ3Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
