@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<title>ВС РФ — в/ч №12132 · Проверки ВП</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style id="vsrf-admin-guard">
+[data-admin]{display:none !important}
+[data-staff]{display:none !important}
+body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
+body.vsrf-is-staff .nav a[data-staff]{display:inline-flex !important}
+body.vsrf-is-admin [data-admin]:not(.nav a){display:initial !important}
+body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-text">
+        <span class="brand-label">Вооружённые Силы РФ</span>
+        <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
+      </div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="info.html" data-page="info.html" data-transition>Информация</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="training.html" data-page="training.html" data-transition>Обучение</a>
+      <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
+      <a href="docs.html" data-page="docs.html" data-transition data-admin>Документы</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+      <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
+      <a href="apps.html" data-page="apps.html" data-transition data-staff>Заявления</a>
+      <a href="vp.html" data-page="vp.html" data-transition data-staff class="active">Проверки ВП</a>
+      <a href="lk.html" data-page="lk.html" data-transition data-admin>Личный кабинет</a>
+    </nav>
+    <div class="header-actions">
+      <button class="search-btn" data-open-search title="Поиск (Ctrl+K)">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <span>Поиск</span><span class="kbd">Ctrl K</span>
+      </button>
+      <button class="icon-btn" data-open-notify title="Уведомления" style="position:relative">
+        <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        <span class="vsrf-notify-badge" data-notify-badge></span>
+      </button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="login-btn" data-open-login>
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        <span>Войти</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="apps-head">
+    <div class="container">
+      <div class="apps-head-ribbon">
+        <span class="apps-head-ribbon-line"></span>
+        <span class="apps-head-ribbon-emblem">◈</span>
+        <span class="apps-head-ribbon-name">Военная Полиция · Проверки</span>
+        <span class="apps-head-ribbon-emblem">◈</span>
+        <span class="apps-head-ribbon-line"></span>
+      </div>
+      <h1 class="apps-head-title">Проверки личного состава</h1>
+      <div class="apps-head-subtitle">Документы, аттестация, лицензии</div>
+    </div>
+  </section>
+
+  <section class="apps-guard" id="vpGuard" style="display:none">
+    <div class="container apps-guard-box">
+      <div class="apps-guard-icon">⚠</div>
+      <h2>Доступ ограничен</h2>
+      <p>Раздел «Проверки ВП» доступен только Старшему Составу и Администрации.</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+        <button class="btn btn-gold btn-sm" data-open-login>Войти</button>
+        <a class="btn btn-ghost btn-sm" href="index.html">На главную</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="apps-body" id="vpBody" style="display:none">
+    <div class="container">
+
+      <div class="vp-toolbar">
+        <div class="vp-toolbar-left">
+          <input type="search" class="vp-search" id="vpSearch" placeholder="Поиск по ФИО, статику, должности...">
+        </div>
+        <div class="vp-toolbar-right">
+          <span class="vp-sync-status" id="vpSyncStatus"></span>
+          <button class="btn btn-ghost btn-sm" id="vpSyncBtn" title="Запросить у бота свежий список из Discord">↻ Синхронизировать</button>
+          <button class="btn btn-gold btn-sm" id="vpSettingsBtn" data-admin title="Настройка ролей и колонок">⚙ Настройки</button>
+        </div>
+      </div>
+
+      <div class="vp-tables" id="vpTables">
+        <div class="apps-empty">Загрузка...</div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<div class="modal-back" id="vpSettingsModal">
+  <div class="modal modal-xl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Настройки проверок ВП</h3>
+    <div class="modal-sub">Пометьте роли Discord: какие считать <b>отделами</b> (сгруппируют людей в таблицы), какие — <b>должностями</b> (появятся в колонке Должность), а какие проигнорировать.</div>
+
+    <div class="vp-settings-toolbar">
+      <input type="search" class="vp-search" id="vpMapSearch" placeholder="Поиск по названию роли..." style="max-width:340px">
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" id="vpMapReload">Обновить список ролей</button>
+    </div>
+
+    <div class="vp-map-legend">
+      <span class="vp-map-chip vp-map-chip-dept">Отдел</span>
+      <span class="vp-map-chip vp-map-chip-pos">Должность</span>
+      <span class="vp-map-chip vp-map-chip-ign">Игнор</span>
+    </div>
+
+    <div class="vp-map-list" id="vpMapList">
+      <div class="apps-empty">Загрузка...</div>
+    </div>
+
+    <div class="form-msg" id="vpMapMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px">
+      <button class="btn btn-ghost btn-sm" id="vpMapClose">Закрыть</button>
+      <button class="btn btn-gold btn-sm" id="vpMapSave">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Вход в служебный раздел</h3>
+    <div class="modal-sub">Требуется роль СС или Администратора</div>
+    <form>
+      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
+      <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="brand-icon" style="width:44px;height:44px"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt=""></div>
+        <p style="color:var(--muted);font-size:13px;margin-top:12px">Служебный раздел. Доступ ограничен.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Разделы</h5>
+        <a href="index.html">Главная</a>
+        <a href="info.html">Информация</a>
+        <a href="ustav.html">Уставы</a>
+        <a href="composition.html">Состав</a>
+      </div>
+      <div class="footer-col">
+        <h5>Служебное</h5>
+        <a href="apps.html">Заявления</a>
+        <a href="vp.html">Проверки ВП</a>
+        <a href="lk.html">Личный кабинет</a>
+        <a href="docs.html">Документы</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> · Вооружённые Силы Российской Федерации</span>
+      <span>1-я ОБрСпН · в/ч №12132</span>
+    </div>
+  </div>
+</footer>
+
+<div class="fab-stack" id="fabStack">
+  <button class="fab" id="fabUp" title="Наверх">
+    <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg>
+  </button>
+</div>
+
+<div class="search-modal" id="searchModal">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      <input class="search-input" placeholder="Поиск..." spellcheck="false">
+      <button class="search-close-kbd">Esc</button>
+    </div>
+    <div class="search-results"></div>
+  </div>
+</div>
+
+<script src="supabase-loader.js?v=62"></script>
+<script src="config.js?v=62"></script>
+<script src="auth.js?v=62"></script>
+<script src="roles-engine.js?v=62"></script>
+<script src="vp-engine.js?v=62"></script>
+<script src="main.js?v=62"></script>
+<script src="holiday-engine.js?v=62"></script>
+<script src="sound-engine.js?v=62"></script>
+<script src="settings-panel.js?v=62"></script>
+<script src="faq-engine.js?v=62"></script>
+<script src="search-engine.js?v=62"></script>
+<script src="notify-engine.js?v=62"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+let ALL_MEMBERS=[];
+let ALL_MAPPING=[];
+let ALL_CHECKS={};
+let ALL_ROLES=[];
+let SEARCH_Q="";
+
+const COLS=[
+  {key:"medbook",label:"Мед. Книжка",options:["yes","no"]},
+  {key:"narko",label:"Справка Нарк.",options:["yes","no"]},
+  {key:"driver",label:"Вод. Права",options:["yes","no"]},
+  {key:"passport",label:"Паспорт",options:["yes","no"]},
+  {key:"personal_file",label:"Лич. Дело",options:["yes","no"]},
+  {key:"weapon_license",label:"Лиц. Оружия",options:["yes","no","absent"]},
+  {key:"attestation",label:"Аттестация",options:["yes","no"]}
+];
+
+const OPT_LABEL={yes:"ДА",no:"НЕТ",absent:"Отсутствует"};
+const OPT_CLASS={yes:"vp-cell-yes",no:"vp-cell-no",absent:"vp-cell-absent"};
+
+function matchesSearch(m){
+  if(!SEARCH_Q) return true;
+  const q=SEARCH_Q.toLowerCase();
+  return (m.parsed_fio||"").toLowerCase().includes(q)
+    || (m.parsed_static||"").toLowerCase().includes(q)
+    || (m.display_name||"").toLowerCase().includes(q)
+    || (m.raw_nick||"").toLowerCase().includes(q);
+}
+
+function renderRow(m){
+  const check=ALL_CHECKS[m.discord_id]||{};
+  const position=VSRF_VP.positionFor(m,ALL_MAPPING);
+  const cells=COLS.map(c=>{
+    const val=check[c.key]||(c.key==="weapon_license"?"absent":"no");
+    return `<td class="vp-cell ${OPT_CLASS[val]}">
+      <select data-check="${c.key}" data-id="${m.discord_id}" class="vp-sel">
+        ${c.options.map(o=>`<option value="${o}" ${o===val?"selected":""}>${OPT_LABEL[o]}</option>`).join("")}
+      </select>
+    </td>`;
+  }).join("");
+  const checker=check.checked_by_name?`<div class="vp-checker" title="${esc(new Date(check.checked_at).toLocaleString("ru-RU"))}">${esc(check.checked_by_name)}</div>`:`<span class="vp-checker-empty">—</span>`;
+  return `<tr data-id="${m.discord_id}">
+    <td class="vp-td-name"><div class="vp-fio">${esc(m.parsed_fio||m.display_name||"—")}</div><div class="vp-nick">${esc(m.raw_nick||"")}</div></td>
+    <td class="vp-td-pos">${esc(position)}</td>
+    <td class="vp-td-static">${esc(m.parsed_static||"—")}</td>
+    ${cells}
+    <td class="vp-td-checker">${checker}</td>
+  </tr>`;
+}
+
+function renderTable(g){
+  const rows=g.list.filter(matchesSearch);
+  if(!rows.length) return "";
+  return `<div class="vp-table-block">
+    <div class="vp-table-title"><span class="vp-table-dot"></span>${esc(g.name)} <span class="vp-table-count">${rows.length}</span></div>
+    <div class="vp-table-wrap">
+      <table class="vp-table">
+        <thead><tr>
+          <th class="vp-th-name">ФИО</th>
+          <th>Должность</th>
+          <th>Статик</th>
+          ${COLS.map(c=>`<th>${c.label}</th>`).join("")}
+          <th>Проверил(а)</th>
+        </tr></thead>
+        <tbody>${rows.map(renderRow).join("")}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+async function renderAll(){
+  const box=$("vpTables");
+  box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
+  const [members,mapping,checks]=await Promise.all([VSRF_VP.fetchMembers(),VSRF_VP.fetchMapping(),VSRF_VP.fetchChecks()]);
+  ALL_MEMBERS=members;
+  ALL_MAPPING=mapping;
+  ALL_CHECKS=Object.fromEntries(checks.map(c=>[c.discord_id,c]));
+
+  if(!members.length){
+    box.innerHTML=`<div class="apps-empty">
+      <div class="apps-empty-icon">◎</div>
+      <h3>Список пуст</h3>
+      <p>Бот ещё не синхронизировал участников Discord.<br>Нажмите «Синхронизировать» вверху страницы.</p>
+    </div>`;
+    return;
+  }
+
+  const groups=VSRF_VP.groupByDept(members,mapping);
+  const html=groups.map(renderTable).filter(Boolean).join("");
+  box.innerHTML=html||`<div class="apps-empty"><h3>Ничего не найдено</h3><p>Попробуй изменить поисковый запрос.</p></div>`;
+
+  box.querySelectorAll(".vp-sel").forEach(sel=>{
+    sel.addEventListener("change",async e=>{
+      const id=sel.dataset.id;
+      const key=sel.dataset.check;
+      const val=sel.value;
+      const td=sel.closest("td");
+      td.classList.remove("vp-cell-yes","vp-cell-no","vp-cell-absent");
+      td.classList.add(OPT_CLASS[val]);
+      const patch={};patch[key]=val;
+      const r=await VSRF_VP.saveCheck(id,patch);
+      if(!r.ok){alert("Ошибка: "+r.error);return}
+      ALL_CHECKS[id]=Object.assign({},ALL_CHECKS[id]||{},patch,{checked_by_name:(function(){try{return localStorage.getItem("vsrf-my-display-name")||""}catch(e){return ""}})(),checked_at:new Date().toISOString()});
+      const tr=sel.closest("tr");
+      const checker=tr.querySelector(".vp-td-checker");
+      const name=ALL_CHECKS[id].checked_by_name||"—";
+      checker.innerHTML=name!=="—"?`<div class="vp-checker">${esc(name)}</div>`:`<span class="vp-checker-empty">—</span>`;
+    });
+  });
+}
+
+$("vpSearch").addEventListener("input",()=>{SEARCH_Q=$("vpSearch").value.trim();renderAll()});
+
+$("vpSyncBtn").addEventListener("click",async()=>{
+  const st=$("vpSyncStatus");
+  st.textContent="Отправка запроса...";st.className="vp-sync-status vp-sync-running";
+  const r=await VSRF_VP.requestSync();
+  if(!r.ok){st.textContent="Ошибка: "+r.error;st.className="vp-sync-status vp-sync-err";return}
+  st.textContent="Бот сканирует Discord...";
+  const res=await VSRF_VP.pollSyncStatus(r.id,120000);
+  if(!res.ok){st.textContent="Не удалось: "+(res.error||res.message||res.status);st.className="vp-sync-status vp-sync-err";return}
+  st.textContent="Готово · участников: "+res.members_scanned;st.className="vp-sync-status vp-sync-ok";
+  renderAll();
+  setTimeout(()=>{st.textContent="";st.className="vp-sync-status"},4000);
+});
+
+async function openMapping(){
+  const modal=$("vpSettingsModal");
+  modal.classList.add("active");
+  await loadMappingUI();
+}
+async function loadMappingUI(){
+  const box=$("vpMapList");
+  box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
+  ALL_ROLES=await VSRF_VP.fetchRoles();
+  const mapping=await VSRF_VP.fetchMapping();
+  const byId=Object.fromEntries(mapping.map(m=>[m.role_id,m]));
+  const q=($("vpMapSearch").value||"").toLowerCase().trim();
+  const rolesFiltered=ALL_ROLES.filter(r=>!q||r.name.toLowerCase().includes(q));
+  if(!rolesFiltered.length){box.innerHTML=`<div class="apps-empty">Список ролей пуст. Нажмите «Обновить» и убедись что бот запущен.</div>`;return}
+  box.innerHTML=rolesFiltered.map(r=>{
+    const m=byId[r.role_id]||{kind:"ignore",label:""};
+    return `<div class="vp-map-row" data-role-id="${r.role_id}">
+      <div class="vp-map-name">${esc(r.name)}</div>
+      <div class="vp-map-controls">
+        <label class="vp-map-radio"><input type="radio" name="k-${r.role_id}" value="ignore" ${m.kind==="ignore"?"checked":""}> Игнор</label>
+        <label class="vp-map-radio"><input type="radio" name="k-${r.role_id}" value="department" ${m.kind==="department"?"checked":""}> Отдел</label>
+        <label class="vp-map-radio"><input type="radio" name="k-${r.role_id}" value="position" ${m.kind==="position"?"checked":""}> Должность</label>
+        <input type="text" class="vp-map-label" data-role-id="${r.role_id}" placeholder="Название (опц., по умолчанию = имя роли)" value="${esc(m.label||"")}">
+      </div>
+    </div>`;
+  }).join("");
+}
+$("vpMapSearch").addEventListener("input",loadMappingUI);
+$("vpMapReload").addEventListener("click",loadMappingUI);
+$("vpMapClose").addEventListener("click",()=>$("vpSettingsModal").classList.remove("active"));
+$("vpSettingsModal").querySelector(".modal-close").addEventListener("click",()=>$("vpSettingsModal").classList.remove("active"));
+$("vpSettingsModal").addEventListener("click",e=>{if(e.target===$("vpSettingsModal")) $("vpSettingsModal").classList.remove("active")});
+$("vpMapSave").addEventListener("click",async()=>{
+  const rows=[];
+  const toRemove=[];
+  document.querySelectorAll(".vp-map-row").forEach(el=>{
+    const roleId=el.dataset.roleId;
+    const kind=(el.querySelector('input[type=radio]:checked')||{}).value||"ignore";
+    const label=(el.querySelector(".vp-map-label")||{}).value||"";
+    if(kind==="ignore") toRemove.push(roleId);
+    else rows.push({role_id:roleId,kind,label:label||null,sort:100});
+  });
+  const msg=$("vpMapMsg");
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  const r=await VSRF_VP.saveMapping(rows);
+  for(const id of toRemove) await VSRF_VP.removeMapping(id);
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  msg.className="form-msg ok";msg.textContent="Сохранено";
+  setTimeout(()=>{$("vpSettingsModal").classList.remove("active");msg.textContent="";renderAll()},700);
+});
+$("vpSettingsBtn").addEventListener("click",openMapping);
+
+let LAST_GUARD_STATE=null;
+function applyGuard(){
+  const isStaff=!!(window.VSRF_ROLES&&window.VSRF_ROLES.isStaff());
+  const uid=(window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user&&window.VSRF_AUTH.state.user.id)||null;
+  const key=isStaff+":"+uid;
+  $("vpBody").style.display=isStaff?"":"none";
+  $("vpGuard").style.display=isStaff?"none":"";
+  if(!isStaff){LAST_GUARD_STATE=key;return}
+  if(LAST_GUARD_STATE===key) return;
+  LAST_GUARD_STATE=key;
+  renderAll();
+}
+if(window.VSRF_ROLES){VSRF_ROLES.onChange(()=>applyGuard())}
+setTimeout(applyGuard,600);
+setTimeout(applyGuard,1500);
+
+let SOFT_TIMER=null;
+function softRefresh(){
+  if(SOFT_TIMER) clearTimeout(SOFT_TIMER);
+  SOFT_TIMER=setTimeout(()=>{
+    if(document.visibilityState==="visible"&&window.VSRF_ROLES&&window.VSRF_ROLES.isStaff()) renderAll();
+  },400);
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible") softRefresh()});
+window.addEventListener("focus",softRefresh);
+setInterval(softRefresh,30000);
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24c9daeac8b9d45',t:'MTc4NTY2ODgxNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
+</html>

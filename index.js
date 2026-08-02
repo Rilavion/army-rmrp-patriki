@@ -4,6 +4,7 @@ if(typeof globalThis.WebSocket === "undefined") globalThis.WebSocket = WS;
 const { Client, GatewayIntentBits, Partials, Events, EmbedBuilder } = require("discord.js");
 const { createClient } = require("@supabase/supabase-js");
 const { parseDiscordMessage } = require("./parser");
+const { setupVP } = require("./vp");
 
 const REQUIRED = ["DISCORD_TOKEN","GUILD_ID","CHANNEL_INCOMING_ID","CHANNEL_RESULTS_ID","SUPABASE_URL","SUPABASE_SERVICE_ROLE"];
 const missing = REQUIRED.filter(k=>!process.env[k]);
@@ -307,11 +308,23 @@ function subscribeRealtime(){
   return channel;
 }
 
+const vp = setupVP({ client, supabase, guildId: GUILD_ID, log });
+
 client.once(Events.ClientReady, async (c) => {
   log("BOT READY as", c.user.tag);
   log("Guild:", GUILD_ID, "| Incoming:", CHANNEL_INCOMING_ID, "| Results:", CHANNEL_RESULTS_ID);
 
   subscribeRealtime();
+  vp.subscribeSyncRequests();
+
+  const syncMin = parseInt(process.env.VP_SYNC_MINUTES || "5", 10);
+  vp.scheduleInterval(syncMin);
+  log("VP: interval sync every", syncMin, "min");
+
+  vp.initialSync().then(r => {
+    if(r.ok) log("VP: initial sync ok,", r.count, "members");
+    else log("VP: initial sync failed:", r.error);
+  });
 
   if(String(BACKFILL_ON_START).toLowerCase() === "true"){
     await backfill();
