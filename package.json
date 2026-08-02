@@ -1,0 +1,20 @@
+{
+  "name": "vsrf-apps-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for 1st OBrSpN v/ch 12132 — принимает электронные заявления и отправляет результаты рассмотрения",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
+    "ws": "^8.18.0"
+  }
+}

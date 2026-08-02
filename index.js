@@ -1,5 +1,7 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, Partials, Events } = require("discord.js");
+const WS = require("ws");
+if(typeof globalThis.WebSocket === "undefined") globalThis.WebSocket = WS;
+const { Client, GatewayIntentBits, Partials, Events, EmbedBuilder } = require("discord.js");
 const { createClient } = require("@supabase/supabase-js");
 const { parseDiscordMessage } = require("./parser");
 
@@ -14,12 +16,12 @@ if(missing.length){
 const {
   DISCORD_TOKEN, GUILD_ID, CHANNEL_INCOMING_ID, CHANNEL_RESULTS_ID,
   SUPABASE_URL, SUPABASE_SERVICE_ROLE,
-  SITE_APPS_URL, BACKFILL_ON_START, BACKFILL_LIMIT
+  BACKFILL_ON_START, BACKFILL_LIMIT
 } = process.env;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
   auth: { persistSession: false, autoRefreshToken: false },
-  realtime: { params: { eventsPerSecond: 10 } }
+  realtime: { transport: WS, params: { eventsPerSecond: 10 } }
 });
 
 const client = new Client({
@@ -121,37 +123,91 @@ async function backfill(){
   }
 }
 
-function statusLabel(status){
-  if(status === "approved") return "✅ Одобрено";
-  if(status === "rejected") return "❌ Отказано";
-  if(status === "archived") return "🗄️ Архив";
-  return status;
+const STATUS_STYLE = {
+  approved: {
+    color: 0x2ecc71,
+    accent: 0x1e8449,
+    label: "ОДОБРЕНО",
+    emoji: "✅",
+    title: "Заявление одобрено",
+    footer: "Добро пожаловать в подразделение"
+  },
+  rejected: {
+    color: 0xe74c3c,
+    accent: 0xa93226,
+    label: "ОТКАЗАНО",
+    emoji: "⛔",
+    title: "Заявление отклонено",
+    footer: "Причина указана ниже"
+  },
+  archived: {
+    color: 0x7f8c8d,
+    accent: 0x566573,
+    label: "АРХИВ",
+    emoji: "🗄️",
+    title: "Заявление в архиве",
+    footer: "Без официального ответа"
+  }
+};
+
+function truncate(s, n){
+  const t = String(s == null ? "" : s);
+  return t.length > n ? t.slice(0, n-1) + "…" : t;
 }
 
-function buildResultText(row){
-  const link = row.message_link || (SITE_APPS_URL || "");
-  const who = row.responded_by_name || "СС";
-  const status = statusLabel(row.status);
+function buildResultEmbed(row){
+  const st = STATUS_STYLE[row.status] || STATUS_STYLE.approved;
   const type = row.app_type || "Заявление";
   const submitter = row.submitter_name || row.submitter_discord || "неизвестно";
+  const who = row.responded_by_name || "Служба Собственной Безопасности";
+  const link = row.message_link || null;
 
-  const lines = [
-    "📋 **Электронное заявление рассмотрено**",
-    "",
-    `• Тип: **${type}**`,
-    `• Заявитель: **${submitter}**`,
-    `• Ссылка: ${link}`,
-    `• Рассмотрел: **${who}**`,
-    `• Статус: **${status}**`
+  const embed = new EmbedBuilder()
+    .setColor(st.color)
+    .setTitle(`${st.emoji}  ${st.title}`)
+    .setTimestamp(row.responded_at ? new Date(row.responded_at) : new Date())
+    .setFooter({ text: `1-я ОБрСпН • в/ч 12132 • ${st.footer}` });
+
+  const headerLines = [
+    "```ansi",
+    `\u001b[1;37m▍ СТАТУС:\u001b[0m  ${st.emoji} ${st.label}`,
+    "```"
   ];
+
+  const fields = [
+    { name: "📄 Тип заявления", value: "```" + truncate(type, 180) + "```", inline: false },
+    { name: "👤 Заявитель", value: "```" + truncate(submitter, 80) + "```", inline: true },
+    { name: "🎖️ Рассмотрел", value: "```" + truncate(who, 80) + "```", inline: true }
+  ];
+
+  if(row.submitter_discord && row.submitter_discord !== submitter){
+    fields.push({ name: "💬 Discord", value: "`" + truncate(row.submitter_discord, 60) + "`", inline: true });
+  }
+
   if(row.status === "rejected" && row.reject_reason){
-    lines.push(`• Причина отказа: ${row.reject_reason}`);
+    fields.push({
+      name: "📝 Причина отказа",
+      value: "> " + truncate(row.reject_reason.replace(/\n+/g, "\n> "), 900),
+      inline: false
+    });
   }
-  if(SITE_APPS_URL){
-    lines.push("");
-    lines.push(`Панель СС: ${SITE_APPS_URL}`);
+
+  if(link){
+    fields.push({
+      name: "🔗 Оригинал заявления",
+      value: `[Открыть сообщение в канале →](${link})`,
+      inline: false
+    });
   }
-  return lines.join("\n");
+
+  embed.setDescription(headerLines.join("\n"));
+  embed.addFields(fields);
+
+  if(row.submitter_avatar){
+    embed.setThumbnail(row.submitter_avatar);
+  }
+
+  return embed;
 }
 
 async function sendResult(row){
@@ -168,8 +224,8 @@ async function sendResult(row){
       log("RESULT ERR: канал результатов не найден");
       return;
     }
-    const text = buildResultText(row);
-    const sent = await ch.send({ content: text, allowedMentions: { parse: [] } });
+    const embed = buildResultEmbed(row);
+    const sent = await ch.send({ embeds: [embed], allowedMentions: { parse: [] } });
     log("RESULT sent", row.id, "→", sent.id);
 
     await supabase
