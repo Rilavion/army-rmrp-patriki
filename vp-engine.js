@@ -133,7 +133,8 @@ window.VSRF_VP=(function(){
     return out;
   }
 
-  function groupByDept(members,mapping){
+  function groupByDept(members,mapping,opts){
+    const hideNoDept=!!(opts&&opts.hideNoDept);
     const filtered=filterMembers(members,mapping);
     const deptRoleIds=new Set(mapping.filter(m=>m.role_kind==="department").map(m=>m.role_id));
     const labels={};
@@ -145,11 +146,19 @@ window.VSRF_VP=(function(){
       for(const id of ids){
         if(deptRoleIds.has(id)){ deptName=labels[id]||id; break; }
       }
-      if(!deptName) deptName=mem.parsed_dept||"Без отдела";
+      if(!deptName){
+        if(mem.parsed_dept) deptName=mem.parsed_dept;
+        else if(hideNoDept) continue;
+        else deptName="Без отдела";
+      }
       if(!groups.has(deptName)) groups.set(deptName,[]);
       groups.get(deptName).push(mem);
     }
-    return Array.from(groups.entries()).map(([name,list])=>({name,list})).sort((a,b)=>a.name.localeCompare(b.name,"ru"));
+    return Array.from(groups.entries()).map(([name,list])=>({name,list})).sort((a,b)=>{
+      if(a.name==="Без отдела") return 1;
+      if(b.name==="Без отдела") return -1;
+      return a.name.localeCompare(b.name,"ru");
+    });
   }
 
   function positionFor(member,mapping){

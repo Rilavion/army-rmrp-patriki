@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=66">
+<link rel="stylesheet" href="style.css?v=67">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -117,6 +117,11 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
           </div>
         </div>
         <div class="vp-toolbar-right">
+          <label class="vp-toggle" title="Скрыть людей, у которых не определён отдел (нет роли-отдела и в нике нет «Отдел |»)">
+            <input type="checkbox" id="vpHideNoDept">
+            <span class="vp-toggle-slider"></span>
+            <span class="vp-toggle-lbl">Скрыть «Без отдела»</span>
+          </label>
           <div class="vp-bot-indicator" id="vpBotIndicator" title="Статус Discord-бота">
             <span class="vp-bot-dot"></span>
             <span class="vp-bot-text">проверка...</span>
@@ -126,16 +131,6 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
           </button>
           <button class="btn btn-gold btn-sm" id="vpSettingsBtn" data-admin title="Настройка ролей и отделов">⚙ Настройки</button>
         </div>
-      </div>
-
-      <div class="vp-onboard" id="vpOnboard" style="display:none">
-        <div class="vp-onboard-title">Первый запуск — что делать?</div>
-        <ol class="vp-onboard-steps">
-          <li><b>Подключите Discord-бота</b> (он должен быть на сервере и запущен).</li>
-          <li>Нажмите <b>↻ Синхронизировать</b> — бот загрузит всех участников и роли.</li>
-          <li>Админ нажимает <b>⚙ Настройки</b> и помечает роли: какие «Отделы», какие «Должности», кого «Скрывать» (Уволен, Гражданин).</li>
-          <li>После этого таблицы наполнятся, и можно ставить отметки о документах.</li>
-        </ol>
       </div>
 
       <div class="vp-tables" id="vpTables">
@@ -255,18 +250,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=66"></script>
-<script src="config.js?v=66"></script>
-<script src="auth.js?v=66"></script>
-<script src="roles-engine.js?v=66"></script>
-<script src="vp-engine.js?v=66"></script>
-<script src="main.js?v=66"></script>
-<script src="holiday-engine.js?v=66"></script>
-<script src="sound-engine.js?v=66"></script>
-<script src="settings-panel.js?v=66"></script>
-<script src="faq-engine.js?v=66"></script>
-<script src="search-engine.js?v=66"></script>
-<script src="notify-engine.js?v=66"></script>
+<script src="supabase-loader.js?v=67"></script>
+<script src="config.js?v=67"></script>
+<script src="auth.js?v=67"></script>
+<script src="roles-engine.js?v=67"></script>
+<script src="vp-engine.js?v=67"></script>
+<script src="main.js?v=67"></script>
+<script src="holiday-engine.js?v=67"></script>
+<script src="sound-engine.js?v=67"></script>
+<script src="settings-panel.js?v=67"></script>
+<script src="faq-engine.js?v=67"></script>
+<script src="search-engine.js?v=67"></script>
+<script src="notify-engine.js?v=67"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -283,6 +278,8 @@ try{CURRENT_CHECKER=localStorage.getItem("vsrf-vp-checker-name")||""}catch(e){}
 let RENDER_LOCK=false;
 let LAST_RENDER_HASH="";
 let REALTIME_SUB=null;
+let HIDE_NO_DEPT=false;
+try{HIDE_NO_DEPT=localStorage.getItem("vsrf-vp-hide-nodept")==="1"}catch(e){}
 
 const COLS=[
   {key:"medbook",label:"Мед.Книжка",short:"МК",opts:["yes","no"]},
@@ -409,7 +406,7 @@ function renderTable(g){
 }
 
 function stateHash(){
-  let h=SEARCH_Q+"|"+ALL_MEMBERS.length+"|"+ALL_MAPPING.length+"|";
+  let h=SEARCH_Q+"|"+(HIDE_NO_DEPT?"H":"S")+"|"+ALL_MEMBERS.length+"|"+ALL_MAPPING.length+"|";
   for(const m of ALL_MEMBERS) h+=m.discord_id+":"+(m.updated_at||"")+";";
   for(const k of Object.keys(ALL_CHECKS).sort()){
     const c=ALL_CHECKS[k];
@@ -563,7 +560,6 @@ async function renderAll(force){
     ALL_CHECKS=Object.fromEntries(checks.map(c=>[c.discord_id,c]));
 
     if(!members.length){
-      $("vpOnboard").style.display="";
       box.innerHTML=`<div class="apps-empty">
         <div class="apps-empty-icon">◎</div>
         <h3>Список участников пуст</h3>
@@ -573,10 +569,8 @@ async function renderAll(force){
       return;
     }
 
-    ALL_GROUPS=VSRF_VP.groupByDept(members,mapping);
+    ALL_GROUPS=VSRF_VP.groupByDept(members,mapping,{hideNoDept:HIDE_NO_DEPT});
     const filtered=VSRF_VP.filterMembers(members,mapping);
-    const showOnboard=(mapping.length===0)||(filtered.length===0);
-    $("vpOnboard").style.display=showOnboard?"":"none";
 
     const hash=stateHash();
     if(!force&&hash===LAST_RENDER_HASH) return;
@@ -605,6 +599,13 @@ function refreshCheckerList(){
 }
 
 $("vpSearch").addEventListener("input",()=>{SEARCH_Q=$("vpSearch").value.trim();LAST_RENDER_HASH="";renderAll(true)});
+
+$("vpHideNoDept").checked=HIDE_NO_DEPT;
+$("vpHideNoDept").addEventListener("change",()=>{
+  HIDE_NO_DEPT=$("vpHideNoDept").checked;
+  try{localStorage.setItem("vsrf-vp-hide-nodept",HIDE_NO_DEPT?"1":"0")}catch(e){}
+  LAST_RENDER_HASH="";renderAll(true);
+});
 
 $("vpCheckerInput").value=CURRENT_CHECKER;
 updateCheckerBar();
@@ -818,5 +819,5 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 window.addEventListener("focus",softRefresh);
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24e7e2deb03f3a7',t:'MTc4NTY4ODQ5Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
