@@ -160,7 +160,6 @@ function truncate(s, n){
 
 function buildResultEmbed(row){
   const st = STATUS_STYLE[row.status] || STATUS_STYLE.approved;
-  const type = row.app_type || "Заявление";
   const submitter = row.submitter_name || row.submitter_discord || "неизвестно";
   const who = row.responded_by_name || "Служба Собственной Безопасности";
   const link = row.message_link || null;
@@ -178,13 +177,12 @@ function buildResultEmbed(row){
   ];
 
   const fields = [
-    { name: "📄 Тип заявления", value: "```" + truncate(type, 180) + "```", inline: false },
-    { name: "👤 Заявитель", value: "```" + truncate(submitter, 80) + "```", inline: true },
-    { name: "🎖️ Рассмотрел", value: "```" + truncate(who, 80) + "```", inline: true }
+    { name: "👤 Заявитель", value: "```" + truncate(submitter, 200) + "```", inline: false },
+    { name: "🎖️ Рассмотрел", value: "```" + truncate(who, 200) + "```", inline: false }
   ];
 
   if(row.submitter_discord && row.submitter_discord !== submitter){
-    fields.push({ name: "💬 Discord", value: "`" + truncate(row.submitter_discord, 60) + "`", inline: true });
+    fields.push({ name: "💬 Discord", value: "`" + truncate(row.submitter_discord, 200) + "`", inline: false });
   }
 
   if(row.status === "rejected" && row.reject_reason){
@@ -206,11 +204,40 @@ function buildResultEmbed(row){
   embed.setDescription(headerLines.join("\n"));
   embed.addFields(fields);
 
-  if(row.submitter_avatar){
-    embed.setThumbnail(row.submitter_avatar);
-  }
-
   return embed;
+}
+
+function extractDiscordHandle(raw){
+  const s = String(raw||"").trim();
+  if(!s) return null;
+  const mentionId = s.match(/<@!?(\d{15,25})>/);
+  if(mentionId) return { type: "id", value: mentionId[1] };
+  const rawId = s.match(/^(\d{15,25})$/);
+  if(rawId) return { type: "id", value: rawId[1] };
+  const atUser = s.match(/@?([a-z0-9_.]{2,32})/i);
+  if(atUser) return { type: "username", value: atUser[1].toLowerCase() };
+  return null;
+}
+
+async function resolveMention(guild, submitterDiscord){
+  const h = extractDiscordHandle(submitterDiscord);
+  if(!h || !guild) return null;
+  try{
+    if(h.type === "id"){
+      const m = await guild.members.fetch(h.value).catch(()=>null);
+      if(m) return `<@${m.id}>`;
+      return null;
+    }
+    const found = await guild.members.fetch({ query: h.value, limit: 5 }).catch(()=>null);
+    if(!found || !found.size) return null;
+    let hit = found.find(m => (m.user.username||"").toLowerCase() === h.value);
+    if(!hit) hit = found.find(m => (m.user.globalName||"").toLowerCase() === h.value);
+    if(!hit) hit = found.first();
+    return hit ? `<@${hit.id}>` : null;
+  }catch(e){
+    log("MENTION resolve err:", e.message);
+    return null;
+  }
 }
 
 async function sendResult(row){
@@ -227,9 +254,31 @@ async function sendResult(row){
       log("RESULT ERR: канал результатов не найден");
       return;
     }
+
+    let mention = null;
+    let mentionUserId = null;
+    try{
+      const guild = ch.guild || await client.guilds.fetch(GUILD_ID).catch(()=>null);
+      if(guild && row.submitter_discord){
+        mention = await resolveMention(guild, row.submitter_discord);
+        if(mention){
+          const m = mention.match(/<@(\d+)>/);
+          if(m) mentionUserId = m[1];
+        }
+      }
+    }catch(e){ log("MENTION err:", e.message); }
+
     const embed = buildResultEmbed(row);
-    const sent = await ch.send({ embeds: [embed], allowedMentions: { parse: [] } });
-    log("RESULT sent", row.id, "→", sent.id);
+    const payload = { embeds: [embed] };
+    if(mention){
+      payload.content = mention;
+      payload.allowedMentions = { users: [mentionUserId] };
+    } else {
+      payload.allowedMentions = { parse: [] };
+    }
+
+    const sent = await ch.send(payload);
+    log("RESULT sent", row.id, "→", sent.id, mention ? "(pinged "+mentionUserId+")" : "(no ping)");
 
     await supabase
       .from("applications")
