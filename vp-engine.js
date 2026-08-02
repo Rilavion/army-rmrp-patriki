@@ -131,7 +131,7 @@ window.VSRF_VP=(function(){
     for(let i=0;i<ids.length;i++){
       if(posRoleIds.has(ids[i])) return labels[ids[i]]||names[i]||ids[i];
     }
-    return "—";
+    return member.parsed_static||"—";
   }
 
   return {fetchMembers,fetchRoles,fetchMapping,saveMapping,removeMapping,fetchChecks,saveCheck,requestSync,pollSyncStatus,groupByDept,positionFor};

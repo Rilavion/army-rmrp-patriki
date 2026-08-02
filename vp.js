@@ -1,14 +1,14 @@
 function parseNick(rawName){
   const s = String(rawName || "").trim();
-  if(!s) return { dept: null, fio: null, static: null };
+  if(!s) return { dept: null, rank: null, fio: null };
   const parts = s.split("|").map(p => p.trim()).filter(Boolean);
   if(parts.length >= 3){
-    return { dept: parts[0], fio: parts[1], static: parts[2] };
+    return { dept: parts[0], rank: parts[1], fio: parts.slice(2).join(" | ") };
   }
   if(parts.length === 2){
-    return { dept: parts[0], fio: parts[1], static: null };
+    return { dept: parts[0], rank: null, fio: parts[1] };
   }
-  return { dept: null, fio: s, static: null };
+  return { dept: null, rank: null, fio: s };
 }
 
 function memberToRow(m){
@@ -31,7 +31,7 @@ function memberToRow(m){
     raw_nick: nick,
     parsed_dept: parsed.dept,
     parsed_fio: parsed.fio,
-    parsed_static: parsed.static,
+    parsed_static: parsed.rank,
     avatar_url: m.user && m.user.displayAvatarURL ? m.user.displayAvatarURL({ size: 128, extension: "png" }) : null,
     role_ids: roleIds,
     role_names: roleNames,
