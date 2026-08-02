@@ -293,7 +293,62 @@ async function renderList(){
     el.querySelector(".apps-card-head").addEventListener("click",()=>{
       el.classList.toggle("open");
     });
+    // Toggle iframe-превью
+    el.querySelectorAll("[data-toggle-frame]").forEach(btn=>{
+      btn.addEventListener("click",e=>{
+        e.stopPropagation();
+        const uid=btn.dataset.toggleFrame;
+        const f=document.getElementById("frame-"+uid);
+        if(!f) return;
+        const shown=!f.hasAttribute("hidden");
+        if(shown){f.setAttribute("hidden","");btn.querySelector("[data-toggle-label]").textContent="Развернуть превью"}
+        else{f.removeAttribute("hidden");btn.querySelector("[data-toggle-label]").textContent="Свернуть превью"}
+      });
+    });
   });
+}
+
+function extractUrls(text){
+  const out=[];const re=/(https?:\/\/[^\s<>"'`]+)/gi;let m;
+  while((m=re.exec(text))!==null) out.push(m[1].replace(/[.,;:!?)]+$/,""));
+  return out;
+}
+function looksLikeMediaField(key){
+  return /скриншот|ссылк|фото|imgur|yapx|url|http/i.test(key||"");
+}
+function renderField(k,v,rowId){
+  const key=esc(k);
+  const val=String(v||"");
+  const urls=extractUrls(val);
+  const isMedia=looksLikeMediaField(k)&&urls.length>0;
+  const textHtml=esc(val).replace(/\n/g,"<br>").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+  if(!isMedia){
+    return `<div class="apps-field"><div class="apps-field-key">${key}</div><div class="apps-field-val">${textHtml}</div></div>`;
+  }
+  // Медиа-поле: iframe с превью + кнопки
+  const url=urls[0];
+  const uid=rowId+"-"+Math.random().toString(36).slice(2,7);
+  return `<div class="apps-field apps-field-media">
+    <div class="apps-field-key">${key}</div>
+    <div class="apps-field-val">
+      <div class="apps-media-controls">
+        <a class="apps-media-btn apps-media-btn-open" href="${esc(url)}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h5v2H5v12h12v-5h2v5c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2z"/></svg>
+          Открыть в новом окне
+        </a>
+        <button class="apps-media-btn apps-media-btn-toggle" data-toggle-frame="${uid}">
+          <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z"/></svg>
+          <span data-toggle-label>Развернуть превью</span>
+        </button>
+        <span class="apps-media-url">${esc(url)}</span>
+      </div>
+      <div class="apps-media-frame" id="frame-${uid}" hidden>
+        <iframe src="${esc(url)}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" allow="fullscreen"></iframe>
+        <div class="apps-media-frame-note">Если превью пустое — сайт запрещает встраивание. Откройте в новом окне ↗</div>
+      </div>
+      ${urls.length>1?`<div class="apps-media-more">Дополнительные ссылки: ${urls.slice(1).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join(", ")}</div>`:""}
+    </div>
+  </div>`;
 }
 
 function renderCard(r,i){
@@ -335,10 +390,7 @@ function renderCard(r,i){
     </div>
     <div class="apps-card-body">
       <div class="apps-fields">
-        ${keys.map(k=>`<div class="apps-field">
-          <div class="apps-field-key">${esc(k)}</div>
-          <div class="apps-field-val">${esc(fields[k]).replace(/\n/g,"<br>").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')}</div>
-        </div>`).join("")}
+        ${keys.map(k=>renderField(k,fields[k],r.id)).join("")}
       </div>
       ${rejectInfo}
       ${respondedInfo}
@@ -394,7 +446,40 @@ $("rejectConfirm").addEventListener("click",async()=>{
 
 // ===== Manual add (для теста без бота) =====
 $("appsAddManual").addEventListener("click",()=>{
-  $("manualText").value=`\`\`\`\n**Выберите тип:**\nЗаявление на вступление в Областную Медицинскую Службу\n\n**Имя Фамилия (персонажа):**\nИван Тестов\n\n**Возраст: (Ваш)**\n21\n\n**Возраст: (Персонажа)**\n27\n\n**Номер вашего Нового паспорта (персонажа) :**\n123-456\n\n**По какой причине желаете вступить?**\nХочу спасать жизни граждан\n\n**Часы, отыгранные на сервере:**\n500 часов\n\n**Дискорд для связи с вами: (пример @user)**\n@test_user\n\`\`\``;
+  $("manualText").value=`\`\`\`
+**Выберите тип:**
+Заявление на вступление в Областную Медицинскую Службу
+
+**Имя Фамилия (персонажа):**
+Илья Фельдшеров
+
+**Возраст: (Ваш)**
+21
+
+**Возраст: (Персонажа)**
+25
+
+**Номер вашего Нового паспорта (персонажа) :**
+745-263
+
+**По какой причине желаете вступить в ОМС?**
+Желаю спасать жизни граждан города Москвы
+
+**Работали ли вы в ОМС ранее?**
+Да, работал
+
+**Ссылка на скриншоты - паспорт, водительское удостоверение, мед. книжка (Imgur/Yapx):**
+https://fotora.ru/uploaded/?ID=HASKK01082026153545
+
+**Часы, отыгранные на сервере:**
+619 часов
+
+**Ваш среднесуточный онлайн**
+2-4 часов
+
+**Дискорд для связи с вами: (пример @user)**
+@soldatik_44
+\`\`\``;
   $("manualLink").value="";
   $("manualMsg").textContent="";$("manualMsg").className="form-msg";
   $("manualModal").classList.add("active");
@@ -431,5 +516,5 @@ setTimeout(applyGuard,600);
 setTimeout(applyGuard,1500);
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24b9c0e6b14f117',t:'MTc4NTY1ODI2Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24bb2586c15e960',t:'MTc4NTY1OTE3NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

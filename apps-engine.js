@@ -79,39 +79,84 @@ window.VSRF_APPS=(function(){
   }
 
   // ==== Парсер сообщения бота — вытаскивает поля из discord-сообщения ====
+  function stripFormatting(s){
+    // Убираем discord-разметку: **bold**, *italic*, __underline__, `code`, ~~strike~~, ++markers++
+    return String(s||"")
+      .replace(/\*\*\*(.+?)\*\*\*/g,"$1")
+      .replace(/\*\*(.+?)\*\*/g,"$1")
+      .replace(/__(.+?)__/g,"$1")
+      .replace(/\+\+(.+?)\+\+/g,"$1")
+      .replace(/~~(.+?)~~/g,"$1")
+      .replace(/`([^`]+)`/g,"$1")
+      .replace(/\*(.+?)\*/g,"$1")
+      .trim();
+  }
+
   function parseDiscordMessage(text){
-    // Ищем пары **Ключ:** значение
-    const lines=String(text||"").replace(/\r/g,"").split("\n");
+    // Строки с ключом ищем как: строка полностью в виде "**ЧТО-ТО:**" (без значения на этой же строке)
+    // Значение — все последующие непустые строки до следующего такого ключа.
+    const raw=String(text||"").replace(/\r/g,"");
+    const lines=raw.split("\n");
     const fields={};
+    const order=[];
     let currentKey=null;
-    let appType=null;
-    const buffer=[];
-    for(let i=0;i<lines.length;i++){
-      const line=lines[i];
-      // Разделитель ```
-      if(/^`{3,}/.test(line.trim())) continue;
-      const m=line.match(/^\s*\*\*([^*]+?):\*\*\s*(.*)$/);
-      if(m){
-        if(currentKey){fields[currentKey]=buffer.join("\n").trim();buffer.length=0}
-        currentKey=m[1].trim();
-        if(m[2]) buffer.push(m[2]);
-      }else if(currentKey){
-        buffer.push(line);
+    let buffer=[];
+    const keyRe=/^\s*\*\*(.+?):?\*\*\s*:?\s*$/;
+    // Инлайновый вариант: **Ключ:** значение на одной строке
+    const inlineRe=/^\s*\*\*(.+?):?\*\*\s*:?\s*(.+)$/;
+
+    function commit(){
+      if(currentKey){
+        const val=stripFormatting(buffer.join("\n")).trim();
+        // Пропускаем футер бота вроде "Вчера, в 23:36"
+        if(!/^вчера|^сегодня|^\d{1,2}[.:/]\d{1,2}/i.test(currentKey.trim())){
+          fields[currentKey]=val;
+          order.push(currentKey);
+        }
+        buffer=[];
       }
     }
-    if(currentKey) fields[currentKey]=buffer.join("\n").trim();
-
-    // "Выберите тип:" → app_type
-    for(const key of Object.keys(fields)){
-      if(/выберите\s*тип/i.test(key)){appType=fields[key];delete fields[key]}
+    for(let i=0;i<lines.length;i++){
+      const line=lines[i];
+      if(/^`{3,}/.test(line.trim())) continue; // ``` — разделитель кода
+      // Пустые строки не сбрасывают ключ, но в буфер не идут
+      if(!line.trim()) continue;
+      // Сначала проверяем «только ключ на строке»
+      let m=line.match(keyRe);
+      if(m){
+        commit();
+        currentKey=stripFormatting(m[1]).replace(/:\s*$/,"").trim();
+        continue;
+      }
+      // Иначе — инлайн: **Ключ:** значение
+      m=line.match(inlineRe);
+      if(m){
+        commit();
+        currentKey=stripFormatting(m[1]).replace(/:\s*$/,"").trim();
+        buffer.push(m[2]);
+        continue;
+      }
+      // Иначе — часть значения
+      if(currentKey) buffer.push(line);
     }
-    // Пытаемся найти submitter
+    commit();
+
+    let appType=null;
+    for(const key of Object.keys(fields)){
+      if(/выберите\s*тип|^\s*тип\s*$/i.test(key)){appType=fields[key];delete fields[key]}
+    }
     let submitterName="",submitterDiscord="";
     for(const key of Object.keys(fields)){
-      if(/имя\s*фамилия/i.test(key)&&!submitterName) submitterName=fields[key];
-      if(/дискорд/i.test(key)&&!submitterDiscord) submitterDiscord=fields[key];
+      if(/имя\s*фамилия|фио|персонаж/i.test(key)&&!submitterName) submitterName=fields[key];
+      if(/дискорд|discord/i.test(key)&&!submitterDiscord) submitterDiscord=fields[key];
     }
-    return {app_type:appType||"Заявление",fields,submitter_name:submitterName,submitter_discord:submitterDiscord,raw_text:text};
+    return {
+      app_type:appType||"Заявление",
+      fields,
+      submitter_name:submitterName,
+      submitter_discord:submitterDiscord,
+      raw_text:text
+    };
   }
 
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
