@@ -114,7 +114,28 @@ window.VSRF_VP=(function(){
     return {ok:false,error:"timeout"};
   }
 
+  function filterMembers(members,mapping){
+    const excludeIds=new Set(mapping.filter(m=>m.kind==="exclude").map(m=>m.role_id));
+    const includeIds=new Set(mapping.filter(m=>m.kind==="include").map(m=>m.role_id));
+    const useInclude=includeIds.size>0;
+    const out=[];
+    for(const m of members){
+      const ids=m.role_ids||[];
+      let excluded=false;
+      for(const id of ids){if(excludeIds.has(id)){excluded=true;break}}
+      if(excluded) continue;
+      if(useInclude){
+        let ok=false;
+        for(const id of ids){if(includeIds.has(id)){ok=true;break}}
+        if(!ok) continue;
+      }
+      out.push(m);
+    }
+    return out;
+  }
+
   function groupByDept(members,mapping){
+    const filtered=filterMembers(members,mapping);
     const deptRoleIds=new Set(mapping.filter(m=>m.kind==="department").map(m=>m.role_id));
     const roleLabels={};
     for(const m of mapping){if(m.label) roleLabels[m.role_id]=m.label}
@@ -123,7 +144,7 @@ window.VSRF_VP=(function(){
       if(!groups.has(name)) groups.set(name,[]);
       return groups.get(name);
     }
-    for(const mem of members){
+    for(const mem of filtered){
       let deptName=null;
       const ids=mem.role_ids||[];
       for(const id of ids){
@@ -150,5 +171,5 @@ window.VSRF_VP=(function(){
     return member.parsed_static||"—";
   }
 
-  return {fetchMembers,fetchRoles,fetchMapping,saveMapping,removeMapping,fetchChecks,saveCheck,resetCheck,resetChecksBulk,requestSync,pollSyncStatus,groupByDept,positionFor};
+  return {fetchMembers,fetchRoles,fetchMapping,saveMapping,removeMapping,fetchChecks,saveCheck,resetCheck,resetChecksBulk,requestSync,pollSyncStatus,groupByDept,positionFor,filterMembers};
 })();

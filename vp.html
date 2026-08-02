@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=64">
+<link rel="stylesheet" href="style.css?v=65">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -126,7 +126,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   <div class="modal modal-xxl">
     <button class="modal-close" aria-label="Закрыть">✕</button>
     <h3>Настройки проверок ВП</h3>
-    <div class="modal-sub">Пометьте роли Discord: какие считать <b>отделами</b> (сгруппируют людей в таблицы), какие — <b>должностями</b> (появятся в колонке Должность), а какие проигнорировать.</div>
+    <div class="modal-sub">Пометьте роли Discord: какие считать <b>отделами</b> (создают таблицы), <b>должностями</b> (колонка Должность), <b>показывать</b> (включить в таблицу) или <b>скрывать</b> (например «Уволен», «ЧС», «Гражданин»).</div>
 
     <div class="vp-settings-toolbar">
       <input type="search" class="vp-search" id="vpMapSearch" placeholder="Поиск по названию роли..." style="max-width:340px">
@@ -137,7 +137,11 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
     <div class="vp-map-legend">
       <span class="vp-map-chip vp-map-chip-dept">Отдел</span>
       <span class="vp-map-chip vp-map-chip-pos">Должность</span>
+      <span class="vp-map-chip vp-map-chip-inc">Показывать</span>
+      <span class="vp-map-chip vp-map-chip-exc">Скрывать</span>
       <span class="vp-map-chip vp-map-chip-ign">Игнор</span>
+      <div style="flex:1"></div>
+      <span class="vp-map-hint" id="vpMapHint"></span>
     </div>
 
     <div class="vp-map-list" id="vpMapList">
@@ -212,18 +216,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=64"></script>
-<script src="config.js?v=64"></script>
-<script src="auth.js?v=64"></script>
-<script src="roles-engine.js?v=64"></script>
-<script src="vp-engine.js?v=64"></script>
-<script src="main.js?v=64"></script>
-<script src="holiday-engine.js?v=64"></script>
-<script src="sound-engine.js?v=64"></script>
-<script src="settings-panel.js?v=64"></script>
-<script src="faq-engine.js?v=64"></script>
-<script src="search-engine.js?v=64"></script>
-<script src="notify-engine.js?v=64"></script>
+<script src="supabase-loader.js?v=65"></script>
+<script src="config.js?v=65"></script>
+<script src="auth.js?v=65"></script>
+<script src="roles-engine.js?v=65"></script>
+<script src="vp-engine.js?v=65"></script>
+<script src="main.js?v=65"></script>
+<script src="holiday-engine.js?v=65"></script>
+<script src="sound-engine.js?v=65"></script>
+<script src="settings-panel.js?v=65"></script>
+<script src="faq-engine.js?v=65"></script>
+<script src="search-engine.js?v=65"></script>
+<script src="notify-engine.js?v=65"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -465,16 +469,40 @@ async function loadMappingUI(){
   if(!rolesFiltered.length){box.innerHTML=`<div class="apps-empty">Список ролей пуст. Нажмите «Обновить» и убедись что бот запущен.</div>`;return}
   box.innerHTML=rolesFiltered.map(r=>{
     const m=byId[r.role_id]||{kind:"ignore",label:""};
-    return `<div class="vp-map-row" data-role-id="${r.role_id}">
+    return `<div class="vp-map-row vp-map-kind-${m.kind}" data-role-id="${r.role_id}">
       <div class="vp-map-name" title="${esc(r.name)}">${esc(r.name)}</div>
       <div class="vp-map-controls">
-        <label class="vp-map-radio"><input type="radio" name="k-${r.role_id}" value="ignore" ${m.kind==="ignore"?"checked":""}><span>Игнор</span></label>
-        <label class="vp-map-radio"><input type="radio" name="k-${r.role_id}" value="department" ${m.kind==="department"?"checked":""}><span>Отдел</span></label>
-        <label class="vp-map-radio"><input type="radio" name="k-${r.role_id}" value="position" ${m.kind==="position"?"checked":""}><span>Должность</span></label>
+        <label class="vp-map-radio vp-r-ign"><input type="radio" name="k-${r.role_id}" value="ignore" ${m.kind==="ignore"?"checked":""}><span>Игнор</span></label>
+        <label class="vp-map-radio vp-r-inc"><input type="radio" name="k-${r.role_id}" value="include" ${m.kind==="include"?"checked":""}><span>Показывать</span></label>
+        <label class="vp-map-radio vp-r-exc"><input type="radio" name="k-${r.role_id}" value="exclude" ${m.kind==="exclude"?"checked":""}><span>Скрывать</span></label>
+        <label class="vp-map-radio vp-r-dept"><input type="radio" name="k-${r.role_id}" value="department" ${m.kind==="department"?"checked":""}><span>Отдел</span></label>
+        <label class="vp-map-radio vp-r-pos"><input type="radio" name="k-${r.role_id}" value="position" ${m.kind==="position"?"checked":""}><span>Должность</span></label>
       </div>
       <input type="text" class="vp-map-label" data-role-id="${r.role_id}" placeholder="Название колонки (опц.)" value="${esc(m.label||"")}">
     </div>`;
   }).join("");
+
+  box.querySelectorAll(".vp-map-row").forEach(row=>{
+    row.querySelectorAll('input[type=radio]').forEach(r=>{
+      r.addEventListener("change",()=>{
+        row.classList.remove("vp-map-kind-ignore","vp-map-kind-include","vp-map-kind-exclude","vp-map-kind-department","vp-map-kind-position");
+        row.classList.add("vp-map-kind-"+r.value);
+        updateMapHint();
+      });
+    });
+  });
+  updateMapHint();
+}
+
+function updateMapHint(){
+  const hint=$("vpMapHint");if(!hint) return;
+  const inc=document.querySelectorAll('.vp-map-row input[value=include]:checked').length;
+  const exc=document.querySelectorAll('.vp-map-row input[value=exclude]:checked').length;
+  if(inc===0&&exc===0){hint.textContent="В таблице будут показаны все участники ДС";return}
+  const parts=[];
+  if(inc>0) parts.push("Показать только с "+inc+" отмеченными ролями");
+  if(exc>0) parts.push("Скрыть "+exc+" ролей");
+  hint.textContent=parts.join(" · ");
 }
 $("vpMapSearch").addEventListener("input",loadMappingUI);
 $("vpMapReload").addEventListener("click",loadMappingUI);
@@ -489,7 +517,7 @@ $("vpMapSave").addEventListener("click",async()=>{
     const kind=(el.querySelector('input[type=radio]:checked')||{}).value||"ignore";
     const label=(el.querySelector(".vp-map-label")||{}).value||"";
     if(kind==="ignore") toRemove.push(roleId);
-    else rows.push({role_id:roleId,kind,label:label||null,sort:100});
+    else rows.push({role_id:roleId,kind,label:(kind==="department"||kind==="position")?(label||null):null,sort:100});
   });
   const msg=$("vpMapMsg");
   msg.className="form-msg info";msg.textContent="Сохранение...";
@@ -529,5 +557,5 @@ window.addEventListener("focus",softRefresh);
 setInterval(softRefresh,30000);
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d22e33a6fe924',t:'MTc4NTY3NDI3MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d422d3912ec65',t:'MTc4NTY3NTU1Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
