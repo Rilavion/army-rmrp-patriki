@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=67">
+<link rel="stylesheet" href="style.css?v=68">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -176,6 +176,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
         <option value="department">Отделы</option>
         <option value="position">Должности</option>
       </select>
+      <button class="btn btn-ghost btn-sm" id="vpPresetHide" title="Автоматически пометить как «Скрыть»: Уволен, Гражданин, ЧС, Отпуск, Заморожен и подобные">⚡ Скрыть стандартные</button>
       <div style="flex:1"></div>
       <span class="vp-map-hint" id="vpMapHint"></span>
       <button class="btn btn-ghost btn-sm" id="vpMapReload">Обновить</button>
@@ -250,18 +251,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=67"></script>
-<script src="config.js?v=67"></script>
-<script src="auth.js?v=67"></script>
-<script src="roles-engine.js?v=67"></script>
-<script src="vp-engine.js?v=67"></script>
-<script src="main.js?v=67"></script>
-<script src="holiday-engine.js?v=67"></script>
-<script src="sound-engine.js?v=67"></script>
-<script src="settings-panel.js?v=67"></script>
-<script src="faq-engine.js?v=67"></script>
-<script src="search-engine.js?v=67"></script>
-<script src="notify-engine.js?v=67"></script>
+<script src="supabase-loader.js?v=68"></script>
+<script src="config.js?v=68"></script>
+<script src="auth.js?v=68"></script>
+<script src="roles-engine.js?v=68"></script>
+<script src="vp-engine.js?v=68"></script>
+<script src="main.js?v=68"></script>
+<script src="holiday-engine.js?v=68"></script>
+<script src="sound-engine.js?v=68"></script>
+<script src="settings-panel.js?v=68"></script>
+<script src="faq-engine.js?v=68"></script>
+<script src="search-engine.js?v=68"></script>
+<script src="notify-engine.js?v=68"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -332,6 +333,7 @@ function cellClass(val){
 function renderRow(m,index){
   const check=ALL_CHECKS[m.discord_id]||{};
   const position=VSRF_VP.positionFor(m,ALL_MAPPING);
+  const staticId=VSRF_VP.staticFor(m);
   const cells=COLS.map(c=>{
     const val=check[c.key]||null;
     const opts=c.opts;
@@ -351,6 +353,7 @@ function renderRow(m,index){
       <div class="vp-nick">${esc(m.raw_nick||"")}</div>
     </td>
     <td class="vp-td-pos">${esc(position)}</td>
+    <td class="vp-td-static">${esc(staticId)}</td>
     ${cells}
     <td class="vp-td-actions">
       <button class="vp-row-btn vp-row-yes" data-row-all="yes" data-id="${m.discord_id}" title="Отметить все ДА">✓✓</button>
@@ -394,7 +397,8 @@ function renderTable(g){
         <thead><tr>
           <th class="vp-th-idx">№</th>
           <th class="vp-th-name">ФИО</th>
-          <th>Звание / Должность</th>
+          <th>Должность</th>
+          <th>Статик</th>
           ${COLS.map(c=>`<th title="${esc(c.label)}">${esc(c.short)}</th>`).join("")}
           <th class="vp-th-actions">Быстро</th>
           <th>Проверил</th>
@@ -737,6 +741,25 @@ function updateMapHint(){
 $("vpMapSearch").addEventListener("input",loadMappingUI);
 $("vpMapFilter").addEventListener("change",loadMappingUI);
 $("vpMapReload").addEventListener("click",loadMappingUI);
+
+const HIDE_PRESETS=[/уволен/i,/граждан/i,/^чс\b/i,/\bчс\b/i,/чёрн(ый|ому)?\s*спис/i,/черн(ый|ому)?\s*спис/i,/отпуск/i,/заморож/i,/забанен/i,/бан\b/i];
+$("vpPresetHide").addEventListener("click",()=>{
+  let n=0;
+  document.querySelectorAll(".vp-map-row").forEach(row=>{
+    const nameEl=row.querySelector(".vp-map-name");
+    const nm=nameEl?nameEl.textContent.trim():"";
+    if(HIDE_PRESETS.some(re=>re.test(nm))){
+      row.dataset.show="exclude";
+      row.querySelectorAll("[data-show]").forEach(b=>b.classList.toggle("active",b.dataset.show==="exclude"));
+      n++;
+    }
+  });
+  updateMapHint();
+  const msg=$("vpMapMsg");
+  msg.className="form-msg info";
+  msg.textContent=n?"Помечено "+n+" ролей как «Скрыть». Нажмите Сохранить чтобы применить.":"Стандартные роли (Уволен/Гражданин/ЧС/Отпуск/Заморожен) не найдены в этом списке.";
+  setTimeout(()=>{msg.textContent="";msg.className="form-msg"},5000);
+});
 $("vpMapClose").addEventListener("click",()=>$("vpSettingsModal").classList.remove("active"));
 $("vpSettingsModal").querySelector(".modal-close").addEventListener("click",()=>$("vpSettingsModal").classList.remove("active"));
 $("vpSettingsModal").addEventListener("click",e=>{if(e.target===$("vpSettingsModal")) $("vpSettingsModal").classList.remove("active")});
@@ -818,6 +841,6 @@ function softRefresh(){
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible") softRefresh()});
 window.addEventListener("focus",softRefresh);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25034c0ab389dbf',t:'MTc4NTcwNjQ2MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

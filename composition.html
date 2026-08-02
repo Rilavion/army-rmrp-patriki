@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=67">
+<link rel="stylesheet" href="style.css?v=68">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -191,7 +191,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 
 <div class="toast" id="toast"></div>
 
-<script src="supabase-loader.js?v=67"></script>
+<script src="supabase-loader.js?v=68"></script>
 <script src="config.js"></script>
 <script src="main.js"></script>
 <script src="holiday-engine.js"></script>
@@ -201,7 +201,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 <script src="search-engine.js"></script>
 <script src="notify-engine.js"></script>
 <script src="auth.js"></script>
-<script src="roles-engine.js?v=67"></script>
+<script src="roles-engine.js?v=68"></script>
 <script src="select-enhance.js"></script>
 <script src="composition-engine.js"></script>
 <script>
@@ -242,6 +242,7 @@ function render(){
       <div class="hier-cmd-name">${cmd.name?esc(cmd.name):`<span style="opacity:.5">Вакансия</span>`}</div>
       <div class="hier-cmd-rank">Ген-Майор ${cmd.tag?`· ${esc(cmd.tag)}`:""}</div>
       ${cmd.code?`<div class="hier-cmd-code">📞 ${esc(cmd.code)}</div>`:""}
+      ${cmd.comm?`<div class="hier-cmd-comm">📡 ${esc(cmd.comm)}</div>`:""}
       ${editing?`<button class="hier-edit-btn" data-edit-hq="cmd_brigade">✎</button>`:""}
     </div>
   </div>`;
@@ -261,6 +262,7 @@ function render(){
             <div class="hier-officer-meta">
               <span class="hier-officer-rank">${esc(slot.badge)}</span>
               ${p.code?`<span class="hier-officer-code">${esc(p.code)}</span>`:""}
+              ${p.comm?`<span class="hier-officer-comm" title="Спец. связь">📡 ${esc(p.comm)}</span>`:""}
             </div>
           </div>
           ${editing?`<div class="hier-edit-group">
@@ -288,7 +290,10 @@ function render(){
             <div class="hier-member-name">${esc(m.name)}</div>
             ${m.role?`<div class="hier-member-role">${esc(m.role)}</div>`:""}
           </div>
-          ${m.code?`<div class="hier-member-code">${esc(m.code)}</div>`:""}
+          <div class="hier-member-ids">
+            ${m.code?`<div class="hier-member-code" title="Статик / Код">${esc(m.code)}</div>`:""}
+            ${m.comm?`<div class="hier-member-comm" title="Спец. связь">📡 ${esc(m.comm)}</div>`:""}
+          </div>
           ${editing?`<div class="hier-member-actions">
             <button class="mini-icon-btn" data-edit-member="${sub.id}::${sub.members.indexOf(m)}">✎</button>
             <button class="mini-icon-btn danger" data-del-member="${sub.id}::${sub.members.indexOf(m)}">×</button>
@@ -378,7 +383,8 @@ function openHqEdit(key,isNew){
     <div class="form-group"><label>Звание должности (бейдж)</label><input name="badge" value="${esc(slot.badge||"")}" placeholder="Полковник"></div>
     `:`<div class="form-group" style="opacity:.6;font-size:12px">Должность: <b>${esc(slot.label)}</b> (защищена от изменений)</div>`}
     <div class="form-group"><label>ФИО</label><input name="name" value="${esc(p.name||"")}" placeholder="Иван Иванов"></div>
-    <div class="form-group"><label>Код (телефон/позывной)</label><input name="code" value="${esc(p.code||"")}" placeholder="123-456"></div>
+    <div class="form-group"><label>Статик / Код</label><input name="code" value="${esc(p.code||"")}" placeholder="123-456"></div>
+    <div class="form-group"><label>Спец. связь (Discord/иное)</label><input name="comm" value="${esc(p.comm||"")}" placeholder="@username или Telegram/etc"></div>
     <div class="form-group"><label>Заметка</label><input name="tag" value="${esc(p.tag||"")}" placeholder="ком. бриг"></div>
     ${photoField(p.photo||"")}
   `;
@@ -401,7 +407,8 @@ function openMemberEdit(subId,memberIdx){
     </div>
     <div class="form-group"><label>ФИО</label><input name="name" value="${esc(m.name||"")}" required></div>
     <div class="form-group"><label>Должность / роль</label><input name="role" value="${esc(m.role||"")}" placeholder="Ком. батальона ВП"></div>
-    <div class="form-group"><label>Код (телефон/позывной)</label><input name="code" value="${esc(m.code||"")}" placeholder="123-456"></div>
+    <div class="form-group"><label>Статик / Код</label><input name="code" value="${esc(m.code||"")}" placeholder="123-456"></div>
+    <div class="form-group"><label>Спец. связь (Discord/иное)</label><input name="comm" value="${esc(m.comm||"")}" placeholder="@username"></div>
     ${photoField(m.photo||"")}
   `;
   bindPhotoField(pForm);
@@ -423,7 +430,7 @@ pForm.addEventListener("submit",async e=>{
       if(data.label) slot.label=data.label;
       if(data.badge) slot.badge=data.badge;
     }
-    STATE.hq[ctx[1]]={name:data.name,code:data.code,tag:data.tag,photo:data.photo};
+    STATE.hq[ctx[1]]={name:data.name,code:data.code,comm:data.comm,tag:data.tag,photo:data.photo};
   }else if(ctx[0]==="hqnew"){
     if(!data.label){pForm.querySelector(".form-msg").className="form-msg error";pForm.querySelector(".form-msg").textContent="Укажите название должности";return}
     const newKey="hq_"+Math.random().toString(36).slice(2,8);
@@ -432,7 +439,7 @@ pForm.addEventListener("submit",async e=>{
   }else{
     const sub=STATE.subs.find(s=>s.id===ctx[1]);if(!sub) return;
     const idx=parseInt(ctx[2]);
-    const m={rank:data.rank,name:data.name,code:data.code,role:data.role,photo:data.photo};
+    const m={rank:data.rank,name:data.name,code:data.code,comm:data.comm,role:data.role,photo:data.photo};
     if(idx>=0) sub.members[idx]=m;else sub.members.push(m);
   }
   await VSRF_COMP.save(STATE);
@@ -513,5 +520,5 @@ boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a250339c3c379dbf',t:'MTc4NTcwNjQxMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

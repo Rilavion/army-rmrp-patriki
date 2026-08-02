@@ -1,14 +1,28 @@
 window.VSRF_DOC_TEMPLATES=(function(){
   const EMBLEM="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg";
 
+  const TOGGLES=[
+    {key:"show_sig",label:"Показывать подпись №1",type:"toggle",default:"1"},
+    {key:"show_sig2",label:"Показывать подпись №2",type:"toggle",default:"0"},
+    {key:"show_seal",label:"Показывать печать",type:"toggle",default:"1"}
+  ];
+  const SIG2=[
+    {key:"sig2_role1",label:"Подпись №2 — должность строка 1",type:"text",default:""},
+    {key:"sig2_role2",label:"Подпись №2 — должность строка 2",type:"text",default:""},
+    {key:"sig2_rank",label:"Подпись №2 — звание",type:"text",default:""},
+    {key:"sig2_name",label:"Подпись №2 — ФИО с инициалами",type:"text",default:""},
+    {key:"sig2_url",label:"Подпись №2 — URL изображения (опц.)",type:"text",default:""}
+  ];
   const COMMON_SEAL={key:"seal_url",label:"URL печати (изображение)",type:"text",default:""};
-  const COMMON_SIG_IMG={key:"sig_url",label:"URL подписи (изображение)",type:"text",default:""};
+  const COMMON_SIG_IMG={key:"sig_url",label:"URL подписи №1 (изображение)",type:"text",default:""};
+
+  function withCommon(main){return [...main,...SIG2,COMMON_SEAL,COMMON_SIG_IMG,...TOGGLES]}
 
   const TEMPLATES={
     prikaz:{
       name:"Приказ",
       description:"Официальный приказ Министерства обороны",
-      fields:[
+      fields:withCommon([
         {key:"title",label:"Заголовок приказа",type:"textarea",default:"О формировании оперативной группы для проведения процессуальных действий"},
         {key:"date",label:"Дата",type:"text",default:"17 апреля 2026 г."},
         {key:"city",label:"Город",type:"text",default:"Москва"},
@@ -17,17 +31,16 @@ window.VSRF_DOC_TEMPLATES=(function(){
         {key:"members",label:"Члены оперативной группы (каждый с новой строки)",type:"textarea",default:"Военный комендант гарнизона, подполковник Монтерро Роман Васильевич, удостоверение АА №324-340\nКомандир батальона военной полиции, подполковник Распутин Руслан Сергеевич, удостоверение АА №593-876\nЗаместитель командира ВП, майор Распутин Алексей Вадимович, удостоверение АА №248-295\nЗаместитель командира ВП, капитан Баранов Кирилл Робертович, удостоверение АА №171-958\nИнструктор ВП, младший лейтенант Алмазов Максим Вячеславович, удостоверение АА №746-078"},
         {key:"time_from",label:"Время начала действия",type:"text",default:"16 часов 45 минут по московскому времени 17 апреля 2026 года"},
         {key:"time_to",label:"Время окончания действия",type:"text",default:"01 час 00 минут по московскому времени 20 апреля 2026 года"},
-        {key:"sig_role1",label:"Подпись — должность строка 1",type:"text",default:"Военный комендант"},
-        {key:"sig_role2",label:"Подпись — должность строка 2",type:"text",default:"гарнизона"},
-        {key:"sig_rank",label:"Подпись — звание",type:"text",default:"Подполковник"},
-        {key:"sig_name",label:"Подпись — ФИО с инициалами",type:"text",default:"Монтерро Р.В."},
-        COMMON_SEAL,COMMON_SIG_IMG
-      ]
+        {key:"sig_role1",label:"Подпись №1 — должность строка 1",type:"text",default:"Военный комендант"},
+        {key:"sig_role2",label:"Подпись №1 — должность строка 2",type:"text",default:"гарнизона"},
+        {key:"sig_rank",label:"Подпись №1 — звание",type:"text",default:"Подполковник"},
+        {key:"sig_name",label:"Подпись №1 — ФИО с инициалами",type:"text",default:"Монтерро Р.В."}
+      ])
     },
     letter:{
       name:"Официальное письмо / ответ",
       description:"Служебное письмо (например, ответ прокурору)",
-      fields:[
+      fields:withCommon([
         {key:"unit_name",label:"Название части (левый блок)",type:"text",default:"Войсковая часть 12132"},
         {key:"unit_city",label:"Город",type:"text",default:"г. Москва, Россия"},
         {key:"date",label:"Дата",type:"text",default:"17.04.2026"},
@@ -40,16 +53,15 @@ window.VSRF_DOC_TEMPLATES=(function(){
         {key:"body_1",label:"Абзац 1",type:"textarea",default:"Настоящим сообщаю, что постановление «О запросе необходимых сведений» №1408 от 17.04.2026 г. было получено и надлежащим образом рассмотрено в установленный законом срок."},
         {key:"body_2",label:"Абзац 2",type:"textarea",default:"Все необходимые данные и выписки из служебных документов были подготовлены и направлены на указанный электронный адрес прокуратуры в полном объёме."},
         {key:"body_3_bold",label:"Абзац 3 (жирный)",type:"textarea",default:"Довожу до Вашего сведения плачевную обстановку с большим количеством криминальных элементов в чёрном одеянии в подведомственной зоне ответственности. Весь состав Вооружённых Сил РФ с 21:00 до глубокой ночи находился в прямом руководстве лично подписанта. Обращаю внимание на человеческий фактор и невнимательность, обусловленные усталостью личного состава."},
-        {key:"sig_role1",label:"Подпись — должность",type:"text",default:"Командир Бригады"},
-        {key:"sig_rank",label:"Подпись — звание",type:"text",default:"Генерал-лейтенант"},
-        {key:"sig_name",label:"Подпись — ФИО",type:"text",default:"В.В. Прайд"},
-        COMMON_SEAL,COMMON_SIG_IMG
-      ]
+        {key:"sig_role1",label:"Подпись №1 — должность",type:"text",default:"Командир Бригады"},
+        {key:"sig_rank",label:"Подпись №1 — звание",type:"text",default:"Генерал-лейтенант"},
+        {key:"sig_name",label:"Подпись №1 — ФИО",type:"text",default:"В.В. Прайд"}
+      ])
     },
     prikaz_kadr:{
       name:"Приказ (кадровый)",
       description:"Приказ о кадровых перестановках, назначениях, присвоении званий",
-      fields:[
+      fields:withCommon([
         {key:"ministry_line1",label:"Шапка — строка 1",type:"text",default:"МИНИСТЕРСТВО ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ"},
         {key:"ministry_line2",label:"Шапка — строка 2",type:"text",default:"ПЕРВАЯ ПАТРИАРШАЯ МОТОСТРЕЛКОВАЯ БРИГАДА"},
         {key:"ministry_line3",label:"Шапка — строка 3",type:"text",default:"ВОИНСКАЯ ЧАСТЬ №12132"},
@@ -58,45 +70,43 @@ window.VSRF_DOC_TEMPLATES=(function(){
         {key:"city",label:"Город",type:"text",default:"г. Москва"},
         {key:"number",label:"Номер приказа",type:"text",default:"№227"},
         {key:"preamble",label:"Преамбула",type:"textarea",default:"В соответствии с частью «1» статьи «10» Федерального закона «Об Обороне» №52-ФЗ, ПРИКАЗЫВАЮ:"},
-        {key:"items",label:"Пункты приказа (каждый с новой строки, нумерация автоматическая)",type:"textarea",default:"Назначить на должность Заместителя Начальника отдела Кадров военного комиссариата Льва Волкова с личным номером 790-004.\nВ связи с назначением на должность присвоить Льву Волкову воинское звание Капитан.\nНазначить на должность Заместителя Начальника отдела Кадров военного комиссариата Романа Крэй с личным номером 739-996.\nВ связи с назначением на должность присвоить Роману Крэй воинское звание Капитан.\nУстановить испытательный срок продолжительностью 21 календарный день с целью проверки профпригодности.\nНастоящий Приказ вступает в законную силу с момента его подписания и опубликования."},
-        {key:"sig_role1",label:"Подпись — должность строка 1",type:"text",default:"Командир Бригады"},
-        {key:"sig_role2",label:"Подпись — должность строка 2",type:"text",default:""},
-        {key:"sig_rank",label:"Подпись — звание",type:"text",default:"Генерал-лейтенант"},
-        {key:"sig_name",label:"Подпись — ФИО с инициалами",type:"text",default:"В.В. Прайд"},
-        COMMON_SEAL,COMMON_SIG_IMG
-      ]
+        {key:"items",label:"Пункты приказа (каждый с новой строки, нумерация автоматическая)",type:"textarea",default:"Назначить на должность Заместителя Начальника отдела Кадров военного комиссариата Льва Волкова с личным номером 790-004.\nВ связи с назначением на должность присвоить Льву Волкову воинское звание Капитан.\nНастоящий Приказ вступает в законную силу с момента его подписания и опубликования."},
+        {key:"sig_role1",label:"Подпись №1 — должность строка 1",type:"text",default:"Командир Бригады"},
+        {key:"sig_role2",label:"Подпись №1 — должность строка 2",type:"text",default:""},
+        {key:"sig_rank",label:"Подпись №1 — звание",type:"text",default:"Генерал-лейтенант"},
+        {key:"sig_name",label:"Подпись №1 — ФИО с инициалами",type:"text",default:"В.В. Прайд"}
+      ])
     },
     ukaz:{
       name:"Указ",
       description:"Указ / распоряжение",
-      fields:[
+      fields:withCommon([
         {key:"title",label:"Наименование указа",type:"textarea",default:"О назначении на должность"},
         {key:"date",label:"Дата",type:"text",default:"17 апреля 2026 г."},
         {key:"city",label:"Город",type:"text",default:"Москва"},
         {key:"number",label:"Номер",type:"text",default:"№45"},
         {key:"body",label:"Основной текст",type:"textarea",default:"На основании представления командования и результатов аттестации, —\n\nПОСТАНОВЛЯЮ:\n\n1. Назначить на должность заместителя командира батальона военной полиции войсковой части 12132 капитана Иванова Ивана Ивановича, удостоверение АА №000-000.\n\n2. Настоящий Указ вступает в силу с момента подписания.\n\n3. Контроль за исполнением настоящего Указа возложить на начальника штаба."},
-        {key:"sig_role1",label:"Подпись — должность",type:"text",default:"Командир Бригады"},
-        {key:"sig_rank",label:"Подпись — звание",type:"text",default:"Генерал-лейтенант"},
-        {key:"sig_name",label:"Подпись — ФИО",type:"text",default:"В.В. Прайд"},
-        COMMON_SEAL,COMMON_SIG_IMG
-      ]
+        {key:"sig_role1",label:"Подпись №1 — должность",type:"text",default:"Командир Бригады"},
+        {key:"sig_rank",label:"Подпись №1 — звание",type:"text",default:"Генерал-лейтенант"},
+        {key:"sig_name",label:"Подпись №1 — ФИО",type:"text",default:"В.В. Прайд"}
+      ])
     }
   };
 
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   function nl2br(s){return esc(s).replace(/\n/g,"<br>")}
   function paragraphs(s){return String(s||"").split(/\n{2,}/).map(p=>p.trim()).filter(Boolean).map(p=>`<p class="doc-p">${esc(p).replace(/\n/g,"<br>")}</p>`).join("")}
+  function truthy(v){const s=String(v==null?"":v).toLowerCase().trim();return s==="1"||s==="true"||s==="on"||s==="yes"||s==="да"}
 
-  function sealBlock(sealUrl){
+  function sealBlock(sealUrl,show){
+    if(!show) return `<div class="doc-seal doc-seal-hidden"></div>`;
     if(sealUrl&&sealUrl.trim()){
       return `<div class="doc-seal"><img src="${esc(sealUrl.trim())}" alt="Печать" crossorigin="anonymous"></div>`;
     }
-    return `<div class="doc-seal doc-seal-empty" title="Печать не загружена">
-      <div class="doc-seal-empty-inner">Печать<br>не загружена</div>
-    </div>`;
+    return `<div class="doc-seal doc-seal-empty" title="Печать не загружена"><div class="doc-seal-empty-inner">Печать<br>не загружена</div></div>`;
   }
 
-  function signature(name,sigUrl){
+  function signatureImg(name,sigUrl){
     if(sigUrl&&sigUrl.trim()){
       return `<div class="doc-signature doc-signature-img"><img src="${esc(sigUrl.trim())}" alt="Подпись" crossorigin="anonymous"></div>`;
     }
@@ -111,6 +121,40 @@ window.VSRF_DOC_TEMPLATES=(function(){
       <path d="${paths[seed]}" stroke="#12327b" stroke-width="1.8" fill="none" stroke-linecap="round"/>
       <path d="M 40,44 L 130,44" stroke="#12327b" stroke-width="1.1" fill="none" opacity=".7"/>
     </svg></div>`;
+  }
+
+  function signColumn(role1,role2,rank,name,sigUrl,showSig){
+    if(!name&&!role1&&!rank) return "";
+    const rows=[];
+    if(role1) rows.push(`<div>${esc(role1)}</div>`);
+    if(role2) rows.push(`<div>${esc(role2)}</div>`);
+    if(rank) rows.push(`<div>${esc(rank)}</div>`);
+    return `<div class="doc-sign-col">
+      <div class="doc-sign-col-left">${rows.join("")}</div>
+      <div class="doc-sign-col-center">${showSig?signatureImg(name,sigUrl):`<div class="doc-signature doc-signature-hidden"></div>`}</div>
+      <div class="doc-sign-col-right">${esc(name||"")}</div>
+    </div>`;
+  }
+
+  function renderSignBlock(v){
+    const showSig=truthy(v.show_sig==null?"1":v.show_sig);
+    const showSig2=truthy(v.show_sig2==null?"0":v.show_sig2);
+    const showSeal=truthy(v.show_seal==null?"1":v.show_seal);
+    const has2=showSig2&&(v.sig2_name||v.sig2_role1||v.sig2_rank);
+    const col1=signColumn(v.sig_role1,v.sig_role2,v.sig_rank,v.sig_name,v.sig_url,showSig);
+    const col2=has2?signColumn(v.sig2_role1,v.sig2_role2,v.sig2_rank,v.sig2_name,v.sig2_url,showSig2):"";
+    const seal=sealBlock(v.seal_url,showSeal);
+    if(has2){
+      return `<div class="doc-sign-block doc-sign-block-2">
+        ${col1}
+        <div class="doc-sign-seal-mid">${seal}</div>
+        ${col2}
+      </div>`;
+    }
+    return `<div class="doc-sign-block">
+      ${col1}
+      <div class="doc-sign-seal-side">${seal}</div>
+    </div>`;
   }
 
   function paginate(items,firstPageMax,otherPageMax){
@@ -161,15 +205,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
         <div class="doc-p"><b>2.</b> Установить время действия сформированной оперативной группы: с ${esc(v.time_from)} до ${esc(v.time_to)}.</div>
         <div class="doc-p"><b>3.</b> Контроль за исполнением настоящего Приказа оставляю за собой.</div>
         <div class="doc-p"><b>4.</b> Настоящий Приказ вступает в законную силу с момента его официального опубликования.</div>
-        <div class="doc-sign-block">
-          <div class="doc-sign-left">
-            <div>${esc(v.sig_role1)}</div>
-            <div>${esc(v.sig_role2)}</div>
-            <div>${esc(v.sig_rank)}</div>
-          </div>
-          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name,v.sig_url)}</div>
-          <div class="doc-sign-right">${esc(v.sig_name)}</div>
-        </div>
+        ${renderSignBlock(v)}
       </div>
     </div>`);
     return pages.join("");
@@ -203,14 +239,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
         <div class="doc-p">${nl2br(v.body_1)}</div>
         <div class="doc-p">${nl2br(v.body_2)}</div>
         <div class="doc-p"><b>${nl2br(v.body_3_bold)}</b></div>
-        <div class="doc-sign-block">
-          <div class="doc-sign-left">
-            <div>${esc(v.sig_role1)}</div>
-            <div>${esc(v.sig_rank)}</div>
-          </div>
-          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name,v.sig_url)}</div>
-          <div class="doc-sign-right">${esc(v.sig_name)}</div>
-        </div>
+        ${renderSignBlock(v)}
       </div>
     </div>`;
   }
@@ -230,14 +259,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
           <span>${esc(v.date)}</span><span>${esc(v.city)}</span><span>${esc(v.number)}</span>
         </div>
         <div>${paragraphs(v.body)}</div>
-        <div class="doc-sign-block">
-          <div class="doc-sign-left">
-            <div>${esc(v.sig_role1)}</div>
-            <div>${esc(v.sig_rank)}</div>
-          </div>
-          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name,v.sig_url)}</div>
-          <div class="doc-sign-right">${esc(v.sig_name)}</div>
-        </div>
+        ${renderSignBlock(v)}
       </div>
     </div>`;
   }
@@ -257,15 +279,7 @@ window.VSRF_DOC_TEMPLATES=(function(){
         </div>
         <div class="doc-p doc-preamble">${nl2br(v.preamble)}</div>
         ${items}
-        <div class="doc-sign-block">
-          <div class="doc-sign-left">
-            <div>${esc(v.sig_role1)}</div>
-            ${v.sig_role2?`<div>${esc(v.sig_role2)}</div>`:""}
-            <div>${esc(v.sig_rank)}</div>
-          </div>
-          <div class="doc-sign-center">${sealBlock(v.seal_url)}${signature(v.sig_name,v.sig_url)}</div>
-          <div class="doc-sign-right">${esc(v.sig_name)}</div>
-        </div>
+        ${renderSignBlock(v)}
       </div>
     </div>`;
   }

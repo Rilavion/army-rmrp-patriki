@@ -170,8 +170,12 @@ window.VSRF_VP=(function(){
     for(let i=0;i<ids.length;i++){
       if(posRoleIds.has(ids[i])) return labels[ids[i]]||names[i]||ids[i];
     }
-    return member.parsed_static||"—";
+    return "—";
   }
 
-  return {fetchMembers,fetchRoles,fetchMapping,saveMappingBatch,fetchChecks,saveCheck,resetCheck,resetChecksBulk,requestSync,pollSyncStatus,fetchBotStatus,filterMembers,groupByDept,positionFor};
+  function staticFor(member){
+    return (member.parsed_static||"").trim()||"—";
+  }
+
+  return {fetchMembers,fetchRoles,fetchMapping,saveMappingBatch,fetchChecks,saveCheck,resetCheck,resetChecksBulk,requestSync,pollSyncStatus,fetchBotStatus,filterMembers,groupByDept,positionFor,staticFor};
 })();
