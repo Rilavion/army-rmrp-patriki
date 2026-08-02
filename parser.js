@@ -7,7 +7,30 @@ function stripFormatting(s){
     .replace(/~~(.+?)~~/g,"$1")
     .replace(/`([^`]+)`/g,"$1")
     .replace(/\*(.+?)\*/g,"$1")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,"$2")
     .trim();
+}
+
+function isDateLine(s){
+  const t=String(s||"").trim();
+  return /^вчера,?\s*в?\s*\d/i.test(t) || /^сегодня,?\s*в?\s*\d/i.test(t) || /^\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}(\s+\d{1,2}:\d{2})?$/i.test(t);
+}
+
+function extractBoldKey(line){
+  let m=line.match(/^\s*\*\*(.+?):?\*\*\s*:?\s*$/);
+  if(m) return { key: stripFormatting(m[1]).replace(/[:?]\s*$/,"").trim(), val: "" };
+  m=line.match(/^\s*\*\*(.+?):?\*\*\s*:?\s*(.+)$/);
+  if(m) return { key: stripFormatting(m[1]).replace(/[:?]\s*$/,"").trim(), val: m[2] };
+  return null;
+}
+
+function extractPlainKey(line){
+  const t=String(line||"").trim();
+  if(!t || t.length > 200) return null;
+  if(/^https?:/i.test(t)) return null;
+  if(!/[:?]\s*$/.test(t)) return null;
+  if(!/[a-zа-яё]/i.test(t)) return null;
+  return { key: stripFormatting(t).replace(/[:?]\s*$/,"").trim(), val: "" };
 }
 
 function parseDiscordMessage(text){
@@ -17,36 +40,52 @@ function parseDiscordMessage(text){
   const order=[];
   let currentKey=null;
   let buffer=[];
-  const keyRe=/^\s*\*\*(.+?):?\*\*\s*:?\s*$/;
-  const inlineRe=/^\s*\*\*(.+?):?\*\*\s*:?\s*(.+)$/;
+  let expectValue=false;
 
   function commit(){
     if(currentKey){
       const val=stripFormatting(buffer.join("\n")).trim();
-      if(!/^вчера|^сегодня|^\d{1,2}[.:/]\d{1,2}/i.test(currentKey.trim())){
+      if(!isDateLine(currentKey) && val){
         fields[currentKey]=val;
         order.push(currentKey);
       }
       buffer=[];
     }
+    currentKey=null;
+    expectValue=false;
   }
+
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
-    if(/^`{3,}/.test(line.trim())) continue;
-    if(!line.trim()) continue;
-    let m=line.match(keyRe);
-    if(m){
+    const trimmed=line.trim();
+    if(/^`{3,}/.test(trimmed)) continue;
+    if(!trimmed) continue;
+    if(isDateLine(trimmed)) { commit(); continue; }
+
+    const bold=extractBoldKey(line);
+    if(bold){
       commit();
-      currentKey=stripFormatting(m[1]).replace(/:\s*$/,"").trim();
+      currentKey=bold.key;
+      if(bold.val) { buffer.push(bold.val); expectValue=false; }
+      else expectValue=true;
       continue;
     }
-    m=line.match(inlineRe);
-    if(m){
-      commit();
-      currentKey=stripFormatting(m[1]).replace(/:\s*$/,"").trim();
-      buffer.push(m[2]);
+
+    if(expectValue){
+      buffer.push(line);
+      expectValue=false;
       continue;
     }
+
+    const plain=extractPlainKey(line);
+    if(plain){
+      commit();
+      currentKey=plain.key;
+      if(plain.val) { buffer.push(plain.val); expectValue=false; }
+      else expectValue=true;
+      continue;
+    }
+
     if(currentKey) buffer.push(line);
   }
   commit();
@@ -54,6 +93,9 @@ function parseDiscordMessage(text){
   let appType=null;
   for(const key of Object.keys(fields)){
     if(/выберите\s*тип|^\s*тип\s*$/i.test(key)){appType=fields[key];delete fields[key]}
+  }
+  if(!appType && fields["Ключ"]){
+    delete fields["Ключ"];
   }
   let submitterName="",submitterDiscord="";
   for(const key of Object.keys(fields)){

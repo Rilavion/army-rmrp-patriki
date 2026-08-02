@@ -62,12 +62,13 @@ async function saveApplication(msg){
     log("SKIP: пустое сообщение", msg.id);
     return null;
   }
-  if(!/\*\*[^*]+\*\*/.test(text)){
-    log("SKIP: не похоже на заявление (нет полей **ключ:**)", msg.id);
-    return null;
-  }
 
   const parsed = parseDiscordMessage(text);
+  const fieldCount = Object.keys(parsed.fields || {}).length;
+  if(fieldCount < 2){
+    log("SKIP: не похоже на заявление (распознано полей:", fieldCount, ")", msg.id);
+    return null;
+  }
 
   const authorTag = msg.author ? (msg.author.tag || msg.author.username || "") : "";
   const authorAvatar = msg.author && msg.author.displayAvatarURL ? msg.author.displayAvatarURL({ size: 128, extension: "png" }) : null;
