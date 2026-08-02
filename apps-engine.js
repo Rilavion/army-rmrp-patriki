@@ -12,7 +12,7 @@ window.VSRF_APPS=(function(){
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(!s||!s.client) return [];
     try{
-      let q=s.client.from("applications").select("*").order("created_at",{ascending:false}).limit(limit||100);
+      let q=s.client.from("applications").select("*").order("created_at",{ascending:true}).limit(limit||100);
       if(status&&status!=="all") q=q.eq("status",status);
       const {data,error}=await q;
       if(error){console.warn("[VSRF_APPS]",error.message);return []}

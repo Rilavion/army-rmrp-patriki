@@ -45,9 +45,12 @@ function pickText(msg){
   if(msg.content && msg.content.trim()) parts.push(msg.content);
   if(msg.embeds && msg.embeds.length){
     for(const e of msg.embeds){
+      const hasFields = Array.isArray(e.fields) && e.fields.length > 0;
+      const isLinkPreview = e.url && !hasFields;
+      if(isLinkPreview) continue;
       if(e.title) parts.push("**"+e.title+"**");
       if(e.description) parts.push(e.description);
-      if(Array.isArray(e.fields)){
+      if(hasFields){
         for(const f of e.fields){
           parts.push("**"+f.name+":**");
           parts.push(f.value);

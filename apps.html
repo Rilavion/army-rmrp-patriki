@@ -231,18 +231,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=58"></script>
-<script src="config.js?v=58"></script>
-<script src="auth.js?v=58"></script>
-<script src="roles-engine.js?v=58"></script>
-<script src="apps-engine.js?v=58"></script>
-<script src="main.js?v=58"></script>
-<script src="holiday-engine.js?v=58"></script>
-<script src="sound-engine.js?v=58"></script>
-<script src="settings-panel.js?v=58"></script>
-<script src="faq-engine.js?v=58"></script>
-<script src="search-engine.js?v=58"></script>
-<script src="notify-engine.js?v=58"></script>
+<script src="supabase-loader.js?v=61"></script>
+<script src="config.js?v=61"></script>
+<script src="auth.js?v=61"></script>
+<script src="roles-engine.js?v=61"></script>
+<script src="apps-engine.js?v=61"></script>
+<script src="main.js?v=61"></script>
+<script src="holiday-engine.js?v=61"></script>
+<script src="sound-engine.js?v=61"></script>
+<script src="settings-panel.js?v=61"></script>
+<script src="faq-engine.js?v=61"></script>
+<script src="search-engine.js?v=61"></script>
+<script src="notify-engine.js?v=61"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -250,11 +250,17 @@ const esc=s=>VSRF_APPS.esc(s);
 
 let currentStatus="new";
 let CURRENT_ROW=null;
+let LAST_RENDER_HASH="";
+let LAST_ROWS=[];
+let RENDER_LOCK=false;
+let OPEN_IDS=new Set();
 
 function switchTab(status){
+  if(currentStatus===status) return;
   currentStatus=status;
+  LAST_RENDER_HASH="";
   document.querySelectorAll(".apps-tab").forEach(t=>t.classList.toggle("active",t.dataset.status===status));
-  renderList();
+  renderList(true);
 }
 document.querySelectorAll(".apps-tab").forEach(t=>t.addEventListener("click",()=>switchTab(t.dataset.status)));
 
@@ -266,46 +272,67 @@ async function refreshCounts(){
   $("cntArchived").textContent=c.archived;
 }
 
-async function renderList(){
-  const box=$("appsList");
-  box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
-  const rows=await VSRF_APPS.fetchByStatus(currentStatus,200);
-  refreshCounts();
-  if(!rows.length){
-    box.innerHTML=`<div class="apps-empty">
-      <div class="apps-empty-icon">${currentStatus==="new"?"✦":currentStatus==="approved"?"✓":currentStatus==="rejected"?"✕":"▣"}</div>
-      <h3>Пусто</h3>
-      <p>${currentStatus==="new"?"Новых заявлений нет":currentStatus==="archived"?"Архив пуст":"Записей в этой категории нет"}</p>
-    </div>`;
-    return;
+function rowsHash(rows,status){
+  let h=status+":"+rows.length+":";
+  for(const r of rows) h+=r.id+"|"+(r.updated_at||r.created_at||"")+"|"+r.status+";";
+  return h;
+}
+
+async function renderList(force){
+  if(RENDER_LOCK) return;
+  RENDER_LOCK=true;
+  try{
+    const box=$("appsList");
+    const isEmpty=!box.querySelector(".apps-card");
+    if(force||isEmpty) box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
+    const rows=await VSRF_APPS.fetchByStatus(currentStatus,200);
+    refreshCounts();
+    LAST_ROWS=rows;
+    const hash=rowsHash(rows,currentStatus);
+    if(!force&&hash===LAST_RENDER_HASH){
+      return;
+    }
+    LAST_RENDER_HASH=hash;
+    if(!rows.length){
+      box.innerHTML=`<div class="apps-empty">
+        <div class="apps-empty-icon">${currentStatus==="new"?"✦":currentStatus==="approved"?"✓":currentStatus==="rejected"?"✕":"▣"}</div>
+        <h3>Пусто</h3>
+        <p>${currentStatus==="new"?"Новых заявлений нет":currentStatus==="archived"?"Архив пуст":"Записей в этой категории нет"}</p>
+      </div>`;
+      return;
+    }
+    box.innerHTML=rows.map((r,i)=>renderCard(r,i)).join("");
+    box.querySelectorAll(".apps-card").forEach(el=>{
+      const cardId=el.dataset.id;
+      if(OPEN_IDS.has(cardId)) el.classList.add("open");
+      el.querySelectorAll("[data-act]").forEach(btn=>{
+        btn.addEventListener("click",e=>{
+          e.stopPropagation();
+          const id=btn.closest(".apps-card").dataset.id;
+          const row=rows.find(x=>x.id===id);
+          handleAction(row,btn.dataset.act);
+        });
+      });
+      el.querySelector(".apps-card-head").addEventListener("click",()=>{
+        el.classList.toggle("open");
+        if(el.classList.contains("open")) OPEN_IDS.add(cardId);
+        else OPEN_IDS.delete(cardId);
+      });
+      el.querySelectorAll("[data-toggle-frame]").forEach(btn=>{
+        btn.addEventListener("click",e=>{
+          e.stopPropagation();
+          const uid=btn.dataset.toggleFrame;
+          const f=document.getElementById("frame-"+uid);
+          if(!f) return;
+          const shown=!f.hasAttribute("hidden");
+          if(shown){f.setAttribute("hidden","");btn.querySelector("[data-toggle-label]").textContent="Развернуть превью"}
+          else{f.removeAttribute("hidden");btn.querySelector("[data-toggle-label]").textContent="Свернуть превью"}
+        });
+      });
+    });
+  } finally {
+    RENDER_LOCK=false;
   }
-  box.innerHTML=rows.map((r,i)=>renderCard(r,i)).join("");
-  box.querySelectorAll(".apps-card").forEach(el=>{
-    el.querySelectorAll("[data-act]").forEach(btn=>{
-      btn.addEventListener("click",e=>{
-        e.stopPropagation();
-        const id=btn.closest(".apps-card").dataset.id;
-        const row=rows.find(x=>x.id===id);
-        handleAction(row,btn.dataset.act);
-      });
-    });
-    // Раскрытие карточки
-    el.querySelector(".apps-card-head").addEventListener("click",()=>{
-      el.classList.toggle("open");
-    });
-    // Toggle iframe-превью
-    el.querySelectorAll("[data-toggle-frame]").forEach(btn=>{
-      btn.addEventListener("click",e=>{
-        e.stopPropagation();
-        const uid=btn.dataset.toggleFrame;
-        const f=document.getElementById("frame-"+uid);
-        if(!f) return;
-        const shown=!f.hasAttribute("hidden");
-        if(shown){f.setAttribute("hidden","");btn.querySelector("[data-toggle-label]").textContent="Развернуть превью"}
-        else{f.removeAttribute("hidden");btn.querySelector("[data-toggle-label]").textContent="Свернуть превью"}
-      });
-    });
-  });
 }
 
 function extractUrls(text){
@@ -374,7 +401,7 @@ function renderCard(r,i){
     ${status!=="new"?`<button class="apps-btn apps-btn-back" data-act="restore" title="Вернуть в новые">↺ Вернуть</button>`:""}
   `);
   const link=r.message_link?`<a class="apps-card-link" href="${esc(r.message_link)}" target="_blank" rel="noopener" title="Открыть в Discord">↗</a>`:"";
-  return `<article class="apps-card ${status==="new"?"open":""}" data-id="${r.id}">
+  return `<article class="apps-card" data-id="${r.id}">
     <div class="apps-card-head">
       <div class="apps-card-idx">#${String(i+1).padStart(3,"0")}</div>
       <div class="apps-card-main">
@@ -407,7 +434,7 @@ async function handleAction(row,act){
     if(!confirm("Одобрить заявление от «"+(row.submitter_name||"без имени")+"»?")) return;
     const r=await VSRF_APPS.updateStatus(row.id,"approved");
     if(!r.ok){alert("Ошибка: "+r.error);return}
-    renderList();
+    LAST_RENDER_HASH="";renderList(true);
   }
   else if(act==="reject"){
     CURRENT_ROW=row;
@@ -419,13 +446,13 @@ async function handleAction(row,act){
     if(!confirm("Переместить в архив?")) return;
     const r=await VSRF_APPS.updateStatus(row.id,"archived");
     if(!r.ok){alert("Ошибка: "+r.error);return}
-    renderList();
+    LAST_RENDER_HASH="";renderList(true);
   }
   else if(act==="restore"){
     if(!confirm("Вернуть заявление в статус «Новое»?")) return;
     const r=await VSRF_APPS.updateStatus(row.id,"new");
     if(!r.ok){alert("Ошибка: "+r.error);return}
-    renderList();
+    LAST_RENDER_HASH="";renderList(true);
   }
 }
 
@@ -441,7 +468,7 @@ $("rejectConfirm").addEventListener("click",async()=>{
   const r=await VSRF_APPS.updateStatus(CURRENT_ROW.id,"rejected",reason);
   if(!r.ok){$("rejectMsg").className="form-msg error";$("rejectMsg").textContent=r.error;return}
   $("rejectModal").classList.remove("active");
-  renderList();
+  LAST_RENDER_HASH="";renderList(true);
 });
 
 // ===== Manual add (для теста без бота) =====
@@ -500,21 +527,41 @@ $("manualCreate").addEventListener("click",async()=>{
   switchTab("new");
 });
 
-$("appsRefresh").addEventListener("click",renderList);
+$("appsRefresh").addEventListener("click",()=>{LAST_RENDER_HASH="";renderList(true)});
 
-// ===== Гвард доступа =====
+let LAST_GUARD_STATE=null;
 function applyGuard(){
-  const isStaff=window.VSRF_ROLES&&window.VSRF_ROLES.isStaff();
+  const isStaff=!!(window.VSRF_ROLES&&window.VSRF_ROLES.isStaff());
+  const uid=(window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user&&window.VSRF_AUTH.state.user.id)||null;
+  const key=isStaff+":"+uid;
   $("appsBody").style.display=isStaff?"":"none";
   $("appsGuard").style.display=isStaff?"none":"";
-  if(isStaff) renderList();
+  if(!isStaff){LAST_GUARD_STATE=key;return}
+  if(LAST_GUARD_STATE===key) return;
+  LAST_GUARD_STATE=key;
+  renderList(true);
 }
 if(window.VSRF_ROLES){
   VSRF_ROLES.onChange(()=>applyGuard());
 }
 setTimeout(applyGuard,600);
 setTimeout(applyGuard,1500);
+
+let SOFT_REFRESH_TIMER=null;
+function softRefresh(){
+  if(SOFT_REFRESH_TIMER) clearTimeout(SOFT_REFRESH_TIMER);
+  SOFT_REFRESH_TIMER=setTimeout(()=>{
+    if(document.visibilityState==="visible"&&window.VSRF_ROLES&&window.VSRF_ROLES.isStaff()){
+      renderList(false);
+    }
+  },400);
+}
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible") softRefresh();
+});
+window.addEventListener("focus",softRefresh);
+setInterval(softRefresh,30000);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24bb2586c15e960',t:'MTc4NTY1OTE3NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24c5aa28d439d45',t:'MTc4NTY2NjA2OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
