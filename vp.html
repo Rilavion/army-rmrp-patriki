@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=65">
+<link rel="stylesheet" href="style.css?v=66">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -99,19 +99,43 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   <section class="apps-body" id="vpBody" style="display:none">
     <div class="container">
 
+      <div class="vp-checker-bar" id="vpCheckerBar">
+        <div class="vp-checker-bar-icon">👤</div>
+        <div class="vp-checker-bar-txt">
+          <div class="vp-checker-bar-lbl">Вы проверяете как:</div>
+          <input type="text" class="vp-checker-input" id="vpCheckerInput" list="vpCheckerList" placeholder="Введите ФИО / позывной..." autocomplete="off">
+          <datalist id="vpCheckerList"></datalist>
+        </div>
+        <div class="vp-checker-bar-hint" id="vpCheckerHint">Обязательное поле — иначе нельзя ставить отметки</div>
+      </div>
+
       <div class="vp-toolbar">
         <div class="vp-toolbar-left">
-          <input type="search" class="vp-search" id="vpSearch" placeholder="Поиск по ФИО, званию, роли...">
+          <div class="vp-search-wrap">
+            <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+            <input type="search" class="vp-search" id="vpSearch" placeholder="Поиск по ФИО, званию, роли, отделу...">
+          </div>
         </div>
         <div class="vp-toolbar-right">
-          <label class="vp-checker-select-lbl">Проверяющий:
-            <input type="text" class="vp-checker-select" id="vpCheckerInput" list="vpCheckerList" placeholder="Ваше имя" autocomplete="off">
-            <datalist id="vpCheckerList"></datalist>
-          </label>
-          <span class="vp-sync-status" id="vpSyncStatus"></span>
-          <button class="btn btn-ghost btn-sm" id="vpSyncBtn" title="Запросить у бота свежий список из Discord">↻ Синхронизировать</button>
-          <button class="btn btn-gold btn-sm" id="vpSettingsBtn" data-admin title="Настройка ролей и колонок">⚙ Настройки</button>
+          <div class="vp-bot-indicator" id="vpBotIndicator" title="Статус Discord-бота">
+            <span class="vp-bot-dot"></span>
+            <span class="vp-bot-text">проверка...</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="vpSyncBtn" title="Запросить свежий список из Discord">
+            <span id="vpSyncBtnLabel">↻ Синхронизировать</span>
+          </button>
+          <button class="btn btn-gold btn-sm" id="vpSettingsBtn" data-admin title="Настройка ролей и отделов">⚙ Настройки</button>
         </div>
+      </div>
+
+      <div class="vp-onboard" id="vpOnboard" style="display:none">
+        <div class="vp-onboard-title">Первый запуск — что делать?</div>
+        <ol class="vp-onboard-steps">
+          <li><b>Подключите Discord-бота</b> (он должен быть на сервере и запущен).</li>
+          <li>Нажмите <b>↻ Синхронизировать</b> — бот загрузит всех участников и роли.</li>
+          <li>Админ нажимает <b>⚙ Настройки</b> и помечает роли: какие «Отделы», какие «Должности», кого «Скрывать» (Уволен, Гражданин).</li>
+          <li>После этого таблицы наполнятся, и можно ставить отметки о документах.</li>
+        </ol>
       </div>
 
       <div class="vp-tables" id="vpTables">
@@ -126,22 +150,40 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   <div class="modal modal-xxl">
     <button class="modal-close" aria-label="Закрыть">✕</button>
     <h3>Настройки проверок ВП</h3>
-    <div class="modal-sub">Пометьте роли Discord: какие считать <b>отделами</b> (создают таблицы), <b>должностями</b> (колонка Должность), <b>показывать</b> (включить в таблицу) или <b>скрывать</b> (например «Уволен», «ЧС», «Гражданин»).</div>
-
-    <div class="vp-settings-toolbar">
-      <input type="search" class="vp-search" id="vpMapSearch" placeholder="Поиск по названию роли..." style="max-width:340px">
-      <div style="flex:1"></div>
-      <button class="btn btn-ghost btn-sm" id="vpMapReload">Обновить список ролей</button>
+    <div class="modal-sub">
+      Для каждой роли Discord выберите <b>что делать</b> и (опционально) <b>что она означает</b>.
     </div>
 
-    <div class="vp-map-legend">
-      <span class="vp-map-chip vp-map-chip-dept">Отдел</span>
-      <span class="vp-map-chip vp-map-chip-pos">Должность</span>
-      <span class="vp-map-chip vp-map-chip-inc">Показывать</span>
-      <span class="vp-map-chip vp-map-chip-exc">Скрывать</span>
-      <span class="vp-map-chip vp-map-chip-ign">Игнор</span>
+    <div class="vp-map-explain">
+      <div class="vp-map-explain-col">
+        <div class="vp-map-explain-title">👁 Показ в таблице</div>
+        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-neu">— не влияет</span> — роль не учитывается</div>
+        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-inc">✓ Показывать</span> — юзеры с этой ролью попадают в таблицу</div>
+        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-exc">✕ Скрывать</span> — юзеры с этой ролью НЕ попадают (Уволен, Гражданин, ЧС)</div>
+        <div class="vp-map-explain-item vp-map-explain-note">Если ни одна роль не отмечена «Показывать» — показываются ВСЕ (кроме скрытых)</div>
+      </div>
+      <div class="vp-map-explain-col">
+        <div class="vp-map-explain-title">🏷 Значение роли</div>
+        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-neu">— обычная</span> — просто роль</div>
+        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-dept">🏢 Отдел</span> — создаст отдельную таблицу для этих людей</div>
+        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-pos">🎖 Должность</span> — отобразится в колонке «Звание/Должность»</div>
+      </div>
+    </div>
+
+    <div class="vp-settings-toolbar">
+      <input type="search" class="vp-search" id="vpMapSearch" placeholder="Поиск роли по названию..." style="max-width:340px">
+      <select class="vp-search" id="vpMapFilter" style="max-width:200px">
+        <option value="">Все роли</option>
+        <option value="configured">Только настроенные</option>
+        <option value="unconfigured">Только не настроенные</option>
+        <option value="include">Показывать</option>
+        <option value="exclude">Скрывать</option>
+        <option value="department">Отделы</option>
+        <option value="position">Должности</option>
+      </select>
       <div style="flex:1"></div>
       <span class="vp-map-hint" id="vpMapHint"></span>
+      <button class="btn btn-ghost btn-sm" id="vpMapReload">Обновить</button>
     </div>
 
     <div class="vp-map-list" id="vpMapList">
@@ -149,9 +191,9 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
     </div>
 
     <div class="form-msg" id="vpMapMsg"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px">
-      <button class="btn btn-ghost btn-sm" id="vpMapClose">Закрыть</button>
-      <button class="btn btn-gold btn-sm" id="vpMapSave">Сохранить</button>
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--gold-b)">
+      <button class="btn btn-ghost btn-sm" id="vpMapClose">Отмена</button>
+      <button class="btn btn-gold btn-sm" id="vpMapSave">Сохранить и применить</button>
     </div>
   </div>
 </div>
@@ -182,14 +224,13 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
         <a href="index.html">Главная</a>
         <a href="info.html">Информация</a>
         <a href="ustav.html">Уставы</a>
-        <a href="composition.html">Состав</a>
       </div>
       <div class="footer-col">
         <h5>Служебное</h5>
         <a href="apps.html">Заявления</a>
         <a href="vp.html">Проверки ВП</a>
+        <a href="message.html">Сообщения</a>
         <a href="lk.html">Личный кабинет</a>
-        <a href="docs.html">Документы</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -200,9 +241,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 </footer>
 
 <div class="fab-stack" id="fabStack">
-  <button class="fab" id="fabUp" title="Наверх">
-    <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg>
-  </button>
+  <button class="fab" id="fabUp" title="Наверх"><svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg></button>
 </div>
 
 <div class="search-modal" id="searchModal">
@@ -216,18 +255,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=65"></script>
-<script src="config.js?v=65"></script>
-<script src="auth.js?v=65"></script>
-<script src="roles-engine.js?v=65"></script>
-<script src="vp-engine.js?v=65"></script>
-<script src="main.js?v=65"></script>
-<script src="holiday-engine.js?v=65"></script>
-<script src="sound-engine.js?v=65"></script>
-<script src="settings-panel.js?v=65"></script>
-<script src="faq-engine.js?v=65"></script>
-<script src="search-engine.js?v=65"></script>
-<script src="notify-engine.js?v=65"></script>
+<script src="supabase-loader.js?v=66"></script>
+<script src="config.js?v=66"></script>
+<script src="auth.js?v=66"></script>
+<script src="roles-engine.js?v=66"></script>
+<script src="vp-engine.js?v=66"></script>
+<script src="main.js?v=66"></script>
+<script src="holiday-engine.js?v=66"></script>
+<script src="sound-engine.js?v=66"></script>
+<script src="settings-panel.js?v=66"></script>
+<script src="faq-engine.js?v=66"></script>
+<script src="search-engine.js?v=66"></script>
+<script src="notify-engine.js?v=66"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -243,19 +282,36 @@ let CURRENT_CHECKER="";
 try{CURRENT_CHECKER=localStorage.getItem("vsrf-vp-checker-name")||""}catch(e){}
 let RENDER_LOCK=false;
 let LAST_RENDER_HASH="";
+let REALTIME_SUB=null;
 
 const COLS=[
-  {key:"medbook",label:"Мед. Книжка",options:["yes","no"]},
-  {key:"narko",label:"Справка Нарк.",options:["yes","no"]},
-  {key:"driver",label:"Вод. Права",options:["yes","no"]},
-  {key:"passport",label:"Паспорт",options:["yes","no"]},
-  {key:"personal_file",label:"Лич. Дело",options:["yes","no"]},
-  {key:"weapon_license",label:"Лиц. Оружия",options:["yes","no","absent"]},
-  {key:"attestation",label:"Аттестация",options:["yes","no"]}
+  {key:"medbook",label:"Мед.Книжка",short:"МК",opts:["yes","no"]},
+  {key:"narko",label:"Спр.Нарк",short:"Н",opts:["yes","no"]},
+  {key:"driver",label:"Вод.Права",short:"ВП",opts:["yes","no"]},
+  {key:"passport",label:"Паспорт",short:"П",opts:["yes","no"]},
+  {key:"personal_file",label:"Лич.Дело",short:"ЛД",opts:["yes","no"]},
+  {key:"weapon_license",label:"Лиц.Оружия",short:"ЛО",opts:["yes","no","absent"]},
+  {key:"attestation",label:"Аттестация",short:"АТ",opts:["yes","no"]}
 ];
 
-const OPT_LABEL={yes:"ДА",no:"НЕТ",absent:"Отсутствует"};
-const OPT_CLASS={yes:"vp-cell-yes",no:"vp-cell-no",absent:"vp-cell-absent"};
+const OPT_LABEL={yes:"ДА",no:"НЕТ",absent:"Отс.",null:"—"};
+const OPT_ICON={yes:"✓",no:"✕",absent:"○",null:"—"};
+
+function checkerReady(){return !!(CURRENT_CHECKER&&CURRENT_CHECKER.trim())}
+
+function updateCheckerBar(){
+  const bar=$("vpCheckerBar");
+  const hint=$("vpCheckerHint");
+  if(checkerReady()){
+    bar.classList.remove("vp-checker-bar-empty");
+    bar.classList.add("vp-checker-bar-ok");
+    hint.textContent="Можете ставить отметки";
+  } else {
+    bar.classList.add("vp-checker-bar-empty");
+    bar.classList.remove("vp-checker-bar-ok");
+    hint.textContent="Обязательное поле — иначе нельзя ставить отметки";
+  }
+}
 
 function matchesSearch(m){
   if(!SEARCH_Q) return true;
@@ -267,46 +323,86 @@ function matchesSearch(m){
     || (m.role_names||[]).join(" ").toLowerCase().includes(q);
 }
 
-function renderRow(m){
+function nextValue(cur,opts){
+  const idx=opts.indexOf(cur);
+  return opts[(idx+1)%opts.length];
+}
+
+function cellClass(val){
+  return {yes:"vp-cell-yes",no:"vp-cell-no",absent:"vp-cell-absent"}[val]||"vp-cell-none";
+}
+
+function renderRow(m,index){
   const check=ALL_CHECKS[m.discord_id]||{};
   const position=VSRF_VP.positionFor(m,ALL_MAPPING);
   const cells=COLS.map(c=>{
-    const val=check[c.key]||(c.key==="weapon_license"?"absent":"no");
-    return `<td class="vp-cell ${OPT_CLASS[val]}">
-      <select data-check="${c.key}" data-id="${m.discord_id}" class="vp-sel">
-        ${c.options.map(o=>`<option value="${o}" ${o===val?"selected":""}>${OPT_LABEL[o]}</option>`).join("")}
-      </select>
+    const val=check[c.key]||null;
+    const opts=c.opts;
+    return `<td class="vp-cell ${cellClass(val)}">
+      <button class="vp-pill-btn" data-check="${c.key}" data-id="${m.discord_id}" data-cur="${val==null?'':val}" data-opts='${JSON.stringify(opts)}' title="Клик — цикл (${opts.map(o=>OPT_LABEL[o]).join(' → ')})">
+        <span class="vp-pill-i">${OPT_ICON[val]}</span>
+        <span class="vp-pill-t">${OPT_LABEL[val]}</span>
+      </button>
     </td>`;
   }).join("");
   const checker=check.checked_by_name?`<div class="vp-checker" title="${esc(new Date(check.checked_at).toLocaleString("ru-RU"))}">${esc(check.checked_by_name)}</div>`:`<span class="vp-checker-empty">—</span>`;
+  const idx=String(index+1).padStart(2,"0");
   return `<tr data-id="${m.discord_id}">
-    <td class="vp-td-name"><div class="vp-fio">${esc(m.parsed_fio||m.display_name||"—")}</div><div class="vp-nick">${esc(m.raw_nick||"")}</div></td>
+    <td class="vp-td-idx">${idx}</td>
+    <td class="vp-td-name">
+      <div class="vp-fio">${esc(m.parsed_fio||m.display_name||"—")}</div>
+      <div class="vp-nick">${esc(m.raw_nick||"")}</div>
+    </td>
     <td class="vp-td-pos">${esc(position)}</td>
     ${cells}
+    <td class="vp-td-actions">
+      <button class="vp-row-btn vp-row-yes" data-row-all="yes" data-id="${m.discord_id}" title="Отметить все ДА">✓✓</button>
+      <button class="vp-row-btn vp-row-no" data-row-all="no" data-id="${m.discord_id}" title="Отметить все НЕТ">✕✕</button>
+      <button class="vp-row-btn vp-row-reset" data-reset-row="${m.discord_id}" title="Сбросить все">↺</button>
+    </td>
     <td class="vp-td-checker">${checker}</td>
-    <td class="vp-td-reset"><button class="vp-reset-btn" data-reset-row="${m.discord_id}" title="Сбросить проверку этого человека">↺</button></td>
   </tr>`;
+}
+
+function calcProgress(list){
+  let done=0;
+  for(const m of list){
+    const c=ALL_CHECKS[m.discord_id];
+    if(!c) continue;
+    const set=COLS.filter(col=>c[col.key]!=null).length;
+    if(set===COLS.length) done++;
+  }
+  return { done, total: list.length, pct: list.length ? Math.round(done*100/list.length) : 0 };
 }
 
 function renderTable(g){
   const rows=g.list.filter(matchesSearch);
   if(!rows.length) return "";
+  const p=calcProgress(rows);
   return `<div class="vp-table-block">
-    <div class="vp-table-title">
-      <span class="vp-table-dot"></span>${esc(g.name)}
-      <span class="vp-table-count">${rows.length}</span>
-      <button class="vp-table-reset" data-reset-table="${esc(g.name)}" title="Сбросить все проверки в этой таблице">↺ Сбросить отдел</button>
+    <div class="vp-table-head">
+      <div class="vp-table-head-l">
+        <span class="vp-table-dot"></span>
+        <span class="vp-table-name">${esc(g.name)}</span>
+        <span class="vp-table-count">${rows.length}</span>
+      </div>
+      <div class="vp-table-progress" title="${p.done} из ${p.total} проверено полностью">
+        <div class="vp-table-progress-bar"><div class="vp-table-progress-fill" style="width:${p.pct}%"></div></div>
+        <div class="vp-table-progress-txt">${p.done}/${p.total} · ${p.pct}%</div>
+      </div>
+      <button class="vp-table-reset" data-reset-table="${esc(g.name)}" title="Обнулить проверки во всей таблице">↺ Сбросить отдел</button>
     </div>
     <div class="vp-table-wrap">
       <table class="vp-table">
         <thead><tr>
+          <th class="vp-th-idx">№</th>
           <th class="vp-th-name">ФИО</th>
           <th>Звание / Должность</th>
-          ${COLS.map(c=>`<th>${c.label}</th>`).join("")}
-          <th>Проверил(а)</th>
-          <th></th>
+          ${COLS.map(c=>`<th title="${esc(c.label)}">${esc(c.short)}</th>`).join("")}
+          <th class="vp-th-actions">Быстро</th>
+          <th>Проверил</th>
         </tr></thead>
-        <tbody>${rows.map(renderRow).join("")}</tbody>
+        <tbody>${rows.map((r,i)=>renderRow(r,i)).join("")}</tbody>
       </table>
     </div>
   </div>`;
@@ -317,39 +413,89 @@ function stateHash(){
   for(const m of ALL_MEMBERS) h+=m.discord_id+":"+(m.updated_at||"")+";";
   for(const k of Object.keys(ALL_CHECKS).sort()){
     const c=ALL_CHECKS[k];
-    h+=k+"="+(c.medbook||"")+(c.narko||"")+(c.driver||"")+(c.passport||"")+(c.personal_file||"")+(c.weapon_license||"")+(c.attestation||"")+"|";
+    h+=k+"="+(c.medbook||"")+(c.narko||"")+(c.driver||"")+(c.passport||"")+(c.personal_file||"")+(c.weapon_license||"")+(c.attestation||"")+"|"+(c.checked_by_name||"")+";";
   }
   return h;
 }
 
-function bindRowHandlers(box){
-  box.querySelectorAll(".vp-sel").forEach(sel=>{
-    if(sel.dataset.bound) return;
-    sel.dataset.bound="1";
-    sel.addEventListener("change",async e=>{
-      const id=sel.dataset.id;
-      const key=sel.dataset.check;
-      const val=sel.value;
-      const td=sel.closest("td");
-      td.classList.remove("vp-cell-yes","vp-cell-no","vp-cell-absent");
-      td.classList.add(OPT_CLASS[val]);
-      const patch={};patch[key]=val;
-      const r=await VSRF_VP.saveCheck(id,patch,CURRENT_CHECKER);
-      if(!r.ok){alert("Ошибка: "+r.error);return}
-      const name=r.checker||CURRENT_CHECKER||"—";
-      ALL_CHECKS[id]=Object.assign({},ALL_CHECKS[id]||{},patch,{checked_by_name:name,checked_at:new Date().toISOString()});
-      const tr=sel.closest("tr");
-      const checker=tr.querySelector(".vp-td-checker");
-      checker.innerHTML=name!=="—"?`<div class="vp-checker">${esc(name)}</div>`:`<span class="vp-checker-empty">—</span>`;
-      LAST_RENDER_HASH=stateHash();
+async function saveOne(id,key,val){
+  if(!checkerReady()){
+    $("vpCheckerInput").focus();
+    alert("Сначала введите ваше имя в поле «Вы проверяете как»");
+    return false;
+  }
+  const patch={};patch[key]=val;
+  const r=await VSRF_VP.saveCheck(id,patch,CURRENT_CHECKER);
+  if(!r.ok){alert("Ошибка: "+r.error);return false}
+  ALL_CHECKS[id]=Object.assign({},ALL_CHECKS[id]||{},patch,{checked_by_name:r.checker,checked_at:new Date().toISOString()});
+  return true;
+}
+
+async function saveAll(id,val){
+  if(!checkerReady()){$("vpCheckerInput").focus();alert("Сначала введите ваше имя");return false}
+  const patch={};for(const c of COLS){patch[c.key]=val==="yes"?"yes":(c.key==="weapon_license"?(val==="no"?"no":"absent"):"no")}
+  const r=await VSRF_VP.saveCheck(id,patch,CURRENT_CHECKER);
+  if(!r.ok){alert("Ошибка: "+r.error);return false}
+  ALL_CHECKS[id]=Object.assign({},ALL_CHECKS[id]||{},patch,{checked_by_name:r.checker,checked_at:new Date().toISOString()});
+  return true;
+}
+
+function updateCellUI(id,key,val){
+  const tr=document.querySelector(`tr[data-id="${id}"]`);
+  if(!tr) return;
+  const btn=tr.querySelector(`.vp-pill-btn[data-check="${key}"]`);
+  if(!btn) return;
+  btn.dataset.cur=val==null?"":val;
+  btn.querySelector(".vp-pill-i").textContent=OPT_ICON[val];
+  btn.querySelector(".vp-pill-t").textContent=OPT_LABEL[val];
+  const td=btn.closest("td");
+  td.className="vp-cell "+cellClass(val);
+}
+
+function updateRowCheckerUI(id){
+  const tr=document.querySelector(`tr[data-id="${id}"]`);
+  if(!tr) return;
+  const c=ALL_CHECKS[id]||{};
+  const box=tr.querySelector(".vp-td-checker");
+  box.innerHTML=c.checked_by_name?`<div class="vp-checker" title="${esc(new Date(c.checked_at).toLocaleString("ru-RU"))}">${esc(c.checked_by_name)}</div>`:`<span class="vp-checker-empty">—</span>`;
+}
+
+function bindTableHandlers(box){
+  box.querySelectorAll(".vp-pill-btn").forEach(btn=>{
+    btn.addEventListener("click",async ()=>{
+      const id=btn.dataset.id;
+      const key=btn.dataset.check;
+      const opts=JSON.parse(btn.dataset.opts);
+      const cur=btn.dataset.cur||null;
+      const val=nextValue(cur,opts);
+      const ok=await saveOne(id,key,val);
+      if(!ok) return;
+      updateCellUI(id,key,val);
+      updateRowCheckerUI(id);
+      updateAllProgress();
       refreshCheckerList();
+      LAST_RENDER_HASH=stateHash();
+    });
+  });
+
+  box.querySelectorAll("[data-row-all]").forEach(btn=>{
+    btn.addEventListener("click",async ()=>{
+      const id=btn.dataset.id;
+      const val=btn.dataset.rowAll;
+      const ok=await saveAll(id,val);
+      if(!ok) return;
+      for(const c of COLS){
+        updateCellUI(id,c.key,ALL_CHECKS[id][c.key]);
+      }
+      updateRowCheckerUI(id);
+      updateAllProgress();
+      refreshCheckerList();
+      LAST_RENDER_HASH=stateHash();
     });
   });
 
   box.querySelectorAll("[data-reset-row]").forEach(btn=>{
-    if(btn.dataset.bound) return;
-    btn.dataset.bound="1";
-    btn.addEventListener("click",async e=>{
+    btn.addEventListener("click",async ()=>{
       const id=btn.dataset.resetRow;
       const mem=ALL_MEMBERS.find(x=>x.discord_id===id);
       const who=mem?(mem.parsed_fio||mem.display_name):id;
@@ -357,15 +503,15 @@ function bindRowHandlers(box){
       const r=await VSRF_VP.resetCheck(id);
       if(!r.ok){alert("Ошибка: "+r.error);return}
       delete ALL_CHECKS[id];
-      LAST_RENDER_HASH="";
-      renderAll(true);
+      for(const c of COLS) updateCellUI(id,c.key,null);
+      updateRowCheckerUI(id);
+      updateAllProgress();
+      LAST_RENDER_HASH=stateHash();
     });
   });
 
   box.querySelectorAll("[data-reset-table]").forEach(btn=>{
-    if(btn.dataset.bound) return;
-    btn.dataset.bound="1";
-    btn.addEventListener("click",async e=>{
+    btn.addEventListener("click",async ()=>{
       const groupName=btn.dataset.resetTable;
       const g=ALL_GROUPS.find(x=>x.name===groupName);
       if(!g) return;
@@ -373,10 +519,34 @@ function bindRowHandlers(box){
       const ids=g.list.map(x=>x.discord_id);
       const r=await VSRF_VP.resetChecksBulk(ids);
       if(!r.ok){alert("Ошибка: "+r.error);return}
-      for(const id of ids) delete ALL_CHECKS[id];
-      LAST_RENDER_HASH="";
-      renderAll(true);
+      for(const id of ids){
+        delete ALL_CHECKS[id];
+        for(const c of COLS) updateCellUI(id,c.key,null);
+        updateRowCheckerUI(id);
+      }
+      updateAllProgress();
+      LAST_RENDER_HASH=stateHash();
     });
+  });
+}
+
+function updateAllProgress(){
+  document.querySelectorAll(".vp-table-block").forEach(block=>{
+    const rows=block.querySelectorAll("tbody tr");
+    let done=0;
+    rows.forEach(tr=>{
+      const id=tr.dataset.id;
+      const c=ALL_CHECKS[id];
+      if(!c) return;
+      const set=COLS.filter(col=>c[col.key]!=null).length;
+      if(set===COLS.length) done++;
+    });
+    const total=rows.length;
+    const pct=total?Math.round(done*100/total):0;
+    const fill=block.querySelector(".vp-table-progress-fill");
+    const txt=block.querySelector(".vp-table-progress-txt");
+    if(fill) fill.style.width=pct+"%";
+    if(txt) txt.textContent=done+"/"+total+" · "+pct+"%";
   });
 }
 
@@ -386,78 +556,98 @@ async function renderAll(force){
   try{
     const box=$("vpTables");
     const isEmpty=!box.querySelector(".vp-table-block");
-    if(force||isEmpty){
-      box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
-    }
+    if(force||isEmpty) box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
     const [members,mapping,checks]=await Promise.all([VSRF_VP.fetchMembers(),VSRF_VP.fetchMapping(),VSRF_VP.fetchChecks()]);
     ALL_MEMBERS=members;
     ALL_MAPPING=mapping;
     ALL_CHECKS=Object.fromEntries(checks.map(c=>[c.discord_id,c]));
 
     if(!members.length){
+      $("vpOnboard").style.display="";
       box.innerHTML=`<div class="apps-empty">
         <div class="apps-empty-icon">◎</div>
-        <h3>Список пуст</h3>
-        <p>Бот ещё не синхронизировал участников Discord.<br>Нажмите «Синхронизировать» вверху страницы.</p>
+        <h3>Список участников пуст</h3>
+        <p>Бот ещё не синхронизировал участников Discord.<br>Нажмите «↻ Синхронизировать» вверху или подождите пока бот запустится.</p>
       </div>`;
       LAST_RENDER_HASH=stateHash();
       return;
     }
 
     ALL_GROUPS=VSRF_VP.groupByDept(members,mapping);
+    const filtered=VSRF_VP.filterMembers(members,mapping);
+    const showOnboard=(mapping.length===0)||(filtered.length===0);
+    $("vpOnboard").style.display=showOnboard?"":"none";
 
     const hash=stateHash();
-    if(!force&&hash===LAST_RENDER_HASH){
-      return;
-    }
+    if(!force&&hash===LAST_RENDER_HASH) return;
     LAST_RENDER_HASH=hash;
 
     const html=ALL_GROUPS.map(renderTable).filter(Boolean).join("");
-    box.innerHTML=html||`<div class="apps-empty"><h3>Ничего не найдено</h3><p>Попробуй изменить поисковый запрос.</p></div>`;
-    bindRowHandlers(box);
+    if(!html){
+      box.innerHTML=`<div class="apps-empty">
+        <h3>${filtered.length===0?"Пока никто не подходит под фильтры":"Ничего не найдено"}</h3>
+        <p>${filtered.length===0?"Откройте <b>⚙ Настройки</b> и пометьте роли отделами или «Показывать».":"Попробуйте другой запрос в поиске."}</p>
+      </div>`;
+    } else {
+      box.innerHTML=html;
+      bindTableHandlers(box);
+    }
     refreshCheckerList();
-  } finally {
-    RENDER_LOCK=false;
-  }
+  } finally { RENDER_LOCK=false; }
 }
 
 function refreshCheckerList(){
   const set=new Set();
-  for(const c of Object.values(ALL_CHECKS)){
-    if(c.checked_by_name) set.add(c.checked_by_name);
-  }
+  for(const c of Object.values(ALL_CHECKS)){if(c.checked_by_name) set.add(c.checked_by_name)}
   if(CURRENT_CHECKER) set.add(CURRENT_CHECKER);
-  const list=$("vpCheckerList");
-  if(!list) return;
+  const list=$("vpCheckerList");if(!list) return;
   list.innerHTML=Array.from(set).sort().map(n=>`<option value="${esc(n)}">`).join("");
 }
 
 $("vpSearch").addEventListener("input",()=>{SEARCH_Q=$("vpSearch").value.trim();LAST_RENDER_HASH="";renderAll(true)});
 
 $("vpCheckerInput").value=CURRENT_CHECKER;
+updateCheckerBar();
 $("vpCheckerInput").addEventListener("input",()=>{
   CURRENT_CHECKER=$("vpCheckerInput").value.trim();
   try{localStorage.setItem("vsrf-vp-checker-name",CURRENT_CHECKER)}catch(e){}
+  updateCheckerBar();
 });
 
-$("vpSyncBtn").addEventListener("click",async()=>{
-  const st=$("vpSyncStatus");
-  st.textContent="Отправка запроса...";st.className="vp-sync-status vp-sync-running";
+async function updateBotIndicator(){
+  const ind=$("vpBotIndicator");
+  const st=await VSRF_VP.fetchBotStatus();
+  if(!st){ind.className="vp-bot-indicator vp-bot-unknown";ind.querySelector(".vp-bot-text").textContent="статус неизвестен";return}
+  const ageMs=Date.now()-new Date(st.last_seen).getTime();
+  const ageSec=Math.round(ageMs/1000);
+  const online=st.online&&ageSec<60;
+  ind.className="vp-bot-indicator "+(online?"vp-bot-online":"vp-bot-offline");
+  const rel=ageSec<60?"только что":ageSec<3600?Math.round(ageSec/60)+" мин назад":Math.round(ageSec/3600)+" ч назад";
+  ind.querySelector(".vp-bot-text").textContent=online?"бот онлайн":"оффлайн ("+rel+")";
+  ind.title=`Discord-бот · последняя активность: ${new Date(st.last_seen).toLocaleString("ru-RU")}\nГильдия: ${st.guild_name||"?"} · участников: ${st.members_count||"?"}`;
+}
+
+$("vpSyncBtn").addEventListener("click",async ()=>{
+  const st=$("vpBotIndicator");
+  const btn=$("vpSyncBtn");
+  const lbl=$("vpSyncBtnLabel");
+  btn.disabled=true;lbl.textContent="⏳ ожидает бота...";
   const r=await VSRF_VP.requestSync();
-  if(!r.ok){st.textContent="Ошибка: "+r.error;st.className="vp-sync-status vp-sync-err";return}
-  st.textContent="Бот сканирует Discord...";
+  if(!r.ok){lbl.textContent="↻ Синхронизировать";btn.disabled=false;alert("Ошибка: "+r.error);return}
+  lbl.textContent="⏳ бот сканирует...";
   const res=await VSRF_VP.pollSyncStatus(r.id,120000);
-  if(!res.ok){st.textContent="Не удалось: "+(res.error||res.message||res.status);st.className="vp-sync-status vp-sync-err";return}
-  st.textContent="Готово · участников: "+res.members_scanned;st.className="vp-sync-status vp-sync-ok";
+  btn.disabled=false;
+  if(!res.ok){lbl.textContent="↻ Синхронизировать";alert("Не удалось: "+(res.error||res.message||res.status));return}
+  lbl.textContent="✓ Готово · "+res.members_scanned;
   LAST_RENDER_HASH="";renderAll(true);
-  setTimeout(()=>{st.textContent="";st.className="vp-sync-status"},4000);
+  setTimeout(()=>{lbl.textContent="↻ Синхронизировать"},3500);
 });
 
 async function openMapping(){
-  const modal=$("vpSettingsModal");
-  modal.classList.add("active");
+  $("vpSettingsModal").classList.add("active");
   await loadMappingUI();
 }
+
 async function loadMappingUI(){
   const box=$("vpMapList");
   box.innerHTML=`<div class="apps-empty">Загрузка...</div>`;
@@ -465,30 +655,64 @@ async function loadMappingUI(){
   const mapping=await VSRF_VP.fetchMapping();
   const byId=Object.fromEntries(mapping.map(m=>[m.role_id,m]));
   const q=($("vpMapSearch").value||"").toLowerCase().trim();
-  const rolesFiltered=ALL_ROLES.filter(r=>!q||r.name.toLowerCase().includes(q));
-  if(!rolesFiltered.length){box.innerHTML=`<div class="apps-empty">Список ролей пуст. Нажмите «Обновить» и убедись что бот запущен.</div>`;return}
-  box.innerHTML=rolesFiltered.map(r=>{
-    const m=byId[r.role_id]||{kind:"ignore",label:""};
-    return `<div class="vp-map-row vp-map-kind-${m.kind}" data-role-id="${r.role_id}">
+  const filter=$("vpMapFilter").value;
+
+  let filtered=ALL_ROLES.filter(r=>!q||r.name.toLowerCase().includes(q));
+  if(filter){
+    filtered=filtered.filter(r=>{
+      const m=byId[r.role_id];
+      if(filter==="configured") return !!m;
+      if(filter==="unconfigured") return !m;
+      if(filter==="include") return m&&m.show==="include";
+      if(filter==="exclude") return m&&m.show==="exclude";
+      if(filter==="department") return m&&m.role_kind==="department";
+      if(filter==="position") return m&&m.role_kind==="position";
+      return true;
+    });
+  }
+
+  if(!filtered.length){box.innerHTML=`<div class="apps-empty">Ролей не найдено под фильтр</div>`;updateMapHint();return}
+
+  box.innerHTML=filtered.map(r=>{
+    const m=byId[r.role_id]||{show:null,role_kind:null,label:""};
+    const showVal=m.show||"";
+    const kindVal=m.role_kind||"";
+    return `<div class="vp-map-row" data-role-id="${r.role_id}" data-show="${showVal}" data-kind="${kindVal}">
       <div class="vp-map-name" title="${esc(r.name)}">${esc(r.name)}</div>
-      <div class="vp-map-controls">
-        <label class="vp-map-radio vp-r-ign"><input type="radio" name="k-${r.role_id}" value="ignore" ${m.kind==="ignore"?"checked":""}><span>Игнор</span></label>
-        <label class="vp-map-radio vp-r-inc"><input type="radio" name="k-${r.role_id}" value="include" ${m.kind==="include"?"checked":""}><span>Показывать</span></label>
-        <label class="vp-map-radio vp-r-exc"><input type="radio" name="k-${r.role_id}" value="exclude" ${m.kind==="exclude"?"checked":""}><span>Скрывать</span></label>
-        <label class="vp-map-radio vp-r-dept"><input type="radio" name="k-${r.role_id}" value="department" ${m.kind==="department"?"checked":""}><span>Отдел</span></label>
-        <label class="vp-map-radio vp-r-pos"><input type="radio" name="k-${r.role_id}" value="position" ${m.kind==="position"?"checked":""}><span>Должность</span></label>
+      <div class="vp-map-group vp-map-group-show">
+        <div class="vp-map-group-lbl">Показ:</div>
+        <div class="vp-pill-group">
+          <button class="vp-pill vp-pill-neu ${showVal===""?"active":""}" data-show="" data-id="${r.role_id}">—</button>
+          <button class="vp-pill vp-pill-inc ${showVal==="include"?"active":""}" data-show="include" data-id="${r.role_id}">✓ Показ</button>
+          <button class="vp-pill vp-pill-exc ${showVal==="exclude"?"active":""}" data-show="exclude" data-id="${r.role_id}">✕ Скрыть</button>
+        </div>
       </div>
-      <input type="text" class="vp-map-label" data-role-id="${r.role_id}" placeholder="Название колонки (опц.)" value="${esc(m.label||"")}">
+      <div class="vp-map-group vp-map-group-kind">
+        <div class="vp-map-group-lbl">Роль:</div>
+        <div class="vp-pill-group">
+          <button class="vp-pill vp-pill-neu ${kindVal===""?"active":""}" data-kind="" data-id="${r.role_id}">—</button>
+          <button class="vp-pill vp-pill-dept ${kindVal==="department"?"active":""}" data-kind="department" data-id="${r.role_id}">🏢 Отдел</button>
+          <button class="vp-pill vp-pill-pos ${kindVal==="position"?"active":""}" data-kind="position" data-id="${r.role_id}">🎖 Должность</button>
+        </div>
+      </div>
+      <input type="text" class="vp-map-label" data-role-id="${r.role_id}" placeholder="Название колонки" value="${esc(m.label||"")}">
     </div>`;
   }).join("");
 
-  box.querySelectorAll(".vp-map-row").forEach(row=>{
-    row.querySelectorAll('input[type=radio]').forEach(r=>{
-      r.addEventListener("change",()=>{
-        row.classList.remove("vp-map-kind-ignore","vp-map-kind-include","vp-map-kind-exclude","vp-map-kind-department","vp-map-kind-position");
-        row.classList.add("vp-map-kind-"+r.value);
-        updateMapHint();
-      });
+  box.querySelectorAll("[data-show]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const row=btn.closest(".vp-map-row");
+      row.dataset.show=btn.dataset.show;
+      row.querySelectorAll("[data-show]").forEach(b=>b.classList.toggle("active",b.dataset.show===btn.dataset.show));
+      updateMapHint();
+    });
+  });
+  box.querySelectorAll("[data-kind]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const row=btn.closest(".vp-map-row");
+      row.dataset.kind=btn.dataset.kind;
+      row.querySelectorAll("[data-kind]").forEach(b=>b.classList.toggle("active",b.dataset.kind===btn.dataset.kind));
+      updateMapHint();
     });
   });
   updateMapHint();
@@ -496,38 +720,72 @@ async function loadMappingUI(){
 
 function updateMapHint(){
   const hint=$("vpMapHint");if(!hint) return;
-  const inc=document.querySelectorAll('.vp-map-row input[value=include]:checked').length;
-  const exc=document.querySelectorAll('.vp-map-row input[value=exclude]:checked').length;
-  if(inc===0&&exc===0){hint.textContent="В таблице будут показаны все участники ДС";return}
+  const rows=Array.from(document.querySelectorAll(".vp-map-row"));
+  const inc=rows.filter(r=>r.dataset.show==="include").length;
+  const exc=rows.filter(r=>r.dataset.show==="exclude").length;
+  const dep=rows.filter(r=>r.dataset.kind==="department").length;
+  const pos=rows.filter(r=>r.dataset.kind==="position").length;
   const parts=[];
-  if(inc>0) parts.push("Показать только с "+inc+" отмеченными ролями");
-  if(exc>0) parts.push("Скрыть "+exc+" ролей");
-  hint.textContent=parts.join(" · ");
+  if(dep) parts.push(dep+" отдел"+(dep>1?"а/ов":""));
+  if(pos) parts.push(pos+" должн.");
+  if(inc) parts.push(inc+" показ.");
+  if(exc) parts.push(exc+" скрытых");
+  hint.textContent=parts.length?parts.join(" · "):"Ничего не настроено";
 }
+
 $("vpMapSearch").addEventListener("input",loadMappingUI);
+$("vpMapFilter").addEventListener("change",loadMappingUI);
 $("vpMapReload").addEventListener("click",loadMappingUI);
 $("vpMapClose").addEventListener("click",()=>$("vpSettingsModal").classList.remove("active"));
 $("vpSettingsModal").querySelector(".modal-close").addEventListener("click",()=>$("vpSettingsModal").classList.remove("active"));
 $("vpSettingsModal").addEventListener("click",e=>{if(e.target===$("vpSettingsModal")) $("vpSettingsModal").classList.remove("active")});
-$("vpMapSave").addEventListener("click",async()=>{
+
+$("vpMapSave").addEventListener("click",async ()=>{
   const rows=[];
   const toRemove=[];
   document.querySelectorAll(".vp-map-row").forEach(el=>{
     const roleId=el.dataset.roleId;
-    const kind=(el.querySelector('input[type=radio]:checked')||{}).value||"ignore";
+    const show=el.dataset.show||null;
+    const kind=el.dataset.kind||null;
     const label=(el.querySelector(".vp-map-label")||{}).value||"";
-    if(kind==="ignore") toRemove.push(roleId);
-    else rows.push({role_id:roleId,kind,label:(kind==="department"||kind==="position")?(label||null):null,sort:100});
+    if(!show&&!kind){toRemove.push(roleId);return}
+    rows.push({role_id:roleId,show,role_kind:kind,kind:kind||show||"ignore",label:label||null,sort:100});
   });
   const msg=$("vpMapMsg");
   msg.className="form-msg info";msg.textContent="Сохранение...";
-  const r=await VSRF_VP.saveMapping(rows);
-  for(const id of toRemove) await VSRF_VP.removeMapping(id);
+  const r=await VSRF_VP.saveMappingBatch(rows,toRemove);
   if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
-  msg.className="form-msg ok";msg.textContent="Сохранено";
-  setTimeout(()=>{$("vpSettingsModal").classList.remove("active");msg.textContent="";LAST_RENDER_HASH="";renderAll(true)},700);
+  msg.className="form-msg ok";msg.textContent="Сохранено · применяю...";
+  setTimeout(()=>{$("vpSettingsModal").classList.remove("active");msg.textContent="";LAST_RENDER_HASH="";renderAll(true)},600);
 });
+
 $("vpSettingsBtn").addEventListener("click",openMapping);
+
+function subscribeRealtime(){
+  const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+  if(!s||!s.client) return;
+  if(REALTIME_SUB) return;
+  REALTIME_SUB=s.client.channel("vp-live")
+    .on("postgres_changes",{event:"*",schema:"public",table:"vp_checks"},payload=>{
+      const row=payload.new||payload.old;if(!row) return;
+      if(payload.eventType==="DELETE"){delete ALL_CHECKS[row.discord_id]}
+      else {ALL_CHECKS[row.discord_id]=payload.new}
+      const id=(payload.new||payload.old).discord_id;
+      for(const c of COLS){
+        const v=payload.new?(payload.new[c.key]||null):null;
+        updateCellUI(id,c.key,v);
+      }
+      updateRowCheckerUI(id);
+      updateAllProgress();
+    })
+    .on("postgres_changes",{event:"*",schema:"public",table:"vp_role_mapping"},()=>{
+      LAST_RENDER_HASH="";renderAll(true);
+    })
+    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"bot_status"},()=>{
+      updateBotIndicator();
+    })
+    .subscribe();
+}
 
 let LAST_GUARD_STATE=null;
 function applyGuard(){
@@ -540,22 +798,25 @@ function applyGuard(){
   if(LAST_GUARD_STATE===key) return;
   LAST_GUARD_STATE=key;
   renderAll(true);
+  updateBotIndicator();
+  subscribeRealtime();
 }
 if(window.VSRF_ROLES){VSRF_ROLES.onChange(()=>applyGuard())}
 setTimeout(applyGuard,600);
 setTimeout(applyGuard,1500);
 
+setInterval(updateBotIndicator,30000);
+
 let SOFT_TIMER=null;
 function softRefresh(){
   if(SOFT_TIMER) clearTimeout(SOFT_TIMER);
   SOFT_TIMER=setTimeout(()=>{
-    if(document.visibilityState==="visible"&&window.VSRF_ROLES&&window.VSRF_ROLES.isStaff()) renderAll(false);
+    if(document.visibilityState==="visible"&&window.VSRF_ROLES&&window.VSRF_ROLES.isStaff()){renderAll(false);updateBotIndicator()}
   },400);
 }
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible") softRefresh()});
 window.addEventListener("focus",softRefresh);
-setInterval(softRefresh,30000);
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d422d3912ec65',t:'MTc4NTY3NTU1Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24e7e2deb03f3a7',t:'MTc4NTY4ODQ5Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

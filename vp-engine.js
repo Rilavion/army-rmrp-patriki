@@ -15,7 +15,7 @@ window.VSRF_VP=(function(){
 
   async function fetchMembers(){
     const c=await client();if(!c) return [];
-    const {data,error}=await c.from("ds_members").select("*").eq("active",true).order("parsed_dept",{ascending:true}).order("parsed_fio",{ascending:true});
+    const {data,error}=await c.from("ds_members").select("*").eq("active",true).order("parsed_fio",{ascending:true});
     if(error){console.warn("[VP fetchMembers]",error.message);return []}
     return data||[];
   }
@@ -29,24 +29,21 @@ window.VSRF_VP=(function(){
 
   async function fetchMapping(){
     const c=await client();if(!c) return [];
-    const {data,error}=await c.from("vp_role_mapping").select("*").order("sort",{ascending:true});
+    const {data,error}=await c.from("vp_role_mapping").select("*");
     if(error){console.warn("[VP fetchMapping]",error.message);return []}
     return data||[];
   }
 
-  async function saveMapping(rows){
+  async function saveMappingBatch(rows,toRemoveIds){
     const c=await client();if(!c) return {ok:false,error:"no client"};
-    const clean=rows.filter(r=>r&&r.role_id&&r.kind);
-    if(!clean.length) return {ok:true};
-    const {error}=await c.from("vp_role_mapping").upsert(clean,{onConflict:"role_id"});
-    if(error) return {ok:false,error:error.message};
-    return {ok:true};
-  }
-
-  async function removeMapping(roleId){
-    const c=await client();if(!c) return {ok:false};
-    const {error}=await c.from("vp_role_mapping").delete().eq("role_id",roleId);
-    if(error) return {ok:false,error:error.message};
+    if(toRemoveIds&&toRemoveIds.length){
+      const {error}=await c.from("vp_role_mapping").delete().in("role_id",toRemoveIds);
+      if(error) return {ok:false,error:error.message};
+    }
+    if(rows&&rows.length){
+      const {error}=await c.from("vp_role_mapping").upsert(rows,{onConflict:"role_id"});
+      if(error) return {ok:false,error:error.message};
+    }
     return {ok:true};
   }
 
@@ -57,24 +54,22 @@ window.VSRF_VP=(function(){
     return data||[];
   }
 
-  async function saveCheck(discordId,patch,checkerOverride){
+  async function saveCheck(discordId,patch,checkerName){
     const c=await client();if(!c) return {ok:false,error:"no client"};
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
-    const autoName=(function(){
-      try{return localStorage.getItem("vsrf-my-display-name")||(s&&s.user&&s.user.email)||"vp"}catch(e){return "vp"}
-    })();
-    const displayName=(checkerOverride&&String(checkerOverride).trim())||autoName;
+    const name=(checkerName&&String(checkerName).trim())||null;
+    if(!name) return {ok:false,error:"empty_checker"};
     const row={
       discord_id:discordId,
       ...patch,
       checked_by:s&&s.user?s.user.id:null,
-      checked_by_name:displayName,
+      checked_by_name:name,
       checked_at:new Date().toISOString(),
       updated_at:new Date().toISOString()
     };
     const {error}=await c.from("vp_checks").upsert(row,{onConflict:"discord_id"});
     if(error) return {ok:false,error:error.message};
-    return {ok:true,checker:displayName};
+    return {ok:true,checker:name};
   }
 
   async function resetCheck(discordId){
@@ -95,9 +90,7 @@ window.VSRF_VP=(function(){
   async function requestSync(){
     const c=await client();if(!c) return {ok:false,error:"no client"};
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
-    const name=(function(){
-      try{return localStorage.getItem("vsrf-my-display-name")||(s&&s.user&&s.user.email)||"admin"}catch(e){return "admin"}
-    })();
+    const name=(function(){try{return localStorage.getItem("vsrf-my-display-name")||(s&&s.user&&s.user.email)||"admin"}catch(e){return "admin"}})();
     const {data,error}=await c.from("ds_sync_requests").insert({requested_by:s&&s.user?s.user.id:null,requested_by_name:name}).select().single();
     if(error) return {ok:false,error:error.message};
     return {ok:true,id:data.id};
@@ -114,9 +107,15 @@ window.VSRF_VP=(function(){
     return {ok:false,error:"timeout"};
   }
 
+  async function fetchBotStatus(){
+    const c=await client();if(!c) return null;
+    const {data}=await c.from("bot_status").select("*").eq("id",1).maybeSingle();
+    return data||null;
+  }
+
   function filterMembers(members,mapping){
-    const excludeIds=new Set(mapping.filter(m=>m.kind==="exclude").map(m=>m.role_id));
-    const includeIds=new Set(mapping.filter(m=>m.kind==="include").map(m=>m.role_id));
+    const excludeIds=new Set(mapping.filter(m=>m.show==="exclude").map(m=>m.role_id));
+    const includeIds=new Set(mapping.filter(m=>m.show==="include").map(m=>m.role_id));
     const useInclude=includeIds.size>0;
     const out=[];
     for(const m of members){
@@ -136,31 +135,25 @@ window.VSRF_VP=(function(){
 
   function groupByDept(members,mapping){
     const filtered=filterMembers(members,mapping);
-    const deptRoleIds=new Set(mapping.filter(m=>m.kind==="department").map(m=>m.role_id));
-    const roleLabels={};
-    for(const m of mapping){if(m.label) roleLabels[m.role_id]=m.label}
+    const deptRoleIds=new Set(mapping.filter(m=>m.role_kind==="department").map(m=>m.role_id));
+    const labels={};
+    for(const m of mapping){if(m.label) labels[m.role_id]=m.label}
     const groups=new Map();
-    function getGroup(name){
-      if(!groups.has(name)) groups.set(name,[]);
-      return groups.get(name);
-    }
     for(const mem of filtered){
       let deptName=null;
       const ids=mem.role_ids||[];
       for(const id of ids){
-        if(deptRoleIds.has(id)){
-          deptName=roleLabels[id]||id;
-          break;
-        }
+        if(deptRoleIds.has(id)){ deptName=labels[id]||id; break; }
       }
       if(!deptName) deptName=mem.parsed_dept||"Без отдела";
-      getGroup(deptName).push(mem);
+      if(!groups.has(deptName)) groups.set(deptName,[]);
+      groups.get(deptName).push(mem);
     }
     return Array.from(groups.entries()).map(([name,list])=>({name,list})).sort((a,b)=>a.name.localeCompare(b.name,"ru"));
   }
 
   function positionFor(member,mapping){
-    const posRoleIds=new Set(mapping.filter(m=>m.kind==="position").map(m=>m.role_id));
+    const posRoleIds=new Set(mapping.filter(m=>m.role_kind==="position").map(m=>m.role_id));
     const labels={};
     for(const m of mapping){if(m.label) labels[m.role_id]=m.label}
     const ids=member.role_ids||[];
@@ -171,5 +164,5 @@ window.VSRF_VP=(function(){
     return member.parsed_static||"—";
   }
 
-  return {fetchMembers,fetchRoles,fetchMapping,saveMapping,removeMapping,fetchChecks,saveCheck,resetCheck,resetChecksBulk,requestSync,pollSyncStatus,groupByDept,positionFor,filterMembers};
+  return {fetchMembers,fetchRoles,fetchMapping,saveMappingBatch,fetchChecks,saveCheck,resetCheck,resetChecksBulk,requestSync,pollSyncStatus,fetchBotStatus,filterMembers,groupByDept,positionFor};
 })();
