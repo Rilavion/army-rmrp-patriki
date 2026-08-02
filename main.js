@@ -40,9 +40,12 @@
       links.forEach(a=>{if((a.dataset.page||"").toLowerCase()===currentPage) a.classList.add("active")});
 
       const publicPages=["index.html","info.html","ustav.html","training.html","composition.html","news.html","autopark.html","map.html","faq.html"];
+      const staffPages=["apps.html"];
       const adminPages=["lk.html","docs.html"];
       const publicLinks=links.filter(a=>publicPages.includes((a.dataset.page||"").toLowerCase()));
+      const staffLinks=links.filter(a=>staffPages.includes((a.dataset.page||"").toLowerCase()));
       const adminLinks=links.filter(a=>adminPages.includes((a.dataset.page||"").toLowerCase()));
+      staffLinks.forEach(a=>a.setAttribute("data-staff",""));
       adminLinks.forEach(a=>a.setAttribute("data-admin",""));
 
       nav.innerHTML="";
@@ -62,13 +65,14 @@
       sec1.appendChild(g1);
       nav.appendChild(sec1);
 
-      if(adminLinks.length){
+      if(adminLinks.length||staffLinks.length){
         const sec2=document.createElement("div");
         sec2.className="nav-section";
-        sec2.setAttribute("data-admin","");
+        sec2.setAttribute("data-staff","");
         sec2.innerHTML='<div class="nav-section-title">Служебное</div>';
         const g2=document.createElement("div");
         g2.className="nav-links";
+        staffLinks.forEach(a=>g2.appendChild(a));
         adminLinks.forEach(a=>g2.appendChild(a));
         sec2.appendChild(g2);
         nav.appendChild(sec2);

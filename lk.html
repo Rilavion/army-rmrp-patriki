@@ -52,6 +52,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
       <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
+      <a href="apps.html" data-page="apps.html" data-transition data-staff>Заявления</a>
       <a href="lk.html" data-page="lk.html" data-transition data-admin>Личный кабинет</a>
     </nav>
     <div class="header-actions">
@@ -104,6 +105,21 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
             <div class="lk-panel-body">
               <div class="lk-audit" id="lkAudit">
                 <div class="lk-act-empty">Загрузка активности...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lk-panel" data-admin>
+            <div class="lk-panel-head">
+              <span class="lk-panel-title">Роли пользователей</span>
+              <button class="btn btn-gold btn-sm" id="rolesAddBtn">+ Создать аккаунт</button>
+            </div>
+            <div class="lk-panel-body">
+              <div class="roles-hint">
+                Здесь вы создаёте учётные записи для Старшего Состава (СС). После входа они получают доступ к «Электронным заявлениям» и другим служебным разделам.
+              </div>
+              <div class="roles-list" id="rolesList">
+                <div class="roles-empty">Загрузка...</div>
               </div>
             </div>
           </div>
@@ -235,11 +251,38 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=49"></script>
-<script src="config.js"></script>
-<script src="main.js"></script>
-<script src="auth.js"></script>
-<script src="holiday-engine.js"></script>
+<div class="modal-back" id="createUserModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Создать учётную запись</h3>
+    <div class="modal-sub">Новый пользователь получит доступ после подтверждения email (если включено в Supabase).</div>
+    <form id="createUserForm">
+      <div class="form-group"><label>Email</label><input name="email" type="email" required autocomplete="off"></div>
+      <div class="form-group"><label>Пароль (не менее 6 символов)</label><input name="password" type="password" minlength="6" required autocomplete="new-password"></div>
+      <div class="form-group"><label>Отображаемое имя (Позывной / Звание+Фамилия)</label><input name="display_name" type="text" placeholder="Полковник Иванов" required></div>
+      <div class="form-group">
+        <label>Роль</label>
+        <select name="role" required>
+          <option value="ss">Старший Состав (СС) — доступ к служебным разделам</option>
+          <option value="admin">Администратор — полный доступ</option>
+          <option value="user">Обычный пользователь</option>
+        </select>
+      </div>
+      <div class="form-msg"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+        <button type="button" class="btn btn-ghost btn-sm" id="createUserCancel">Отмена</button>
+        <button type="submit" class="btn btn-gold btn-sm">Создать</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="supabase-loader.js?v=58"></script>
+<script src="config.js?v=58"></script>
+<script src="main.js?v=58"></script>
+<script src="auth.js?v=58"></script>
+<script src="roles-engine.js?v=58"></script>
+<script src="holiday-engine.js?v=58"></script>
 <script src="settings-panel.js"></script>
 <script src="sound-engine.js"></script>
 <script src="faq-engine.js"></script>
@@ -399,7 +442,79 @@ boot();
   v.addEventListener("input",()=>{VSRF_SOUND.setVolume(v.value);vv.textContent=Math.round(v.value*100)+"%"});
 })();
 
+// ===== Управление ролями (только для админа) =====
+async function loadRolesList(){
+  if(!window.VSRF_ROLES||!VSRF_ROLES.isAdmin()){$("rolesList").innerHTML='<div class="roles-empty">Только для администраторов</div>';return}
+  const list=await VSRF_ROLES.listAllRoles();
+  const box=$("rolesList");
+  if(!list.length){box.innerHTML='<div class="roles-empty">Пока нет назначенных ролей.<br>Нажмите «+ Создать аккаунт» для добавления Старшего Состава.</div>';return}
+  const ROLE_LABEL={admin:"Администратор",ss:"Ст. Состав",user:"Пользователь"};
+  const ROLE_CLS={admin:"role-adm",ss:"role-ss",user:"role-usr"};
+  box.innerHTML=list.map(r=>`
+    <div class="role-row">
+      <div class="role-avatar">${(r.display_name||"?").slice(0,1).toUpperCase()}</div>
+      <div class="role-info">
+        <div class="role-name">${(r.display_name||"— без имени —").replace(/</g,"&lt;")}</div>
+        <div class="role-uid">${r.user_id.slice(0,8)}…</div>
+      </div>
+      <div class="role-badge ${ROLE_CLS[r.role]||""}">${ROLE_LABEL[r.role]||r.role}</div>
+      <div class="role-actions">
+        <select class="role-sel" data-uid="${r.user_id}">
+          <option value="admin" ${r.role==="admin"?"selected":""}>Админ</option>
+          <option value="ss" ${r.role==="ss"?"selected":""}>СС</option>
+          <option value="user" ${r.role==="user"?"selected":""}>User</option>
+        </select>
+        <button class="role-del" data-uid="${r.user_id}" title="Удалить роль">🗑</button>
+      </div>
+    </div>`).join("");
+  box.querySelectorAll(".role-sel").forEach(sel=>{
+    sel.addEventListener("change",async()=>{
+      const uid=sel.dataset.uid;
+      const nrole=sel.value;
+      const row=list.find(x=>x.user_id===uid);
+      const r=await VSRF_ROLES.setRole(uid,nrole,row?row.display_name:null);
+      if(!r.ok){alert("Ошибка: "+r.error);sel.value=row.role;return}
+      loadRolesList();
+    });
+  });
+  box.querySelectorAll(".role-del").forEach(b=>{
+    b.addEventListener("click",async()=>{
+      if(!confirm("Удалить роль этого пользователя? Он останется в системе, но потеряет доступ к служебным разделам.")) return;
+      const r=await VSRF_ROLES.removeUser(b.dataset.uid);
+      if(!r.ok){alert("Ошибка: "+r.error);return}
+      loadRolesList();
+    });
+  });
+}
+if(window.VSRF_ROLES) VSRF_ROLES.onChange(()=>{if(VSRF_ROLES.isAdmin()) loadRolesList()});
+setTimeout(()=>{if(window.VSRF_ROLES&&VSRF_ROLES.isAdmin()) loadRolesList()},800);
+
+const rolesBtn=$("rolesAddBtn");
+if(rolesBtn){
+  const createModal=$("createUserModal");
+  rolesBtn.addEventListener("click",()=>{createModal.classList.add("active");createModal.querySelector(".form-msg").textContent=""});
+  createModal.querySelector(".modal-close").addEventListener("click",()=>createModal.classList.remove("active"));
+  $("createUserCancel").addEventListener("click",()=>createModal.classList.remove("active"));
+  createModal.addEventListener("click",e=>{if(e.target===createModal) createModal.classList.remove("active")});
+  $("createUserForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const fd=new FormData(e.target);
+    const msg=createModal.querySelector(".form-msg");
+    msg.className="form-msg info";msg.textContent="Создание...";
+    const r=await VSRF_ROLES.inviteAndSetRole(
+      fd.get("email").trim(),
+      fd.get("password"),
+      fd.get("role"),
+      fd.get("display_name").trim()
+    );
+    if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+    msg.className="form-msg success";
+    msg.textContent="✓ Создано. "+(r.warning||"");
+    setTimeout(()=>{createModal.classList.remove("active");e.target.reset();loadRolesList()},1400);
+  });
+}
+
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24b8ad39eadf117',t:'MTc4NTY1NzU1Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
