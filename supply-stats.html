@@ -7,7 +7,7 @@
 <title>Статистика поставок</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=79">
+<link rel="stylesheet" href="style.css?v=81">
 <style id="vsrf-admin-guard">[data-admin]{display:none !important}[data-staff]{display:none !important}body.vsrf-is-admin [data-admin]{display:initial !important}body.vsrf-is-staff [data-staff]{display:initial !important}</style>
 </head>
 <body>
@@ -146,6 +146,31 @@
   </div>
 </div>
 
+<div class="modal-back" id="ssReplaceModal">
+  <div class="modal modal-xl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>🔄 Замена поставки</h3>
+    <div class="modal-sub">Отредактируйте данные (если нужно) и отправьте новую заявку в Discord. Старая пометится как «Заменено».</div>
+    <div id="ssReplaceBody"></div>
+    <div class="msg-row" style="margin-top:14px">
+      <div class="form-group msg-flex-1"><label>Итоговый статус для старой заявки</label>
+        <select id="ssReplTag" class="msg-input">
+          <option value="replaced">🔄 Замена (по умолчанию)</option>
+          <option value="ok">✅ Успешно</option>
+          <option value="undelivered">🚫 Не довезли</option>
+          <option value="fail">❌ Отказались</option>
+        </select>
+        <div class="te-hint">Какой статус проставить в статистику старой (заменённой) заявки</div>
+      </div>
+    </div>
+    <div class="form-msg" id="ssReplMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--gold-b)">
+      <button class="btn btn-ghost btn-sm" id="ssReplCancel">Отмена</button>
+      <button class="btn btn-gold" id="ssReplConfirm">🔄 Создать замену и отправить</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-back" id="loginModal">
   <div class="modal"><button class="modal-close" aria-label="Закрыть">✕</button><h3>Вход</h3>
     <form><div class="form-group"><label>Email</label><input type="email" name="email" required></div><div class="form-group"><label>Пароль</label><input type="password" name="password" required></div><button class="btn btn-gold" style="width:100%" type="submit">Войти</button><div class="form-msg"></div></form></div>
@@ -153,12 +178,12 @@
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=79"></script>
-<script src="config.js?v=79"></script>
-<script src="auth.js?v=79"></script>
-<script src="roles-engine.js?v=79"></script>
-<script src="supply-engine.js?v=79"></script>
-<script src="main.js?v=79"></script>
+<script src="supabase-loader.js?v=81"></script>
+<script src="config.js?v=81"></script>
+<script src="auth.js?v=81"></script>
+<script src="roles-engine.js?v=81"></script>
+<script src="supply-engine.js?v=81"></script>
+<script src="main.js?v=81"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -427,21 +452,88 @@ $("ssdDeleteDs").addEventListener("click",async()=>{
   await load();
 });
 
-$("ssdReplace").addEventListener("click",async()=>{
+$("ssdReplace").addEventListener("click",()=>{
   if(!CUR) return;
-  if(!confirm("Создать новую заявку-замену с теми же данными?\nСтарая останется в архиве со статусом «Замена», новая уйдёт снабженцам в Discord.")) return;
-  const msg=$("ssdMsg");
+  openReplaceModal();
+});
+
+function openReplaceModal(){
+  const fields=(FORM&&FORM.fields)||[];
+  const v=CUR.values||{};
+  const body=[];
+  body.push(`<div class="te-card"><div class="te-card-title">👤 Данные заявителя</div>
+    <div class="form-group"><label>ФИО</label><input type="text" id="reFio" class="msg-input" value="${esc(CUR.fio||"")}"></div>
+    <div class="msg-row">
+      <div class="form-group msg-flex-1"><label>Статик</label><input type="text" id="reStatic" class="msg-input" value="${esc(CUR.static_id||"")}" maxlength="7"></div>
+      <div class="form-group msg-flex-1"><label>Discord</label><input type="text" id="reDiscord" class="msg-input" value="${esc(CUR.discord||"")}"></div>
+    </div>
+  </div>`);
+  body.push(`<div class="te-card"><div class="te-card-title">📋 Данные поставки</div>`);
+  for(const f of fields){
+    const val=v[f.key];
+    body.push(renderReplaceField(f,val));
+  }
+  body.push(`</div>`);
+  $("ssReplaceBody").innerHTML=body.join("");
+  $("reStatic").addEventListener("input",e=>{
+    let vv=e.target.value.replace(/\D/g,"");
+    if(vv.length>3) vv=vv.slice(0,3)+"-"+vv.slice(3,6);
+    e.target.value=vv;
+  });
+  $("ssReplTag").value="replaced";
+  $("ssReplMsg").textContent="";
+  $("ssReplaceModal").classList.add("active");
+}
+
+function renderReplaceField(f,val){
+  const req=f.required?' <span class="sf-req">*</span>':' <span class="sf-opt">(необязательно)</span>';
+  const cur=val==null?"":String(val);
+  if(f.type==="textarea") return `<div class="form-group"><label>${esc(f.label)}${req}</label><textarea data-rk="${esc(f.key)}" class="msg-input msg-textarea msg-textarea-sm">${esc(cur)}</textarea></div>`;
+  if(f.type==="number") return `<div class="form-group"><label>${esc(f.label)}${req}</label><input type="number" data-rk="${esc(f.key)}" class="msg-input" value="${esc(cur)}"></div>`;
+  if(f.type==="date") return `<div class="form-group"><label>${esc(f.label)}${req}</label><input type="date" data-rk="${esc(f.key)}" class="msg-input" value="${esc(cur)}"></div>`;
+  if(f.type==="checkbox") return `<div class="form-group"><label class="doc-toggle-row"><input type="checkbox" data-rk="${esc(f.key)}" ${val?"checked":""}><span>${esc(f.label)}${req}</span></label></div>`;
+  if(f.type==="select"){
+    const opts=(f.options||[]).map(o=>`<option value="${esc(o)}" ${o===cur?"selected":""}>${esc(o)}</option>`).join("");
+    return `<div class="form-group"><label>${esc(f.label)}${req}</label><select data-rk="${esc(f.key)}" class="msg-input"><option value="">— выбери —</option>${opts}</select></div>`;
+  }
+  return `<div class="form-group"><label>${esc(f.label)}${req}</label><input type="text" data-rk="${esc(f.key)}" class="msg-input" value="${esc(cur)}"></div>`;
+}
+
+$("ssReplCancel").addEventListener("click",()=>$("ssReplaceModal").classList.remove("active"));
+$("ssReplaceModal").querySelector(".modal-close").addEventListener("click",()=>$("ssReplaceModal").classList.remove("active"));
+$("ssReplaceModal").addEventListener("click",e=>{if(e.target===$("ssReplaceModal")) $("ssReplaceModal").classList.remove("active")});
+
+$("ssReplConfirm").addEventListener("click",async()=>{
+  if(!CUR) return;
+  const msg=$("ssReplMsg");
+  const fio=$("reFio").value.trim();
+  const st=$("reStatic").value.trim();
+  const dc=$("reDiscord").value.trim();
+  if(!fio){msg.className="form-msg error";msg.textContent="Введите ФИО";return}
+  if(!VSRF_SUPPLY.validStatic(st)){msg.className="form-msg error";msg.textContent="Статик 000-000";return}
+  const newValues={};
+  for(const f of ((FORM&&FORM.fields)||[])){
+    const el=document.querySelector(`[data-rk="${f.key}"]`);
+    if(!el) continue;
+    let v=el.type==="checkbox"?el.checked:el.value;
+    if(f.required&&(v===""||v==null||v===false)){msg.className="form-msg error";msg.textContent="Заполните: "+f.label;return}
+    newValues[f.key]=v;
+  }
   msg.className="form-msg info";msg.textContent="Создание замены...";
-  const r=await VSRF_SUPPLY.replaceRequest(CUR.id);
+  const r=await VSRF_SUPPLY.replaceRequest(CUR.id,newValues,fio,st,dc||null);
   if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  const tag=$("ssReplTag").value;
+  if(tag&&tag!=="replaced"){
+    await VSRF_SUPPLY.updateRequest(CUR.id,{emoji_status:tag,emoji_status_note:"вручную при замене"});
+  }
   msg.className="form-msg ok";msg.textContent="✓ Создана замена #"+r.new_id;
   await load();
-  setTimeout(()=>$("ssDetail").classList.remove("active"),1200);
+  setTimeout(()=>{$("ssReplaceModal").classList.remove("active");$("ssDetail").classList.remove("active")},1200);
 });
 
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(apply);
 setTimeout(apply,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2579debfa06e842',t:'MTc4NTc4NDE2OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2583e59dddee848',t:'MTc4NTc5MDczOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

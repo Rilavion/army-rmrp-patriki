@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=79">
+<link rel="stylesheet" href="style.css?v=81">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -175,7 +175,10 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
             <div class="lk-full-kicker">Администрирование</div>
             <h2 class="lk-full-title">Роли пользователей</h2>
           </div>
-          <button class="btn btn-gold btn-sm" id="rolesAddBtn">+ Создать аккаунт</button>
+          <div style="display:flex;gap:8px">
+            <a href="roles.html" class="btn btn-ghost btn-sm">⚙ Управление ролями</a>
+            <button class="btn btn-gold btn-sm" id="rolesAddBtn">+ Создать аккаунт</button>
+          </div>
         </div>
         <div class="lk-full-body">
           <div class="roles-hint">
@@ -284,12 +287,12 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=79"></script>
-<script src="config.js?v=79"></script>
-<script src="main.js?v=79"></script>
-<script src="auth.js?v=79"></script>
-<script src="roles-engine.js?v=79"></script>
-<script src="holiday-engine.js?v=79"></script>
+<script src="supabase-loader.js?v=81"></script>
+<script src="config.js?v=81"></script>
+<script src="main.js?v=81"></script>
+<script src="auth.js?v=81"></script>
+<script src="roles-engine.js?v=81"></script>
+<script src="holiday-engine.js?v=81"></script>
 <script src="settings-panel.js"></script>
 <script src="sound-engine.js"></script>
 <script src="faq-engine.js"></script>
@@ -457,30 +460,35 @@ async function loadRolesList(){
   if(!list.length){box.innerHTML='<div class="roles-empty">Пока нет назначенных ролей.<br>Нажмите «+ Создать аккаунт» для добавления Старшего Состава.</div>';return}
   const ROLE_LABEL={admin:"Администратор",ss:"Ст. Состав",user:"Пользователь"};
   const ROLE_CLS={admin:"role-adm",ss:"role-ss",user:"role-usr"};
-  box.innerHTML=list.map(r=>`
-    <div class="role-row">
+  const customRoles=await VSRF_ROLES.listCustomRoles();
+  const roleOpts=customRoles.map(cr=>`<option value="${cr.id}" data-base="${cr.base_role}" data-key="${cr.key}">${(cr.name||cr.key).replace(/</g,"&lt;")}</option>`).join("");
+  box.innerHTML=list.map(r=>{
+    const curCr=customRoles.find(cr=>(r.custom_role_id&&cr.id===r.custom_role_id)||(!r.custom_role_id&&cr.key===r.role));
+    const badge=curCr?`<div class="role-badge" style="background:${curCr.color}22;border:1px solid ${curCr.color};color:${curCr.color}">${(curCr.name||curCr.key).replace(/</g,"&lt;")}</div>`:`<div class="role-badge ${ROLE_CLS[r.role]||""}">${ROLE_LABEL[r.role]||r.role}</div>`;
+    return `<div class="role-row">
       <div class="role-avatar">${(r.display_name||"?").slice(0,1).toUpperCase()}</div>
       <div class="role-info">
         <div class="role-name">${(r.display_name||"— без имени —").replace(/</g,"&lt;")}</div>
         <div class="role-uid">${r.user_id.slice(0,8)}…</div>
       </div>
-      <div class="role-badge ${ROLE_CLS[r.role]||""}">${ROLE_LABEL[r.role]||r.role}</div>
+      ${badge}
       <div class="role-actions">
         <select class="role-sel" data-uid="${r.user_id}">
-          <option value="admin" ${r.role==="admin"?"selected":""}>Админ</option>
-          <option value="ss" ${r.role==="ss"?"selected":""}>СС</option>
-          <option value="user" ${r.role==="user"?"selected":""}>User</option>
+          ${customRoles.map(cr=>`<option value="${cr.id}" ${(r.custom_role_id===cr.id||(!r.custom_role_id&&r.role===cr.key))?"selected":""}>${(cr.name||cr.key).replace(/</g,"&lt;")}</option>`).join("")}
         </select>
         <button class="role-del" data-uid="${r.user_id}" title="Удалить роль">🗑</button>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
   box.querySelectorAll(".role-sel").forEach(sel=>{
     sel.addEventListener("change",async()=>{
       const uid=sel.dataset.uid;
-      const nrole=sel.value;
+      const crId=sel.value;
+      const cr=customRoles.find(x=>x.id===crId);
+      if(!cr) return;
       const row=list.find(x=>x.user_id===uid);
-      const r=await VSRF_ROLES.setRole(uid,nrole,row?row.display_name:null);
-      if(!r.ok){alert("Ошибка: "+r.error);sel.value=row.role;return}
+      const r=await VSRF_ROLES.setRole(uid,cr.base_role,row?row.display_name:null,cr.id);
+      if(!r.ok){alert("Ошибка: "+r.error);return}
       loadRolesList();
     });
   });
@@ -522,6 +530,6 @@ if(rolesBtn){
 }
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2579d1c8acce842',t:'MTc4NTc4NDEzNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2583df21cd3e848',t:'MTc4NTc5MDcyMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

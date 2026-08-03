@@ -1,5 +1,7 @@
 window.VSRF_ROLES=(function(){
   let myRole=null;
+  let myPermissions={};
+  let myCustomRole=null;
   const listeners=[];
 
   function waitReady(timeoutMs){
@@ -31,25 +33,30 @@ window.VSRF_ROLES=(function(){
     }
     console.log("[VSRF_ROLES] Загружаем роль для user_id =",s.user.id,"email =",s.user.email);
     try{
-      const {data,error}=await s.client.from("user_roles").select("role,display_name").eq("user_id",s.user.id).maybeSingle();
+      const {data,error}=await s.client.from("user_roles").select("role,display_name,custom_role_id").eq("user_id",s.user.id).maybeSingle();
       if(error){
         console.error("[VSRF_ROLES] Ошибка запроса:",error.message,error);
-        if(error.message&&error.message.toLowerCase().includes("recursion")){
-          console.error("[VSRF_ROLES] 🔴 БЕСКОНЕЧНАЯ РЕКУРСИЯ в RLS-политике. Выполни SUPABASE-APPS-FIX.sql в Supabase SQL Editor.");
-        }
-        myRole=null;
+        myRole=null;myPermissions={};myCustomRole=null;
       }else{
         myRole=data?data.role:null;
-        console.log("[VSRF_ROLES] ✓ Роль:",myRole||"(нет записи в user_roles)");
         const displayName=data?data.display_name:null;
         if(displayName) try{localStorage.setItem("vsrf-my-display-name",displayName)}catch(e){}
-        if(!data){
-          console.warn("[VSRF_ROLES] Записи в user_roles для этого user_id НЕТ. Выполни в SQL Editor:\ninsert into public.user_roles(user_id,role,display_name) values ('"+s.user.id+"','admin','Твоё Имя') on conflict(user_id) do update set role='admin';");
-        }
+        if(data&&data.custom_role_id){
+          try{
+            const {data:cr}=await s.client.from("custom_roles").select("*").eq("id",data.custom_role_id).maybeSingle();
+            if(cr){myCustomRole=cr;myPermissions=cr.permissions||{}}
+          }catch(e){}
+        } else if(myRole){
+          try{
+            const {data:cr}=await s.client.from("custom_roles").select("*").eq("key",myRole).maybeSingle();
+            if(cr){myCustomRole=cr;myPermissions=cr.permissions||{}}
+          }catch(e){}
+        } else {myCustomRole=null;myPermissions={}}
+        console.log("[VSRF_ROLES] ✓ Роль:",myRole,"custom:",myCustomRole&&myCustomRole.name);
       }
     }catch(e){
       console.error("[VSRF_ROLES] Исключение:",e.message);
-      myRole=null;
+      myRole=null;myPermissions={};myCustomRole=null;
     }
     emit();
     apply();
@@ -65,9 +72,41 @@ window.VSRF_ROLES=(function(){
   }
 
   function getMyRole(){return myRole}
+  function getMyCustomRole(){return myCustomRole}
+  function getMyPermissions(){return myPermissions}
   function isAdmin(){return myRole==="admin"}
   function isSS(){return myRole==="ss"}
   function isStaff(){return myRole==="admin"||myRole==="ss"}
+  function can(section,action){
+    if(myRole==="admin") return true;
+    const sec=myPermissions[section];
+    if(!sec) return false;
+    if(action==null) return !!sec.view;
+    return !!sec[action];
+  }
+
+  async function listCustomRoles(){
+    const s=window.VSRF_AUTH.state;
+    if(!s||!s.client) return [];
+    const {data}=await s.client.from("custom_roles").select("*").order("sort",{ascending:true});
+    return data||[];
+  }
+  async function saveCustomRole(row){
+    const s=window.VSRF_AUTH.state;
+    if(!s||!s.client) return {ok:false,error:"no client"};
+    row.updated_at=new Date().toISOString();
+    if(!row.id) row.created_by=s.user?s.user.id:null;
+    const {data,error}=await s.client.from("custom_roles").upsert(row).select().single();
+    if(error) return {ok:false,error:error.message};
+    return {ok:true,row:data};
+  }
+  async function removeCustomRole(id){
+    const s=window.VSRF_AUTH.state;
+    if(!s||!s.client) return {ok:false,error:"no client"};
+    const {error}=await s.client.from("custom_roles").delete().eq("id",id);
+    if(error) return {ok:false,error:error.message};
+    return {ok:true};
+  }
   function onChange(fn){listeners.push(fn);fn(myRole);return()=>{const i=listeners.indexOf(fn);if(i>=0) listeners.splice(i,1)}}
   function emit(){listeners.forEach(fn=>{try{fn(myRole)}catch(e){}})}
 
@@ -80,11 +119,12 @@ window.VSRF_ROLES=(function(){
     return data||[];
   }
 
-  async function setRole(userId,role,displayName){
+  async function setRole(userId,role,displayName,customRoleId){
     const s=window.VSRF_AUTH.state;
     if(!s.client) return {ok:false,error:"no client"};
-    const {error}=await s.client.from("user_roles")
-      .upsert({user_id:userId,role,display_name:displayName||null},{onConflict:"user_id"});
+    const row={user_id:userId,role,display_name:displayName||null};
+    if(customRoleId!==undefined) row.custom_role_id=customRoleId||null;
+    const {error}=await s.client.from("user_roles").upsert(row,{onConflict:"user_id"});
     if(error) return {ok:false,error:error.message};
     return {ok:true};
   }
@@ -121,6 +161,7 @@ window.VSRF_ROLES=(function(){
     setTimeout(loadMyRole,300);
   });
 
-  return {loadMyRole,getMyRole,isAdmin,isSS,isStaff,onChange,
-          listAllRoles,setRole,removeUser,inviteAndSetRole,apply};
+  return {loadMyRole,getMyRole,getMyCustomRole,getMyPermissions,can,isAdmin,isSS,isStaff,onChange,
+          listAllRoles,setRole,removeUser,inviteAndSetRole,apply,
+          listCustomRoles,saveCustomRole,removeCustomRole};
 })();
