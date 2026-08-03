@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<title>Статистика поставок</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=78">
+<style id="vsrf-admin-guard">[data-admin]{display:none !important}[data-staff]{display:none !important}body.vsrf-is-admin [data-admin]{display:initial !important}body.vsrf-is-staff [data-staff]{display:initial !important}</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas><div class="bg-noise"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-text"><span class="brand-label">Статистика</span><span class="brand-name">Поставки</span></div>
+    </a>
+    <div class="header-actions" style="margin-left:auto">
+      <a href="supply.html" class="btn btn-ghost btn-sm">← К форме</a>
+      <a href="supply-admin.html" class="btn btn-gold btn-sm" data-admin>⚙ Настройка</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="apps-head">
+    <div class="container">
+      <div class="apps-head-ribbon">
+        <span class="apps-head-ribbon-line"></span><span class="apps-head-ribbon-emblem">◈</span>
+        <span class="apps-head-ribbon-name">Статистика поставок</span>
+        <span class="apps-head-ribbon-emblem">◈</span><span class="apps-head-ribbon-line"></span>
+      </div>
+      <h1 class="apps-head-title">Статистика поставок</h1>
+    </div>
+  </section>
+
+  <section class="apps-body">
+    <div class="container">
+
+      <div id="ssGuard" style="display:none">
+        <div class="apps-guard-box"><div class="apps-guard-icon">⚠</div><h2>Доступ ограничен</h2>
+          <p>Статистика доступна только Старшему Составу и Администрации.</p>
+          <div style="margin-top:20px"><button class="btn btn-gold" data-open-login>Войти</button></div></div>
+      </div>
+
+      <div id="ssRoot" style="display:none">
+        <div class="ss-toolbar">
+          <div class="ss-toolbar-l">
+            <label>Период:
+              <select id="ssPeriod" class="vp-search" style="max-width:200px">
+                <option value="month" selected>Текущий месяц</option>
+                <option value="week">Последние 7 дней</option>
+                <option value="prev">Прошлый месяц</option>
+                <option value="quarter">Квартал</option>
+                <option value="year">Год</option>
+                <option value="all">Всё время</option>
+                <option value="custom">Свой период</option>
+              </select>
+            </label>
+            <input type="date" id="ssFrom" class="vp-search" style="max-width:160px;display:none">
+            <input type="date" id="ssTo" class="vp-search" style="max-width:160px;display:none">
+          </div>
+          <div class="ss-toolbar-r">
+            <span class="vp-map-hint" id="ssRescanStatus"></span>
+            <button class="btn btn-ghost btn-sm" id="ssRescan">↻ Пересканировать эмодзи</button>
+            <button class="btn btn-ghost btn-sm" id="ssClear" data-admin>🗑 Очистить период</button>
+          </div>
+        </div>
+
+        <div class="vp-stats-cards" id="ssCards"></div>
+
+        <div class="ss-charts">
+          <div class="ss-chart-card">
+            <div class="ss-chart-title">📊 По статусам</div>
+            <div id="ssStatusChart"></div>
+          </div>
+          <div class="ss-chart-card">
+            <div class="ss-chart-title">🏢 Топ организаций</div>
+            <div id="ssOrgChart"></div>
+          </div>
+          <div class="ss-chart-card">
+            <div class="ss-chart-title">📦 Топ типов поставок</div>
+            <div id="ssKindChart"></div>
+          </div>
+        </div>
+
+        <div class="te-card" style="margin-top:16px">
+          <div class="te-card-title-row">
+            <div class="te-card-title">📋 Заявки за период</div>
+            <div style="flex:1"></div>
+            <select id="ssFilterStatus" class="vp-search" style="max-width:200px">
+              <option value="">Все</option>
+              <option value="ok">✅ Успешно</option>
+              <option value="fail">❌ Не успешно</option>
+              <option value="offline">📵 Не вышли на связь</option>
+              <option value="undelivered">🚫 Не довезли</option>
+              <option value="dispute">⚠ Спорные</option>
+              <option value="replaced">🔄 Замена (спорная)</option>
+              <option value="none">➖ Без реакции</option>
+            </select>
+          </div>
+          <div class="ss-list" id="ssList"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal-back" id="ssDetail">
+  <div class="modal modal-xl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="ssdTitle">Заявка</h3>
+    <div class="modal-sub" id="ssdSub"></div>
+    <div id="ssdBody"></div>
+    <div class="form-group" style="margin-top:14px">
+      <label>Решение спорной заявки (комментарий)</label>
+      <textarea id="ssdResolution" class="msg-input msg-textarea msg-textarea-sm"></textarea>
+    </div>
+    <div class="form-msg" id="ssdMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
+      <button class="btn btn-ghost btn-sm" data-admin id="ssdDelete">🗑 Удалить (admin)</button>
+      <div style="flex:1"></div>
+      <a class="btn btn-ghost btn-sm" id="ssdOpen" target="_blank">Открыть в Discord ↗</a>
+      <button class="btn btn-gold btn-sm" id="ssdSaveRes">💾 Сохранить решение</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal"><button class="modal-close" aria-label="Закрыть">✕</button><h3>Вход</h3>
+    <form><div class="form-group"><label>Email</label><input type="email" name="email" required></div><div class="form-group"><label>Пароль</label><input type="password" name="password" required></div><button class="btn btn-gold" style="width:100%" type="submit">Войти</button><div class="form-msg"></div></form></div>
+</div>
+
+<footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
+
+<script src="supabase-loader.js?v=78"></script>
+<script src="config.js?v=78"></script>
+<script src="auth.js?v=78"></script>
+<script src="roles-engine.js?v=78"></script>
+<script src="supply-engine.js?v=78"></script>
+<script src="main.js?v=78"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+let FORM=null,REQS=[],GUILD_ID=null;
+const STATUS_LABELS={ok:"Успешно",fail:"Не успешно",offline:"Не вышли на связь",undelivered:"Не довезли",replaced:"Замена (спорная)",dispute:"Спорная",none:"Без реакции",deleted:"Удалено"};
+const STATUS_ICONS={ok:"✅",fail:"❌",offline:"📵",undelivered:"🚫",replaced:"🔄",dispute:"⚠",none:"➖",deleted:"🗑"};
+const STATUS_COLORS={ok:"#7dd97d",fail:"#e97a7a",offline:"#e9d29a",undelivered:"#e97a7a",replaced:"#a2d8ff",dispute:"#f0d89b",none:"#999",deleted:"#666"};
+
+function ruDT(d){try{return new Date(d).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}catch(e){return String(d||"")}}
+function isoDate(d){const dt=new Date(d);return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0")}
+
+function getPeriod(){
+  const p=$("ssPeriod").value;
+  const now=new Date();
+  let from=null,to=null;
+  if(p==="month"){from=new Date(now.getFullYear(),now.getMonth(),1);to=new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59)}
+  else if(p==="week"){from=new Date(now);from.setDate(now.getDate()-7);to=now}
+  else if(p==="prev"){from=new Date(now.getFullYear(),now.getMonth()-1,1);to=new Date(now.getFullYear(),now.getMonth(),0,23,59,59)}
+  else if(p==="quarter"){from=new Date(now);from.setMonth(now.getMonth()-3);to=now}
+  else if(p==="year"){from=new Date(now);from.setFullYear(now.getFullYear()-1);to=now}
+  else if(p==="all"){from=null;to=null}
+  else if(p==="custom"){
+    from=$("ssFrom").value?new Date($("ssFrom").value):null;
+    to=$("ssTo").value?new Date($("ssTo").value+"T23:59:59"):null;
+  }
+  return {from,to};
+}
+
+async function apply(){
+  const isStaff=window.VSRF_ROLES&&window.VSRF_ROLES.isStaff();
+  if(!isStaff){$("ssGuard").style.display="";$("ssRoot").style.display="none";return}
+  $("ssGuard").style.display="none";$("ssRoot").style.display="";
+  document.body.classList.toggle("vsrf-is-admin",!!(window.VSRF_ROLES&&window.VSRF_ROLES.isAdmin()));
+  document.body.classList.toggle("vsrf-is-staff",true);
+  await load();
+}
+
+async function load(){
+  FORM=await VSRF_SUPPLY.fetchForm();
+  const {from,to}=getPeriod();
+  REQS=await VSRF_SUPPLY.fetchRequests(from?from.toISOString():null,to?to.toISOString():null,1000);
+  render();
+}
+
+function render(){
+  const total=REQS.length;
+  const counts={ok:0,fail:0,offline:0,undelivered:0,replaced:0,dispute:0,none:0};
+  const orgCount={},kindCount={};
+  for(const r of REQS){
+    const s=r.emoji_status||"none";
+    if(counts[s]!=null) counts[s]++;
+    const org=(r.values&&r.values.org)||"—";
+    orgCount[org]=(orgCount[org]||0)+1;
+    const kind=(r.values&&r.values.kind)||"—";
+    kindCount[kind]=(kindCount[kind]||0)+1;
+  }
+  const success=counts.ok;
+  const pct=total?Math.round(success*100/total):0;
+  $("ssCards").innerHTML=`
+    <div class="vp-stats-card"><div class="vp-stats-card-num">${total}</div><div class="vp-stats-card-lbl">всего заявок</div></div>
+    <div class="vp-stats-card vp-arc-stat-ok"><div class="vp-stats-card-num">${success}</div><div class="vp-stats-card-lbl">успешно (${pct}%)</div></div>
+    <div class="vp-stats-card vp-arc-stat-warn"><div class="vp-stats-card-num">${counts.dispute+counts.replaced}</div><div class="vp-stats-card-lbl">спорных</div></div>
+    <div class="vp-stats-card"><div class="vp-stats-card-num" style="color:#f0a5a5">${counts.fail+counts.offline+counts.undelivered}</div><div class="vp-stats-card-lbl">неудачных</div></div>
+    <div class="vp-stats-card"><div class="vp-stats-card-num" style="color:#999">${counts.none}</div><div class="vp-stats-card-lbl">без реакции</div></div>
+  `;
+  $("ssStatusChart").innerHTML=renderBars(counts,total,k=>STATUS_ICONS[k]+" "+STATUS_LABELS[k],k=>STATUS_COLORS[k]);
+  $("ssOrgChart").innerHTML=renderBars(orgCount,total,k=>k,()=>"#cda85a",8);
+  $("ssKindChart").innerHTML=renderBars(kindCount,total,k=>k,()=>"#a2d8ff",8);
+  renderList();
+}
+
+function renderBars(counts,total,labelFn,colorFn,limit){
+  const entries=Object.entries(counts).filter(([_,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  const top=limit?entries.slice(0,limit):entries;
+  if(!top.length) return `<div class="apps-empty" style="padding:20px"><p style="color:var(--muted)">Нет данных</p></div>`;
+  const max=Math.max(...top.map(e=>e[1]));
+  return top.map(([k,v])=>{
+    const pct=Math.round(v*100/max);
+    const color=colorFn(k);
+    return `<div class="ss-bar-row">
+      <div class="ss-bar-lbl">${esc(labelFn(k))}</div>
+      <div class="ss-bar"><div class="ss-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="ss-bar-val">${v}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderList(){
+  const f=$("ssFilterStatus").value;
+  const list=REQS.filter(r=>!f||(r.emoji_status||"none")===f);
+  const box=$("ssList");
+  if(!list.length){box.innerHTML=`<div class="apps-empty"><p>Заявок нет</p></div>`;return}
+  box.innerHTML=list.map(r=>{
+    const s=r.emoji_status||"none";
+    const org=(r.values&&r.values.org)||"—";
+    const kind=(r.values&&r.values.kind)||"—";
+    return `<div class="ss-row" data-id="${r.id}">
+      <div class="ss-row-status" style="color:${STATUS_COLORS[s]}">${STATUS_ICONS[s]}</div>
+      <div class="ss-row-main">
+        <div class="ss-row-title">${esc(r.fio)} · <code>${esc(r.static_id)}</code> · <b>${esc(org)}</b> — ${esc(kind)}</div>
+        <div class="ss-row-sub">${ruDT(r.created_at)} ${r.dispute_resolution?"· ✎ решено":""} ${r.emoji_status_note?"· "+esc(r.emoji_status_note):""}</div>
+      </div>
+      <div class="ss-row-status-lbl">${STATUS_LABELS[s]||s}</div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll(".ss-row").forEach(el=>el.addEventListener("click",()=>openDetail(el.dataset.id)));
+}
+$("ssFilterStatus").addEventListener("change",renderList);
+
+$("ssPeriod").addEventListener("change",()=>{
+  const p=$("ssPeriod").value;
+  $("ssFrom").style.display=p==="custom"?"":"none";
+  $("ssTo").style.display=p==="custom"?"":"none";
+  if(p==="custom"){
+    const now=new Date();
+    if(!$("ssFrom").value) $("ssFrom").value=isoDate(new Date(now.getFullYear(),now.getMonth(),1));
+    if(!$("ssTo").value) $("ssTo").value=isoDate(now);
+  }
+  load();
+});
+$("ssFrom").addEventListener("change",load);
+$("ssTo").addEventListener("change",load);
+
+$("ssRescan").addEventListener("click",async()=>{
+  const st=$("ssRescanStatus");
+  st.textContent="Запрос боту...";
+  const {from,to}=getPeriod();
+  const r=await VSRF_SUPPLY.requestRescan(from?from.toISOString():null,to?to.toISOString():null);
+  if(!r.ok){st.textContent="Ошибка: "+r.error;return}
+  st.textContent="Сканирование...";
+  const res=await VSRF_SUPPLY.pollRescan(r.id,60000);
+  if(!res.ok){st.textContent="Не удалось: "+(res.error||"")}
+  else st.textContent="✓ Обработано: "+res.scanned;
+  await load();
+  setTimeout(()=>{st.textContent=""},4000);
+});
+
+$("ssClear").addEventListener("click",async()=>{
+  if(!confirm("Удалить ВСЕ заявки за выбранный период? Действие необратимо.")) return;
+  const {from,to}=getPeriod();
+  const r=await VSRF_SUPPLY.deleteAll(from?from.toISOString():null,to?to.toISOString():null);
+  if(!r.ok){alert(r.error);return}
+  await load();
+});
+
+let CUR=null;
+function openDetail(id){
+  CUR=REQS.find(r=>r.id===id);if(!CUR) return;
+  const fields=(FORM&&FORM.fields)||[];
+  $("ssdTitle").textContent="Заявка · "+CUR.fio+" ("+CUR.static_id+")";
+  $("ssdSub").innerHTML=`Создано: ${ruDT(CUR.created_at)}${CUR.resolved_by_name?` · ✎ ${esc(CUR.resolved_by_name)} · ${ruDT(CUR.resolved_at)}`:""}`;
+  const s=CUR.emoji_status||"none";
+  const rows=[`<div class="ssd-status" style="background:${STATUS_COLORS[s]}22;border-color:${STATUS_COLORS[s]};color:${STATUS_COLORS[s]}"><b>${STATUS_ICONS[s]} ${STATUS_LABELS[s]||s}</b>${CUR.emoji_status_note?" · "+esc(CUR.emoji_status_note):""}</div>`];
+  rows.push(`<div class="ssd-field"><b>Discord:</b> ${esc(CUR.discord||"—")}</div>`);
+  for(const f of fields){
+    const v=(CUR.values||{})[f.key];
+    if(v==null||v==="") continue;
+    rows.push(`<div class="ssd-field"><b>${esc(f.label)}:</b> ${esc(String(v))}</div>`);
+  }
+  $("ssdBody").innerHTML=rows.join("");
+  $("ssdResolution").value=CUR.dispute_resolution||"";
+  if(CUR.channel_id&&CUR.message_id){
+    $("ssdOpen").style.display="";
+    $("ssdOpen").href="https://discord.com/channels/@me/"+CUR.channel_id+"/"+CUR.message_id;
+  } else $("ssdOpen").style.display="none";
+  $("ssdMsg").textContent="";
+  $("ssDetail").classList.add("active");
+}
+$("ssDetail").querySelector(".modal-close").addEventListener("click",()=>$("ssDetail").classList.remove("active"));
+$("ssDetail").addEventListener("click",e=>{if(e.target===$("ssDetail")) $("ssDetail").classList.remove("active")});
+$("ssdSaveRes").addEventListener("click",async()=>{
+  if(!CUR) return;
+  const r=await VSRF_SUPPLY.updateRequest(CUR.id,{dispute_resolution:$("ssdResolution").value.trim()||null});
+  if(!r.ok){$("ssdMsg").className="form-msg error";$("ssdMsg").textContent=r.error;return}
+  $("ssdMsg").className="form-msg ok";$("ssdMsg").textContent="✓ Сохранено";
+  await load();
+});
+$("ssdDelete").addEventListener("click",async()=>{
+  if(!CUR) return;
+  if(!confirm("Удалить заявку?")) return;
+  const r=await VSRF_SUPPLY.deleteRequest(CUR.id);
+  if(!r.ok){alert(r.error);return}
+  $("ssDetail").classList.remove("active");
+  await load();
+});
+
+if(window.VSRF_ROLES) VSRF_ROLES.onChange(apply);
+setTimeout(apply,600);
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25721b01bc49da1',t:'MTc4NTc3OTA3OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
