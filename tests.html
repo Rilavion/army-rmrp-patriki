@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<title>ВС РФ — Тестирование</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=72">
+<style id="vsrf-admin-guard">
+[data-admin]{display:none !important}
+[data-staff]{display:none !important}
+[data-loggedin]{display:none !important}
+body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
+body.vsrf-is-staff .nav a[data-staff]{display:inline-flex !important}
+body.vsrf-is-logged .nav a[data-loggedin]{display:inline-flex !important}
+body.vsrf-is-admin [data-admin]:not(.nav a){display:initial !important}
+body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-text"><span class="brand-label">Вооружённые Силы РФ</span><span class="brand-name">1-я ОБрСпН · в/ч №12132</span></div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="info.html" data-page="info.html" data-transition>Информация</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="learn.html" data-page="learn.html" data-transition>Учебные материалы</a>
+      <a href="tests.html" data-page="tests.html" data-transition data-loggedin class="active">Тестирование</a>
+      <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
+      <a href="docs.html" data-page="docs.html" data-transition data-admin>Документы</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+      <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
+      <a href="apps.html" data-page="apps.html" data-transition data-staff>Заявления</a>
+      <a href="vp.html" data-page="vp.html" data-transition data-staff>Проверки ВП</a>
+      <a href="message.html" data-page="message.html" data-transition data-admin>Сообщения</a>
+      <a href="lk.html" data-page="lk.html" data-transition data-admin>Личный кабинет</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="login-btn" data-open-login><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg><span>Войти</span></button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="apps-head">
+    <div class="container">
+      <div class="apps-head-ribbon">
+        <span class="apps-head-ribbon-line"></span><span class="apps-head-ribbon-emblem">◈</span>
+        <span class="apps-head-ribbon-name">Учебная часть · Тестирование</span>
+        <span class="apps-head-ribbon-emblem">◈</span><span class="apps-head-ribbon-line"></span>
+      </div>
+      <h1 class="apps-head-title">Тестирование</h1>
+      <div class="apps-head-subtitle">Проверка знаний по учебным материалам</div>
+    </div>
+  </section>
+
+  <section class="apps-body">
+    <div class="container">
+
+      <div class="learn-toolbar">
+        <div class="learn-toolbar-l">
+          <input type="search" class="vp-search" id="tSearch" placeholder="Поиск по названию теста...">
+          <select class="vp-search" id="tCatFilter" style="max-width:220px"><option value="">Все категории</option></select>
+        </div>
+        <div class="learn-toolbar-r">
+          <a href="learn.html" class="btn btn-ghost btn-sm">← К материалам</a>
+          <button class="btn btn-ghost btn-sm" id="tAttemptsBtn" data-staff>📊 Результаты</button>
+          <button class="btn btn-gold btn-sm" id="tAdminBtn" data-admin>⚙ Управление</button>
+        </div>
+      </div>
+
+      <div class="tests-grid" id="testsGrid"><div class="apps-empty">Загрузка...</div></div>
+
+    </div>
+  </section>
+</main>
+
+<div class="modal-back" id="tAdminModal">
+  <div class="modal modal-xxl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>⚙ Управление тестами и категориями</h3>
+    <div class="vp-arc-tabs">
+      <button class="vp-arc-tab active" data-tam="tests">📝 Тесты</button>
+      <button class="vp-arc-tab" data-tam="cats">🗂 Категории</button>
+    </div>
+    <div class="vp-arc-tab-body" data-tab="tests">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn btn-gold btn-sm" id="tCreateBtn">+ Новый тест</button>
+      </div>
+      <div class="tests-admin-list" id="tAdminList"></div>
+    </div>
+    <div class="vp-arc-tab-body" data-tab="cats" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="text" id="tCatNewName" class="vp-search" placeholder="Название новой категории" style="flex:1">
+        <input type="color" id="tCatNewColor" value="#cda85a" style="width:44px;height:36px;border-radius:6px;border:1px solid var(--gold-b);cursor:pointer">
+        <button class="btn btn-gold btn-sm" id="tCatAdd">+ Добавить</button>
+      </div>
+      <div class="tests-cats-list" id="tCatsList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="tEditModal">
+  <div class="modal modal-xxl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="tEditTitle">Редактирование теста</h3>
+    <div class="modal-sub">Настройки, вопросы, каналы результата, ограничения — всё в одном месте.</div>
+
+    <div class="vp-arc-tabs">
+      <button class="vp-arc-tab active" data-tet="main">Основное</button>
+      <button class="vp-arc-tab" data-tet="q">Вопросы</button>
+      <button class="vp-arc-tab" data-tet="ping">Строчки для пинга</button>
+      <button class="vp-arc-tab" data-tet="blocks">Блокировки</button>
+    </div>
+
+    <div class="vp-arc-tab-body" data-tab="main">
+      <div class="msg-row">
+        <div class="form-group msg-flex-2"><label>Название теста *</label><input type="text" id="teTitle" class="msg-input"></div>
+        <div class="form-group msg-flex-1"><label>Категория</label><select id="teCat" class="msg-input"><option value="">— без категории —</option></select></div>
+      </div>
+      <div class="form-group"><label>Краткое описание (для карточки)</label><input type="text" id="teDesc" class="msg-input"></div>
+      <div class="form-group"><label>Вступительный текст (показывается перед началом)</label><textarea id="teIntro" class="msg-input msg-textarea msg-textarea-sm"></textarea></div>
+      <div class="msg-row">
+        <div class="form-group msg-flex-1"><label>Порог прохождения (%)</label><input type="number" id="tePass" class="msg-input" min="0" max="100" value="70"></div>
+        <div class="form-group msg-flex-1"><label>Макс. попыток (0 = без ограничений)</label><input type="number" id="teMax" class="msg-input" min="0" value="3"></div>
+        <div class="form-group msg-flex-1"><label>Лимит времени (мин, 0 = нет)</label><input type="number" id="teTime" class="msg-input" min="0" value="0"></div>
+      </div>
+      <div class="form-group">
+        <label>Канал Discord для отправки результатов</label>
+        <select id="teChannel" class="msg-input"></select>
+      </div>
+      <div class="msg-row">
+        <div class="form-group msg-flex-1"><label class="doc-toggle-row"><input type="checkbox" id="tePublished"><span>Опубликован (виден пользователям)</span></label></div>
+        <div class="form-group msg-flex-1"><label class="doc-toggle-row"><input type="checkbox" id="teShowAns"><span>Показывать правильные ответы после сдачи</span></label></div>
+      </div>
+      <div class="form-group"><label>Slug (для ссылки, оставь пустым чтобы сгенерировать)</label><input type="text" id="teSlug" class="msg-input" placeholder="например: osnovy-oms"></div>
+    </div>
+
+    <div class="vp-arc-tab-body" data-tab="q" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn btn-gold btn-sm" id="tQAdd">+ Добавить вопрос</button>
+        <div style="flex:1"></div>
+        <span class="vp-map-hint" id="tQHint"></span>
+      </div>
+      <div class="tests-q-list" id="tQList"></div>
+    </div>
+
+    <div class="vp-arc-tab-body" data-tab="ping" style="display:none">
+      <div class="modal-sub">Строчки, которые попадут в сообщение результата. Пример: «Звание: Ефрейтор», «Пост: КПП №1».</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="text" id="tPingKey" class="vp-search" placeholder="Ключ (напр. Звание)" style="max-width:200px">
+        <input type="text" id="tPingVal" class="vp-search" placeholder="Значение (напр. Ефрейтор)" style="flex:1">
+        <button class="btn btn-gold btn-sm" id="tPingAdd">+ Добавить</button>
+      </div>
+      <div class="tests-ping-list" id="tPingList"></div>
+    </div>
+
+    <div class="vp-arc-tab-body" data-tab="blocks" style="display:none">
+      <div class="modal-sub">Заблокировать прохождение теста для конкретного статика или Discord-ника. Заблокированные не смогут отправить ответы.</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <select id="tBlockKind" class="vp-search" style="max-width:140px"><option value="static">Статик</option><option value="discord">Discord</option></select>
+        <input type="text" id="tBlockVal" class="vp-search" placeholder="000-000 или @username" style="flex:1">
+        <input type="text" id="tBlockReason" class="vp-search" placeholder="Причина (опц.)" style="flex:1">
+        <button class="btn btn-gold btn-sm" id="tBlockAdd">Заблокировать</button>
+      </div>
+      <div class="tests-blocks-list" id="tBlocksList"></div>
+    </div>
+
+    <div class="form-msg" id="teMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
+      <button class="btn btn-ghost btn-sm" id="teDelete" style="display:none">🗑 Удалить тест</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" id="teCancel">Закрыть</button>
+      <button class="btn btn-gold btn-sm" id="teSave">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="tQEditModal">
+  <div class="modal modal-lg">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="tQEditTitle">Редактирование вопроса</h3>
+    <div class="form-group">
+      <label>Тип вопроса</label>
+      <select id="qKind" class="msg-input">
+        <option value="single">🔘 Один правильный ответ</option>
+        <option value="multi">☑ Несколько правильных ответов</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Текст вопроса *</label><textarea id="qText" class="msg-input msg-textarea msg-textarea-sm"></textarea></div>
+    <div class="form-group">
+      <label>Изображения к вопросу (URL, по одному на строку)</label>
+      <textarea id="qImages" class="msg-input msg-textarea msg-textarea-sm" placeholder="https://... (опц., каждый URL с новой строки)"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Варианты ответов <span class="msg-help">Кликайте по галочке для отметки правильных.</span></label>
+      <div id="qOptsList"></div>
+      <button class="btn btn-ghost btn-sm" id="qOptAdd" style="margin-top:8px">+ Добавить вариант</button>
+    </div>
+    <div class="msg-row">
+      <div class="form-group msg-flex-1"><label>Баллы за вопрос</label><input type="number" id="qPoints" class="msg-input" min="1" value="1"></div>
+      <div class="form-group msg-flex-1"><label>Сортировка</label><input type="number" id="qSort" class="msg-input" value="100"></div>
+    </div>
+    <div class="form-group"><label>Пояснение (опц., не показывается пользователю)</label><textarea id="qExplain" class="msg-input msg-textarea msg-textarea-sm"></textarea></div>
+    <div class="form-msg" id="qMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
+      <button class="btn btn-ghost btn-sm" id="qDelete" style="display:none">🗑 Удалить</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" id="qCancel">Отмена</button>
+      <button class="btn btn-gold btn-sm" id="qSave">Сохранить вопрос</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="tAttemptsModal">
+  <div class="modal modal-xxl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>📊 Результаты тестов</h3>
+    <div class="modal-sub">Все прохождения тестов. Клик на строку → детали, редактирование, повторная пингация.</div>
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+      <select id="aTestFilter" class="vp-search" style="max-width:280px"><option value="">Все тесты</option></select>
+      <input type="search" id="aSearch" class="vp-search" placeholder="Поиск по ФИО/статику/discord..." style="flex:1">
+      <select id="aStatusFilter" class="vp-search" style="max-width:180px"><option value="">Все статусы</option><option value="passed">Сдано</option><option value="failed">Не сдано</option></select>
+    </div>
+    <div class="attempts-list" id="aList"></div>
+  </div>
+</div>
+
+<div class="modal-back" id="tAttemptDetailModal">
+  <div class="modal modal-xxl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 id="adTitle">Прохождение</h3>
+    <div class="modal-sub" id="adSub"></div>
+    <div class="ad-body" id="adBody"></div>
+    <div class="form-msg" id="adMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" id="adResetBtn" data-admin>↺ Сбросить попытки этого юзера</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" id="adRepingBtn">📤 Пинг повторно</button>
+      <button class="btn btn-gold btn-sm" id="adSaveBtn">Сохранить изменения</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Вход</h3>
+    <form>
+      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
+      <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
+      <div class="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div>
+  </div>
+</footer>
+
+<div class="fab-stack"><button class="fab" id="fabUp" title="Наверх"><svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg></button></div>
+
+<script src="supabase-loader.js?v=72"></script>
+<script src="config.js?v=72"></script>
+<script src="auth.js?v=72"></script>
+<script src="roles-engine.js?v=72"></script>
+<script src="tests-engine.js?v=72"></script>
+<script src="main.js?v=72"></script>
+<script src="holiday-engine.js?v=72"></script>
+<script src="settings-panel.js?v=72"></script>
+<script src="sound-engine.js?v=72"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+let TESTS=[],CATS=[],CHANNELS=[];
+let SEARCH="",CAT_FILTER="";
+
+function updateLoggedFlag(){const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;document.body.classList.toggle("vsrf-is-logged",!!(s&&s.user))}
+function applyRoles(){
+  const isAdmin=!!(window.VSRF_ROLES&&window.VSRF_ROLES.isAdmin());
+  const isStaff=!!(window.VSRF_ROLES&&window.VSRF_ROLES.isStaff());
+  document.body.classList.toggle("vsrf-is-admin",isAdmin);
+  document.body.classList.toggle("vsrf-is-staff",isStaff);
+  updateLoggedFlag();
+}
+
+async function loadAll(){
+  const [t,c,ch]=await Promise.all([VSRF_TESTS.fetchTests(!(window.VSRF_ROLES&&window.VSRF_ROLES.isStaff())),VSRF_TESTS.fetchCategories(),VSRF_TESTS.fetchDsChannels()]);
+  TESTS=t;CATS=c;CHANNELS=ch;
+  $("tCatFilter").innerHTML=`<option value="">Все категории</option>`+CATS.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
+  renderList();
+}
+
+function catById(id){return CATS.find(c=>c.id===id)}
+function testUrl(t){return "test.html?t="+encodeURIComponent(t.slug||t.id)}
+
+function renderList(){
+  const box=$("testsGrid");
+  const q=SEARCH.toLowerCase();
+  const list=TESTS.filter(t=>{
+    if(CAT_FILTER&&t.category_id!==CAT_FILTER) return false;
+    if(!q) return true;
+    return (t.title||"").toLowerCase().includes(q)||(t.description||"").toLowerCase().includes(q);
+  });
+  if(!list.length){box.innerHTML=`<div class="apps-empty"><h3>Тестов нет</h3><p>Пока не создано ни одного опубликованного теста.</p></div>`;return}
+  const byCat=new Map();
+  for(const t of list){
+    const k=t.category_id||"__none__";
+    if(!byCat.has(k)) byCat.set(k,[]);
+    byCat.get(k).push(t);
+  }
+  const parts=[];
+  for(const [cid,items] of byCat){
+    const cat=catById(cid);
+    const name=cat?cat.name:"Без категории";
+    const color=cat?cat.color:"#cda85a";
+    parts.push(`<div class="tests-cat">
+      <div class="tests-cat-title"><span class="tests-cat-dot" style="background:${esc(color)}"></span>${esc(name)}<span class="tests-cat-count">${items.length}</span></div>
+      <div class="tests-cards">
+        ${items.map(t=>{
+          const url=testUrl(t);
+          return `<div class="test-card ${t.published?"":"test-card-draft"}">
+            <div class="test-card-head">
+              <div class="test-card-badge" style="border-color:${esc(color)};color:${esc(color)}">${t.published?"ОПУБЛИКОВАН":"ЧЕРНОВИК"}</div>
+              <button class="test-card-copy" data-copy="${esc(new URL(url,location.href).href)}" title="Копировать ссылку на тест">🔗</button>
+            </div>
+            <div class="test-card-title">${esc(t.title)}</div>
+            ${t.description?`<div class="test-card-desc">${esc(t.description)}</div>`:""}
+            <div class="test-card-meta">
+              <span title="Порог сдачи">🎯 ${t.pass_score}%</span>
+              <span title="Макс. попыток">🔁 ${t.max_attempts||"∞"}</span>
+              ${t.time_limit_minutes?`<span title="Лимит">⏱ ${t.time_limit_minutes}м</span>`:""}
+            </div>
+            <div class="test-card-acts">
+              <a class="btn btn-gold" href="${esc(url)}">Начать тест →</a>
+              <button class="btn btn-ghost btn-sm" data-admin data-edit-test="${t.id}">✎ Ред.</button>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`);
+  }
+  box.innerHTML=parts.join("");
+  box.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",e=>{
+    e.stopPropagation();navigator.clipboard.writeText(b.dataset.copy);
+    b.textContent="✓";setTimeout(()=>b.textContent="🔗",1000);
+  }));
+  box.querySelectorAll("[data-edit-test]").forEach(b=>b.addEventListener("click",()=>openTestEdit(b.dataset.editTest)));
+  applyRoles();
+}
+
+$("tSearch").addEventListener("input",()=>{SEARCH=$("tSearch").value.trim();renderList()});
+$("tCatFilter").addEventListener("change",()=>{CAT_FILTER=$("tCatFilter").value;renderList()});
+
+/* ============ АДМИН: управление ============ */
+
+$("tAdminBtn").addEventListener("click",()=>{$("tAdminModal").classList.add("active");switchTam("tests")});
+$("tAdminModal").querySelector(".modal-close").addEventListener("click",()=>$("tAdminModal").classList.remove("active"));
+$("tAdminModal").addEventListener("click",e=>{if(e.target===$("tAdminModal"))$("tAdminModal").classList.remove("active")});
+document.querySelectorAll("[data-tam]").forEach(t=>t.addEventListener("click",()=>switchTam(t.dataset.tam)));
+
+function switchTam(name){
+  document.querySelectorAll("[data-tam]").forEach(t=>t.classList.toggle("active",t.dataset.tam===name));
+  document.querySelectorAll("#tAdminModal .vp-arc-tab-body").forEach(b=>b.style.display=b.dataset.tab===name?"":"none");
+  if(name==="tests") renderAdminTests();
+  if(name==="cats") renderAdminCats();
+}
+
+function renderAdminTests(){
+  const box=$("tAdminList");
+  if(!TESTS.length){box.innerHTML=`<div class="apps-empty"><p>Тестов пока нет. Нажмите «+ Новый тест».</p></div>`;return}
+  box.innerHTML=TESTS.map(t=>`<div class="tests-admin-row">
+    <div class="tests-admin-name">${esc(t.title)} ${t.published?`<span class="test-pub-ok">пуб.</span>`:`<span class="test-pub-draft">черн.</span>`}</div>
+    <div class="tests-admin-meta">${esc((catById(t.category_id)||{}).name||"—")} · ${t.pass_score}% · попыток: ${t.max_attempts||"∞"}</div>
+    <div class="tests-admin-acts">
+      <a class="btn btn-ghost btn-sm" href="${esc(testUrl(t))}" target="_blank">Открыть</a>
+      <button class="btn btn-gold btn-sm" data-edit-test="${t.id}">✎ Настройки</button>
+    </div>
+  </div>`).join("");
+  box.querySelectorAll("[data-edit-test]").forEach(b=>b.addEventListener("click",()=>openTestEdit(b.dataset.editTest)));
+}
+
+$("tCreateBtn").addEventListener("click",()=>openTestEdit(null));
+
+async function renderAdminCats(){
+  const box=$("tCatsList");
+  if(!CATS.length){box.innerHTML=`<div class="apps-empty"><p>Категорий нет</p></div>`;return}
+  box.innerHTML=CATS.map(c=>`<div class="tests-cat-row">
+    <span class="tests-cat-dot" style="background:${esc(c.color)}"></span>
+    <input type="text" data-cat-name="${c.id}" value="${esc(c.name)}" class="vp-search" style="flex:1">
+    <input type="color" data-cat-color="${c.id}" value="${esc(c.color||'#cda85a')}" style="width:44px;height:36px;border-radius:6px;border:1px solid var(--gold-b);cursor:pointer">
+    <input type="number" data-cat-sort="${c.id}" value="${c.sort||100}" style="width:70px" class="vp-search">
+    <button class="btn btn-ghost btn-sm" data-cat-save="${c.id}">💾</button>
+    <button class="btn btn-ghost btn-sm" data-cat-del="${c.id}">🗑</button>
+  </div>`).join("");
+  box.querySelectorAll("[data-cat-save]").forEach(b=>b.addEventListener("click",async()=>{
+    const id=b.dataset.catSave;
+    const name=document.querySelector(`[data-cat-name="${id}"]`).value.trim();
+    const color=document.querySelector(`[data-cat-color="${id}"]`).value;
+    const sort=parseInt(document.querySelector(`[data-cat-sort="${id}"]`).value)||100;
+    const r=await VSRF_TESTS.saveCategory({id,name,color,sort});
+    if(!r.ok){alert(r.error);return}
+    await loadAll();renderAdminCats();
+  }));
+  box.querySelectorAll("[data-cat-del]").forEach(b=>b.addEventListener("click",async()=>{
+    if(!confirm("Удалить категорию? Тесты этой категории останутся без категории.")) return;
+    const r=await VSRF_TESTS.removeCategory(b.dataset.catDel);
+    if(!r.ok){alert(r.error);return}
+    await loadAll();renderAdminCats();
+  }));
+}
+$("tCatAdd").addEventListener("click",async()=>{
+  const name=$("tCatNewName").value.trim();
+  if(!name) return;
+  const r=await VSRF_TESTS.saveCategory({name,color:$("tCatNewColor").value,sort:100});
+  if(!r.ok){alert(r.error);return}
+  $("tCatNewName").value="";await loadAll();renderAdminCats();
+});
+
+/* ============ АДМИН: редактирование теста ============ */
+
+let CURRENT_TEST=null,CURRENT_TEST_QS=[],CURRENT_TEST_PINGS=[],CURRENT_TEST_BLOCKS=[];
+
+async function openTestEdit(idOrNew){
+  CURRENT_TEST=idOrNew?await VSRF_TESTS.fetchTest(idOrNew):{title:"",pass_score:70,max_attempts:3,published:false};
+  $("tEditTitle").textContent=idOrNew?("✎ "+CURRENT_TEST.title):"+ Новый тест";
+  $("teTitle").value=CURRENT_TEST.title||"";
+  $("teDesc").value=CURRENT_TEST.description||"";
+  $("teIntro").value=CURRENT_TEST.intro||"";
+  $("tePass").value=CURRENT_TEST.pass_score||70;
+  $("teMax").value=CURRENT_TEST.max_attempts||0;
+  $("teTime").value=CURRENT_TEST.time_limit_minutes||0;
+  $("teSlug").value=CURRENT_TEST.slug||"";
+  $("tePublished").checked=!!CURRENT_TEST.published;
+  $("teShowAns").checked=!!CURRENT_TEST.show_answers_after;
+  $("teCat").innerHTML=`<option value="">— без категории —</option>`+CATS.map(c=>`<option value="${c.id}" ${c.id===CURRENT_TEST.category_id?"selected":""}>${esc(c.name)}</option>`).join("");
+  renderChannelSelect("teChannel",CURRENT_TEST.result_channel_id);
+  $("teDelete").style.display=idOrNew?"":"none";
+  $("teMsg").textContent="";$("teMsg").className="form-msg";
+  document.querySelectorAll("[data-tet]").forEach(t=>t.classList.toggle("active",t.dataset.tet==="main"));
+  document.querySelectorAll("#tEditModal .vp-arc-tab-body").forEach(b=>b.style.display=b.dataset.tab==="main"?"":"none");
+  $("tEditModal").classList.add("active");
+  if(idOrNew){await loadTestSubdata()}else{CURRENT_TEST_QS=[];CURRENT_TEST_PINGS=[];CURRENT_TEST_BLOCKS=[];renderTQList();renderPingList();renderBlocksList()}
+}
+
+async function loadTestSubdata(){
+  if(!CURRENT_TEST||!CURRENT_TEST.id) return;
+  const [qs,pings,blocks]=await Promise.all([VSRF_TESTS.fetchQuestions(CURRENT_TEST.id),VSRF_TESTS.fetchPingLines(CURRENT_TEST.id),VSRF_TESTS.fetchBlocks(CURRENT_TEST.id)]);
+  CURRENT_TEST_QS=qs;CURRENT_TEST_PINGS=pings;CURRENT_TEST_BLOCKS=blocks;
+  renderTQList();renderPingList();renderBlocksList();
+}
+
+function renderChannelSelect(id,current){
+  const sel=$(id);
+  if(!CHANNELS.length){sel.innerHTML=`<option value="">— бот не синхронизировал каналы —</option>`;return}
+  const byParent=new Map();
+  for(const c of CHANNELS){const k=c.parent_name||"Без категории";if(!byParent.has(k)) byParent.set(k,[]);byParent.get(k).push(c)}
+  const parts=[`<option value="">— не отправлять —</option>`];
+  for(const [pn,list] of byParent){
+    parts.push(`<optgroup label="${esc(pn)}">`);
+    for(const c of list) parts.push(`<option value="${c.channel_id}" ${c.channel_id===current?"selected":""}>#${esc(c.name)}</option>`);
+    parts.push(`</optgroup>`);
+  }
+  sel.innerHTML=parts.join("");
+}
+
+document.querySelectorAll("[data-tet]").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll("[data-tet]").forEach(x=>x.classList.toggle("active",x===t));
+  document.querySelectorAll("#tEditModal .vp-arc-tab-body").forEach(b=>b.style.display=b.dataset.tab===t.dataset.tet?"":"none");
+}));
+$("teCancel").addEventListener("click",()=>$("tEditModal").classList.remove("active"));
+$("tEditModal").querySelector(".modal-close").addEventListener("click",()=>$("tEditModal").classList.remove("active"));
+$("tEditModal").addEventListener("click",e=>{if(e.target===$("tEditModal"))$("tEditModal").classList.remove("active")});
+
+$("teSave").addEventListener("click",async()=>{
+  const msg=$("teMsg");
+  const title=$("teTitle").value.trim();
+  if(!title){msg.className="form-msg error";msg.textContent="Название обязательно";return}
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  const row={
+    title,description:$("teDesc").value.trim()||null,intro:$("teIntro").value.trim()||null,
+    category_id:$("teCat").value||null,slug:$("teSlug").value.trim()||null,
+    pass_score:parseInt($("tePass").value)||70,max_attempts:parseInt($("teMax").value)||0,
+    time_limit_minutes:parseInt($("teTime").value)||null,
+    result_channel_id:$("teChannel").value||null,
+    published:$("tePublished").checked,show_answers_after:$("teShowAns").checked
+  };
+  if(CURRENT_TEST&&CURRENT_TEST.id) row.id=CURRENT_TEST.id;
+  const r=await VSRF_TESTS.saveTest(row);
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  CURRENT_TEST=r.row;
+  msg.className="form-msg ok";msg.textContent="✓ Сохранено";
+  await loadAll();
+  setTimeout(()=>msg.textContent="",1500);
+});
+
+$("teDelete").addEventListener("click",async()=>{
+  if(!CURRENT_TEST||!CURRENT_TEST.id) return;
+  if(!confirm("Удалить тест? Все вопросы и попытки удалятся вместе с ним. Действие необратимо.")) return;
+  const r=await VSRF_TESTS.removeTest(CURRENT_TEST.id);
+  if(!r.ok){alert(r.error);return}
+  $("tEditModal").classList.remove("active");await loadAll();
+});
+
+/* --- Вопросы --- */
+
+function renderTQList(){
+  const box=$("tQList");
+  if(!CURRENT_TEST||!CURRENT_TEST.id){box.innerHTML=`<div class="apps-empty"><p>Сначала сохраните тест — потом добавляйте вопросы.</p></div>`;$("tQHint").textContent="";return}
+  if(!CURRENT_TEST_QS.length){box.innerHTML=`<div class="apps-empty"><p>Вопросов нет. Нажмите «+ Добавить вопрос».</p></div>`;$("tQHint").textContent="";return}
+  let total=0;for(const q of CURRENT_TEST_QS) total+=(q.points||1);
+  $("tQHint").textContent=CURRENT_TEST_QS.length+" вопросов · "+total+" баллов макс.";
+  box.innerHTML=CURRENT_TEST_QS.map((q,i)=>{
+    const opts=q.options||[];
+    const correct=q.correct||[];
+    return `<div class="tq-item" data-qid="${q.id}">
+      <div class="tq-head">
+        <div class="tq-num">#${i+1}</div>
+        <div class="tq-kind">${q.kind==="multi"?"☑ несколько":"🔘 один"}</div>
+        <div class="tq-text">${esc(q.text)}</div>
+        <div class="tq-pts">${q.points||1} б.</div>
+        <div class="tq-acts">
+          <button class="btn btn-ghost btn-sm" data-q-edit="${q.id}">✎</button>
+          <button class="btn btn-ghost btn-sm" data-q-del="${q.id}">🗑</button>
+        </div>
+      </div>
+      <div class="tq-opts">${opts.map(o=>`<span class="tq-opt ${correct.includes(o)?"tq-opt-c":""}">${correct.includes(o)?"✓ ":""}${esc(o)}</span>`).join("")}</div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("[data-q-edit]").forEach(b=>b.addEventListener("click",()=>openQEdit(b.dataset.qEdit)));
+  box.querySelectorAll("[data-q-del]").forEach(b=>b.addEventListener("click",async()=>{
+    if(!confirm("Удалить вопрос?")) return;
+    await VSRF_TESTS.removeQuestion(b.dataset.qDel);await loadTestSubdata();
+  }));
+}
+$("tQAdd").addEventListener("click",()=>openQEdit(null));
+
+let CURRENT_Q=null;
+function openQEdit(id){
+  if(!CURRENT_TEST||!CURRENT_TEST.id){alert("Сохраните тест сначала");return}
+  CURRENT_Q=id?CURRENT_TEST_QS.find(x=>x.id===id):null;
+  const q=CURRENT_Q||{kind:"single",text:"",options:["",""],correct:[],points:1,sort:(CURRENT_TEST_QS.length+1)*10,images:[]};
+  $("tQEditTitle").textContent=id?"✎ Вопрос":"+ Новый вопрос";
+  $("qKind").value=q.kind;
+  $("qText").value=q.text;
+  $("qPoints").value=q.points||1;
+  $("qSort").value=q.sort||100;
+  $("qExplain").value=q.explanation||"";
+  $("qImages").value=(q.images||[]).join("\n");
+  renderQOpts(q.options||[],q.correct||[],q.kind);
+  $("qDelete").style.display=id?"":"none";
+  $("qMsg").textContent="";$("qMsg").className="form-msg";
+  $("tQEditModal").classList.add("active");
+}
+$("tQEditModal").querySelector(".modal-close").addEventListener("click",()=>$("tQEditModal").classList.remove("active"));
+$("qCancel").addEventListener("click",()=>$("tQEditModal").classList.remove("active"));
+$("tQEditModal").addEventListener("click",e=>{if(e.target===$("tQEditModal"))$("tQEditModal").classList.remove("active")});
+
+function renderQOpts(options,correct,kind){
+  const box=$("qOptsList");
+  box.innerHTML=options.map((o,i)=>`<div class="q-opt-row" data-oi="${i}">
+    <input type="${kind==="multi"?"checkbox":"radio"}" name="qCorrect" ${correct.includes(o)?"checked":""}>
+    <input type="text" class="msg-input q-opt-text" value="${esc(o)}" placeholder="Вариант ответа ${i+1}">
+    <button class="btn btn-ghost btn-sm" data-oi-del="${i}">×</button>
+  </div>`).join("");
+  box.querySelectorAll("[data-oi-del]").forEach(b=>b.addEventListener("click",()=>{
+    const rows=Array.from(box.querySelectorAll(".q-opt-row"));
+    if(rows.length<=2){alert("Минимум 2 варианта");return}
+    const {opts,cor}=collectOpts();
+    opts.splice(parseInt(b.dataset.oiDel),1);
+    renderQOpts(opts,cor,$("qKind").value);
+  }));
+}
+function collectOpts(){
+  const rows=Array.from(document.querySelectorAll(".q-opt-row"));
+  const opts=[];const cor=[];
+  rows.forEach(r=>{
+    const t=r.querySelector(".q-opt-text").value;
+    opts.push(t);
+    if(r.querySelector("input[type=radio],input[type=checkbox]").checked) cor.push(t);
+  });
+  return {opts,cor};
+}
+$("qOptAdd").addEventListener("click",()=>{
+  const {opts,cor}=collectOpts();opts.push("");renderQOpts(opts,cor,$("qKind").value);
+});
+$("qKind").addEventListener("change",()=>{
+  const {opts,cor}=collectOpts();
+  const k=$("qKind").value;
+  const cor2=k==="single"?cor.slice(0,1):cor;
+  renderQOpts(opts,cor2,k);
+});
+$("qSave").addEventListener("click",async()=>{
+  const {opts,cor}=collectOpts();
+  const filtered=opts.map(o=>o.trim()).filter(Boolean);
+  const cor2=cor.map(c=>c.trim()).filter(c=>filtered.includes(c));
+  if(filtered.length<2){$("qMsg").className="form-msg error";$("qMsg").textContent="Минимум 2 варианта";return}
+  if(!cor2.length){$("qMsg").className="form-msg error";$("qMsg").textContent="Отметьте хотя бы один правильный вариант";return}
+  const row={
+    test_id:CURRENT_TEST.id,
+    kind:$("qKind").value,
+    text:$("qText").value.trim(),
+    options:filtered,
+    correct:cor2,
+    points:parseInt($("qPoints").value)||1,
+    sort:parseInt($("qSort").value)||100,
+    explanation:$("qExplain").value.trim()||null,
+    images:$("qImages").value.split(/\n/).map(s=>s.trim()).filter(Boolean)
+  };
+  if(CURRENT_Q&&CURRENT_Q.id) row.id=CURRENT_Q.id;
+  if(!row.text){$("qMsg").className="form-msg error";$("qMsg").textContent="Введите текст вопроса";return}
+  const r=await VSRF_TESTS.saveQuestion(row);
+  if(!r.ok){$("qMsg").className="form-msg error";$("qMsg").textContent=r.error;return}
+  $("tQEditModal").classList.remove("active");await loadTestSubdata();
+});
+$("qDelete").addEventListener("click",async()=>{
+  if(!CURRENT_Q||!CURRENT_Q.id) return;
+  if(!confirm("Удалить вопрос?")) return;
+  await VSRF_TESTS.removeQuestion(CURRENT_Q.id);
+  $("tQEditModal").classList.remove("active");await loadTestSubdata();
+});
+
+/* --- Строки пинга --- */
+
+function renderPingList(){
+  const box=$("tPingList");
+  if(!CURRENT_TEST||!CURRENT_TEST.id){box.innerHTML=`<div class="apps-empty"><p>Сначала сохраните тест.</p></div>`;return}
+  if(!CURRENT_TEST_PINGS.length){box.innerHTML=`<div class="apps-empty"><p>Строк нет. Добавьте например «Звание: Ефрейтор» — попадёт в сообщение результата.</p></div>`;return}
+  box.innerHTML=CURRENT_TEST_PINGS.map(p=>`<div class="tests-cat-row">
+    <b style="min-width:120px">${esc(p.key)}:</b> <span style="flex:1">${esc(p.value)}</span>
+    <button class="btn btn-ghost btn-sm" data-ping-del="${p.id}">🗑</button>
+  </div>`).join("");
+  box.querySelectorAll("[data-ping-del]").forEach(b=>b.addEventListener("click",async()=>{
+    await VSRF_TESTS.removePingLine(b.dataset.pingDel);await loadTestSubdata();
+  }));
+}
+$("tPingAdd").addEventListener("click",async()=>{
+  if(!CURRENT_TEST||!CURRENT_TEST.id){alert("Сохраните тест");return}
+  const key=$("tPingKey").value.trim();const val=$("tPingVal").value.trim();
+  if(!key||!val) return;
+  await VSRF_TESTS.savePingLine({test_id:CURRENT_TEST.id,key,value:val,sort:(CURRENT_TEST_PINGS.length+1)*10});
+  $("tPingKey").value="";$("tPingVal").value="";await loadTestSubdata();
+});
+
+/* --- Блокировки --- */
+
+function renderBlocksList(){
+  const box=$("tBlocksList");
+  if(!CURRENT_TEST||!CURRENT_TEST.id){box.innerHTML=`<div class="apps-empty"><p>Сначала сохраните тест.</p></div>`;return}
+  if(!CURRENT_TEST_BLOCKS.length){box.innerHTML=`<div class="apps-empty"><p>Блокировок нет.</p></div>`;return}
+  box.innerHTML=CURRENT_TEST_BLOCKS.map(b=>`<div class="tests-cat-row">
+    <span class="test-block-kind">${b.kind==="static"?"🆔 Статик":"💬 Discord"}</span>
+    <code style="flex:1">${esc(b.value)}</code>
+    <span style="color:var(--muted)">${b.reason?esc(b.reason):"—"}</span>
+    <span style="font-size:11px;color:var(--muted)">${esc(b.blocked_by_name||"")}</span>
+    <button class="btn btn-ghost btn-sm" data-block-del="${b.id}">✕</button>
+  </div>`).join("");
+  box.querySelectorAll("[data-block-del]").forEach(b=>b.addEventListener("click",async()=>{
+    await VSRF_TESTS.removeBlock(b.dataset.blockDel);await loadTestSubdata();
+  }));
+}
+$("tBlockAdd").addEventListener("click",async()=>{
+  if(!CURRENT_TEST||!CURRENT_TEST.id){alert("Сохраните тест");return}
+  const val=$("tBlockVal").value.trim();if(!val) return;
+  const kind=$("tBlockKind").value;
+  if(kind==="static"&&!VSRF_TESTS.validStatic(val)){alert("Статик в формате 000-000");return}
+  await VSRF_TESTS.addBlock(CURRENT_TEST.id,kind,val,$("tBlockReason").value.trim()||null);
+  $("tBlockVal").value="";$("tBlockReason").value="";await loadTestSubdata();
+});
+
+/* ============ Результаты (СС и admin) ============ */
+
+let ALL_ATTEMPTS=[];
+$("tAttemptsBtn").addEventListener("click",async()=>{
+  $("tAttemptsModal").classList.add("active");
+  $("aTestFilter").innerHTML=`<option value="">Все тесты</option>`+TESTS.map(t=>`<option value="${t.id}">${esc(t.title)}</option>`).join("");
+  await loadAttempts();
+});
+$("tAttemptsModal").querySelector(".modal-close").addEventListener("click",()=>$("tAttemptsModal").classList.remove("active"));
+$("tAttemptsModal").addEventListener("click",e=>{if(e.target===$("tAttemptsModal"))$("tAttemptsModal").classList.remove("active")});
+$("aTestFilter").addEventListener("change",loadAttempts);
+$("aSearch").addEventListener("input",()=>renderAttemptsList());
+$("aStatusFilter").addEventListener("change",()=>renderAttemptsList());
+
+async function loadAttempts(){
+  ALL_ATTEMPTS=await VSRF_TESTS.fetchAttempts($("aTestFilter").value||null,300);
+  renderAttemptsList();
+}
+function renderAttemptsList(){
+  const q=$("aSearch").value.toLowerCase();
+  const st=$("aStatusFilter").value;
+  const list=ALL_ATTEMPTS.filter(a=>{
+    if(st==="passed"&&!a.passed) return false;
+    if(st==="failed"&&a.passed) return false;
+    if(!q) return true;
+    return (a.fio||"").toLowerCase().includes(q)||(a.static_id||"").toLowerCase().includes(q)||(a.discord||"").toLowerCase().includes(q);
+  });
+  const box=$("aList");
+  if(!list.length){box.innerHTML=`<div class="apps-empty"><p>Прохождений не найдено.</p></div>`;return}
+  box.innerHTML=list.map(a=>{
+    const test=TESTS.find(t=>t.id===a.test_id);
+    return `<div class="a-row ${a.passed?"a-row-ok":"a-row-fail"}" data-a-open="${a.id}">
+      <div class="a-row-status">${a.passed?"✅":"⛔"}</div>
+      <div class="a-row-main">
+        <div class="a-row-fio">${esc(a.fio)} <span class="vp-nick">${esc(a.static_id)}</span></div>
+        <div class="a-row-test">${esc(test?test.title:a.test_id)}</div>
+      </div>
+      <div class="a-row-score"><b>${a.score}/${a.max_score}</b> · ${a.percent}%</div>
+      <div class="a-row-date">${new Date(a.finished_at||a.started_at).toLocaleString("ru-RU")}</div>
+      ${a.reviewed_by_name?`<div class="a-row-rev">✎ ${esc(a.reviewed_by_name)}</div>`:""}
+    </div>`;
+  }).join("");
+  box.querySelectorAll("[data-a-open]").forEach(el=>el.addEventListener("click",()=>openAttempt(el.dataset.aOpen)));
+}
+
+let CURRENT_ATTEMPT=null;
+async function openAttempt(id){
+  CURRENT_ATTEMPT=ALL_ATTEMPTS.find(a=>a.id===id);
+  if(!CURRENT_ATTEMPT) return;
+  const test=TESTS.find(t=>t.id===CURRENT_ATTEMPT.test_id);
+  const qs=test?await VSRF_TESTS.fetchQuestions(test.id):[];
+  $("adTitle").textContent="Прохождение · "+(test?test.title:"?");
+  $("adSub").innerHTML=`<b>${esc(CURRENT_ATTEMPT.fio)}</b> · <code>${esc(CURRENT_ATTEMPT.static_id)}</code> · ${esc(CURRENT_ATTEMPT.discord||"—")} · ${new Date(CURRENT_ATTEMPT.finished_at).toLocaleString("ru-RU")}`;
+  const ans=CURRENT_ATTEMPT.answers||{};
+  const body=[];
+  body.push(`<div class="msg-row" style="margin-bottom:12px">
+    <div class="form-group msg-flex-1"><label>Балл (переопределить)</label><input type="number" id="adScore" class="msg-input" value="${CURRENT_ATTEMPT.score}"></div>
+    <div class="form-group msg-flex-1"><label>Макс. балл</label><input type="number" id="adMax" class="msg-input" value="${CURRENT_ATTEMPT.max_score}"></div>
+    <div class="form-group msg-flex-1"><label>Пройден</label><select id="adPassed" class="msg-input"><option value="true" ${CURRENT_ATTEMPT.passed?"selected":""}>✅ Да</option><option value="false" ${!CURRENT_ATTEMPT.passed?"selected":""}>⛔ Нет</option></select></div>
+  </div>`);
+  body.push(`<div class="ad-qs">`);
+  for(const q of qs){
+    const u=ans[q.id];
+    const cor=q.correct||[];
+    const uArr=Array.isArray(u)?u:(u==null?[]:[u]);
+    const ok=q.kind==="single"?(cor.length===1&&cor[0]===u):(cor.length===uArr.length&&cor.every(x=>uArr.includes(x)));
+    body.push(`<div class="ad-q ${ok?"ad-q-ok":"ad-q-bad"}">
+      <div class="ad-q-text"><b>${esc(q.text)}</b> <span class="tq-pts">${q.points||1} б.</span></div>
+      <div class="ad-q-opts">${(q.options||[]).map(o=>{
+        const isU=uArr.includes(o);
+        const isC=cor.includes(o);
+        return `<div class="ad-q-opt ${isU?"is-user":""} ${isC?"is-correct":""}">${isC?"✓":isU?"✗":"·"} ${esc(o)}</div>`;
+      }).join("")}</div>
+    </div>`);
+  }
+  body.push(`</div>`);
+  if(CURRENT_ATTEMPT.review_history&&CURRENT_ATTEMPT.review_history.length){
+    body.push(`<div class="ad-history"><b>История правок:</b>`);
+    for(const h of CURRENT_ATTEMPT.review_history){
+      body.push(`<div class="ad-hist-item">${new Date(h.at).toLocaleString("ru-RU")} · <b>${esc(h.by)}</b> · ${esc(JSON.stringify(h.patch))}</div>`);
+    }
+    body.push(`</div>`);
+  }
+  $("adBody").innerHTML=body.join("");
+  $("adMsg").textContent="";$("adMsg").className="form-msg";
+  $("tAttemptDetailModal").classList.add("active");
+}
+$("tAttemptDetailModal").querySelector(".modal-close").addEventListener("click",()=>$("tAttemptDetailModal").classList.remove("active"));
+$("tAttemptDetailModal").addEventListener("click",e=>{if(e.target===$("tAttemptDetailModal"))$("tAttemptDetailModal").classList.remove("active")});
+
+$("adSaveBtn").addEventListener("click",async()=>{
+  if(!CURRENT_ATTEMPT) return;
+  const score=parseInt($("adScore").value);
+  const max=parseInt($("adMax").value);
+  const passed=$("adPassed").value==="true";
+  const percent=max?Math.round(score*100/max):0;
+  const r=await VSRF_TESTS.updateAttempt(CURRENT_ATTEMPT.id,{score,max_score:max,passed,percent});
+  const msg=$("adMsg");
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  msg.className="form-msg ok";msg.textContent="✓ Сохранено";
+  await loadAttempts();
+});
+
+$("adRepingBtn").addEventListener("click",async()=>{
+  if(!CURRENT_ATTEMPT) return;
+  if(!confirm("Отправить обновлённый результат в Discord повторно?")) return;
+  const msg=$("adMsg");
+  msg.className="form-msg info";msg.textContent="Отправка...";
+  const r=await VSRF_TESTS.requestResult(CURRENT_ATTEMPT.id,null,CURRENT_ATTEMPT.discord,true);
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  const res=await VSRF_TESTS.pollResult(r.id,30000);
+  if(!res.ok){msg.className="form-msg error";msg.textContent="Не отправлено: "+(res.error||res.status);return}
+  msg.className="form-msg ok";msg.textContent="✓ Отправлено повторно";
+});
+
+$("adResetBtn").addEventListener("click",async()=>{
+  if(!CURRENT_ATTEMPT) return;
+  if(!confirm("Сбросить все попытки этого пользователя (статик "+CURRENT_ATTEMPT.static_id+") в этом тесте? Он сможет пройти заново.")) return;
+  const r=await VSRF_TESTS.resetAttempts(CURRENT_ATTEMPT.test_id,CURRENT_ATTEMPT.static_id,CURRENT_ATTEMPT.discord);
+  const msg=$("adMsg");
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  msg.className="form-msg ok";msg.textContent="✓ Попытки сброшены";
+  await loadAttempts();
+  setTimeout(()=>$("tAttemptDetailModal").classList.remove("active"),700);
+});
+
+if(window.VSRF_ROLES) VSRF_ROLES.onChange(()=>{applyRoles();loadAll()});
+if(window.VSRF_AUTH) VSRF_AUTH.onChange(updateLoggedFlag);
+setTimeout(()=>{loadAll();applyRoles()},600);
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a253c91f3fc6ec4d',t:'MTc4NTc0Mzk5NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
+</html>

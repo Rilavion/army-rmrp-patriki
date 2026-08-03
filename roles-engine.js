@@ -60,6 +60,8 @@ window.VSRF_ROLES=(function(){
     document.body.classList.toggle("vsrf-is-admin",myRole==="admin");
     document.body.classList.toggle("vsrf-is-ss",myRole==="ss");
     document.body.classList.toggle("vsrf-is-staff",myRole==="admin"||myRole==="ss");
+    const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+    document.body.classList.toggle("vsrf-is-logged",!!(s&&s.user));
   }
 
   function getMyRole(){return myRole}

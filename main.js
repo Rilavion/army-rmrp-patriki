@@ -39,15 +39,18 @@
       const currentPage=(location.pathname.split("/").pop()||"index.html").toLowerCase();
       links.forEach(a=>{if((a.dataset.page||"").toLowerCase()===currentPage) a.classList.add("active")});
 
-      const publicPages=["index.html","info.html","ustav.html","training.html","composition.html","news.html","autopark.html","map.html","faq.html"];
+      const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html"];
+      const loggedInPages=["tests.html"];
       const staffPages=["apps.html","vp.html"];
       const adminOnlyPages=["message.html"];
       const adminPages=["lk.html","docs.html","message.html"];
       const publicLinks=links.filter(a=>publicPages.includes((a.dataset.page||"").toLowerCase()));
       const staffLinks=links.filter(a=>staffPages.includes((a.dataset.page||"").toLowerCase()));
       const adminLinks=links.filter(a=>adminPages.includes((a.dataset.page||"").toLowerCase()));
+      const loggedInLinks=links.filter(a=>loggedInPages.includes((a.dataset.page||"").toLowerCase()));
       staffLinks.forEach(a=>a.setAttribute("data-staff",""));
       adminLinks.forEach(a=>a.setAttribute("data-admin",""));
+      loggedInLinks.forEach(a=>a.setAttribute("data-loggedin",""));
 
       nav.innerHTML="";
       const header=document.createElement("div");
@@ -66,6 +69,17 @@
       sec1.appendChild(g1);
       nav.appendChild(sec1);
 
+      if(loggedInLinks.length){
+        const secL=document.createElement("div");
+        secL.className="nav-section";
+        secL.setAttribute("data-loggedin","");
+        secL.innerHTML='<div class="nav-section-title">Обучение</div>';
+        const gL=document.createElement("div");
+        gL.className="nav-links";
+        loggedInLinks.forEach(a=>gL.appendChild(a));
+        secL.appendChild(gL);
+        nav.appendChild(secL);
+      }
       if(adminLinks.length||staffLinks.length){
         const sec2=document.createElement("div");
         sec2.className="nav-section";
