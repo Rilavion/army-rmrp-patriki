@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=81">
+<link rel="stylesheet" href="style.css?v=82">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -210,22 +210,22 @@
   </div>
 </div>
 
-<script src="supabase-loader.js?v=81"></script>
-<script src="config.js"></script>
-<script src="main.js"></script>
-<script src="holiday-engine.js"></script>
-<script src="settings-panel.js"></script>
-<script src="sound-engine.js"></script>
-<script src="faq-engine.js"></script>
-<script src="search-engine.js"></script>
-<script src="notify-engine.js"></script>
+<script src="supabase-loader.js?v=82"></script>
+<script src="config.js?v=82"></script>
+<script src="main.js?v=82"></script>
+<script src="holiday-engine.js?v=82"></script>
+<script src="settings-panel.js?v=82"></script>
+<script src="sound-engine.js?v=82"></script>
+<script src="faq-engine.js?v=82"></script>
+<script src="search-engine.js?v=82"></script>
+<script src="notify-engine.js?v=82"></script>
 
-<script src="auth.js"></script>
-<script src="roles-engine.js?v=81"></script>
-<script src="news.js"></script>
-<script src="news-reader.js"></script>
-<script src="select-enhance.js"></script>
-<script src="draft-engine.js"></script>
+<script src="auth.js?v=82"></script>
+<script src="roles-engine.js?v=82"></script>
+<script src="news.js?v=82"></script>
+<script src="news-reader.js?v=82"></script>
+<script src="select-enhance.js?v=82"></script>
+<script src="draft-engine.js?v=82"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -294,11 +294,14 @@ function itemHtml(n){
 function openNews(id){
   const n=LOADED.find(x=>String(x.id)===String(id));if(!n) return;
   currentNews=n;
-  const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  const canEdit=window.VSRF_ROLES&&window.VSRF_ROLES.can("news","edit");
+  const canDelete=window.VSRF_ROLES&&window.VSRF_ROLES.can("news","delete");
   VSRF_NEWS_READER.open(n,{
-    admin:isAdmin,
-    onEdit:(item)=>openEdit(item),
+    admin:canEdit||canDelete,
+    canEdit,canDelete,
+    onEdit:(item)=>{if(canEdit) openEdit(item)},
     onDelete:async(item)=>{
+      if(!canDelete) return;
       const s=window.VSRF_AUTH.state;
       if(!s.available||!s.client){alert("Supabase не настроен");return}
       if(!confirm("Удалить новость «"+item.title+"»?")) return;
@@ -336,7 +339,7 @@ function renderSkeleton(){
 }
 
 async function load(){
-  const isAdmin=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  const canCreate=window.VSRF_ROLES&&(window.VSRF_ROLES.can("news","create")||window.VSRF_ROLES.can("news","edit"));
   renderSkeleton();
   LOADED=await VSRF_NEWS.fetchNews();
   if(!LOADED.length){
@@ -358,9 +361,10 @@ async function load(){
   document.querySelectorAll(".reveal").forEach(el=>{
     new IntersectionObserver((es,io)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{threshold:.1}).observe(el);
   });
-  document.querySelectorAll(".admin-only").forEach(el=>el.style.display=isAdmin?"":"none");
+  document.querySelectorAll(".admin-only").forEach(el=>el.style.display=canCreate?"":"none");
 }
 
+if(window.VSRF_ROLES) window.VSRF_ROLES.onChange(()=>load());
 if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(()=>load());
 
 document.getElementById("tagSelect").innerHTML=VSRF_NEWS.tagsList().map(t=>`<option value="${t.key}">${t.label}</option>`).join("");
@@ -491,5 +495,5 @@ if(location.hash&&location.hash.indexOf("#news-")===0){
 
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2583e0a1921e848',t:'MTc4NTc5MDcyNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2585d840e09e848',t:'MTc4NTc5MjAxNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -156,13 +156,15 @@
     });
     hideAdminNav();
     if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(hideAdminNav);
+    if(window.VSRF_ROLES) window.VSRF_ROLES.onChange(hideAdminNav);
   }
 
   function hideAdminNav(){
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(!s||!s.ready) return;
     document.body.classList.add("auth-ready");
-    document.body.classList.toggle("is-admin",!!s.user);
+    const isAdmin=!!(window.VSRF_ROLES&&window.VSRF_ROLES.isAdmin());
+    document.body.classList.toggle("is-admin",isAdmin);
   }
 
   function setupFab(){

@@ -4980,3 +4980,5 @@ body.vsrf-is-logged .footer-col a[data-loggedin]{display:block !important}
 .rl-perm-act:hover{background:rgba(205,168,90,.12);border-color:var(--gold-b)}
 .rl-perm-act input{accent-color:var(--gold);width:14px;height:14px;cursor:pointer}
 .rl-perm-act:has(input:checked){background:rgba(80,180,80,.14);color:#a9e5a9;border-color:rgba(80,180,80,.4)}
+.rl-perm-group{grid-column:1/-1;font:700 12px Inter,sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--gold-b);padding:8px 4px 4px;border-top:1px dashed rgba(205,168,90,.2);margin-top:6px}
+.rl-perm-group:first-child{border-top:none;margin-top:0;padding-top:0}

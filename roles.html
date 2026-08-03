@@ -7,7 +7,7 @@
 <title>Управление ролями</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=81">
+<link rel="stylesheet" href="style.css?v=82">
 <style id="vsrf-admin-guard">[data-admin]{display:none !important}body.vsrf-is-admin [data-admin]{display:initial !important}</style>
 </head>
 <body>
@@ -100,26 +100,33 @@
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=81"></script>
-<script src="config.js?v=81"></script>
-<script src="auth.js?v=81"></script>
-<script src="roles-engine.js?v=81"></script>
-<script src="main.js?v=81"></script>
+<script src="supabase-loader.js?v=82"></script>
+<script src="config.js?v=82"></script>
+<script src="auth.js?v=82"></script>
+<script src="roles-engine.js?v=82"></script>
+<script src="main.js?v=82"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 const SECTIONS=[
-  {key:"apps",label:"📥 Заявления",actions:["view","edit","delete"]},
+  {group:"🛠 Служебные разделы",key:"apps",label:"📥 Заявления",actions:["view","edit","delete"]},
   {key:"vp",label:"🛡 Проверки ВП",actions:["view","edit","delete","settings"]},
   {key:"vp_archive",label:"📊 Архив проверок ВП",actions:["view","edit","delete","send","settings"]},
   {key:"tests",label:"📝 Тесты",actions:["view","edit","delete","create","stats"]},
   {key:"supply",label:"📦 Поставки",actions:["view","stats","admin","delete_ds","replace"]},
   {key:"messages",label:"💬 Отправка сообщений",actions:["send"]},
   {key:"docs",label:"📄 Документы",actions:["view"]},
-  {key:"learn",label:"🎓 Учебные материалы",actions:["view","edit"]},
   {key:"lk",label:"🔒 Личный кабинет",actions:["users","roles"]},
+  {group:"📚 Публичные разделы — редактирование",key:"info",label:"ℹ Информация",actions:["edit"]},
+  {key:"ustav",label:"📜 Уставы",actions:["edit"]},
+  {key:"composition",label:"👥 Состав",actions:["edit"]},
+  {key:"autopark",label:"🚗 Автопарк",actions:["edit"]},
+  {key:"faq",label:"❓ FAQ",actions:["edit"]},
+  {key:"training",label:"🎯 Обучение (курсы)",actions:["edit"]},
+  {key:"learn",label:"🎓 Учебные материалы",actions:["view","edit"]},
+  {key:"news",label:"📰 Новости",actions:["view","create","edit","delete"]},
 ];
 const ACTION_LABELS={view:"Просмотр",edit:"Редакт.",delete:"Удаление",settings:"Настройки",send:"Отправка",create:"Создание",stats:"Статистика",admin:"Админ",delete_ds:"Удал.из DS",replace:"Замена",users:"Юзеры",roles:"Роли"};
 
@@ -197,7 +204,8 @@ function renderPerms(p){
   const box=$("rlPerms");
   box.innerHTML=SECTIONS.map(s=>{
     const sp=p[s.key]||{};
-    return `<div class="rl-perm-sec" data-sec="${s.key}">
+    const grp=s.group?`<div class="rl-perm-group">${esc(s.group)}</div>`:"";
+    return `${grp}<div class="rl-perm-sec" data-sec="${s.key}">
       <div class="rl-perm-sec-title">${esc(s.label)}</div>
       <div class="rl-perm-sec-acts">
         ${s.actions.map(a=>`<label class="rl-perm-act"><input type="checkbox" data-act="${a}" ${sp[a]?"checked":""}><span>${ACTION_LABELS[a]||a}</span></label>`).join("")}
@@ -269,6 +277,6 @@ $("rlmDelete").addEventListener("click",async()=>{
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2583e319fbbe848',t:'MTc4NTc5MDczMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2585d96bc35e848',t:'MTc4NTc5MjAxOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
