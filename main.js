@@ -39,9 +39,9 @@
       const currentPage=(location.pathname.split("/").pop()||"index.html").toLowerCase();
       links.forEach(a=>{if((a.dataset.page||"").toLowerCase()===currentPage) a.classList.add("active")});
 
-      const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html","supply.html"];
+      const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html"];
       const loggedInPages=["tests.html"];
-      const staffPages=["apps.html","vp.html"];
+      const staffPages=["apps.html","vp.html","supply.html","supply-stats.html"];
       const adminOnlyPages=["message.html"];
       const adminPages=["lk.html","docs.html","message.html"];
       const publicLinks=links.filter(a=>publicPages.includes((a.dataset.page||"").toLowerCase()));

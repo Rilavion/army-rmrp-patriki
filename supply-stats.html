@@ -7,7 +7,7 @@
 <title>Статистика поставок</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=78">
+<link rel="stylesheet" href="style.css?v=79">
 <style id="vsrf-admin-guard">[data-admin]{display:none !important}[data-staff]{display:none !important}body.vsrf-is-admin [data-admin]{display:initial !important}body.vsrf-is-staff [data-staff]{display:initial !important}</style>
 </head>
 <body>
@@ -72,6 +72,20 @@
 
         <div class="vp-stats-cards" id="ssCards"></div>
 
+        <div class="ss-pie-wrap">
+          <div class="ss-chart-card">
+            <div class="ss-chart-title">🥧 Итоги за период
+              <label class="ss-pie-toggle" style="float:right;font-size:11px;color:var(--muted);cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0">
+                <input type="checkbox" id="ssPieDetail"> подробно (разбить «иные»)
+              </label>
+            </div>
+            <div class="ss-pie-container">
+              <div id="ssPie" class="ss-pie"></div>
+              <div id="ssPieLegend" class="ss-pie-legend"></div>
+            </div>
+          </div>
+        </div>
+
         <div class="ss-charts">
           <div class="ss-chart-card">
             <div class="ss-chart-title">📊 По статусам</div>
@@ -94,7 +108,7 @@
             <select id="ssFilterStatus" class="vp-search" style="max-width:200px">
               <option value="">Все</option>
               <option value="ok">✅ Успешно</option>
-              <option value="fail">❌ Не успешно</option>
+              <option value="fail">❌ Отказались</option>
               <option value="offline">📵 Не вышли на связь</option>
               <option value="undelivered">🚫 Не довезли</option>
               <option value="dispute">⚠ Спорные</option>
@@ -122,7 +136,9 @@
     </div>
     <div class="form-msg" id="ssdMsg"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
-      <button class="btn btn-ghost btn-sm" data-admin id="ssdDelete">🗑 Удалить (admin)</button>
+      <button class="btn btn-ghost btn-sm" id="ssdReplace" style="display:none" title="Создать новую заявку с теми же данными">🔄 Заменить поставку</button>
+      <button class="btn btn-ghost btn-sm" id="ssdDelete" data-admin>🗑 Удалить из статистики</button>
+      <button class="btn btn-ghost btn-sm" id="ssdDeleteDs" data-admin title="Удалить и сообщение из Discord тоже">🗑📤 Удалить + из DS</button>
       <div style="flex:1"></div>
       <a class="btn btn-ghost btn-sm" id="ssdOpen" target="_blank">Открыть в Discord ↗</a>
       <button class="btn btn-gold btn-sm" id="ssdSaveRes">💾 Сохранить решение</button>
@@ -137,19 +153,19 @@
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=78"></script>
-<script src="config.js?v=78"></script>
-<script src="auth.js?v=78"></script>
-<script src="roles-engine.js?v=78"></script>
-<script src="supply-engine.js?v=78"></script>
-<script src="main.js?v=78"></script>
+<script src="supabase-loader.js?v=79"></script>
+<script src="config.js?v=79"></script>
+<script src="auth.js?v=79"></script>
+<script src="roles-engine.js?v=79"></script>
+<script src="supply-engine.js?v=79"></script>
+<script src="main.js?v=79"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 let FORM=null,REQS=[],GUILD_ID=null;
-const STATUS_LABELS={ok:"Успешно",fail:"Не успешно",offline:"Не вышли на связь",undelivered:"Не довезли",replaced:"Замена (спорная)",dispute:"Спорная",none:"Без реакции",deleted:"Удалено"};
+const STATUS_LABELS={ok:"Успешно",fail:"Отказались",offline:"Не вышли на связь",undelivered:"Не довезли",replaced:"Замена (спорная)",dispute:"Спорная",none:"Без реакции",deleted:"Удалено"};
 const STATUS_ICONS={ok:"✅",fail:"❌",offline:"📵",undelivered:"🚫",replaced:"🔄",dispute:"⚠",none:"➖",deleted:"🗑"};
 const STATUS_COLORS={ok:"#7dd97d",fail:"#e97a7a",offline:"#e9d29a",undelivered:"#e97a7a",replaced:"#a2d8ff",dispute:"#f0d89b",none:"#999",deleted:"#666"};
 
@@ -189,6 +205,8 @@ async function load(){
   render();
 }
 
+let LAST_COUNTS=null;
+
 function render(){
   const total=REQS.length;
   const counts={ok:0,fail:0,offline:0,undelivered:0,replaced:0,dispute:0,none:0};
@@ -201,20 +219,80 @@ function render(){
     const kind=(r.values&&r.values.kind)||"—";
     kindCount[kind]=(kindCount[kind]||0)+1;
   }
+  LAST_COUNTS=counts;
   const success=counts.ok;
   const pct=total?Math.round(success*100/total):0;
   $("ssCards").innerHTML=`
     <div class="vp-stats-card"><div class="vp-stats-card-num">${total}</div><div class="vp-stats-card-lbl">всего заявок</div></div>
     <div class="vp-stats-card vp-arc-stat-ok"><div class="vp-stats-card-num">${success}</div><div class="vp-stats-card-lbl">успешно (${pct}%)</div></div>
     <div class="vp-stats-card vp-arc-stat-warn"><div class="vp-stats-card-num">${counts.dispute+counts.replaced}</div><div class="vp-stats-card-lbl">спорных</div></div>
-    <div class="vp-stats-card"><div class="vp-stats-card-num" style="color:#f0a5a5">${counts.fail+counts.offline+counts.undelivered}</div><div class="vp-stats-card-lbl">неудачных</div></div>
+    <div class="vp-stats-card"><div class="vp-stats-card-num" style="color:#f0a5a5">${counts.fail+counts.offline+counts.undelivered}</div><div class="vp-stats-card-lbl">отказы/несостоявшиеся</div></div>
     <div class="vp-stats-card"><div class="vp-stats-card-num" style="color:#999">${counts.none}</div><div class="vp-stats-card-lbl">без реакции</div></div>
   `;
+  renderPie();
   $("ssStatusChart").innerHTML=renderBars(counts,total,k=>STATUS_ICONS[k]+" "+STATUS_LABELS[k],k=>STATUS_COLORS[k]);
   $("ssOrgChart").innerHTML=renderBars(orgCount,total,k=>k,()=>"#cda85a",8);
   $("ssKindChart").innerHTML=renderBars(kindCount,total,k=>k,()=>"#a2d8ff",8);
   renderList();
 }
+
+function renderPie(){
+  const c=LAST_COUNTS;if(!c) return;
+  const detail=$("ssPieDetail").checked;
+  let segments;
+  if(!detail){
+    segments=[
+      {key:"ok",label:"Успешно",value:c.ok,color:"#7dd97d"},
+      {key:"undelivered",label:"Не довезли",value:c.undelivered,color:"#e97a7a"},
+      {key:"other",label:"Иные (отказы, спорные, без реакции)",value:c.fail+c.offline+c.replaced+c.dispute+c.none,color:"#e9d29a"}
+    ];
+  } else {
+    segments=[
+      {key:"ok",label:"Успешно",value:c.ok,color:"#7dd97d"},
+      {key:"undelivered",label:"Не довезли",value:c.undelivered,color:"#e97a7a"},
+      {key:"fail",label:"Отказались",value:c.fail,color:"#d97878"},
+      {key:"offline",label:"Не вышли на связь",value:c.offline,color:"#e9d29a"},
+      {key:"replaced",label:"Замена",value:c.replaced,color:"#a2d8ff"},
+      {key:"dispute",label:"Спорные",value:c.dispute,color:"#f0d89b"},
+      {key:"none",label:"Без реакции",value:c.none,color:"#888"}
+    ];
+  }
+  const total=segments.reduce((s,x)=>s+x.value,0);
+  const box=$("ssPie");
+  const legendBox=$("ssPieLegend");
+  if(!total){
+    box.innerHTML=`<div class="ss-pie-empty">Нет данных за период</div>`;
+    legendBox.innerHTML="";
+    return;
+  }
+  const R=80,CX=100,CY=100;
+  let angle=-Math.PI/2;
+  const paths=[];
+  for(const s of segments){
+    if(!s.value) continue;
+    const frac=s.value/total;
+    const a2=angle+frac*Math.PI*2;
+    const x1=CX+R*Math.cos(angle),y1=CY+R*Math.sin(angle);
+    const x2=CX+R*Math.cos(a2),y2=CY+R*Math.sin(a2);
+    const large=frac>.5?1:0;
+    if(frac>=0.999){
+      paths.push(`<circle cx="${CX}" cy="${CY}" r="${R}" fill="${s.color}"/>`);
+    } else {
+      paths.push(`<path d="M${CX},${CY} L${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} Z" fill="${s.color}"/>`);
+    }
+    angle=a2;
+  }
+  box.innerHTML=`<svg viewBox="0 0 200 200" width="200" height="200">${paths.join("")}<circle cx="${CX}" cy="${CY}" r="45" fill="#15241d"/><text x="${CX}" y="${CY-4}" text-anchor="middle" fill="#f0d89b" font-family="Cormorant Garamond" font-size="28" font-weight="700">${total}</text><text x="${CX}" y="${CY+14}" text-anchor="middle" fill="#8fa39a" font-size="10">всего</text></svg>`;
+  legendBox.innerHTML=segments.filter(s=>s.value>0).map(s=>{
+    const pct=Math.round(s.value*100/total);
+    return `<div class="ss-pie-item">
+      <span class="ss-pie-swatch" style="background:${s.color}"></span>
+      <span class="ss-pie-lbl">${esc(s.label)}</span>
+      <span class="ss-pie-val"><b>${s.value}</b> · ${pct}%</span>
+    </div>`;
+  }).join("");
+}
+$("ssPieDetail").addEventListener("change",renderPie);
 
 function renderBars(counts,total,labelFn,colorFn,limit){
   const entries=Object.entries(counts).filter(([_,v])=>v>0).sort((a,b)=>b[1]-a[1]);
@@ -310,6 +388,8 @@ function openDetail(id){
     $("ssdOpen").style.display="";
     $("ssdOpen").href="https://discord.com/channels/@me/"+CUR.channel_id+"/"+CUR.message_id;
   } else $("ssdOpen").style.display="none";
+  $("ssdReplace").style.display=(s==="replaced")?"":"none";
+  $("ssdDeleteDs").style.display=(CUR.channel_id&&CUR.message_id)?"":"none";
   $("ssdMsg").textContent="";
   $("ssDetail").classList.add("active");
 }
@@ -324,16 +404,44 @@ $("ssdSaveRes").addEventListener("click",async()=>{
 });
 $("ssdDelete").addEventListener("click",async()=>{
   if(!CUR) return;
-  if(!confirm("Удалить заявку?")) return;
+  if(!confirm("Удалить заявку из статистики?\nСообщение в Discord останется.")) return;
   const r=await VSRF_SUPPLY.deleteRequest(CUR.id);
   if(!r.ok){alert(r.error);return}
   $("ssDetail").classList.remove("active");
   await load();
 });
 
+$("ssdDeleteDs").addEventListener("click",async()=>{
+  if(!CUR) return;
+  if(!confirm("Удалить заявку из статистики И удалить сообщение из Discord?\nЭто действие необратимо.")) return;
+  const msg=$("ssdMsg");
+  msg.className="form-msg info";msg.textContent="Удаление из Discord...";
+  const r=await VSRF_SUPPLY.requestDsDelete(CUR.id);
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  const res=await VSRF_SUPPLY.pollDsDelete(r.id,20000);
+  if(!res.ok){msg.className="form-msg error";msg.textContent="Из DS: "+(res.error||"не удалось");
+  }
+  const d=await VSRF_SUPPLY.deleteRequest(CUR.id);
+  if(!d.ok){msg.className="form-msg error";msg.textContent=d.error;return}
+  $("ssDetail").classList.remove("active");
+  await load();
+});
+
+$("ssdReplace").addEventListener("click",async()=>{
+  if(!CUR) return;
+  if(!confirm("Создать новую заявку-замену с теми же данными?\nСтарая останется в архиве со статусом «Замена», новая уйдёт снабженцам в Discord.")) return;
+  const msg=$("ssdMsg");
+  msg.className="form-msg info";msg.textContent="Создание замены...";
+  const r=await VSRF_SUPPLY.replaceRequest(CUR.id);
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  msg.className="form-msg ok";msg.textContent="✓ Создана замена #"+r.new_id;
+  await load();
+  setTimeout(()=>$("ssDetail").classList.remove("active"),1200);
+});
+
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(apply);
 setTimeout(apply,600);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25721b01bc49da1',t:'MTc4NTc3OTA3OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2579debfa06e842',t:'MTc4NTc4NDE2OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
