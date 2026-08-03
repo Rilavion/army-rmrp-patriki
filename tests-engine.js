@@ -216,38 +216,57 @@ window.VSRF_TESTS=(function(){
     return [...prefilled,...picked];
   }
 
+  function makeUuid(){
+    if(crypto&&crypto.randomUUID) return crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{
+      const r=Math.random()*16|0;const v=c==="x"?r:(r&0x3|0x8);return v.toString(16);
+    });
+  }
+
   async function submitAttempt(payload){
     const c=await client();if(!c) return {ok:false,error:"no client"};
     if(!validStatic(payload.static_id)) return {ok:false,error:"Некорректный статик, ожидается 000-000"};
-    const row={
-      test_id:payload.test_id,
-      fio:String(payload.fio||"").trim(),
-      static_id:String(payload.static_id||"").trim(),
-      discord:payload.discord?String(payload.discord).trim():null,
-      answers:payload.answers||{},
-      score:payload.score,
-      max_score:payload.max_score,
-      percent:payload.percent,
-      passed:payload.passed,
-      started_at:payload.started_at||new Date().toISOString(),
-      finished_at:new Date().toISOString(),
-      user_agent:navigator.userAgent.slice(0,255)
-    };
-    const {data,error}=await c.from("test_attempts").insert(row).select().single();
+    const {data,error}=await c.rpc("submit_test_attempt",{
+      p_test_id:payload.test_id,
+      p_fio:String(payload.fio||"").trim(),
+      p_static:String(payload.static_id||"").trim(),
+      p_discord:payload.discord?String(payload.discord).trim():null,
+      p_answers:payload.answers||{},
+      p_score:payload.score,
+      p_max:payload.max_score,
+      p_percent:payload.percent,
+      p_passed:payload.passed,
+      p_started:payload.started_at||new Date().toISOString()
+    });
     if(error) return {ok:false,error:error.message};
-    return {ok:true,attempt:data};
+    return {ok:true,attempt:{id:data}};
   }
 
   async function requestResult(attemptId,channelId,pingDiscord,isRepeat){
     const c=await client();if(!c) return {ok:false,error:"no client"};
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     const name=(function(){try{return localStorage.getItem("vsrf-my-display-name")||(s&&s.user&&s.user.email)||"system"}catch(e){return "system"}})();
-    const {data,error}=await c.from("test_result_requests").insert({attempt_id:attemptId,channel_id:channelId||null,ping_discord:pingDiscord||null,is_repeat:!!isRepeat,requested_by:s&&s.user?s.user.id:null,requested_by_name:name}).select().single();
-    if(error) return {ok:false,error:error.message};
-    return {ok:true,id:data.id};
+    if(s&&s.user){
+      const row={attempt_id:attemptId,channel_id:channelId||null,ping_discord:pingDiscord||null,is_repeat:!!isRepeat,requested_by:s.user.id,requested_by_name:name};
+      const {data,error}=await c.from("test_result_requests").insert(row).select().single();
+      if(error) return {ok:false,error:error.message};
+      return {ok:true,id:data.id};
+    } else {
+      const {data,error}=await c.rpc("request_test_result",{
+        p_attempt_id:attemptId,
+        p_channel_id:channelId||null,
+        p_ping_discord:pingDiscord||null
+      });
+      if(error) return {ok:false,error:error.message};
+      return {ok:true,id:data};
+    }
   }
+
   async function pollResult(id,timeoutMs){
+    if(!id) return {ok:true,skipped:true};
     const c=await client();if(!c) return {ok:false,error:"no client"};
+    const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+    if(!s||!s.user) return {ok:true,skipped:true};
     const deadline=Date.now()+(timeoutMs||30000);
     while(Date.now()<deadline){
       const {data}=await c.from("test_result_requests").select("*").eq("id",id).maybeSingle();
