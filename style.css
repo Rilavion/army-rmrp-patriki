@@ -4939,3 +4939,17 @@ body.vsrf-is-logged .nav-section[data-loggedin]{display:block !important}
 .ss-pie-val b{color:#f5ecd6}
 .ss-pie-toggle{user-select:none}
 .ss-pie-toggle input{accent-color:var(--gold);margin-right:4px}
+
+/* Global role-based visibility (fallback, если на странице нет inline-guard) */
+.nav a[data-admin],
+.nav a[data-staff],
+.nav a[data-loggedin]{display:none !important}
+body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
+body.vsrf-is-staff .nav a[data-staff]{display:inline-flex !important}
+body.vsrf-is-logged .nav a[data-loggedin]{display:inline-flex !important}
+.footer-col a[data-admin],
+.footer-col a[data-staff],
+.footer-col a[data-loggedin]{display:none !important}
+body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
+body.vsrf-is-staff .footer-col a[data-staff]{display:block !important}
+body.vsrf-is-logged .footer-col a[data-loggedin]{display:block !important}
