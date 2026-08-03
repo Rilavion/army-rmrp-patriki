@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=72">
+<link rel="stylesheet" href="style.css?v=73">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -117,118 +117,6 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<div class="modal-back" id="tEditModal">
-  <div class="modal modal-xxl">
-    <button class="modal-close" aria-label="Закрыть">✕</button>
-    <h3 id="tEditTitle">Редактирование теста</h3>
-    <div class="modal-sub">Настройки, вопросы, каналы результата, ограничения — всё в одном месте.</div>
-
-    <div class="vp-arc-tabs">
-      <button class="vp-arc-tab active" data-tet="main">Основное</button>
-      <button class="vp-arc-tab" data-tet="q">Вопросы</button>
-      <button class="vp-arc-tab" data-tet="ping">Строчки для пинга</button>
-      <button class="vp-arc-tab" data-tet="blocks">Блокировки</button>
-    </div>
-
-    <div class="vp-arc-tab-body" data-tab="main">
-      <div class="msg-row">
-        <div class="form-group msg-flex-2"><label>Название теста *</label><input type="text" id="teTitle" class="msg-input"></div>
-        <div class="form-group msg-flex-1"><label>Категория</label><select id="teCat" class="msg-input"><option value="">— без категории —</option></select></div>
-      </div>
-      <div class="form-group"><label>Краткое описание (для карточки)</label><input type="text" id="teDesc" class="msg-input"></div>
-      <div class="form-group"><label>Вступительный текст (показывается перед началом)</label><textarea id="teIntro" class="msg-input msg-textarea msg-textarea-sm"></textarea></div>
-      <div class="msg-row">
-        <div class="form-group msg-flex-1"><label>Порог прохождения (%)</label><input type="number" id="tePass" class="msg-input" min="0" max="100" value="70"></div>
-        <div class="form-group msg-flex-1"><label>Макс. попыток (0 = без ограничений)</label><input type="number" id="teMax" class="msg-input" min="0" value="3"></div>
-        <div class="form-group msg-flex-1"><label>Лимит времени (мин, 0 = нет)</label><input type="number" id="teTime" class="msg-input" min="0" value="0"></div>
-      </div>
-      <div class="form-group">
-        <label>Канал Discord для отправки результатов</label>
-        <select id="teChannel" class="msg-input"></select>
-      </div>
-      <div class="msg-row">
-        <div class="form-group msg-flex-1"><label class="doc-toggle-row"><input type="checkbox" id="tePublished"><span>Опубликован (виден пользователям)</span></label></div>
-        <div class="form-group msg-flex-1"><label class="doc-toggle-row"><input type="checkbox" id="teShowAns"><span>Показывать правильные ответы после сдачи</span></label></div>
-      </div>
-      <div class="form-group"><label>Slug (для ссылки, оставь пустым чтобы сгенерировать)</label><input type="text" id="teSlug" class="msg-input" placeholder="например: osnovy-oms"></div>
-    </div>
-
-    <div class="vp-arc-tab-body" data-tab="q" style="display:none">
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <button class="btn btn-gold btn-sm" id="tQAdd">+ Добавить вопрос</button>
-        <div style="flex:1"></div>
-        <span class="vp-map-hint" id="tQHint"></span>
-      </div>
-      <div class="tests-q-list" id="tQList"></div>
-    </div>
-
-    <div class="vp-arc-tab-body" data-tab="ping" style="display:none">
-      <div class="modal-sub">Строчки, которые попадут в сообщение результата. Пример: «Звание: Ефрейтор», «Пост: КПП №1».</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <input type="text" id="tPingKey" class="vp-search" placeholder="Ключ (напр. Звание)" style="max-width:200px">
-        <input type="text" id="tPingVal" class="vp-search" placeholder="Значение (напр. Ефрейтор)" style="flex:1">
-        <button class="btn btn-gold btn-sm" id="tPingAdd">+ Добавить</button>
-      </div>
-      <div class="tests-ping-list" id="tPingList"></div>
-    </div>
-
-    <div class="vp-arc-tab-body" data-tab="blocks" style="display:none">
-      <div class="modal-sub">Заблокировать прохождение теста для конкретного статика или Discord-ника. Заблокированные не смогут отправить ответы.</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <select id="tBlockKind" class="vp-search" style="max-width:140px"><option value="static">Статик</option><option value="discord">Discord</option></select>
-        <input type="text" id="tBlockVal" class="vp-search" placeholder="000-000 или @username" style="flex:1">
-        <input type="text" id="tBlockReason" class="vp-search" placeholder="Причина (опц.)" style="flex:1">
-        <button class="btn btn-gold btn-sm" id="tBlockAdd">Заблокировать</button>
-      </div>
-      <div class="tests-blocks-list" id="tBlocksList"></div>
-    </div>
-
-    <div class="form-msg" id="teMsg"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
-      <button class="btn btn-ghost btn-sm" id="teDelete" style="display:none">🗑 Удалить тест</button>
-      <div style="flex:1"></div>
-      <button class="btn btn-ghost btn-sm" id="teCancel">Закрыть</button>
-      <button class="btn btn-gold btn-sm" id="teSave">Сохранить</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-back" id="tQEditModal">
-  <div class="modal modal-lg">
-    <button class="modal-close" aria-label="Закрыть">✕</button>
-    <h3 id="tQEditTitle">Редактирование вопроса</h3>
-    <div class="form-group">
-      <label>Тип вопроса</label>
-      <select id="qKind" class="msg-input">
-        <option value="single">🔘 Один правильный ответ</option>
-        <option value="multi">☑ Несколько правильных ответов</option>
-      </select>
-    </div>
-    <div class="form-group"><label>Текст вопроса *</label><textarea id="qText" class="msg-input msg-textarea msg-textarea-sm"></textarea></div>
-    <div class="form-group">
-      <label>Изображения к вопросу (URL, по одному на строку)</label>
-      <textarea id="qImages" class="msg-input msg-textarea msg-textarea-sm" placeholder="https://... (опц., каждый URL с новой строки)"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Варианты ответов <span class="msg-help">Кликайте по галочке для отметки правильных.</span></label>
-      <div id="qOptsList"></div>
-      <button class="btn btn-ghost btn-sm" id="qOptAdd" style="margin-top:8px">+ Добавить вариант</button>
-    </div>
-    <div class="msg-row">
-      <div class="form-group msg-flex-1"><label>Баллы за вопрос</label><input type="number" id="qPoints" class="msg-input" min="1" value="1"></div>
-      <div class="form-group msg-flex-1"><label>Сортировка</label><input type="number" id="qSort" class="msg-input" value="100"></div>
-    </div>
-    <div class="form-group"><label>Пояснение (опц., не показывается пользователю)</label><textarea id="qExplain" class="msg-input msg-textarea msg-textarea-sm"></textarea></div>
-    <div class="form-msg" id="qMsg"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
-      <button class="btn btn-ghost btn-sm" id="qDelete" style="display:none">🗑 Удалить</button>
-      <div style="flex:1"></div>
-      <button class="btn btn-ghost btn-sm" id="qCancel">Отмена</button>
-      <button class="btn btn-gold btn-sm" id="qSave">Сохранить вопрос</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-back" id="tAttemptsModal">
   <div class="modal modal-xxl">
     <button class="modal-close" aria-label="Закрыть">✕</button>
@@ -280,21 +168,21 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <div class="fab-stack"><button class="fab" id="fabUp" title="Наверх"><svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg></button></div>
 
-<script src="supabase-loader.js?v=72"></script>
-<script src="config.js?v=72"></script>
-<script src="auth.js?v=72"></script>
-<script src="roles-engine.js?v=72"></script>
-<script src="tests-engine.js?v=72"></script>
-<script src="main.js?v=72"></script>
-<script src="holiday-engine.js?v=72"></script>
-<script src="settings-panel.js?v=72"></script>
-<script src="sound-engine.js?v=72"></script>
+<script src="supabase-loader.js?v=73"></script>
+<script src="config.js?v=73"></script>
+<script src="auth.js?v=73"></script>
+<script src="roles-engine.js?v=73"></script>
+<script src="tests-engine.js?v=73"></script>
+<script src="main.js?v=73"></script>
+<script src="holiday-engine.js?v=73"></script>
+<script src="settings-panel.js?v=73"></script>
+<script src="sound-engine.js?v=73"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
-let TESTS=[],CATS=[],CHANNELS=[];
+let TESTS=[],CATS=[];
 let SEARCH="",CAT_FILTER="";
 
 function updateLoggedFlag(){const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;document.body.classList.toggle("vsrf-is-logged",!!(s&&s.user))}
@@ -307,8 +195,8 @@ function applyRoles(){
 }
 
 async function loadAll(){
-  const [t,c,ch]=await Promise.all([VSRF_TESTS.fetchTests(!(window.VSRF_ROLES&&window.VSRF_ROLES.isStaff())),VSRF_TESTS.fetchCategories(),VSRF_TESTS.fetchDsChannels()]);
-  TESTS=t;CATS=c;CHANNELS=ch;
+  const [t,c]=await Promise.all([VSRF_TESTS.fetchTests(!(window.VSRF_ROLES&&window.VSRF_ROLES.isStaff())),VSRF_TESTS.fetchCategories()]);
+  TESTS=t;CATS=c;
   $("tCatFilter").innerHTML=`<option value="">Все категории</option>`+CATS.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
   renderList();
 }
@@ -341,10 +229,11 @@ function renderList(){
       <div class="tests-cards">
         ${items.map(t=>{
           const url=testUrl(t);
+          const fullUrl=new URL(url,location.href).href;
           return `<div class="test-card ${t.published?"":"test-card-draft"}">
             <div class="test-card-head">
               <div class="test-card-badge" style="border-color:${esc(color)};color:${esc(color)}">${t.published?"ОПУБЛИКОВАН":"ЧЕРНОВИК"}</div>
-              <button class="test-card-copy" data-copy="${esc(new URL(url,location.href).href)}" title="Копировать ссылку на тест">🔗</button>
+              <button class="test-card-copy" data-copy="${esc(fullUrl)}" title="Копировать ссылку на тест">🔗</button>
             </div>
             <div class="test-card-title">${esc(t.title)}</div>
             ${t.description?`<div class="test-card-desc">${esc(t.description)}</div>`:""}
@@ -355,7 +244,7 @@ function renderList(){
             </div>
             <div class="test-card-acts">
               <a class="btn btn-gold" href="${esc(url)}">Начать тест →</a>
-              <button class="btn btn-ghost btn-sm" data-admin data-edit-test="${t.id}">✎ Ред.</button>
+              <a class="btn btn-ghost btn-sm" data-admin href="test-editor.html?t=${t.id}">✎</a>
             </div>
           </div>`;
         }).join("")}
@@ -367,15 +256,13 @@ function renderList(){
     e.stopPropagation();navigator.clipboard.writeText(b.dataset.copy);
     b.textContent="✓";setTimeout(()=>b.textContent="🔗",1000);
   }));
-  box.querySelectorAll("[data-edit-test]").forEach(b=>b.addEventListener("click",()=>openTestEdit(b.dataset.editTest)));
   applyRoles();
 }
 
 $("tSearch").addEventListener("input",()=>{SEARCH=$("tSearch").value.trim();renderList()});
 $("tCatFilter").addEventListener("change",()=>{CAT_FILTER=$("tCatFilter").value;renderList()});
 
-/* ============ АДМИН: управление ============ */
-
+/* Управление */
 $("tAdminBtn").addEventListener("click",()=>{$("tAdminModal").classList.add("active");switchTam("tests")});
 $("tAdminModal").querySelector(".modal-close").addEventListener("click",()=>$("tAdminModal").classList.remove("active"));
 $("tAdminModal").addEventListener("click",e=>{if(e.target===$("tAdminModal"))$("tAdminModal").classList.remove("active")});
@@ -396,13 +283,11 @@ function renderAdminTests(){
     <div class="tests-admin-meta">${esc((catById(t.category_id)||{}).name||"—")} · ${t.pass_score}% · попыток: ${t.max_attempts||"∞"}</div>
     <div class="tests-admin-acts">
       <a class="btn btn-ghost btn-sm" href="${esc(testUrl(t))}" target="_blank">Открыть</a>
-      <button class="btn btn-gold btn-sm" data-edit-test="${t.id}">✎ Настройки</button>
+      <a class="btn btn-gold btn-sm" href="test-editor.html?t=${t.id}">✎ Настройки</a>
     </div>
   </div>`).join("");
-  box.querySelectorAll("[data-edit-test]").forEach(b=>b.addEventListener("click",()=>openTestEdit(b.dataset.editTest)));
 }
-
-$("tCreateBtn").addEventListener("click",()=>openTestEdit(null));
+$("tCreateBtn").addEventListener("click",()=>{location.href="test-editor.html"});
 
 async function renderAdminCats(){
   const box=$("tCatsList");
@@ -425,7 +310,7 @@ async function renderAdminCats(){
     await loadAll();renderAdminCats();
   }));
   box.querySelectorAll("[data-cat-del]").forEach(b=>b.addEventListener("click",async()=>{
-    if(!confirm("Удалить категорию? Тесты этой категории останутся без категории.")) return;
+    if(!confirm("Удалить категорию? Тесты останутся без категории.")) return;
     const r=await VSRF_TESTS.removeCategory(b.dataset.catDel);
     if(!r.ok){alert(r.error);return}
     await loadAll();renderAdminCats();
@@ -439,259 +324,7 @@ $("tCatAdd").addEventListener("click",async()=>{
   $("tCatNewName").value="";await loadAll();renderAdminCats();
 });
 
-/* ============ АДМИН: редактирование теста ============ */
-
-let CURRENT_TEST=null,CURRENT_TEST_QS=[],CURRENT_TEST_PINGS=[],CURRENT_TEST_BLOCKS=[];
-
-async function openTestEdit(idOrNew){
-  CURRENT_TEST=idOrNew?await VSRF_TESTS.fetchTest(idOrNew):{title:"",pass_score:70,max_attempts:3,published:false};
-  $("tEditTitle").textContent=idOrNew?("✎ "+CURRENT_TEST.title):"+ Новый тест";
-  $("teTitle").value=CURRENT_TEST.title||"";
-  $("teDesc").value=CURRENT_TEST.description||"";
-  $("teIntro").value=CURRENT_TEST.intro||"";
-  $("tePass").value=CURRENT_TEST.pass_score||70;
-  $("teMax").value=CURRENT_TEST.max_attempts||0;
-  $("teTime").value=CURRENT_TEST.time_limit_minutes||0;
-  $("teSlug").value=CURRENT_TEST.slug||"";
-  $("tePublished").checked=!!CURRENT_TEST.published;
-  $("teShowAns").checked=!!CURRENT_TEST.show_answers_after;
-  $("teCat").innerHTML=`<option value="">— без категории —</option>`+CATS.map(c=>`<option value="${c.id}" ${c.id===CURRENT_TEST.category_id?"selected":""}>${esc(c.name)}</option>`).join("");
-  renderChannelSelect("teChannel",CURRENT_TEST.result_channel_id);
-  $("teDelete").style.display=idOrNew?"":"none";
-  $("teMsg").textContent="";$("teMsg").className="form-msg";
-  document.querySelectorAll("[data-tet]").forEach(t=>t.classList.toggle("active",t.dataset.tet==="main"));
-  document.querySelectorAll("#tEditModal .vp-arc-tab-body").forEach(b=>b.style.display=b.dataset.tab==="main"?"":"none");
-  $("tEditModal").classList.add("active");
-  if(idOrNew){await loadTestSubdata()}else{CURRENT_TEST_QS=[];CURRENT_TEST_PINGS=[];CURRENT_TEST_BLOCKS=[];renderTQList();renderPingList();renderBlocksList()}
-}
-
-async function loadTestSubdata(){
-  if(!CURRENT_TEST||!CURRENT_TEST.id) return;
-  const [qs,pings,blocks]=await Promise.all([VSRF_TESTS.fetchQuestions(CURRENT_TEST.id),VSRF_TESTS.fetchPingLines(CURRENT_TEST.id),VSRF_TESTS.fetchBlocks(CURRENT_TEST.id)]);
-  CURRENT_TEST_QS=qs;CURRENT_TEST_PINGS=pings;CURRENT_TEST_BLOCKS=blocks;
-  renderTQList();renderPingList();renderBlocksList();
-}
-
-function renderChannelSelect(id,current){
-  const sel=$(id);
-  if(!CHANNELS.length){sel.innerHTML=`<option value="">— бот не синхронизировал каналы —</option>`;return}
-  const byParent=new Map();
-  for(const c of CHANNELS){const k=c.parent_name||"Без категории";if(!byParent.has(k)) byParent.set(k,[]);byParent.get(k).push(c)}
-  const parts=[`<option value="">— не отправлять —</option>`];
-  for(const [pn,list] of byParent){
-    parts.push(`<optgroup label="${esc(pn)}">`);
-    for(const c of list) parts.push(`<option value="${c.channel_id}" ${c.channel_id===current?"selected":""}>#${esc(c.name)}</option>`);
-    parts.push(`</optgroup>`);
-  }
-  sel.innerHTML=parts.join("");
-}
-
-document.querySelectorAll("[data-tet]").forEach(t=>t.addEventListener("click",()=>{
-  document.querySelectorAll("[data-tet]").forEach(x=>x.classList.toggle("active",x===t));
-  document.querySelectorAll("#tEditModal .vp-arc-tab-body").forEach(b=>b.style.display=b.dataset.tab===t.dataset.tet?"":"none");
-}));
-$("teCancel").addEventListener("click",()=>$("tEditModal").classList.remove("active"));
-$("tEditModal").querySelector(".modal-close").addEventListener("click",()=>$("tEditModal").classList.remove("active"));
-$("tEditModal").addEventListener("click",e=>{if(e.target===$("tEditModal"))$("tEditModal").classList.remove("active")});
-
-$("teSave").addEventListener("click",async()=>{
-  const msg=$("teMsg");
-  const title=$("teTitle").value.trim();
-  if(!title){msg.className="form-msg error";msg.textContent="Название обязательно";return}
-  msg.className="form-msg info";msg.textContent="Сохранение...";
-  const row={
-    title,description:$("teDesc").value.trim()||null,intro:$("teIntro").value.trim()||null,
-    category_id:$("teCat").value||null,slug:$("teSlug").value.trim()||null,
-    pass_score:parseInt($("tePass").value)||70,max_attempts:parseInt($("teMax").value)||0,
-    time_limit_minutes:parseInt($("teTime").value)||null,
-    result_channel_id:$("teChannel").value||null,
-    published:$("tePublished").checked,show_answers_after:$("teShowAns").checked
-  };
-  if(CURRENT_TEST&&CURRENT_TEST.id) row.id=CURRENT_TEST.id;
-  const r=await VSRF_TESTS.saveTest(row);
-  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
-  CURRENT_TEST=r.row;
-  msg.className="form-msg ok";msg.textContent="✓ Сохранено";
-  await loadAll();
-  setTimeout(()=>msg.textContent="",1500);
-});
-
-$("teDelete").addEventListener("click",async()=>{
-  if(!CURRENT_TEST||!CURRENT_TEST.id) return;
-  if(!confirm("Удалить тест? Все вопросы и попытки удалятся вместе с ним. Действие необратимо.")) return;
-  const r=await VSRF_TESTS.removeTest(CURRENT_TEST.id);
-  if(!r.ok){alert(r.error);return}
-  $("tEditModal").classList.remove("active");await loadAll();
-});
-
-/* --- Вопросы --- */
-
-function renderTQList(){
-  const box=$("tQList");
-  if(!CURRENT_TEST||!CURRENT_TEST.id){box.innerHTML=`<div class="apps-empty"><p>Сначала сохраните тест — потом добавляйте вопросы.</p></div>`;$("tQHint").textContent="";return}
-  if(!CURRENT_TEST_QS.length){box.innerHTML=`<div class="apps-empty"><p>Вопросов нет. Нажмите «+ Добавить вопрос».</p></div>`;$("tQHint").textContent="";return}
-  let total=0;for(const q of CURRENT_TEST_QS) total+=(q.points||1);
-  $("tQHint").textContent=CURRENT_TEST_QS.length+" вопросов · "+total+" баллов макс.";
-  box.innerHTML=CURRENT_TEST_QS.map((q,i)=>{
-    const opts=q.options||[];
-    const correct=q.correct||[];
-    return `<div class="tq-item" data-qid="${q.id}">
-      <div class="tq-head">
-        <div class="tq-num">#${i+1}</div>
-        <div class="tq-kind">${q.kind==="multi"?"☑ несколько":"🔘 один"}</div>
-        <div class="tq-text">${esc(q.text)}</div>
-        <div class="tq-pts">${q.points||1} б.</div>
-        <div class="tq-acts">
-          <button class="btn btn-ghost btn-sm" data-q-edit="${q.id}">✎</button>
-          <button class="btn btn-ghost btn-sm" data-q-del="${q.id}">🗑</button>
-        </div>
-      </div>
-      <div class="tq-opts">${opts.map(o=>`<span class="tq-opt ${correct.includes(o)?"tq-opt-c":""}">${correct.includes(o)?"✓ ":""}${esc(o)}</span>`).join("")}</div>
-    </div>`;
-  }).join("");
-  box.querySelectorAll("[data-q-edit]").forEach(b=>b.addEventListener("click",()=>openQEdit(b.dataset.qEdit)));
-  box.querySelectorAll("[data-q-del]").forEach(b=>b.addEventListener("click",async()=>{
-    if(!confirm("Удалить вопрос?")) return;
-    await VSRF_TESTS.removeQuestion(b.dataset.qDel);await loadTestSubdata();
-  }));
-}
-$("tQAdd").addEventListener("click",()=>openQEdit(null));
-
-let CURRENT_Q=null;
-function openQEdit(id){
-  if(!CURRENT_TEST||!CURRENT_TEST.id){alert("Сохраните тест сначала");return}
-  CURRENT_Q=id?CURRENT_TEST_QS.find(x=>x.id===id):null;
-  const q=CURRENT_Q||{kind:"single",text:"",options:["",""],correct:[],points:1,sort:(CURRENT_TEST_QS.length+1)*10,images:[]};
-  $("tQEditTitle").textContent=id?"✎ Вопрос":"+ Новый вопрос";
-  $("qKind").value=q.kind;
-  $("qText").value=q.text;
-  $("qPoints").value=q.points||1;
-  $("qSort").value=q.sort||100;
-  $("qExplain").value=q.explanation||"";
-  $("qImages").value=(q.images||[]).join("\n");
-  renderQOpts(q.options||[],q.correct||[],q.kind);
-  $("qDelete").style.display=id?"":"none";
-  $("qMsg").textContent="";$("qMsg").className="form-msg";
-  $("tQEditModal").classList.add("active");
-}
-$("tQEditModal").querySelector(".modal-close").addEventListener("click",()=>$("tQEditModal").classList.remove("active"));
-$("qCancel").addEventListener("click",()=>$("tQEditModal").classList.remove("active"));
-$("tQEditModal").addEventListener("click",e=>{if(e.target===$("tQEditModal"))$("tQEditModal").classList.remove("active")});
-
-function renderQOpts(options,correct,kind){
-  const box=$("qOptsList");
-  box.innerHTML=options.map((o,i)=>`<div class="q-opt-row" data-oi="${i}">
-    <input type="${kind==="multi"?"checkbox":"radio"}" name="qCorrect" ${correct.includes(o)?"checked":""}>
-    <input type="text" class="msg-input q-opt-text" value="${esc(o)}" placeholder="Вариант ответа ${i+1}">
-    <button class="btn btn-ghost btn-sm" data-oi-del="${i}">×</button>
-  </div>`).join("");
-  box.querySelectorAll("[data-oi-del]").forEach(b=>b.addEventListener("click",()=>{
-    const rows=Array.from(box.querySelectorAll(".q-opt-row"));
-    if(rows.length<=2){alert("Минимум 2 варианта");return}
-    const {opts,cor}=collectOpts();
-    opts.splice(parseInt(b.dataset.oiDel),1);
-    renderQOpts(opts,cor,$("qKind").value);
-  }));
-}
-function collectOpts(){
-  const rows=Array.from(document.querySelectorAll(".q-opt-row"));
-  const opts=[];const cor=[];
-  rows.forEach(r=>{
-    const t=r.querySelector(".q-opt-text").value;
-    opts.push(t);
-    if(r.querySelector("input[type=radio],input[type=checkbox]").checked) cor.push(t);
-  });
-  return {opts,cor};
-}
-$("qOptAdd").addEventListener("click",()=>{
-  const {opts,cor}=collectOpts();opts.push("");renderQOpts(opts,cor,$("qKind").value);
-});
-$("qKind").addEventListener("change",()=>{
-  const {opts,cor}=collectOpts();
-  const k=$("qKind").value;
-  const cor2=k==="single"?cor.slice(0,1):cor;
-  renderQOpts(opts,cor2,k);
-});
-$("qSave").addEventListener("click",async()=>{
-  const {opts,cor}=collectOpts();
-  const filtered=opts.map(o=>o.trim()).filter(Boolean);
-  const cor2=cor.map(c=>c.trim()).filter(c=>filtered.includes(c));
-  if(filtered.length<2){$("qMsg").className="form-msg error";$("qMsg").textContent="Минимум 2 варианта";return}
-  if(!cor2.length){$("qMsg").className="form-msg error";$("qMsg").textContent="Отметьте хотя бы один правильный вариант";return}
-  const row={
-    test_id:CURRENT_TEST.id,
-    kind:$("qKind").value,
-    text:$("qText").value.trim(),
-    options:filtered,
-    correct:cor2,
-    points:parseInt($("qPoints").value)||1,
-    sort:parseInt($("qSort").value)||100,
-    explanation:$("qExplain").value.trim()||null,
-    images:$("qImages").value.split(/\n/).map(s=>s.trim()).filter(Boolean)
-  };
-  if(CURRENT_Q&&CURRENT_Q.id) row.id=CURRENT_Q.id;
-  if(!row.text){$("qMsg").className="form-msg error";$("qMsg").textContent="Введите текст вопроса";return}
-  const r=await VSRF_TESTS.saveQuestion(row);
-  if(!r.ok){$("qMsg").className="form-msg error";$("qMsg").textContent=r.error;return}
-  $("tQEditModal").classList.remove("active");await loadTestSubdata();
-});
-$("qDelete").addEventListener("click",async()=>{
-  if(!CURRENT_Q||!CURRENT_Q.id) return;
-  if(!confirm("Удалить вопрос?")) return;
-  await VSRF_TESTS.removeQuestion(CURRENT_Q.id);
-  $("tQEditModal").classList.remove("active");await loadTestSubdata();
-});
-
-/* --- Строки пинга --- */
-
-function renderPingList(){
-  const box=$("tPingList");
-  if(!CURRENT_TEST||!CURRENT_TEST.id){box.innerHTML=`<div class="apps-empty"><p>Сначала сохраните тест.</p></div>`;return}
-  if(!CURRENT_TEST_PINGS.length){box.innerHTML=`<div class="apps-empty"><p>Строк нет. Добавьте например «Звание: Ефрейтор» — попадёт в сообщение результата.</p></div>`;return}
-  box.innerHTML=CURRENT_TEST_PINGS.map(p=>`<div class="tests-cat-row">
-    <b style="min-width:120px">${esc(p.key)}:</b> <span style="flex:1">${esc(p.value)}</span>
-    <button class="btn btn-ghost btn-sm" data-ping-del="${p.id}">🗑</button>
-  </div>`).join("");
-  box.querySelectorAll("[data-ping-del]").forEach(b=>b.addEventListener("click",async()=>{
-    await VSRF_TESTS.removePingLine(b.dataset.pingDel);await loadTestSubdata();
-  }));
-}
-$("tPingAdd").addEventListener("click",async()=>{
-  if(!CURRENT_TEST||!CURRENT_TEST.id){alert("Сохраните тест");return}
-  const key=$("tPingKey").value.trim();const val=$("tPingVal").value.trim();
-  if(!key||!val) return;
-  await VSRF_TESTS.savePingLine({test_id:CURRENT_TEST.id,key,value:val,sort:(CURRENT_TEST_PINGS.length+1)*10});
-  $("tPingKey").value="";$("tPingVal").value="";await loadTestSubdata();
-});
-
-/* --- Блокировки --- */
-
-function renderBlocksList(){
-  const box=$("tBlocksList");
-  if(!CURRENT_TEST||!CURRENT_TEST.id){box.innerHTML=`<div class="apps-empty"><p>Сначала сохраните тест.</p></div>`;return}
-  if(!CURRENT_TEST_BLOCKS.length){box.innerHTML=`<div class="apps-empty"><p>Блокировок нет.</p></div>`;return}
-  box.innerHTML=CURRENT_TEST_BLOCKS.map(b=>`<div class="tests-cat-row">
-    <span class="test-block-kind">${b.kind==="static"?"🆔 Статик":"💬 Discord"}</span>
-    <code style="flex:1">${esc(b.value)}</code>
-    <span style="color:var(--muted)">${b.reason?esc(b.reason):"—"}</span>
-    <span style="font-size:11px;color:var(--muted)">${esc(b.blocked_by_name||"")}</span>
-    <button class="btn btn-ghost btn-sm" data-block-del="${b.id}">✕</button>
-  </div>`).join("");
-  box.querySelectorAll("[data-block-del]").forEach(b=>b.addEventListener("click",async()=>{
-    await VSRF_TESTS.removeBlock(b.dataset.blockDel);await loadTestSubdata();
-  }));
-}
-$("tBlockAdd").addEventListener("click",async()=>{
-  if(!CURRENT_TEST||!CURRENT_TEST.id){alert("Сохраните тест");return}
-  const val=$("tBlockVal").value.trim();if(!val) return;
-  const kind=$("tBlockKind").value;
-  if(kind==="static"&&!VSRF_TESTS.validStatic(val)){alert("Статик в формате 000-000");return}
-  await VSRF_TESTS.addBlock(CURRENT_TEST.id,kind,val,$("tBlockReason").value.trim()||null);
-  $("tBlockVal").value="";$("tBlockReason").value="";await loadTestSubdata();
-});
-
-/* ============ Результаты (СС и admin) ============ */
-
+/* Результаты */
 let ALL_ATTEMPTS=[];
 $("tAttemptsBtn").addEventListener("click",async()=>{
   $("tAttemptsModal").classList.add("active");
@@ -746,7 +379,7 @@ async function openAttempt(id){
   const ans=CURRENT_ATTEMPT.answers||{};
   const body=[];
   body.push(`<div class="msg-row" style="margin-bottom:12px">
-    <div class="form-group msg-flex-1"><label>Балл (переопределить)</label><input type="number" id="adScore" class="msg-input" value="${CURRENT_ATTEMPT.score}"></div>
+    <div class="form-group msg-flex-1"><label>Балл</label><input type="number" id="adScore" class="msg-input" value="${CURRENT_ATTEMPT.score}"></div>
     <div class="form-group msg-flex-1"><label>Макс. балл</label><input type="number" id="adMax" class="msg-input" value="${CURRENT_ATTEMPT.max_score}"></div>
     <div class="form-group msg-flex-1"><label>Пройден</label><select id="adPassed" class="msg-input"><option value="true" ${CURRENT_ATTEMPT.passed?"selected":""}>✅ Да</option><option value="false" ${!CURRENT_ATTEMPT.passed?"selected":""}>⛔ Нет</option></select></div>
   </div>`);
@@ -759,8 +392,7 @@ async function openAttempt(id){
     body.push(`<div class="ad-q ${ok?"ad-q-ok":"ad-q-bad"}">
       <div class="ad-q-text"><b>${esc(q.text)}</b> <span class="tq-pts">${q.points||1} б.</span></div>
       <div class="ad-q-opts">${(q.options||[]).map(o=>{
-        const isU=uArr.includes(o);
-        const isC=cor.includes(o);
+        const isU=uArr.includes(o);const isC=cor.includes(o);
         return `<div class="ad-q-opt ${isU?"is-user":""} ${isC?"is-correct":""}">${isC?"✓":isU?"✗":"·"} ${esc(o)}</div>`;
       }).join("")}</div>
     </div>`);
@@ -807,7 +439,7 @@ $("adRepingBtn").addEventListener("click",async()=>{
 
 $("adResetBtn").addEventListener("click",async()=>{
   if(!CURRENT_ATTEMPT) return;
-  if(!confirm("Сбросить все попытки этого пользователя (статик "+CURRENT_ATTEMPT.static_id+") в этом тесте? Он сможет пройти заново.")) return;
+  if(!confirm("Сбросить все попытки этого пользователя (статик "+CURRENT_ATTEMPT.static_id+")?")) return;
   const r=await VSRF_TESTS.resetAttempts(CURRENT_ATTEMPT.test_id,CURRENT_ATTEMPT.static_id,CURRENT_ATTEMPT.discord);
   const msg=$("adMsg");
   if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
@@ -820,6 +452,6 @@ if(window.VSRF_ROLES) VSRF_ROLES.onChange(()=>{applyRoles();loadAll()});
 if(window.VSRF_AUTH) VSRF_AUTH.onChange(updateLoggedFlag);
 setTimeout(()=>{loadAll();applyRoles()},600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a253c91f3fc6ec4d',t:'MTc4NTc0Mzk5NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a253f3fc2cc6e929',t:'MTc4NTc0NTc1MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

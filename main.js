@@ -60,6 +60,9 @@
         <div class="nav-header-unit">1-я ОБрСпН</div>`;
       nav.appendChild(header);
 
+      const scroll=document.createElement("div");
+      scroll.className="nav-scroll";
+
       const sec1=document.createElement("div");
       sec1.className="nav-section";
       sec1.innerHTML='<div class="nav-section-title">Разделы</div>';
@@ -67,7 +70,7 @@
       g1.className="nav-links";
       publicLinks.forEach(a=>g1.appendChild(a));
       sec1.appendChild(g1);
-      nav.appendChild(sec1);
+      scroll.appendChild(sec1);
 
       if(loggedInLinks.length){
         const secL=document.createElement("div");
@@ -78,7 +81,7 @@
         gL.className="nav-links";
         loggedInLinks.forEach(a=>gL.appendChild(a));
         secL.appendChild(gL);
-        nav.appendChild(secL);
+        scroll.appendChild(secL);
       }
       if(adminLinks.length||staffLinks.length){
         const sec2=document.createElement("div");
@@ -90,8 +93,10 @@
         staffLinks.forEach(a=>g2.appendChild(a));
         adminLinks.forEach(a=>g2.appendChild(a));
         sec2.appendChild(g2);
-        nav.appendChild(sec2);
+        scroll.appendChild(sec2);
       }
+
+      nav.appendChild(scroll);
 
       const footer=document.createElement("div");
       footer.className="nav-footer";
