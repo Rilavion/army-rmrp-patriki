@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=74">
+<link rel="stylesheet" href="style.css?v=77">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -42,11 +42,11 @@
   <div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div>
 </footer>
 
-<script src="supabase-loader.js?v=74"></script>
-<script src="config.js?v=74"></script>
-<script src="auth.js?v=74"></script>
-<script src="tests-engine.js?v=74"></script>
-<script src="main.js?v=74"></script>
+<script src="supabase-loader.js?v=77"></script>
+<script src="config.js?v=77"></script>
+<script src="auth.js?v=77"></script>
+<script src="tests-engine.js?v=77"></script>
+<script src="main.js?v=77"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -115,12 +115,14 @@ async function tryStart(){
   if(!VSRF_TESTS.validStatic(st)){msg.className="form-msg error";msg.textContent="Статик должен быть в формате 000-000";return}
   if(!dc){msg.className="form-msg error";msg.textContent="Введите Discord для получения результата";return}
   if(!QS.length){msg.className="form-msg error";msg.textContent="В тесте нет вопросов";return}
-  const blocked=BLOCKS.find(b=>(b.kind==="static"&&b.value===st)||(b.kind==="discord"&&b.value.toLowerCase()===dc.toLowerCase()));
-  if(blocked){msg.className="form-msg error";msg.textContent="Прохождение заблокировано"+(blocked.reason?": "+blocked.reason:"");return}
+  msg.className="form-msg info";msg.textContent="Проверка...";
+  const bl=await VSRF_TESTS.checkBlocked(TEST.id,st,dc);
+  if(bl.blocked){msg.className="form-msg error";msg.textContent="Прохождение заблокировано: "+bl.reason;return}
   if(TEST.max_attempts>0){
     const att=await VSRF_TESTS.attemptsFor(TEST.id,st,dc);
     if(att.count>=TEST.max_attempts){msg.className="form-msg error";msg.textContent="Исчерпан лимит попыток ("+att.count+"/"+TEST.max_attempts+"). Обратитесь к СС для сброса.";return}
   }
+  msg.className="form-msg";msg.textContent="";
   USER={fio,static_id:st,discord:dc};
   ANSWERS={};
   STARTED_AT=new Date().toISOString();
@@ -252,6 +254,6 @@ function renderResult(graded,passed){
 
 boot();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2541a9c78cae929',t:'MTc4NTc0NzMzMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a254642bea389db8',t:'MTc4NTc1MDM0NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>

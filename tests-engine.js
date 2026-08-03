@@ -130,11 +130,26 @@ window.VSRF_TESTS=(function(){
   }
 
   async function attemptsFor(testId,staticId,discord){
-    const c=await client();if(!c) return {ok:true,count:0,rows:[]};
-    let q=c.from("test_attempts").select("id,finished_at,passed,static_id,discord").eq("test_id",testId).not("finished_at","is",null);
-    const {data}=await q;
-    const list=(data||[]).filter(a=>a.static_id===staticId||(discord&&a.discord===discord));
-    return {ok:true,count:list.length,rows:list};
+    const c=await client();if(!c) return {ok:true,count:0};
+    const {data,error}=await c.rpc("count_test_attempts",{
+      p_test_id:testId,
+      p_static:staticId||null,
+      p_discord:discord||null
+    });
+    if(error){console.warn("[VP attemptsFor]",error.message);return {ok:false,count:0,error:error.message}}
+    return {ok:true,count:data||0};
+  }
+
+  async function checkBlocked(testId,staticId,discord){
+    const c=await client();if(!c) return {blocked:false};
+    const {data,error}=await c.rpc("check_test_blocked",{
+      p_test_id:testId,
+      p_static:staticId||null,
+      p_discord:discord||null
+    });
+    if(error) return {blocked:false};
+    if(data==null) return {blocked:false};
+    return {blocked:true,reason:data};
   }
 
   async function fetchAttempts(testId,limit){
@@ -282,5 +297,5 @@ window.VSRF_TESTS=(function(){
     return data||[];
   }
 
-  return {esc,validStatic,slugify,fetchCategories,saveCategory,removeCategory,fetchTests,fetchTest,saveTest,removeTest,fetchQuestions,saveQuestion,removeQuestion,reorderQuestions,fetchPingLines,savePingLine,removePingLine,fetchBlocks,addBlock,removeBlock,attemptsFor,fetchAttempts,updateAttempt,resetAttempts,grade,pickQuestionsForRun,submitAttempt,requestResult,pollResult,fetchDsChannels};
+  return {esc,validStatic,slugify,fetchCategories,saveCategory,removeCategory,fetchTests,fetchTest,saveTest,removeTest,fetchQuestions,saveQuestion,removeQuestion,reorderQuestions,fetchPingLines,savePingLine,removePingLine,fetchBlocks,addBlock,removeBlock,attemptsFor,checkBlocked,fetchAttempts,updateAttempt,resetAttempts,grade,pickQuestionsForRun,submitAttempt,requestResult,pollResult,fetchDsChannels};
 })();
