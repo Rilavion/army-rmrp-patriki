@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=73">
+<link rel="stylesheet" href="style.css?v=74">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin [data-admin]{display:initial !important}
@@ -26,14 +26,17 @@ body.vsrf-is-admin [data-admin]{display:initial !important}
     </a>
     <div class="header-actions" style="margin-left:auto">
       <a href="tests.html" class="btn btn-ghost btn-sm">← К списку тестов</a>
-      <span class="te-save-status" id="teSaveStatus"></span>
-      <button class="btn btn-gold btn-sm" id="teSaveTop">💾 Сохранить</button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
     </div>
   </div>
 </header>
 
 <main>
   <section class="te-page">
+
     <div id="teGuard" style="display:none">
       <div class="apps-guard-box" style="max-width:520px;margin:60px auto;text-align:center;padding:40px">
         <div class="apps-guard-icon">⚠</div>
@@ -43,47 +46,72 @@ body.vsrf-is-admin [data-admin]{display:initial !important}
       </div>
     </div>
 
+    <div id="teCreate" style="display:none">
+      <div class="te-create-card">
+        <div class="te-create-title">✨ Создание нового теста</div>
+        <div class="te-create-sub">Введите название — тест создастся как черновик, потом сможете настроить всё остальное</div>
+        <div class="form-group">
+          <label>Название теста</label>
+          <input type="text" id="tcTitle" class="msg-input te-title-input" placeholder="Например: Основы медицинской службы">
+        </div>
+        <div class="form-msg" id="tcMsg"></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <a href="tests.html" class="btn btn-ghost btn-sm">Отмена</a>
+          <button class="btn btn-gold" id="tcCreate">Создать →</button>
+        </div>
+      </div>
+    </div>
+
     <div id="teRoot" style="display:none">
       <div class="te-header">
-        <input type="text" id="teTitle" placeholder="Название теста..." class="te-title-input">
+        <div class="te-header-l">
+          <input type="text" id="teTitle" placeholder="Название теста..." class="te-title-input">
+          <div class="te-header-slug" id="teSlugLine">Ссылка: <b id="teSlugPreview">...</b> <button class="te-copy-link" id="teCopyLink" title="Копировать полную ссылку">🔗</button></div>
+        </div>
         <div class="te-header-meta">
           <label class="te-pub-toggle">
             <input type="checkbox" id="tePublished">
             <span class="te-pub-slider"></span>
             <span class="te-pub-label" id="tePubLabel">Черновик</span>
           </label>
-          <button class="btn btn-ghost btn-sm" id="teDelete" style="display:none">🗑 Удалить</button>
+          <button class="btn btn-ghost btn-sm" id="teDelete">🗑</button>
+          <button class="btn btn-gold btn-sm" id="teSaveTop">💾 Сохранить</button>
         </div>
       </div>
 
       <div class="te-tabs">
-        <button class="te-tab active" data-te-tab="main"><span class="te-tab-num">1</span> Основное</button>
-        <button class="te-tab" data-te-tab="questions"><span class="te-tab-num">2</span> Вопросы <span class="te-tab-cnt" id="teQCount">0</span></button>
+        <button class="te-tab active" data-te-tab="questions"><span class="te-tab-num">1</span> Вопросы <span class="te-tab-cnt" id="teQCount">0</span></button>
+        <button class="te-tab" data-te-tab="main"><span class="te-tab-num">2</span> Описание</button>
         <button class="te-tab" data-te-tab="settings"><span class="te-tab-num">3</span> Настройки</button>
-        <button class="te-tab" data-te-tab="ping"><span class="te-tab-num">4</span> Строки пинга</button>
-        <button class="te-tab" data-te-tab="blocks"><span class="te-tab-num">5</span> Блокировки</button>
+        <button class="te-tab" data-te-tab="blocks"><span class="te-tab-num">4</span> Блокировки</button>
       </div>
 
-      <div class="te-tab-body" data-tab="main">
-        <div class="te-card">
-          <div class="te-card-title">📋 Основная информация</div>
-          <div class="msg-row">
-            <div class="form-group msg-flex-2"><label>Slug (URL)</label><input type="text" id="teSlug" class="msg-input" placeholder="автоматически если пусто"><div class="te-hint">Часть ссылки: /test.html?t=<b id="teSlugPreview">...</b></div></div>
-            <div class="form-group msg-flex-1"><label>Категория</label><select id="teCat" class="msg-input"><option value="">— без категории —</option></select></div>
-          </div>
-          <div class="form-group"><label>Краткое описание (в карточке теста)</label><input type="text" id="teDesc" class="msg-input" placeholder="Одна строка о чём тест..."></div>
-          <div class="form-group"><label>Вступительный текст (показывается перед началом)</label><textarea id="teIntro" class="msg-input msg-textarea msg-textarea-sm" placeholder="Что должен знать проходящий, какие правила..."></textarea></div>
-        </div>
-      </div>
-
-      <div class="te-tab-body" data-tab="questions" style="display:none">
+      <div class="te-tab-body" data-tab="questions">
         <div class="te-card">
           <div class="te-card-title-row">
             <div class="te-card-title">❓ Вопросы теста</div>
             <div class="te-card-hint" id="teQStats"></div>
-            <button class="btn btn-gold btn-sm" id="teQAddBtn">+ Добавить вопрос</button>
           </div>
-          <div class="te-qs-list" id="teQList"><div class="apps-empty" style="padding:40px"><p>Пока нет вопросов. Нажмите «+ Добавить вопрос».</p></div></div>
+
+          <div class="te-add-panel">
+            <button class="btn btn-gold btn-sm" data-q-add-type="single">🔘 Один ответ</button>
+            <button class="btn btn-gold btn-sm" data-q-add-type="multi">☑ Несколько ответов</button>
+            <button class="btn btn-ghost btn-sm" data-q-add-type="prefilled" title="Обязательное поле с предустановленным ответом (например «Звание: Ефрейтор»)">📌 Предустановленное поле</button>
+          </div>
+
+          <div class="te-qs-list" id="teQList"></div>
+        </div>
+      </div>
+
+      <div class="te-tab-body" data-tab="main" style="display:none">
+        <div class="te-card">
+          <div class="te-card-title">📋 Описание теста</div>
+          <div class="msg-row">
+            <div class="form-group msg-flex-2"><label>Slug (для URL)</label><input type="text" id="teSlug" class="msg-input" placeholder="автоматически если пусто"></div>
+            <div class="form-group msg-flex-1"><label>Категория</label><select id="teCat" class="msg-input"><option value="">— без категории —</option></select></div>
+          </div>
+          <div class="form-group"><label>Краткое описание (в карточке теста)</label><input type="text" id="teDesc" class="msg-input" placeholder="Одна строка о чём тест..."></div>
+          <div class="form-group"><label>Вступительный текст</label><textarea id="teIntro" class="msg-input msg-textarea msg-textarea-sm" placeholder="Что должен знать проходящий..."></textarea></div>
         </div>
       </div>
 
@@ -91,38 +119,30 @@ body.vsrf-is-admin [data-admin]{display:initial !important}
         <div class="te-cards-grid">
           <div class="te-card">
             <div class="te-card-title">🎯 Оценка</div>
-            <div class="form-group"><label>Порог прохождения (%)</label><input type="number" id="tePass" class="msg-input" min="0" max="100" value="70"><div class="te-hint">Процент правильных ответов для «сдано»</div></div>
+            <div class="form-group"><label>Порог прохождения (%)</label><input type="number" id="tePass" class="msg-input" min="0" max="100" value="70"></div>
             <div class="form-group"><label class="doc-toggle-row"><input type="checkbox" id="teShowAns"><span>Показывать правильные ответы после сдачи</span></label></div>
           </div>
           <div class="te-card">
-            <div class="te-card-title">🔁 Ограничения</div>
-            <div class="form-group"><label>Макс. попыток на одного человека</label><input type="number" id="teMax" class="msg-input" min="0" value="3"><div class="te-hint">0 = без ограничений</div></div>
-            <div class="form-group"><label>Лимит времени (минут)</label><input type="number" id="teTime" class="msg-input" min="0" value="0"><div class="te-hint">0 = без таймера</div></div>
+            <div class="te-card-title">🎲 Рандомизация</div>
+            <div class="form-group"><label class="doc-toggle-row"><input type="checkbox" id="teShuffle"><span>Перемешивать вопросы случайно</span></label></div>
+            <div class="form-group"><label>Показывать вопросов за одно прохождение</label><input type="number" id="tePerRun" class="msg-input" min="0" placeholder="0 = все"><div class="te-hint">Если у теста 15 вопросов, а тут 10 — покажется 10 случайных. Предустановленные поля показываются всегда.</div></div>
           </div>
           <div class="te-card">
-            <div class="te-card-title">📤 Результат в Discord</div>
-            <div class="form-group"><label>Канал для отправки результатов</label><select id="teChannel" class="msg-input"></select><div class="te-hint">Пусто — результаты не отправляются в Discord</div></div>
+            <div class="te-card-title">🔁 Попытки и время</div>
+            <div class="form-group"><label>Макс. попыток на человека</label><input type="number" id="teMax" class="msg-input" min="0" value="3"><div class="te-hint">0 = без ограничений</div></div>
+            <div class="form-group"><label>Лимит времени (мин)</label><input type="number" id="teTime" class="msg-input" min="0" value="0"><div class="te-hint">0 = без таймера</div></div>
           </div>
-        </div>
-      </div>
-
-      <div class="te-tab-body" data-tab="ping" style="display:none">
-        <div class="te-card">
-          <div class="te-card-title">📝 Дополнительные строки в сообщении результата</div>
-          <div class="te-hint" style="margin-bottom:14px">Каждая строка (например «Звание: Ефрейтор» или «Пост: КПП №1») попадает в embed результата в Discord.</div>
-          <div class="te-add-row">
-            <input type="text" id="tePingKey" class="msg-input" placeholder="Название (напр. Звание)" style="flex:1">
-            <input type="text" id="tePingVal" class="msg-input" placeholder="Значение (напр. Ефрейтор)" style="flex:2">
-            <button class="btn btn-gold btn-sm" id="tePingAdd">+ Добавить</button>
+          <div class="te-card">
+            <div class="te-card-title">📤 Discord</div>
+            <div class="form-group"><label>Канал отправки результатов</label><select id="teChannel" class="msg-input"></select></div>
           </div>
-          <div class="te-list" id="tePingList"></div>
         </div>
       </div>
 
       <div class="te-tab-body" data-tab="blocks" style="display:none">
         <div class="te-card">
           <div class="te-card-title">🚫 Блокировки прохождения</div>
-          <div class="te-hint" style="margin-bottom:14px">Заблокированные не смогут отправить ответы. Можно блокировать по статику (000-000) или Discord-нику (@user).</div>
+          <div class="te-hint" style="margin-bottom:14px">Заблокированные не смогут отправить ответы. По статику (000-000) или Discord-нику.</div>
           <div class="te-add-row">
             <select id="teBlockKind" class="msg-input" style="max-width:160px"><option value="static">🆔 Статик</option><option value="discord">💬 Discord</option></select>
             <input type="text" id="teBlockVal" class="msg-input" placeholder="000-000 или @username" style="flex:1">
@@ -132,75 +152,26 @@ body.vsrf-is-admin [data-admin]{display:initial !important}
           <div class="te-list" id="teBlockList"></div>
         </div>
       </div>
-
-      <div class="te-actions-bottom">
-        <button class="btn btn-ghost btn-sm" id="teCancelBottom">Отмена</button>
-        <div style="flex:1"></div>
-        <a href="#" id="tePreview" class="btn btn-ghost btn-sm" target="_blank">👁 Предпросмотр</a>
-        <button class="btn btn-gold" id="teSaveBottom">💾 Сохранить всё</button>
-      </div>
     </div>
+
+    <div class="te-toast" id="teToast"></div>
+
   </section>
 </main>
 
-<div class="modal-back" id="teQEditModal">
-  <div class="modal modal-lg">
-    <button class="modal-close" aria-label="Закрыть">✕</button>
-    <h3 id="qEditTitle">Вопрос</h3>
-    <div class="form-group">
-      <label>Тип вопроса</label>
-      <div class="te-kind-picker">
-        <label class="te-kind-opt"><input type="radio" name="qKind" value="single"><div><b>🔘 Один правильный</b><span>Один вариант из нескольких</span></div></label>
-        <label class="te-kind-opt"><input type="radio" name="qKind" value="multi"><div><b>☑ Несколько правильных</b><span>Все правильные должны быть отмечены</span></div></label>
-      </div>
-    </div>
-    <div class="form-group"><label>Текст вопроса *</label><textarea id="qText" class="msg-input msg-textarea msg-textarea-sm" placeholder="Что вы будете спрашивать?..."></textarea></div>
-    <div class="form-group">
-      <label>Изображения (URL, по одному на строку)</label>
-      <textarea id="qImages" class="msg-input msg-textarea msg-textarea-sm" placeholder="https://... (опц.)"></textarea>
-      <div id="qImagesPreview" class="te-img-preview"></div>
-    </div>
-    <div class="form-group">
-      <label>Варианты ответа <span class="msg-help">Нажмите ☑ чтобы отметить правильный вариант</span></label>
-      <div id="qOptsList"></div>
-      <button class="btn btn-ghost btn-sm" id="qOptAdd" style="margin-top:8px">+ Добавить вариант</button>
-    </div>
-    <div class="msg-row">
-      <div class="form-group msg-flex-1"><label>Баллы за вопрос</label><input type="number" id="qPoints" class="msg-input" min="1" value="1"></div>
-      <div class="form-group msg-flex-1"><label>Порядок</label><input type="number" id="qSort" class="msg-input" value="100"></div>
-    </div>
-    <div class="form-group"><label>Пояснение (не показывается пользователю, только для админа)</label><textarea id="qExplain" class="msg-input msg-textarea msg-textarea-sm"></textarea></div>
-    <div class="form-msg" id="qMsg"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
-      <button class="btn btn-ghost btn-sm" id="qDelete" style="display:none">🗑 Удалить</button>
-      <div style="flex:1"></div>
-      <button class="btn btn-ghost btn-sm" id="qCancel">Отмена</button>
-      <button class="btn btn-gold btn-sm" id="qSave">Сохранить вопрос</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-back" id="loginModal">
-  <div class="modal">
-    <button class="modal-close" aria-label="Закрыть">✕</button>
-    <h3>Вход</h3>
-    <form>
-      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
-      <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
-      <button class="btn btn-gold" style="width:100%" type="submit">Войти</button>
-      <div class="form-msg"></div>
-    </form>
-  </div>
+  <div class="modal"><button class="modal-close" aria-label="Закрыть">✕</button><h3>Вход</h3>
+    <form><div class="form-group"><label>Email</label><input type="email" name="email" required></div><div class="form-group"><label>Пароль</label><input type="password" name="password" required></div><button class="btn btn-gold" style="width:100%" type="submit">Войти</button><div class="form-msg"></div></form></div>
 </div>
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=73"></script>
-<script src="config.js?v=73"></script>
-<script src="auth.js?v=73"></script>
-<script src="roles-engine.js?v=73"></script>
-<script src="tests-engine.js?v=73"></script>
-<script src="main.js?v=73"></script>
+<script src="supabase-loader.js?v=74"></script>
+<script src="config.js?v=74"></script>
+<script src="auth.js?v=74"></script>
+<script src="roles-engine.js?v=74"></script>
+<script src="tests-engine.js?v=74"></script>
+<script src="main.js?v=74"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -208,29 +179,55 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 
 const params=new URLSearchParams(location.search);
 const TID=params.get("t");
-let TEST=null,CATS=[],CHANNELS=[],QS=[],PINGS=[],BLOCKS=[];
-let DIRTY=false;
+let TEST=null,CATS=[],CHANNELS=[],QS=[],BLOCKS=[];
+let EXPANDED_QID=null;
 
-function setDirty(v){DIRTY=v;$("teSaveStatus").textContent=v?"● несохранённые изменения":"";$("teSaveStatus").className="te-save-status"+(v?" te-save-dirty":"")}
+function toast(text,type){
+  const t=$("teToast");
+  t.textContent=text;
+  t.className="te-toast te-toast-show"+(type?" te-toast-"+type:"");
+  setTimeout(()=>t.classList.remove("te-toast-show"),2200);
+}
 
 async function boot(){
   const isAdmin=window.VSRF_ROLES&&window.VSRF_ROLES.isAdmin();
-  if(!isAdmin){$("teGuard").style.display="";$("teRoot").style.display="none";return}
-  $("teGuard").style.display="none";$("teRoot").style.display="";
+  if(!isAdmin){$("teGuard").style.display="";$("teRoot").style.display="none";$("teCreate").style.display="none";return}
+  $("teGuard").style.display="none";
   document.body.classList.add("vsrf-is-admin");
   [CATS,CHANNELS]=await Promise.all([VSRF_TESTS.fetchCategories(),VSRF_TESTS.fetchDsChannels()]);
   if(TID){
     TEST=await VSRF_TESTS.fetchTest(TID);
     if(!TEST){alert("Тест не найден");location.href="tests.html";return}
-    [QS,PINGS,BLOCKS]=await Promise.all([VSRF_TESTS.fetchQuestions(TEST.id),VSRF_TESTS.fetchPingLines(TEST.id),VSRF_TESTS.fetchBlocks(TEST.id)]);
+    [QS,BLOCKS]=await Promise.all([VSRF_TESTS.fetchQuestions(TEST.id),VSRF_TESTS.fetchBlocks(TEST.id)]);
+    showEditor();
   } else {
-    TEST={title:"",pass_score:70,max_attempts:3,published:false};
-    QS=[];PINGS=[];BLOCKS=[];
+    $("teCreate").style.display="";
+    $("teRoot").style.display="none";
+    setTimeout(()=>$("tcTitle").focus(),100);
   }
+}
+
+$("tcCreate").addEventListener("click",createNewTest);
+$("tcTitle").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();createNewTest()}});
+async function createNewTest(){
+  const title=$("tcTitle").value.trim();
+  const msg=$("tcMsg");
+  if(!title){msg.className="form-msg error";msg.textContent="Введите название";$("tcTitle").focus();return}
+  msg.className="form-msg info";msg.textContent="Создание...";
+  const r=await VSRF_TESTS.saveTest({title,pass_score:70,max_attempts:3,published:false});
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  history.replaceState(null,"","test-editor.html?t="+r.row.id);
+  TEST=r.row;QS=[];BLOCKS=[];
+  $("teCreate").style.display="none";
+  showEditor();
+  toast("Тест создан","ok");
+}
+
+function showEditor(){
+  $("teRoot").style.display="";
   fillForm();
-  renderQs();renderPings();renderBlocks();
-  updateSlugPreview();
-  $("teDelete").style.display=TEST.id?"":"none";
+  renderQs();renderBlocks();
+  updateSlugLine();
 }
 
 function fillForm(){
@@ -241,13 +238,14 @@ function fillForm(){
   $("tePass").value=TEST.pass_score||70;
   $("teMax").value=TEST.max_attempts||0;
   $("teTime").value=TEST.time_limit_minutes||0;
+  $("tePerRun").value=TEST.questions_per_run||"";
+  $("teShuffle").checked=!!TEST.shuffle_questions;
   $("tePublished").checked=!!TEST.published;
   updatePubLabel();
   $("teShowAns").checked=!!TEST.show_answers_after;
   $("teCat").innerHTML=`<option value="">— без категории —</option>`+CATS.map(c=>`<option value="${c.id}" ${c.id===TEST.category_id?"selected":""}>${esc(c.name)}</option>`).join("");
   fillChannels();
 }
-
 function fillChannels(){
   const sel=$("teChannel");
   const cur=TEST.result_channel_id;
@@ -262,31 +260,33 @@ function fillChannels(){
   }
   sel.innerHTML=parts.join("");
 }
-
 function updatePubLabel(){$("tePubLabel").textContent=$("tePublished").checked?"✓ Опубликован":"Черновик"}
-function updateSlugPreview(){
-  const s=$("teSlug").value.trim()||(TEST.id||"будет-сгенерирован");
-  $("teSlugPreview").textContent=s;
-  const url=TEST.id?"test.html?t="+encodeURIComponent(TEST.slug||TEST.id):"#";
-  $("tePreview").href=url;
+function updateSlugLine(){
+  if(!TEST||!TEST.id){$("teSlugLine").style.display="none";return}
+  $("teSlugLine").style.display="";
+  const s=TEST.slug||TEST.id;
+  $("teSlugPreview").textContent="test.html?t="+s;
 }
+
+$("teCopyLink").addEventListener("click",()=>{
+  if(!TEST||!TEST.id) return;
+  const url=new URL("test.html?t="+encodeURIComponent(TEST.slug||TEST.id),location.href).href;
+  navigator.clipboard.writeText(url);
+  $("teCopyLink").textContent="✓";setTimeout(()=>$("teCopyLink").textContent="🔗",900);
+});
 
 document.querySelectorAll(".te-tab").forEach(t=>t.addEventListener("click",()=>{
   document.querySelectorAll(".te-tab").forEach(x=>x.classList.toggle("active",x===t));
   document.querySelectorAll(".te-tab-body").forEach(b=>b.style.display=b.dataset.tab===t.dataset.teTab?"":"none");
 }));
+$("tePublished").addEventListener("change",updatePubLabel);
 
-["teTitle","teDesc","teIntro","teSlug","tePass","teMax","teTime","teCat","teChannel","tePublished","teShowAns"].forEach(id=>{
-  const el=$(id);if(!el) return;
-  const ev=(el.tagName==="SELECT"||el.type==="checkbox")?"change":"input";
-  el.addEventListener(ev,()=>{setDirty(true);if(id==="tePublished") updatePubLabel();if(id==="teSlug") updateSlugPreview()});
-});
-
-async function saveTest(silent){
+async function saveTest(){
+  if(!TEST){toast("Сначала создайте тест","err");return null}
   const title=$("teTitle").value.trim();
   if(!title){alert("Название обязательно");return null}
   const row={
-    title,
+    id:TEST.id,title,
     description:$("teDesc").value.trim()||null,
     intro:$("teIntro").value.trim()||null,
     category_id:$("teCat").value||null,
@@ -296,64 +296,156 @@ async function saveTest(silent){
     time_limit_minutes:parseInt($("teTime").value)||null,
     result_channel_id:$("teChannel").value||null,
     published:$("tePublished").checked,
-    show_answers_after:$("teShowAns").checked
+    show_answers_after:$("teShowAns").checked,
+    shuffle_questions:$("teShuffle").checked,
+    questions_per_run:parseInt($("tePerRun").value)||null
   };
-  if(TEST.id) row.id=TEST.id;
   const r=await VSRF_TESTS.saveTest(row);
-  if(!r.ok){alert("Ошибка: "+r.error);return null}
+  if(!r.ok){toast("Ошибка: "+r.error,"err");return null}
   TEST=r.row;
-  setDirty(false);
-  updateSlugPreview();
-  $("teDelete").style.display="";
-  if(!silent){$("teSaveStatus").textContent="✓ Сохранено";$("teSaveStatus").className="te-save-status te-save-ok";setTimeout(()=>{if(!DIRTY)$("teSaveStatus").textContent=""},2500)}
-  history.replaceState(null,"","test-editor.html?t="+TEST.id);
+  updateSlugLine();
+  toast("✓ Сохранено","ok");
   return TEST;
 }
-
-$("teSaveTop").addEventListener("click",()=>saveTest(false));
-$("teSaveBottom").addEventListener("click",()=>saveTest(false));
-$("teCancelBottom").addEventListener("click",()=>{if(!DIRTY||confirm("Есть несохранённые изменения. Всё равно уйти?")) location.href="tests.html"});
+$("teSaveTop").addEventListener("click",saveTest);
 $("teDelete").addEventListener("click",async()=>{
-  if(!TEST.id) return;
-  if(!confirm("Удалить тест «"+TEST.title+"» полностью? Все вопросы и попытки будут удалены. Действие необратимо.")) return;
+  if(!TEST||!TEST.id) return;
+  if(!confirm("Удалить тест «"+TEST.title+"» полностью?")) return;
   await VSRF_TESTS.removeTest(TEST.id);
   location.href="tests.html";
 });
 
-/* Вопросы */
+/* ============ ВОПРОСЫ (inline expansion) ============ */
 
 function renderQs(){
   const box=$("teQList");
-  let total=0;for(const q of QS) total+=(q.points||1);
+  let total=0;const prefilledCount=QS.filter(q=>q.kind==="prefilled").length;
+  const regularCount=QS.length-prefilledCount;
+  for(const q of QS) if(q.kind!=="prefilled") total+=(q.points||1);
   $("teQCount").textContent=QS.length;
-  $("teQStats").textContent=QS.length?QS.length+" вопросов · "+total+" балл(ов) макс.":"";
-  if(!TEST.id){box.innerHTML=`<div class="apps-empty" style="padding:40px"><p>Сначала сохраните тест — потом добавляйте вопросы.<br><button class="btn btn-gold btn-sm" onclick="document.getElementById('teSaveTop').click()">💾 Сохранить тест</button></p></div>`;return}
-  if(!QS.length){box.innerHTML=`<div class="apps-empty" style="padding:40px"><p>Пока нет вопросов. Нажмите «+ Добавить вопрос».</p></div>`;return}
-  box.innerHTML=QS.map((q,i)=>{
-    const opts=q.options||[];const cor=q.correct||[];
-    return `<div class="te-q-item" data-qid="${q.id}">
-      <div class="te-q-head">
-        <div class="te-q-num">#${i+1}</div>
-        <div class="te-q-kind">${q.kind==="multi"?"☑ несколько":"🔘 один"}</div>
-        <div class="te-q-text">${esc(q.text)}</div>
-        <div class="tq-pts">${q.points||1} б.</div>
-        <button class="btn btn-ghost btn-sm" data-q-up="${q.id}" title="Выше">↑</button>
-        <button class="btn btn-ghost btn-sm" data-q-dn="${q.id}" title="Ниже">↓</button>
-        <button class="btn btn-gold btn-sm" data-q-edit="${q.id}">✎</button>
-        <button class="btn btn-ghost btn-sm" data-q-del="${q.id}">🗑</button>
+  $("teQStats").textContent=QS.length?(regularCount+" вопросов ("+total+" б.) + "+prefilledCount+" предустановленных"):"Вопросов нет";
+  if(!QS.length){
+    box.innerHTML=`<div class="apps-empty" style="padding:30px"><p>Нажмите кнопку выше чтобы добавить вопрос.</p></div>`;
+    return;
+  }
+  box.innerHTML=QS.map((q,i)=>renderQItem(q,i)).join("");
+  bindQItems();
+}
+
+function renderQItem(q,i){
+  const isOpen=EXPANDED_QID===q.id;
+  const isPre=q.kind==="prefilled";
+  const kindLabel=isPre?"📌 Предустановлено":(q.kind==="multi"?"☑ Несколько":"🔘 Один");
+  const opts=q.options||[];const cor=q.correct||[];
+  const summary=isPre
+    ? `<div class="te-q-opts"><span class="tq-opt tq-opt-c">${esc(q.prefilled_value||"—")}</span></div>`
+    : `<div class="te-q-opts">${opts.map(o=>`<span class="tq-opt ${cor.includes(o)?"tq-opt-c":""}">${cor.includes(o)?"✓ ":""}${esc(o)}</span>`).join("")}</div>`;
+  return `<div class="te-q-item ${isOpen?"te-q-open":""} ${isPre?"te-q-pre":""}" data-qid="${q.id}">
+    <div class="te-q-head" data-q-toggle="${q.id}">
+      <div class="te-q-num">#${i+1}</div>
+      <div class="te-q-kind">${kindLabel}</div>
+      <div class="te-q-text">${esc(q.text||"—")}</div>
+      ${!isPre?`<div class="tq-pts">${q.points||1} б.</div>`:""}
+      <button class="te-q-btn" data-q-up="${q.id}" title="Выше">↑</button>
+      <button class="te-q-btn" data-q-dn="${q.id}" title="Ниже">↓</button>
+      <button class="te-q-btn te-q-btn-del" data-q-del="${q.id}" title="Удалить">🗑</button>
+      <div class="te-q-chev">${isOpen?"▲":"▼"}</div>
+    </div>
+    ${!isOpen?summary:""}
+    ${isOpen?renderQEditor(q):""}
+  </div>`;
+}
+
+function renderQEditor(q){
+  const isPre=q.kind==="prefilled";
+  if(isPre){
+    return `<div class="te-q-edit">
+      <div class="form-group"><label>Название (что за поле, будет видно юзеру)</label><input type="text" data-qf="text" class="msg-input" value="${esc(q.text||"")}" placeholder="Например: Звание"></div>
+      <div class="form-group"><label>Значение (что будет проставлено)</label><input type="text" data-qf="prefilled_value" class="msg-input" value="${esc(q.prefilled_value||"")}" placeholder="Например: Ефрейтор"></div>
+      <div class="te-hint">Это поле показывается пользователю как readonly и уходит в отчёт в Discord.</div>
+      <div class="te-q-actions">
+        <div class="form-msg" data-qmsg></div>
+        <div style="flex:1"></div>
+        <button class="btn btn-ghost btn-sm" data-q-cancel="${q.id}">Отмена</button>
+        <button class="btn btn-gold btn-sm" data-q-save="${q.id}">💾 Сохранить</button>
       </div>
-      <div class="te-q-opts">${opts.map(o=>`<span class="tq-opt ${cor.includes(o)?"tq-opt-c":""}">${cor.includes(o)?"✓ ":""}${esc(o)}</span>`).join("")}</div>
-      ${(q.images||[]).length?`<div class="te-q-imgs">${q.images.map(u=>`<img src="${esc(u)}" alt="" onerror="this.style.display='none'">`).join("")}</div>`:""}
     </div>`;
-  }).join("");
-  box.querySelectorAll("[data-q-edit]").forEach(b=>b.addEventListener("click",()=>openQ(b.dataset.qEdit)));
-  box.querySelectorAll("[data-q-del]").forEach(b=>b.addEventListener("click",async()=>{
+  }
+  const opts=q.options&&q.options.length?q.options:["",""];
+  const cor=q.correct||[];
+  return `<div class="te-q-edit">
+    <div class="form-group"><label>Текст вопроса *</label><textarea data-qf="text" class="msg-input msg-textarea msg-textarea-sm" placeholder="Что спрашиваем?">${esc(q.text||"")}</textarea></div>
+    <div class="form-group">
+      <label>Варианты ответа <span class="msg-help">Нажмите ☑ для правильных</span></label>
+      <div class="q-opt-list" data-q-opts="${q.id}">
+        ${opts.map((o,i)=>`<div class="q-opt-row">
+          <input type="${q.kind==="multi"?"checkbox":"radio"}" name="cor_${q.id}" ${cor.includes(o)?"checked":""}>
+          <input type="text" class="msg-input q-opt-text" value="${esc(o)}" placeholder="Вариант ${i+1}">
+          <button type="button" class="btn btn-ghost btn-sm q-opt-del">×</button>
+        </div>`).join("")}
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm q-opt-add" data-q-optadd="${q.id}" style="margin-top:6px">+ Добавить вариант</button>
+    </div>
+    <div class="form-group">
+      <label>Изображения (URL, по одному на строку, опц.)</label>
+      <textarea data-qf="images" class="msg-input msg-textarea msg-textarea-sm" placeholder="https://...">${esc((q.images||[]).join("\n"))}</textarea>
+    </div>
+    <div class="msg-row">
+      <div class="form-group msg-flex-1"><label>Баллы</label><input type="number" data-qf="points" class="msg-input" min="1" value="${q.points||1}"></div>
+      <div class="form-group msg-flex-1"><label>Порядок</label><input type="number" data-qf="sort" class="msg-input" value="${q.sort||100}"></div>
+    </div>
+    <div class="te-q-actions">
+      <div class="form-msg" data-qmsg></div>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" data-q-cancel="${q.id}">Отмена</button>
+      <button class="btn btn-gold btn-sm" data-q-save="${q.id}">💾 Сохранить</button>
+    </div>
+  </div>`;
+}
+
+function bindQItems(){
+  document.querySelectorAll("[data-q-toggle]").forEach(el=>el.addEventListener("click",e=>{
+    if(e.target.closest("button")) return;
+    const id=el.dataset.qToggle;
+    EXPANDED_QID=EXPANDED_QID===id?null:id;
+    renderQs();
+  }));
+  document.querySelectorAll("[data-q-del]").forEach(b=>b.addEventListener("click",async e=>{
+    e.stopPropagation();
     if(!confirm("Удалить вопрос?")) return;
     await VSRF_TESTS.removeQuestion(b.dataset.qDel);
     QS=await VSRF_TESTS.fetchQuestions(TEST.id);renderQs();
   }));
-  box.querySelectorAll("[data-q-up]").forEach(b=>b.addEventListener("click",()=>moveQ(b.dataset.qUp,-1)));
-  box.querySelectorAll("[data-q-dn]").forEach(b=>b.addEventListener("click",()=>moveQ(b.dataset.qDn,1)));
+  document.querySelectorAll("[data-q-up]").forEach(b=>b.addEventListener("click",async e=>{e.stopPropagation();await moveQ(b.dataset.qUp,-1)}));
+  document.querySelectorAll("[data-q-dn]").forEach(b=>b.addEventListener("click",async e=>{e.stopPropagation();await moveQ(b.dataset.qDn,1)}));
+  document.querySelectorAll("[data-q-cancel]").forEach(b=>b.addEventListener("click",()=>{
+    EXPANDED_QID=null;renderQs();
+  }));
+  document.querySelectorAll("[data-q-save]").forEach(b=>b.addEventListener("click",()=>saveQuestion(b.dataset.qSave)));
+  document.querySelectorAll("[data-q-optadd]").forEach(b=>b.addEventListener("click",()=>{
+    const box=document.querySelector(`[data-q-opts="${b.dataset.qOptadd}"]`);
+    const q=QS.find(x=>x.id===b.dataset.qOptadd);
+    const kind=q.kind;
+    const row=document.createElement("div");
+    row.className="q-opt-row";
+    row.innerHTML=`<input type="${kind==="multi"?"checkbox":"radio"}" name="cor_${q.id}">
+      <input type="text" class="msg-input q-opt-text" placeholder="Новый вариант">
+      <button type="button" class="btn btn-ghost btn-sm q-opt-del">×</button>`;
+    box.appendChild(row);
+    bindOptDelete(box);
+  }));
+  document.querySelectorAll("[data-q-opts]").forEach(box=>bindOptDelete(box));
+}
+
+function bindOptDelete(box){
+  box.querySelectorAll(".q-opt-del").forEach(btn=>{
+    if(btn.dataset.bound) return;
+    btn.dataset.bound="1";
+    btn.addEventListener("click",()=>{
+      if(box.querySelectorAll(".q-opt-row").length<=2){alert("Минимум 2 варианта");return}
+      btn.closest(".q-opt-row").remove();
+    });
+  });
 }
 
 async function moveQ(id,dir){
@@ -362,133 +454,71 @@ async function moveQ(id,dir){
   [QS[idx],QS[ni]]=[QS[ni],QS[idx]];
   renderQs();
   await VSRF_TESTS.reorderQuestions(QS);
-  QS=await VSRF_TESTS.fetchQuestions(TEST.id);renderQs();
+  QS=await VSRF_TESTS.fetchQuestions(TEST.id);
+  renderQs();
 }
 
-$("teQAddBtn").addEventListener("click",async()=>{
-  if(!TEST.id){const t=await saveTest(true);if(!t) return}
-  openQ(null);
-});
-
-let CURRENT_Q=null;
-function openQ(id){
-  CURRENT_Q=id?QS.find(x=>x.id===id):null;
-  const q=CURRENT_Q||{kind:"single",text:"",options:["",""],correct:[],points:1,sort:(QS.length+1)*10,images:[]};
-  $("qEditTitle").textContent=id?"✎ Вопрос":"+ Новый вопрос";
-  document.querySelectorAll("[name=qKind]").forEach(r=>r.checked=r.value===q.kind);
-  $("qText").value=q.text;
-  $("qPoints").value=q.points||1;
-  $("qSort").value=q.sort||100;
-  $("qExplain").value=q.explanation||"";
-  $("qImages").value=(q.images||[]).join("\n");
-  updateImagesPreview();
-  renderQOpts(q.options||[],q.correct||[],q.kind);
-  $("qDelete").style.display=id?"":"none";
-  $("qMsg").textContent="";$("qMsg").className="form-msg";
-  $("teQEditModal").classList.add("active");
-}
-$("teQEditModal").querySelector(".modal-close").addEventListener("click",()=>$("teQEditModal").classList.remove("active"));
-$("qCancel").addEventListener("click",()=>$("teQEditModal").classList.remove("active"));
-$("teQEditModal").addEventListener("click",e=>{if(e.target===$("teQEditModal"))$("teQEditModal").classList.remove("active")});
-
-function renderQOpts(options,correct,kind){
-  const box=$("qOptsList");
-  box.innerHTML=options.map((o,i)=>`<div class="q-opt-row" data-oi="${i}">
-    <input type="${kind==="multi"?"checkbox":"radio"}" name="qCorrect" ${correct.includes(o)?"checked":""}>
-    <input type="text" class="msg-input q-opt-text" value="${esc(o)}" placeholder="Вариант ${i+1}">
-    <button class="btn btn-ghost btn-sm" data-oi-del="${i}" title="Удалить вариант">×</button>
-  </div>`).join("");
-  box.querySelectorAll("[data-oi-del]").forEach(b=>b.addEventListener("click",()=>{
-    const {opts,cor}=collectOpts();
-    if(opts.length<=2){alert("Минимум 2 варианта");return}
-    opts.splice(parseInt(b.dataset.oiDel),1);
-    renderQOpts(opts,cor,document.querySelector("[name=qKind]:checked").value);
-  }));
-}
-function collectOpts(){
-  const rows=Array.from(document.querySelectorAll(".q-opt-row"));
-  const opts=[];const cor=[];
-  rows.forEach(r=>{
-    const t=r.querySelector(".q-opt-text").value;
-    opts.push(t);
-    if(r.querySelector("input[type=radio],input[type=checkbox]").checked) cor.push(t);
-  });
-  return {opts,cor};
-}
-$("qOptAdd").addEventListener("click",()=>{
-  const {opts,cor}=collectOpts();opts.push("");
-  renderQOpts(opts,cor,document.querySelector("[name=qKind]:checked").value);
-});
-document.querySelectorAll("[name=qKind]").forEach(r=>r.addEventListener("change",()=>{
-  const {opts,cor}=collectOpts();
-  const k=document.querySelector("[name=qKind]:checked").value;
-  const cor2=k==="single"?cor.slice(0,1):cor;
-  renderQOpts(opts,cor2,k);
+document.querySelectorAll("[data-q-add-type]").forEach(b=>b.addEventListener("click",async ()=>{
+  if(!TEST||!TEST.id){toast("Сначала создайте тест","err");return}
+  const kind=b.dataset.qAddType;
+  const base={test_id:TEST.id,kind,text:"",sort:(QS.length+1)*10,points:1,images:[]};
+  if(kind==="prefilled") Object.assign(base,{options:[],correct:[],prefilled_value:""});
+  else Object.assign(base,{options:["",""],correct:[]});
+  const r=await VSRF_TESTS.saveQuestion(base);
+  if(!r.ok){toast("Ошибка: "+r.error,"err");return}
+  QS=await VSRF_TESTS.fetchQuestions(TEST.id);
+  EXPANDED_QID=r.row.id;
+  renderQs();
+  setTimeout(()=>{
+    const el=document.querySelector(`[data-qid="${r.row.id}"]`);
+    if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
+  },100);
 }));
-$("qImages").addEventListener("input",updateImagesPreview);
-function updateImagesPreview(){
-  const urls=$("qImages").value.split(/\n/).map(s=>s.trim()).filter(Boolean);
-  $("qImagesPreview").innerHTML=urls.map(u=>`<img src="${esc(u)}" alt="" onerror="this.style.opacity=.2;this.title='не грузится'">`).join("");
+
+async function saveQuestion(qid){
+  const item=document.querySelector(`[data-qid="${qid}"]`);
+  if(!item) return;
+  const q=QS.find(x=>x.id===qid);if(!q) return;
+  const patch={id:qid,test_id:TEST.id,kind:q.kind};
+  item.querySelectorAll("[data-qf]").forEach(el=>{
+    const k=el.dataset.qf;
+    if(k==="images") patch.images=el.value.split(/\n/).map(s=>s.trim()).filter(Boolean);
+    else if(k==="points"||k==="sort") patch[k]=parseInt(el.value)||(k==="points"?1:100);
+    else patch[k]=el.value;
+  });
+  if(q.kind!=="prefilled"){
+    const rows=item.querySelectorAll(".q-opt-row");
+    const opts=[],cor=[];
+    rows.forEach(r=>{
+      const t=r.querySelector(".q-opt-text").value.trim();
+      if(!t) return;
+      opts.push(t);
+      const inp=r.querySelector("input[type=radio],input[type=checkbox]");
+      if(inp&&inp.checked) cor.push(t);
+    });
+    if(opts.length<2){setQMsg(item,"error","Нужно минимум 2 варианта");return}
+    if(!cor.length){setQMsg(item,"error","Отметьте хотя бы один правильный");return}
+    patch.options=opts;patch.correct=cor;
+  } else {
+    if(!patch.text.trim()){setQMsg(item,"error","Введите название поля");return}
+  }
+  setQMsg(item,"info","Сохранение...");
+  const r=await VSRF_TESTS.saveQuestion(patch);
+  if(!r.ok){setQMsg(item,"error",r.error);return}
+  setQMsg(item,"ok","✓");
+  QS=await VSRF_TESTS.fetchQuestions(TEST.id);
+  EXPANDED_QID=null;
+  renderQs();
+  toast("Вопрос сохранён","ok");
 }
-
-$("qSave").addEventListener("click",async()=>{
-  const {opts,cor}=collectOpts();
-  const filtered=opts.map(o=>o.trim()).filter(Boolean);
-  const cor2=cor.map(c=>c.trim()).filter(c=>filtered.includes(c));
-  const kind=document.querySelector("[name=qKind]:checked").value;
-  if(!$("qText").value.trim()){$("qMsg").className="form-msg error";$("qMsg").textContent="Введите текст вопроса";return}
-  if(filtered.length<2){$("qMsg").className="form-msg error";$("qMsg").textContent="Минимум 2 варианта ответа";return}
-  if(!cor2.length){$("qMsg").className="form-msg error";$("qMsg").textContent="Отметьте хотя бы один правильный вариант";return}
-  const row={
-    test_id:TEST.id,kind,text:$("qText").value.trim(),options:filtered,correct:cor2,
-    points:parseInt($("qPoints").value)||1,sort:parseInt($("qSort").value)||100,
-    explanation:$("qExplain").value.trim()||null,
-    images:$("qImages").value.split(/\n/).map(s=>s.trim()).filter(Boolean)
-  };
-  if(CURRENT_Q&&CURRENT_Q.id) row.id=CURRENT_Q.id;
-  const r=await VSRF_TESTS.saveQuestion(row);
-  if(!r.ok){$("qMsg").className="form-msg error";$("qMsg").textContent=r.error;return}
-  $("teQEditModal").classList.remove("active");
-  QS=await VSRF_TESTS.fetchQuestions(TEST.id);renderQs();
-});
-$("qDelete").addEventListener("click",async()=>{
-  if(!CURRENT_Q||!CURRENT_Q.id) return;
-  if(!confirm("Удалить вопрос?")) return;
-  await VSRF_TESTS.removeQuestion(CURRENT_Q.id);
-  $("teQEditModal").classList.remove("active");
-  QS=await VSRF_TESTS.fetchQuestions(TEST.id);renderQs();
-});
-
-/* Строки пинга */
-
-function renderPings(){
-  const box=$("tePingList");
-  if(!TEST.id){box.innerHTML=`<div class="apps-empty"><p>Сначала сохраните тест.</p></div>`;return}
-  if(!PINGS.length){box.innerHTML=`<div class="apps-empty" style="padding:20px"><p>Строк пока нет.</p></div>`;return}
-  box.innerHTML=PINGS.map(p=>`<div class="te-list-row">
-    <b style="color:var(--gold-b);min-width:140px">${esc(p.key)}:</b>
-    <span style="flex:1">${esc(p.value)}</span>
-    <button class="btn btn-ghost btn-sm" data-ping-del="${p.id}">🗑</button>
-  </div>`).join("");
-  box.querySelectorAll("[data-ping-del]").forEach(b=>b.addEventListener("click",async()=>{
-    await VSRF_TESTS.removePingLine(b.dataset.pingDel);
-    PINGS=await VSRF_TESTS.fetchPingLines(TEST.id);renderPings();
-  }));
+function setQMsg(item,type,text){
+  const m=item.querySelector("[data-qmsg]");if(!m) return;
+  m.className="form-msg "+type;m.textContent=text;
 }
-$("tePingAdd").addEventListener("click",async()=>{
-  if(!TEST.id){const t=await saveTest(true);if(!t) return}
-  const key=$("tePingKey").value.trim();const val=$("tePingVal").value.trim();
-  if(!key||!val) return;
-  await VSRF_TESTS.savePingLine({test_id:TEST.id,key,value:val,sort:(PINGS.length+1)*10});
-  $("tePingKey").value="";$("tePingVal").value="";
-  PINGS=await VSRF_TESTS.fetchPingLines(TEST.id);renderPings();
-});
 
 /* Блокировки */
-
 function renderBlocks(){
   const box=$("teBlockList");
-  if(!TEST.id){box.innerHTML=`<div class="apps-empty"><p>Сначала сохраните тест.</p></div>`;return}
   if(!BLOCKS.length){box.innerHTML=`<div class="apps-empty" style="padding:20px"><p>Заблокированных нет.</p></div>`;return}
   box.innerHTML=BLOCKS.map(b=>`<div class="te-list-row">
     <span class="test-block-kind">${b.kind==="static"?"🆔":"💬"}</span>
@@ -503,20 +533,17 @@ function renderBlocks(){
   }));
 }
 $("teBlockAdd").addEventListener("click",async()=>{
-  if(!TEST.id){const t=await saveTest(true);if(!t) return}
   const val=$("teBlockVal").value.trim();if(!val) return;
   const kind=$("teBlockKind").value;
-  if(kind==="static"&&!VSRF_TESTS.validStatic(val)){alert("Статик должен быть в формате 000-000");return}
+  if(kind==="static"&&!VSRF_TESTS.validStatic(val)){alert("Статик в формате 000-000");return}
   await VSRF_TESTS.addBlock(TEST.id,kind,val,$("teBlockReason").value.trim()||null);
   $("teBlockVal").value="";$("teBlockReason").value="";
   BLOCKS=await VSRF_TESTS.fetchBlocks(TEST.id);renderBlocks();
 });
 
-window.addEventListener("beforeunload",e=>{if(DIRTY){e.preventDefault();e.returnValue=""}});
-
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a253f3dbe9ece929',t:'MTc4NTc0NTc0NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2541a899b11e929',t:'MTc4NTc0NzMyOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

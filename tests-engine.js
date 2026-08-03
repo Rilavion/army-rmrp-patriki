@@ -172,6 +172,7 @@ window.VSRF_TESTS=(function(){
     let score=0,max=0;
     const details=[];
     for(const q of questions){
+      if(q.kind==="prefilled") continue;
       const pts=q.points||1;
       max+=pts;
       const user=answers[q.id];
@@ -193,6 +194,26 @@ window.VSRF_TESTS=(function(){
     }
     const percent=max?Math.round(score*100/max):0;
     return {score,max_score:max,percent,details};
+  }
+
+  function shuffleArray(arr){
+    const a=arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function pickQuestionsForRun(all,test){
+    const prefilled=all.filter(q=>q.kind==="prefilled");
+    const regular=all.filter(q=>q.kind!=="prefilled");
+    let picked=regular;
+    if(test.shuffle_questions) picked=shuffleArray(picked);
+    if(test.questions_per_run&&test.questions_per_run>0&&test.questions_per_run<picked.length){
+      picked=picked.slice(0,test.questions_per_run);
+    }
+    return [...prefilled,...picked];
   }
 
   async function submitAttempt(payload){
@@ -242,5 +263,5 @@ window.VSRF_TESTS=(function(){
     return data||[];
   }
 
-  return {esc,validStatic,slugify,fetchCategories,saveCategory,removeCategory,fetchTests,fetchTest,saveTest,removeTest,fetchQuestions,saveQuestion,removeQuestion,reorderQuestions,fetchPingLines,savePingLine,removePingLine,fetchBlocks,addBlock,removeBlock,attemptsFor,fetchAttempts,updateAttempt,resetAttempts,grade,submitAttempt,requestResult,pollResult,fetchDsChannels};
+  return {esc,validStatic,slugify,fetchCategories,saveCategory,removeCategory,fetchTests,fetchTest,saveTest,removeTest,fetchQuestions,saveQuestion,removeQuestion,reorderQuestions,fetchPingLines,savePingLine,removePingLine,fetchBlocks,addBlock,removeBlock,attemptsFor,fetchAttempts,updateAttempt,resetAttempts,grade,pickQuestionsForRun,submitAttempt,requestResult,pollResult,fetchDsChannels};
 })();

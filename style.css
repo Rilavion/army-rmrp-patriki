@@ -4830,3 +4830,48 @@ body.vsrf-is-logged .nav-section[data-loggedin]{display:block !important}
 .test-card:hover::before{opacity:1}
 .test-card-title{font-size:17px}
 .test-card-badge{background:rgba(21,36,29,.6);text-transform:uppercase;letter-spacing:.08em}
+
+/* Test-editor v74 */
+.te-create-card{
+  max-width:600px;margin:80px auto;padding:36px 40px;
+  background:var(--card-bg);border:1px solid var(--gold-b);border-radius:14px;
+  box-shadow:0 16px 48px rgba(0,0,0,.4);
+}
+.te-create-title{font:700 26px 'Cormorant Garamond',serif;color:var(--gold-b);margin-bottom:6px;text-align:center}
+.te-create-sub{color:var(--muted);text-align:center;font-size:13px;margin-bottom:24px}
+
+.te-header-l{flex:1;display:flex;flex-direction:column;gap:6px}
+.te-header-slug{font-size:11px;color:var(--muted);padding:0 6px;display:flex;align-items:center;gap:8px}
+.te-header-slug b{color:var(--gold-b);font-family:monospace;background:rgba(205,168,90,.1);padding:2px 8px;border-radius:4px}
+.te-copy-link{background:transparent;border:1px solid rgba(205,168,90,.3);color:var(--gold-b);cursor:pointer;padding:2px 8px;border-radius:6px;font-size:12px}
+.te-copy-link:hover{background:rgba(205,168,90,.2)}
+
+.te-add-panel{display:flex;gap:8px;flex-wrap:wrap;padding:12px 14px;background:rgba(21,36,29,.4);border:1px dashed rgba(205,168,90,.3);border-radius:8px;margin-bottom:14px}
+
+.te-q-item{margin-bottom:8px;border:1px solid rgba(205,168,90,.2);border-radius:8px;background:rgba(21,36,29,.4);transition:.15s;overflow:hidden}
+.te-q-item.te-q-open{border-color:var(--gold);background:rgba(21,36,29,.7);box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.te-q-item.te-q-pre{border-left:3px solid #a2d8ff}
+.te-q-head{display:flex;gap:10px;align-items:center;padding:10px 14px;cursor:pointer;user-select:none;flex-wrap:wrap}
+.te-q-head:hover{background:rgba(205,168,90,.05)}
+.te-q-btn{width:28px;height:26px;padding:0;border-radius:5px;background:rgba(21,36,29,.6);border:1px solid rgba(205,168,90,.2);color:var(--gold-b);cursor:pointer;font-size:12px;transition:.15s}
+.te-q-btn:hover{background:rgba(205,168,90,.15)}
+.te-q-btn-del:hover{background:rgba(200,70,70,.25);border-color:rgba(200,70,70,.4);color:#f0a5a5}
+.te-q-chev{color:var(--muted);font-size:10px;margin-left:4px}
+.te-q-edit{padding:14px 18px 16px;border-top:1px solid rgba(205,168,90,.15);background:rgba(15,26,20,.5)}
+.te-q-actions{display:flex;gap:8px;align-items:center;padding-top:12px;margin-top:12px;border-top:1px solid rgba(205,168,90,.15);flex-wrap:wrap}
+
+.te-q-item .te-q-opts{padding:0 14px 12px}
+.te-q-open .te-q-opts{display:none}
+
+.te-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  padding:12px 24px;background:rgba(21,36,29,.95);border:1px solid var(--gold);color:var(--gold-b);
+  border-radius:99px;box-shadow:0 8px 32px rgba(0,0,0,.5);font-weight:600;font-size:13px;
+  opacity:0;pointer-events:none;transition:.3s;z-index:1000;
+}
+.te-toast-show{opacity:1;transform:translateX(-50%) translateY(0)}
+.te-toast-ok{border-color:#7dd97d;color:#a9e5a9}
+.te-toast-err{border-color:#e97a7a;color:#f0a5a5}
+
+.test-q-pre{background:linear-gradient(180deg,rgba(52,152,219,.08),var(--card-bg));border-left:3px solid #3498db}
+.test-q-pre-val{padding:8px 14px;background:rgba(52,152,219,.14);border-radius:6px;font-weight:600;color:#a2d8ff;font-family:'JetBrains Mono',monospace;font-size:14px;margin-top:8px;display:inline-block}

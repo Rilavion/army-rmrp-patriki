@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=73">
+<link rel="stylesheet" href="style.css?v=74">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -42,11 +42,11 @@
   <div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div>
 </footer>
 
-<script src="supabase-loader.js?v=73"></script>
-<script src="config.js?v=73"></script>
-<script src="auth.js?v=73"></script>
-<script src="tests-engine.js?v=73"></script>
-<script src="main.js?v=73"></script>
+<script src="supabase-loader.js?v=74"></script>
+<script src="config.js?v=74"></script>
+<script src="auth.js?v=74"></script>
+<script src="tests-engine.js?v=74"></script>
+<script src="main.js?v=74"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -128,7 +128,11 @@ async function tryStart(){
   renderQuestions();
 }
 
+let ACTIVE_QS=[];
+
 function renderQuestions(){
+  ACTIVE_QS=VSRF_TESTS.pickQuestionsForRun(QS,TEST);
+  const graded=ACTIVE_QS.filter(q=>q.kind!=="prefilled");
   const html=[`<div class="test-run">
     <div class="test-run-head">
       <div class="test-run-title">${esc(TEST.title)}</div>
@@ -137,9 +141,20 @@ function renderQuestions(){
     </div>
     <div class="test-run-progress"><div class="test-run-progress-fill" id="tProg" style="width:0%"></div></div>
     <div class="test-run-qs">`];
-  QS.forEach((q,i)=>{
+  let vidx=0;
+  ACTIVE_QS.forEach((q,i)=>{
+    if(q.kind==="prefilled"){
+      html.push(`<div class="test-q test-q-pre" data-qid="${q.id}">
+        <div class="test-q-num">📌 Предустановленное поле</div>
+        <div class="test-q-text">${esc(q.text||"—")}</div>
+        <div class="test-q-pre-val">${esc(q.prefilled_value||"")}</div>
+        <div class="te-hint" style="margin-top:6px">Это поле заполнено автоматически и будет отправлено с результатом.</div>
+      </div>`);
+      return;
+    }
+    vidx++;
     html.push(`<div class="test-q" data-qid="${q.id}">
-      <div class="test-q-num">Вопрос ${i+1} из ${QS.length} <span class="tq-pts">${q.points||1} балл${(q.points||1)>1?"а":""}</span></div>
+      <div class="test-q-num">Вопрос ${vidx} из ${graded.length} <span class="tq-pts">${q.points||1} балл${(q.points||1)>1?"а":""}</span></div>
       <div class="test-q-text">${esc(q.text).replace(/\n/g,"<br>")}</div>
       ${(q.images||[]).length?`<div class="test-q-images">${q.images.map(u=>`<img src="${esc(u)}" alt="" onerror="this.style.display='none'">`).join("")}</div>`:""}
       <div class="test-q-opts">
@@ -164,12 +179,13 @@ function renderQuestions(){
 }
 
 function updateProgress(){
+  const graded=ACTIVE_QS.filter(q=>q.kind!=="prefilled");
   let done=0;
-  for(const q of QS){
+  for(const q of graded){
     const inputs=document.querySelectorAll(`input[name="q_${q.id}"]:checked`);
     if(inputs.length) done++;
   }
-  const pct=QS.length?Math.round(done*100/QS.length):0;
+  const pct=graded.length?Math.round(done*100/graded.length):0;
   $("tProg").style.width=pct+"%";
 }
 
@@ -187,20 +203,22 @@ function startTimer(){
 
 async function submitTest(auto){
   const msg=$("tSubMsg");
+  const gradedQs=ACTIVE_QS.filter(q=>q.kind!=="prefilled");
   if(!auto){
     let missed=0;
-    for(const q of QS){
+    for(const q of gradedQs){
       const inputs=document.querySelectorAll(`input[name="q_${q.id}"]:checked`);
       if(!inputs.length) missed++;
     }
     if(missed>0&&!confirm("Не отвечено на "+missed+" вопросов. Всё равно завершить? Пропущенные засчитаются как неверные.")) return;
   }
-  for(const q of QS){
+  for(const q of ACTIVE_QS){
+    if(q.kind==="prefilled"){ANSWERS[q.id]=q.prefilled_value||"";continue}
     const inputs=document.querySelectorAll(`input[name="q_${q.id}"]:checked`);
     if(q.kind==="single") ANSWERS[q.id]=inputs.length?inputs[0].value:null;
     else ANSWERS[q.id]=Array.from(inputs).map(i=>i.value);
   }
-  const graded=VSRF_TESTS.grade(QS,ANSWERS);
+  const graded=VSRF_TESTS.grade(ACTIVE_QS,ANSWERS);
   const passed=graded.percent>=(TEST.pass_score||70);
   msg.className="form-msg info";msg.textContent="Отправка результата...";
   $("tSubmitBtn").disabled=true;
@@ -234,6 +252,6 @@ function renderResult(graded,passed){
 
 boot();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a253f3e82e49e929',t:'MTc4NTc0NTc0Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2541a9c78cae929',t:'MTc4NTc0NzMzMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
