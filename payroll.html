@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=100">
+<link rel="stylesheet" href="style.css?v=101">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -234,19 +234,19 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=100"></script>
-<script src="config.js?v=100"></script>
-<script src="main.js?v=100"></script>
-<script src="format-utils.js?v=100"></script>
-<script src="holiday-engine.js?v=100"></script>
-<script src="settings-panel.js?v=100"></script>
-<script src="sound-engine.js?v=100"></script>
-<script src="auth.js?v=100"></script>
-<script src="roles-engine.js?v=100"></script>
-<script src="search-engine.js?v=100"></script>
-<script src="notify-engine.js?v=100"></script>
-<script src="html2canvas.min.js?v=100"></script>
-<script src="payroll-engine.js?v=100"></script>
+<script src="supabase-loader.js?v=101"></script>
+<script src="config.js?v=101"></script>
+<script src="main.js?v=101"></script>
+<script src="format-utils.js?v=101"></script>
+<script src="holiday-engine.js?v=101"></script>
+<script src="settings-panel.js?v=101"></script>
+<script src="sound-engine.js?v=101"></script>
+<script src="auth.js?v=101"></script>
+<script src="roles-engine.js?v=101"></script>
+<script src="search-engine.js?v=101"></script>
+<script src="notify-engine.js?v=101"></script>
+<script src="html2canvas.min.js?v=101"></script>
+<script src="payroll-engine.js?v=101"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -362,8 +362,12 @@ function renderDepts(calc){
       <div class="pr-dept-head">
         <div class="pr-dept-icon">${esc(d.icon||"🎖")}</div>
         <input type="text" class="pr-dept-name-in" data-d-name value="${esc(d.name)}" title="Название отдела">
-        <div class="pr-dept-role">роль: ${esc(d.role_name||"—")}</div>
+        <div class="pr-dept-role">роль: ${esc(d.role_name||"—")}${d.role_id?"":" <span style='color:#e77070'>(нет ID)</span>"}</div>
         <div style="flex:1"></div>
+        <label class="pr-toggle" title="Пинговать эту роль при отправке приказа в DS" style="padding:4px 10px;font-size:11px">
+          <input type="checkbox" data-d-ping ${d.ping?"checked":""} ${!d.role_id?"disabled":""}>
+          <span>🔔 Пинг</span>
+        </label>
         <label class="pr-pct-lbl">%<input type="number" class="pr-pct-in" data-d-pct value="${d.pct||0}" min="0" max="100" step="0.1"></label>
         <div class="pr-dept-sum">${VSRF_PAYROLL.fmtMoney(d.dept_amount)}</div>
         <button class="btn btn-ghost btn-sm" data-d-add title="Добавить сотрудника вручную">＋</button>
@@ -406,6 +410,8 @@ function attachDeptHandlers(){
     const di=+el.dataset.di;
     el.querySelector("[data-d-name]").addEventListener("input",e=>{DRAFT.data.departments[di].name=e.target.value;scheduleSave();updateSummary()});
     el.querySelector("[data-d-pct]").addEventListener("input",e=>{DRAFT.data.departments[di].pct=Number(e.target.value)||0;scheduleSave();render()});
+    const pingEl=el.querySelector("[data-d-ping]");
+    if(pingEl) pingEl.addEventListener("change",e=>{DRAFT.data.departments[di].ping=e.target.checked;scheduleSave()});
     el.querySelector("[data-d-add]").addEventListener("click",()=>openAddMember(di));
     el.querySelector("[data-d-del]").addEventListener("click",()=>{
       if(!confirm("Удалить отдел «"+DRAFT.data.departments[di].name+"»?")) return;
@@ -827,5 +833,5 @@ $("prSend").addEventListener("click",async()=>{
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25f0eebf83be918',t:'MTc4NTg2MjE5Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25f1be4cfafe918',t:'MTc4NTg2MjcyOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
