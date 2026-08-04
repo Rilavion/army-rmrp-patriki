@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=88">
+<link rel="stylesheet" href="style.css?v=89">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -133,7 +133,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
           </button>
           <button class="btn btn-ghost btn-sm" id="vpArchiveBtn" title="Архив проверок и статистика">📊 Архив</button>
           <button class="btn btn-gold btn-sm" id="vpSaveArchiveBtn" title="Сохранить текущие проверки в архив">💾 В архив</button>
-          <button class="btn btn-gold btn-sm" id="vpSettingsBtn" data-admin title="Настройка ролей и отделов">⚙ Настройки</button>
+          <button class="btn btn-gold btn-sm" id="vpSettingsBtn" data-perm="vp:settings" title="Настройка ролей и отделов">⚙ Настройки</button>
         </div>
       </div>
 
@@ -193,7 +193,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
     <div class="vp-arc-tabs">
       <button class="vp-arc-tab active" data-arc-tab="list">📋 Список</button>
       <button class="vp-arc-tab" data-arc-tab="stats">📈 Статистика</button>
-      <button class="vp-arc-tab" data-arc-tab="settings" data-admin>⚙ Канал отчётов</button>
+      <button class="vp-arc-tab" data-arc-tab="settings" data-perm="vp_archive:settings">⚙ Канал отчётов</button>
     </div>
 
     <div class="vp-arc-tab-body" data-arc-body="list">
@@ -243,8 +243,8 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
     <div class="vp-arc-detail-body" id="vpArcDetailBody"></div>
     <div class="form-msg" id="vpArcDetailMsg"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--gold-b)">
-      <button class="btn btn-ghost btn-sm" id="vpArcDetailDelete" data-admin>🗑 Удалить (admin)</button>
-      <button class="btn btn-ghost btn-sm" id="vpArcDetailEdit" data-admin>✎ Редактировать (admin)</button>
+      <button class="btn btn-ghost btn-sm" id="vpArcDetailDelete" data-perm="vp_archive:delete">🗑 Удалить (admin)</button>
+      <button class="btn btn-ghost btn-sm" id="vpArcDetailEdit" data-perm="vp_archive:edit">✎ Редактировать</button>
       <div style="flex:1"></div>
       <button class="btn btn-ghost btn-sm" id="vpArcDetailClose">Закрыть</button>
       <button class="btn btn-gold btn-sm" id="vpArcDetailSend">📤 Отправить в Discord</button>
@@ -363,16 +363,16 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       </div>
       <div class="footer-col">
         <h5>Разделы</h5>
-        <a href="index.html">Главная</a>
-        <a href="info.html">Информация</a>
-        <a href="ustav.html">Уставы</a>
+        <a href="index.html" data-page="index.html">Главная</a>
+        <a href="info.html" data-page="info.html">Информация</a>
+        <a href="ustav.html" data-page="ustav.html">Уставы</a>
       </div>
       <div class="footer-col">
         <h5>Служебное</h5>
-        <a href="apps.html">Заявления</a>
-        <a href="vp.html">Проверки ВП</a>
-        <a href="message.html">Сообщения</a>
-        <a href="lk.html">Личный кабинет</a>
+        <a href="apps.html" data-page="apps.html">Заявления</a>
+        <a href="vp.html" data-page="vp.html">Проверки ВП</a>
+        <a href="message.html" data-page="message.html">Сообщения</a>
+        <a href="lk.html" data-page="lk.html">Личный кабинет</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -397,18 +397,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=88"></script>
-<script src="config.js?v=88"></script>
-<script src="auth.js?v=88"></script>
-<script src="roles-engine.js?v=88"></script>
-<script src="vp-engine.js?v=88"></script>
-<script src="main.js?v=88"></script>
-<script src="holiday-engine.js?v=88"></script>
-<script src="sound-engine.js?v=88"></script>
-<script src="settings-panel.js?v=88"></script>
-<script src="faq-engine.js?v=88"></script>
-<script src="search-engine.js?v=88"></script>
-<script src="notify-engine.js?v=88"></script>
+<script src="supabase-loader.js?v=89"></script>
+<script src="config.js?v=89"></script>
+<script src="auth.js?v=89"></script>
+<script src="roles-engine.js?v=89"></script>
+<script src="vp-engine.js?v=89"></script>
+<script src="main.js?v=89"></script>
+<script src="holiday-engine.js?v=89"></script>
+<script src="sound-engine.js?v=89"></script>
+<script src="settings-panel.js?v=89"></script>
+<script src="faq-engine.js?v=89"></script>
+<script src="search-engine.js?v=89"></script>
+<script src="notify-engine.js?v=89"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -1019,12 +1019,12 @@ function subscribeRealtime(){
 
 let LAST_GUARD_STATE=null;
 function applyGuard(){
-  const isStaff=!!(window.VSRF_ROLES&&window.VSRF_ROLES.isStaff());
+  const canVp=!!(window.VSRF_ROLES&&window.VSRF_ROLES.can("vp","view"));
   const uid=(window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user&&window.VSRF_AUTH.state.user.id)||null;
-  const key=isStaff+":"+uid;
-  $("vpBody").style.display=isStaff?"":"none";
-  $("vpGuard").style.display=isStaff?"none":"";
-  if(!isStaff){LAST_GUARD_STATE=key;return}
+  const key=canVp+":"+uid;
+  $("vpBody").style.display=canVp?"":"none";
+  $("vpGuard").style.display=canVp?"none":"";
+  if(!canVp){LAST_GUARD_STATE=key;return}
   if(LAST_GUARD_STATE===key) return;
   LAST_GUARD_STATE=key;
   renderAll(true);
@@ -1041,7 +1041,7 @@ let SOFT_TIMER=null;
 function softRefresh(){
   if(SOFT_TIMER) clearTimeout(SOFT_TIMER);
   SOFT_TIMER=setTimeout(()=>{
-    if(document.visibilityState==="visible"&&window.VSRF_ROLES&&window.VSRF_ROLES.isStaff()){renderAll(false);updateBotIndicator()}
+    if(document.visibilityState==="visible"&&window.VSRF_ROLES&&window.VSRF_ROLES.can("vp","view")){renderAll(false);updateBotIndicator()}
   },400);
 }
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible") softRefresh()});
@@ -1293,7 +1293,7 @@ async function loadStats(){
 $("vpStatsPeriod").addEventListener("change",loadStats);
 
 async function loadArcSettings(){
-  const isAdmin=window.VSRF_ROLES&&window.VSRF_ROLES.isAdmin();
+  const isAdmin=!!(window.VSRF_ROLES&&window.VSRF_ROLES.can("vp_archive","settings"));
   const sel=$("vpReportChannel");
   const [settings,channels]=await Promise.all([VSRF_VP.fetchSettings(),VSRF_VP.fetchDsChannels()]);
   VP_SETTINGS_STATE=settings||{};
@@ -1335,7 +1335,8 @@ let CURRENT_ARC=null;
 async function openArcDetail(id){
   CURRENT_ARC=await VSRF_VP.fetchArchiveFull(id);
   if(!CURRENT_ARC){alert("Запись не найдена");return}
-  const isAdmin=window.VSRF_ROLES&&window.VSRF_ROLES.isAdmin();
+  const canDel=!!(window.VSRF_ROLES&&window.VSRF_ROLES.can("vp_archive","delete"));
+  const canEdit=!!(window.VSRF_ROLES&&window.VSRF_ROLES.can("vp_archive","edit"));
   $("vpArcDetailTitle").textContent="📋 "+(CURRENT_ARC.title||"Без названия");
   $("vpArcDetailSub").innerHTML=`Сохранено: <b>${esc(CURRENT_ARC.saved_by_name||"—")}</b> · ${ruDateTime(CURRENT_ARC.saved_at)}${CURRENT_ARC.period_from?` · период ${ruDate(CURRENT_ARC.period_from)} — ${ruDate(CURRENT_ARC.period_to)}`:""}${CURRENT_ARC.notes?`<br><i>${esc(CURRENT_ARC.notes)}</i>`:""}`;
   const snap=CURRENT_ARC.snapshot||{};
@@ -1384,8 +1385,8 @@ async function openArcDetail(id){
     ${CURRENT_ARC.report_message_id?`<div class="vp-arc-det-sent">✓ Отчёт был отправлен в Discord ${ruDateTime(CURRENT_ARC.report_sent_at)} ${CURRENT_ARC.report_sent_by_name?"пользователем "+esc(CURRENT_ARC.report_sent_by_name):""}</div>`:""}
   `;
   $("vpArcDetailMsg").textContent="";$("vpArcDetailMsg").className="form-msg";
-  $("vpArcDetailDelete").style.display=isAdmin?"":"none";
-  $("vpArcDetailEdit").style.display=isAdmin?"":"none";
+  $("vpArcDetailDelete").style.display=canDel?"":"none";
+  $("vpArcDetailEdit").style.display=canEdit?"":"none";
   $("vpArcDetailModal").classList.add("active");
 }
 
@@ -1446,6 +1447,6 @@ $("vpArcDetailSend").addEventListener("click",async()=>{
   setTimeout(()=>openArcDetail(CURRENT_ARC.id),1200);
 });
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25d01d4bd5a9da1',t:'MTc4NTg0MDY4OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

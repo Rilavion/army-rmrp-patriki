@@ -195,6 +195,6 @@ window.VSRF_ROLES=(function(){
   });
 
   return {loadMyRole,getMyRole,getMyCustomRole,getMyPermissions,can,isAdmin,isSS,isStaff,onChange,
-          listAllRoles,setRole,removeUser,inviteAndSetRole,apply,
+          listAllRoles,setRole,removeUser,inviteAndSetRole,apply,applyPermGates,
           listCustomRoles};
 })();

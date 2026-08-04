@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=88">
+<link rel="stylesheet" href="style.css?v=89">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -21,7 +21,7 @@
       <div class="brand-text"><span class="brand-label">Вооружённые Силы РФ</span><span class="brand-name">1-я ОБрСпН · Тестирование</span></div>
     </a>
     <div class="header-actions" style="margin-left:auto">
-      <a href="tests.html" class="btn btn-ghost btn-sm">← Ко всем тестам</a>
+      <a href="tests.html" data-page="tests.html" class="btn btn-ghost btn-sm">← Ко всем тестам</a>
       <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
         <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -42,11 +42,11 @@
   <div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div>
 </footer>
 
-<script src="supabase-loader.js?v=88"></script>
-<script src="config.js?v=88"></script>
-<script src="auth.js?v=88"></script>
-<script src="tests-engine.js?v=88"></script>
-<script src="main.js?v=88"></script>
+<script src="supabase-loader.js?v=89"></script>
+<script src="config.js?v=89"></script>
+<script src="auth.js?v=89"></script>
+<script src="tests-engine.js?v=89"></script>
+<script src="main.js?v=89"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -61,9 +61,9 @@ let ANSWERS={};
 let STARTED_AT=null,TIMER=null,DEADLINE=null;
 
 async function boot(){
-  if(!TID){root.innerHTML=`<div class="apps-empty"><h3>Тест не указан</h3><p><a href="tests.html">← К списку тестов</a></p></div>`;return}
+  if(!TID){root.innerHTML=`<div class="apps-empty"><h3>Тест не указан</h3><p><a href="tests.html" data-page="tests.html">← К списку тестов</a></p></div>`;return}
   TEST=await VSRF_TESTS.fetchTest(TID);
-  if(!TEST){root.innerHTML=`<div class="apps-empty"><h3>Тест не найден</h3><p>Возможно он ещё не опубликован или ссылка устарела.<br><a href="tests.html">← К списку тестов</a></p></div>`;return}
+  if(!TEST){root.innerHTML=`<div class="apps-empty"><h3>Тест не найден</h3><p>Возможно он ещё не опубликован или ссылка устарела.<br><a href="tests.html" data-page="tests.html">← К списку тестов</a></p></div>`;return}
   document.title="Тест · "+TEST.title;
   [QS,PINGS,BLOCKS]=await Promise.all([VSRF_TESTS.fetchQuestions(TEST.id),VSRF_TESTS.fetchPingLines(TEST.id),VSRF_TESTS.fetchBlocks(TEST.id)]);
   renderIntro();
@@ -254,6 +254,6 @@ function renderResult(graded,passed){
 
 boot();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25d01917d989da1',t:'MTc4NTg0MDY3OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

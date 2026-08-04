@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=88">
+<link rel="stylesheet" href="style.css?v=89">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -18,11 +18,22 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 </style>
 <script>
 (function(){
-  function apply(){var s=window.VSRF_AUTH&&window.VSRF_AUTH.state;if(!s||!s.ready) return;document.body.classList.toggle("vsrf-is-admin",!!s.user)}
+  var _lkChecked=false;
+  function apply(){
+    var s=window.VSRF_AUTH&&window.VSRF_AUTH.state;if(!s||!s.ready) return;
+    if(!window.VSRF_ROLES||!window.VSRF_ROLES.getMyRole) return;
+    var role=window.VSRF_ROLES.getMyRole();
+    if(role===null&&s.user) return;
+    _lkChecked=true;
+    var canLk=window.VSRF_ROLES.can("lk","users")||window.VSRF_ROLES.can("lk","roles")||window.VSRF_ROLES.can("lk","settings");
+    if(!canLk){location.replace("index.html");return}
+  }
   document.addEventListener("DOMContentLoaded",function(){
     apply();
+    if(window.VSRF_ROLES&&window.VSRF_ROLES.onChange) window.VSRF_ROLES.onChange(apply);
     if(window.VSRF_AUTH&&window.VSRF_AUTH.onChange) window.VSRF_AUTH.onChange(apply);
-    else{var t=setInterval(function(){if(window.VSRF_AUTH){clearInterval(t);apply();window.VSRF_AUTH.onChange(apply)}},80);setTimeout(function(){clearInterval(t)},4000)}
+    var t=setInterval(function(){if(window.VSRF_ROLES){clearInterval(t);apply()}},80);
+    setTimeout(function(){clearInterval(t)},4000);
   });
 })();
 </script>
@@ -113,7 +124,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
             </div>
           </div>
 
-          <div class="lk-panel">
+          <div class="lk-panel" data-perm="lk:settings">
             <div class="lk-panel-head">
               <span class="lk-panel-title">Праздничные темы</span>
             </div>
@@ -176,7 +187,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
             <h2 class="lk-full-title">Роли пользователей</h2>
           </div>
           <div style="display:flex;gap:8px">
-            <a href="roles.html" class="btn btn-ghost btn-sm">📖 Справочник ролей</a>
+            <a href="roles.html" data-page="roles.html" class="btn btn-ghost btn-sm">📖 Справочник ролей</a>
             <button class="btn btn-ghost btn-sm" id="rolesRefreshBtn" title="Обновить список">🔄</button>
             <button class="btn btn-gold btn-sm" id="rolesAddBtn">+ Создать аккаунт</button>
           </div>
@@ -226,19 +237,19 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       </div>
       <div class="footer-col">
         <h5>Разделы</h5>
-        <a href="index.html">Главная</a>
-        <a href="ustav.html">Уставы</a>
-        <a href="training.html">Обучение</a>
-        <a href="composition.html">Состав</a>
-        <a href="news.html">Новости</a>
+        <a href="index.html" data-page="index.html">Главная</a>
+        <a href="ustav.html" data-page="ustav.html">Уставы</a>
+        <a href="training.html" data-page="training.html">Обучение</a>
+        <a href="composition.html" data-page="composition.html">Состав</a>
+        <a href="news.html" data-page="news.html">Новости</a>
       </div>
       <div class="footer-col">
         <h5>Ресурсы</h5>
-        <a href="docs.html" data-perm="docs:view">Документы</a>
-        <a href="autopark.html">Автопарк</a>
-        <a href="map.html">Карта</a>
-        <a href="faq.html">FAQ</a>
-        <a href="lk.html">Личный кабинет</a>
+        <a href="docs.html" data-page="docs.html" data-perm="docs:view">Документы</a>
+        <a href="autopark.html" data-page="autopark.html">Автопарк</a>
+        <a href="map.html" data-page="map.html">Карта</a>
+        <a href="faq.html" data-page="faq.html">FAQ</a>
+        <a href="lk.html" data-page="lk.html">Личный кабинет</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -286,12 +297,12 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=88"></script>
-<script src="config.js?v=88"></script>
-<script src="main.js?v=88"></script>
-<script src="auth.js?v=88"></script>
-<script src="roles-engine.js?v=88"></script>
-<script src="holiday-engine.js?v=88"></script>
+<script src="supabase-loader.js?v=89"></script>
+<script src="config.js?v=89"></script>
+<script src="main.js?v=89"></script>
+<script src="auth.js?v=89"></script>
+<script src="roles-engine.js?v=89"></script>
+<script src="holiday-engine.js?v=89"></script>
 <script src="settings-panel.js"></script>
 <script src="sound-engine.js"></script>
 <script src="faq-engine.js"></script>
@@ -573,6 +584,6 @@ if(rolesBtn){
 }
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25d0100594b9da1',t:'MTc4NTg0MDY1NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

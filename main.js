@@ -37,19 +37,34 @@
     if(!nav.querySelector(".nav-header")){
       const links=Array.from(nav.querySelectorAll("a"));
       const currentPage=(location.pathname.split("/").pop()||"index.html").toLowerCase();
-      links.forEach(a=>{if((a.dataset.page||"").toLowerCase()===currentPage) a.classList.add("active")});
+      links.forEach(a=>{
+        if(!a.dataset.page && a.getAttribute("href")) a.setAttribute("data-page",a.getAttribute("href").toLowerCase());
+        if((a.dataset.page||"").toLowerCase()===currentPage) a.classList.add("active");
+      });
+
+      const PAGE_PERM={
+        "apps.html":"apps:view",
+        "vp.html":"vp:view",
+        "supply.html":"supply:view",
+        "supply-stats.html":"supply:stats",
+        "supply-admin.html":"supply:admin",
+        "docs.html":"docs:view",
+        "message.html":"messages:send",
+        "lk.html":"lk:users,lk:roles,lk:settings"
+      };
+      links.forEach(a=>{
+        const page=(a.dataset.page||"").toLowerCase();
+        if(PAGE_PERM[page] && !a.hasAttribute("data-perm")) a.setAttribute("data-perm",PAGE_PERM[page]);
+        a.removeAttribute("data-admin");
+        a.removeAttribute("data-staff");
+      });
 
       const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html"];
       const loggedInPages=["tests.html"];
-      const staffPages=["apps.html","vp.html","supply.html","supply-stats.html"];
-      const adminOnlyPages=["message.html"];
-      const adminPages=["lk.html","docs.html","message.html"];
+      const staffPages=["apps.html","vp.html","supply.html","supply-stats.html","docs.html","message.html","lk.html"];
       const publicLinks=links.filter(a=>publicPages.includes((a.dataset.page||"").toLowerCase()));
-      const staffLinks=links.filter(a=>staffPages.includes((a.dataset.page||"").toLowerCase()));
-      const adminLinks=links.filter(a=>adminPages.includes((a.dataset.page||"").toLowerCase()));
       const loggedInLinks=links.filter(a=>loggedInPages.includes((a.dataset.page||"").toLowerCase()));
-      staffLinks.forEach(a=>a.setAttribute("data-staff",""));
-      adminLinks.forEach(a=>a.setAttribute("data-admin",""));
+      const staffLinks=links.filter(a=>staffPages.includes((a.dataset.page||"").toLowerCase()));
       loggedInLinks.forEach(a=>a.setAttribute("data-loggedin",""));
 
       nav.innerHTML="";
@@ -83,15 +98,15 @@
         secL.appendChild(gL);
         scroll.appendChild(secL);
       }
-      if(adminLinks.length||staffLinks.length){
+      if(staffLinks.length){
         const sec2=document.createElement("div");
         sec2.className="nav-section";
-        sec2.setAttribute("data-staff","");
+        const staffPerms=staffLinks.map(a=>a.getAttribute("data-perm")).filter(Boolean).join(",");
+        if(staffPerms) sec2.setAttribute("data-perm",staffPerms);
         sec2.innerHTML='<div class="nav-section-title">Служебное</div>';
         const g2=document.createElement("div");
         g2.className="nav-links";
         staffLinks.forEach(a=>g2.appendChild(a));
-        adminLinks.forEach(a=>g2.appendChild(a));
         sec2.appendChild(g2);
         scroll.appendChild(sec2);
       }
@@ -102,6 +117,8 @@
       footer.className="nav-footer";
       footer.innerHTML='<div class="nav-footer-motto">Честь · Долг · Отвага</div><div class="nav-footer-sub">Служим Отечеству</div>';
       nav.appendChild(footer);
+
+      if(window.VSRF_ROLES&&window.VSRF_ROLES.applyPermGates) window.VSRF_ROLES.applyPermGates();
     }
 
     let backdrop=document.querySelector(".nav-backdrop");
