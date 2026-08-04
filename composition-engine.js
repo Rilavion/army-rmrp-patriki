@@ -118,12 +118,28 @@ window.VSRF_COMP=(function(){
         const {error}=await s.client.from("composition").upsert({id:1,state:state,updated_at:state.updated_at},{onConflict:"id"});
         if(error) throw error;
         return {ok:true,remote:true};
-      }catch(e){return {ok:true,remote:false,error:e.message}}
+      }catch(e){console.warn("[VSRF_COMP] save err:",e.message);return {ok:true,remote:false,error:e.message}}
     }
     return {ok:true,remote:false};
   }
 
+  async function uploadPhoto(file){
+    const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+    if(!s||!s.client) return {ok:false,error:"no client"};
+    if(!file) return {ok:false,error:"no file"};
+    const maxBytes=5*1024*1024;
+    if(file.size>maxBytes) return {ok:false,error:"Файл больше 5 МБ. Сожми или выбери меньший."};
+    const ext=(file.name.match(/\.([a-z0-9]+)$/i)||[])[1]||"png";
+    const path="comp_"+Date.now()+"_"+Math.random().toString(36).slice(2,8)+"."+ext.toLowerCase();
+    try{
+      const {error}=await s.client.storage.from("composition-photos").upload(path,file,{contentType:file.type||undefined,upsert:false});
+      if(error) return {ok:false,error:error.message};
+      const {data:pub}=s.client.storage.from("composition-photos").getPublicUrl(path);
+      return {ok:true,url:pub.publicUrl,path};
+    }catch(e){return {ok:false,error:e.message}}
+  }
+
   function uid(){return "s_"+Math.random().toString(36).slice(2,9)}
 
-  return {RANKS,DEFAULT_HQ_SLOTS,DEFAULT_STATE,SUB_PRESETS,load,save,esc,rankInfo,uid};
+  return {RANKS,DEFAULT_HQ_SLOTS,DEFAULT_STATE,SUB_PRESETS,load,save,uploadPhoto,esc,rankInfo,uid};
 })();
