@@ -1670,47 +1670,54 @@ body.light-mode .doc-toggle-row{color:#3a2f18}
 
 .hier-cmd{width:100%;max-width:420px}
 .hier-cmd-inner{
-  position:relative;padding:20px 24px 24px;border-radius:22px;text-align:center;
-  background:
-    radial-gradient(circle at 50% 0%,rgba(205,168,90,.18),transparent 55%),
-    linear-gradient(160deg,#3f5a49,#22392e 55%,#152220);
-  border:2px solid rgba(205,168,90,.5);
-  box-shadow:0 30px 70px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1),0 0 0 8px rgba(205,168,90,.06);
-  color:#f6ecd0;
-  display:flex;flex-direction:column;align-items:center;gap:0;
-}
-.hier-cmd-inner::before{
-  content:"";position:absolute;inset:8px;border-radius:16px;
-  border:1px double rgba(205,168,90,.35);pointer-events:none;
-}
-.hier-cmd-inner::after{
-  content:"";position:absolute;top:-1px;left:24px;right:24px;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(240,216,155,.8),transparent);
-}
-.hier-cmd-badge{
-  display:inline-block;padding:7px 22px;border-radius:999px;
-  background:linear-gradient(180deg,#f0d89b,#cda85a);color:#181208;
-  font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:800;
-  box-shadow:0 6px 18px rgba(205,168,90,.4);
-  border:1px solid rgba(255,255,255,.3);position:relative;z-index:2;
+  position:relative;border-radius:22px;overflow:hidden;
+  background:linear-gradient(180deg,#1c2b23,#0f1a14);
+  border:2px solid rgba(205,168,90,.55);
+  box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 0 8px rgba(205,168,90,.08);
+  aspect-ratio:3/4;display:flex;flex-direction:column;
 }
 .hier-cmd-photo{
-  width:210px;height:210px;margin-top:18px;margin-bottom:0;
-  border:3px solid rgba(205,168,90,.65);
-  box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 0 6px rgba(205,168,90,.12),inset 0 2px 4px rgba(255,255,255,.15);
+  position:absolute;inset:0;overflow:hidden;
+  background:linear-gradient(160deg,rgba(205,168,90,.12),rgba(21,36,29,.6));
 }
-.hier-cmd-photo .hier-officer-initials{font-size:90px;color:rgba(240,216,155,.45)}
-.hier-cmd-photo .hier-officer-role-tag{
+.hier-cmd-photo img{width:100%;height:100%;object-fit:cover;display:block;filter:contrast(1.05) saturate(1.05)}
+.hier-cmd-photo.no-photo{display:grid;place-items:center}
+.hier-cmd-photo .hier-officer-initials{font-size:150px;color:rgba(240,216,155,.28)}
+.hier-cmd-badge{
+  position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:3;
+  padding:8px 24px;border-radius:999px;
   background:linear-gradient(180deg,#f0d89b,#cda85a);color:#181208;
-  border-color:rgba(255,255,255,.4);font-weight:800;
+  font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:800;
+  box-shadow:0 6px 18px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.3);
+  white-space:nowrap;
 }
-.hier-cmd-body{padding:26px 0 4px;position:relative;z-index:1;width:100%}
-.hier-cmd-name{font-family:"Cormorant Garamond",serif;font-size:32px;font-weight:600;color:#f6ecd0;line-height:1.05;margin-bottom:6px;letter-spacing:-.005em}
-.hier-cmd-rank{font-size:11px;color:#cda85a;letter-spacing:.22em;text-transform:uppercase;font-weight:700;margin-bottom:14px}
-.hier-cmd-contacts{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+.hier-cmd-photo .hier-officer-role-tag{
+  position:absolute;top:auto;bottom:auto;left:50%;transform:translateX(-50%);
+  top:70px;
+  padding:5px 14px;border-radius:999px;
+  background:rgba(0,0,0,.65);color:var(--gold-b);
+  font:700 10px/1 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid rgba(205,168,90,.5);backdrop-filter:blur(4px);
+  box-shadow:0 4px 12px rgba(0,0,0,.5);white-space:nowrap;z-index:3;
+}
+.hier-cmd-body{
+  position:absolute;left:0;right:0;bottom:0;z-index:2;
+  padding:100px 22px 26px;text-align:center;
+  background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 40%,rgba(0,0,0,.95) 100%);
+}
+.hier-cmd-name{
+  font-family:"Cormorant Garamond",serif;font-size:34px;font-weight:700;color:#fff;line-height:1.05;letter-spacing:-.005em;
+  text-shadow:0 2px 12px rgba(0,0,0,.9);margin-bottom:6px;
+}
+.hier-cmd-rank{
+  font-size:11px;color:#f0d89b;letter-spacing:.22em;text-transform:uppercase;font-weight:700;
+  text-shadow:0 2px 8px rgba(0,0,0,.9);margin-bottom:14px;
+}
+.hier-cmd-contacts{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:8px}
 .hier-cmd-contacts .hier-officer-code,.hier-cmd-contacts .hier-officer-comm{
-  padding:5px 12px;border-radius:8px;background:rgba(0,0,0,.4);
-  border:1px solid rgba(205,168,90,.32);color:#f0d89b;font-size:11.5px;letter-spacing:.06em;
+  padding:5px 12px;border-radius:8px;background:rgba(0,0,0,.65);
+  border:1px solid rgba(205,168,90,.4);color:#f0d89b;font-size:11.5px;letter-spacing:.06em;
+  backdrop-filter:blur(4px);
 }
 
 .hier-edit-btn{
@@ -1736,62 +1743,78 @@ body.light-mode .doc-toggle-row{color:#3a2f18}
 }
 
 .hier-staff-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px;
-  width:100%;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,280px));gap:22px;
+  width:100%;justify-content:center;
 }
 .hier-officer{
-  position:relative;border-radius:18px;overflow:hidden;
-  background:linear-gradient(180deg,rgba(42,72,56,.55),rgba(21,36,29,.75));
-  border:1px solid var(--line);display:flex;flex-direction:column;
-  transition:.3s cubic-bezier(.2,.8,.2,1);box-shadow:0 10px 24px rgba(0,0,0,.22);
-  box-sizing:border-box;min-height:340px;
+  position:relative;border-radius:20px;overflow:hidden;
+  background:linear-gradient(180deg,#1c2b23,#0f1a14);
+  border:1px solid rgba(205,168,90,.25);display:flex;flex-direction:column;
+  transition:.3s cubic-bezier(.2,.8,.2,1);box-shadow:0 12px 28px rgba(0,0,0,.4);
+  box-sizing:border-box;aspect-ratio:3/4;cursor:default;
 }
-.hier-officer:hover{transform:translateY(-6px);border-color:rgba(205,168,90,.55);box-shadow:0 22px 46px rgba(0,0,0,.4)}
-.hier-officer-empty{background:linear-gradient(180deg,rgba(50,50,50,.15),rgba(30,30,30,.25));opacity:.72;border-style:dashed}
-.hier-officer-empty:hover{opacity:.95}
-[data-theme="light"] .hier-officer{background:linear-gradient(180deg,rgba(251,246,231,.92),rgba(232,226,200,.75))}
+.hier-officer:hover{transform:translateY(-6px);border-color:rgba(205,168,90,.6);box-shadow:0 24px 50px rgba(0,0,0,.5)}
+.hier-officer-empty{background:linear-gradient(180deg,#2a2a2a,#1a1a1a);opacity:.6;border-style:dashed}
+.hier-officer-empty:hover{opacity:.9}
+[data-theme="light"] .hier-officer{background:linear-gradient(180deg,#f7f2e0,#ece5c8)}
 
 .hier-officer-photo{
-  position:relative;width:180px;height:180px;margin:22px auto 0;overflow:hidden;
-  background:linear-gradient(160deg,rgba(205,168,90,.15),rgba(21,36,29,.35));
-  border-radius:50%;
-  border:3px solid rgba(205,168,90,.5);
-  box-shadow:0 8px 24px rgba(0,0,0,.35),0 0 0 6px rgba(205,168,90,.08),inset 0 2px 4px rgba(255,255,255,.1);
+  position:absolute;inset:0;overflow:hidden;
+  background:linear-gradient(160deg,rgba(205,168,90,.1),rgba(21,36,29,.5));
 }
-.hier-officer-photo img{width:100%;height:100%;object-fit:cover;display:block;filter:contrast(1.05) saturate(1.05)}
+.hier-officer-photo img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:contrast(1.05) saturate(1.05);
+}
 .hier-officer-photo.no-photo{display:grid;place-items:center}
 .hier-officer-initials{
-  font-family:"Cormorant Garamond",serif;font-size:76px;font-weight:600;
-  color:rgba(205,168,90,.4);letter-spacing:-.02em;line-height:1;
+  font-family:"Cormorant Garamond",serif;font-size:120px;font-weight:600;
+  color:rgba(205,168,90,.28);letter-spacing:-.02em;line-height:1;
 }
 .hier-officer-role-tag{
-  position:absolute;left:50%;bottom:-14px;transform:translateX(-50%);
-  padding:5px 14px;border-radius:999px;
-  background:rgba(0,0,0,.88);color:var(--gold-b);
-  font:700 10px/1 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
-  border:1px solid rgba(205,168,90,.6);
-  box-shadow:0 4px 12px rgba(0,0,0,.5);white-space:nowrap;
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  padding:6px 16px;border-radius:999px;
+  background:linear-gradient(180deg,rgba(205,168,90,.95),rgba(180,140,60,.95));
+  color:#1a1208;
+  font:700 10.5px/1 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.3);
+  box-shadow:0 4px 14px rgba(0,0,0,.5);white-space:nowrap;z-index:3;
 }
 
-.hier-officer-body{padding:26px 18px 18px;flex:1;display:flex;flex-direction:column;gap:6px;text-align:center}
-.hier-officer-role{font:700 10.5px/1.2 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
-.hier-officer-name{font-family:"Cormorant Garamond",serif;font-size:22px;color:var(--text);line-height:1.15;font-weight:600;letter-spacing:-.005em;margin-top:2px}
-.hier-officer-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:auto;padding-top:10px;border-top:1px dashed rgba(205,168,90,.15)}
-.hier-officer-code,.hier-officer-comm{color:var(--muted);font-family:'Inter',monospace;font-size:11px;letter-spacing:.02em}
+.hier-officer-body{
+  position:absolute;left:0;right:0;bottom:0;z-index:2;
+  padding:80px 18px 18px;
+  background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.55) 45%,rgba(0,0,0,.92) 100%);
+  display:flex;flex-direction:column;gap:4px;text-align:center;
+}
+.hier-officer-role{
+  font:700 10.5px/1.2 'Inter',sans-serif;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold-b);text-shadow:0 2px 8px rgba(0,0,0,.8);
+}
+.hier-officer-name{
+  font-family:"Cormorant Garamond",serif;font-size:24px;color:#fff;line-height:1.1;font-weight:700;letter-spacing:-.005em;
+  text-shadow:0 2px 8px rgba(0,0,0,.9);margin-top:2px;
+}
+.hier-officer-meta{
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:8px;
+}
+.hier-officer-code,.hier-officer-comm{
+  color:rgba(240,216,155,.95);font-family:'Inter',monospace;font-size:11.5px;letter-spacing:.03em;
+  padding:3px 9px;border-radius:6px;background:rgba(0,0,0,.5);border:1px solid rgba(205,168,90,.35);
+  backdrop-filter:blur(4px);
+}
 
 .hier-officer-add{
   cursor:pointer;justify-content:center;align-items:center;font-family:inherit;color:var(--gold-b);
-  font-size:14px;font-weight:600;border-style:dashed;background:none;
-  min-height:340px;text-align:center;padding:20px;display:flex;
+  font-size:14px;font-weight:600;border-style:dashed;background:linear-gradient(180deg,rgba(30,30,30,.5),rgba(15,15,15,.6));
+  aspect-ratio:3/4;text-align:center;padding:20px;display:flex;
 }
-.hier-officer-add:hover{border-color:rgba(205,168,90,.55);background:rgba(205,168,90,.05);color:var(--gold-b)}
+.hier-officer-add:hover{border-color:rgba(205,168,90,.7);background:linear-gradient(180deg,rgba(50,45,20,.4),rgba(30,25,10,.5));color:#fff}
 
 @media(max-width:520px){
-  .hier-staff-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
-  .hier-officer{min-height:280px}
-  .hier-officer-add{min-height:280px}
-  .hier-officer-photo{width:130px;height:130px;margin-top:18px}
-  .hier-officer-initials{font-size:54px}
+  .hier-staff-grid{grid-template-columns:repeat(auto-fit,minmax(160px,220px));gap:14px}
+  .hier-officer-name{font-size:19px}
+  .hier-officer-initials{font-size:82px}
 }
 
 .hier-subs-title{display:flex;align-items:center;gap:20px;margin:0 0 24px;width:100%;max-width:1400px}
@@ -1804,7 +1827,7 @@ body.light-mode .doc-toggle-row{color:#3a2f18}
   background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.4));
   border:1px solid var(--line);box-shadow:0 14px 32px rgba(0,0,0,.28),inset 0 0 0 1px var(--sub-color);
   transition:.35s cubic-bezier(.2,.8,.2,1);
-  width:calc(33.333% - 15px);min-width:320px;max-width:420px;
+  width:100%;max-width:600px;min-width:320px;
   box-sizing:border-box;display:flex;flex-direction:column;
 }
 [data-theme="light"] .hier-sub{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(232,226,200,.45))}
@@ -1845,24 +1868,53 @@ body.light-mode .doc-toggle-row{color:#3a2f18}
 .hier-sub-footer{padding:0 14px 16px}
 .hier-empty{padding:20px;text-align:center;color:var(--muted);font-style:italic;font-size:13px;opacity:.7}
 
-@media(max-width:1080px){
-  .hier-sub{width:calc(50% - 11px)}
-}
 @media(max-width:680px){
-  .hier-sub{width:100%;max-width:none}
+  .hier-sub{max-width:none}
 }
 
+.hier-sub-body{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;flex:1;align-content:start}
 .hier-member{
-  position:relative;display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:13px;
-  background:var(--card-bg);border:1px solid var(--line);transition:.25s ease;
+  position:relative;border-radius:14px;overflow:hidden;
+  background:linear-gradient(180deg,#1c2b23,#0f1a14);
+  border:1px solid rgba(205,168,90,.2);
+  transition:.25s ease;box-shadow:0 6px 18px rgba(0,0,0,.3);
+  display:flex;flex-direction:column;aspect-ratio:3/4;
 }
-.hier-member:hover{border-color:var(--sub-color);transform:translateX(3px);box-shadow:-3px 0 0 var(--sub-color)}
-.hier-member-body{flex:1;min-width:0}
-.hier-member-rank{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;margin-bottom:3px}
-.hier-member-name{font-size:14.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
-.hier-member-role{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
-.hier-member-code{font-family:monospace;color:var(--muted);font-size:11px;flex-shrink:0;padding:4px 9px;border-radius:7px;background:var(--input-bg);border:1px solid var(--line);letter-spacing:.06em}
-.hier-member-actions{display:none;gap:5px;flex-shrink:0}
+.hier-member:hover{transform:translateY(-4px);border-color:var(--m-color);box-shadow:0 14px 32px rgba(0,0,0,.45)}
+[data-theme="light"] .hier-member{background:linear-gradient(180deg,#f7f2e0,#ece5c8)}
+.hier-member-photo{
+  position:absolute;inset:0;overflow:hidden;
+  background:linear-gradient(160deg,rgba(205,168,90,.1),rgba(21,36,29,.55));
+}
+.hier-member-photo img{width:100%;height:100%;object-fit:cover;display:block;filter:contrast(1.05) saturate(1.05)}
+.hier-member-photo.no-photo{display:grid;place-items:center}
+.hier-member-photo .hier-officer-initials{font-size:78px;color:rgba(205,168,90,.32)}
+.hier-member-rank-tag{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:3;
+  padding:4px 12px;border-radius:999px;color:#fff;
+  font:800 9.5px/1 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.3);
+  box-shadow:0 3px 10px rgba(0,0,0,.5);white-space:nowrap;
+}
+.hier-member-body{
+  position:absolute;left:0;right:0;bottom:0;z-index:2;
+  padding:60px 12px 12px;
+  background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.55) 40%,rgba(0,0,0,.93) 100%);
+  text-align:center;display:flex;flex-direction:column;gap:3px;
+}
+.hier-member-name{
+  font-family:"Cormorant Garamond",serif;font-size:16px;font-weight:700;color:#fff;line-height:1.1;
+  text-shadow:0 2px 6px rgba(0,0,0,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.hier-member-role{font-size:10.5px;color:rgba(255,255,255,.72);text-shadow:0 2px 6px rgba(0,0,0,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hier-member-ids{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-top:4px}
+.hier-member-code,.hier-member-comm{
+  font-family:'Inter',monospace;font-size:9.5px;letter-spacing:.03em;
+  padding:2px 7px;border-radius:5px;background:rgba(0,0,0,.55);border:1px solid rgba(205,168,90,.35);
+  color:rgba(240,216,155,.95);white-space:nowrap;backdrop-filter:blur(4px);
+}
+.hier-member-comm{border-color:rgba(90,143,205,.4);color:#a2d8ff}
+.hier-member-actions{position:absolute;top:8px;right:8px;z-index:4;display:none;gap:4px;flex-shrink:0}
 .admin-editing .hier-member-actions{display:flex}
 
 .hier-add-btn{
@@ -4469,8 +4521,7 @@ body.light-mode .msg-input{background:rgba(251,246,231,.9);color:#3a2f18}
 .vp-td-static{color:#c9d3c6;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
 body.light-mode .vp-td-static{color:#6a5a35}
 
-.hier-member-ids{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
-.hier-member-comm{font-family:monospace;color:#a2d8ff;font-size:10.5px;padding:3px 8px;border-radius:6px;background:rgba(52,152,219,.12);border:1px solid rgba(52,152,219,.3);letter-spacing:.04em;white-space:nowrap}
+
 .hier-officer-comm{color:#a2d8ff;font-family:monospace;font-size:11px;letter-spacing:.04em;padding:2px 8px;border-radius:5px;background:rgba(52,152,219,.12);border:1px solid rgba(52,152,219,.3)}
 .hier-cmd-comm{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;background:rgba(52,152,219,.15);border:1px solid rgba(52,152,219,.4);color:#a2d8ff;font-family:monospace;font-size:12px;letter-spacing:.06em;margin-top:6px}
 

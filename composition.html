@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=104">
+<link rel="stylesheet" href="style.css?v=105">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -196,20 +196,20 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 
 <div class="toast" id="toast"></div>
 
-<script src="supabase-loader.js?v=104"></script>
-<script src="config.js?v=104"></script>
-<script src="main.js?v=104"></script>
-<script src="format-utils.js?v=104"></script>
-<script src="holiday-engine.js?v=104"></script>
-<script src="settings-panel.js?v=104"></script>
-<script src="sound-engine.js?v=104"></script>
-<script src="faq-engine.js?v=104"></script>
-<script src="search-engine.js?v=104"></script>
-<script src="notify-engine.js?v=104"></script>
-<script src="auth.js?v=104"></script>
-<script src="roles-engine.js?v=104"></script>
-<script src="select-enhance.js?v=104"></script>
-<script src="composition-engine.js?v=104"></script>
+<script src="supabase-loader.js?v=105"></script>
+<script src="config.js?v=105"></script>
+<script src="main.js?v=105"></script>
+<script src="format-utils.js?v=105"></script>
+<script src="holiday-engine.js?v=105"></script>
+<script src="settings-panel.js?v=105"></script>
+<script src="sound-engine.js?v=105"></script>
+<script src="faq-engine.js?v=105"></script>
+<script src="search-engine.js?v=105"></script>
+<script src="notify-engine.js?v=105"></script>
+<script src="auth.js?v=105"></script>
+<script src="roles-engine.js?v=105"></script>
+<script src="select-enhance.js?v=105"></script>
+<script src="composition-engine.js?v=105"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -301,16 +301,19 @@ function render(){
       const sorted=(sub.members||[]).slice().sort((a,b)=>VSRF_COMP.rankInfo(a.rank).tier-VSRF_COMP.rankInfo(b.rank).tier);
       const rows=sorted.map(m=>{
         const r=VSRF_COMP.rankInfo(m.rank);
-        return `<div class="hier-member">
-          ${avatar(m,44,color)}
+        const hasPhoto=!!(m&&m.photo);
+        return `<div class="hier-member" style="--m-color:${color}">
+          <div class="hier-member-photo ${hasPhoto?"":"no-photo"}">
+            ${hasPhoto?`<img src="${esc(m.photo)}" alt="">`:`<span class="hier-officer-initials">${esc(initials(m.name||""))}</span>`}
+            <div class="hier-member-rank-tag" style="background:${color}">${esc(r.label)}</div>
+          </div>
           <div class="hier-member-body">
-            <div class="hier-member-rank" style="color:${color}">${esc(r.label)}</div>
             <div class="hier-member-name">${esc(m.name)}</div>
             ${m.role?`<div class="hier-member-role">${esc(m.role)}</div>`:""}
-          </div>
-          <div class="hier-member-ids">
-            ${m.code?`<div class="hier-member-code" title="Статик / Код">${esc(m.code)}</div>`:""}
-            ${m.comm?`<div class="hier-member-comm" title="Спец. связь">📡 ${esc(m.comm)}</div>`:""}
+            <div class="hier-member-ids">
+              ${m.code?`<span class="hier-member-code" title="Статик / Код">📞 ${esc(m.code)}</span>`:""}
+              ${m.comm?`<span class="hier-member-comm" title="Спец. связь">📡 ${esc(m.comm)}</span>`:""}
+            </div>
           </div>
           ${editing?`<div class="hier-member-actions">
             <button class="mini-icon-btn" data-edit-member="${sub.id}::${sub.members.indexOf(m)}">✎</button>
@@ -552,5 +555,5 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a260eff00ce1fffa',t:'MTc4NTg4MTg5OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26104185ca8f10d',t:'MTc4NTg4MjcyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
