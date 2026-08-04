@@ -91,22 +91,6 @@ window.VSRF_ROLES=(function(){
     const {data}=await s.client.from("custom_roles").select("*").order("sort",{ascending:true});
     return data||[];
   }
-  async function saveCustomRole(row){
-    const s=window.VSRF_AUTH.state;
-    if(!s||!s.client) return {ok:false,error:"no client"};
-    row.updated_at=new Date().toISOString();
-    if(!row.id) row.created_by=s.user?s.user.id:null;
-    const {data,error}=await s.client.from("custom_roles").upsert(row).select().single();
-    if(error) return {ok:false,error:error.message};
-    return {ok:true,row:data};
-  }
-  async function removeCustomRole(id){
-    const s=window.VSRF_AUTH.state;
-    if(!s||!s.client) return {ok:false,error:"no client"};
-    const {error}=await s.client.from("custom_roles").delete().eq("id",id);
-    if(error) return {ok:false,error:error.message};
-    return {ok:true};
-  }
   function onChange(fn){listeners.push(fn);fn(myRole);return()=>{const i=listeners.indexOf(fn);if(i>=0) listeners.splice(i,1)}}
   function emit(){listeners.forEach(fn=>{try{fn(myRole)}catch(e){}})}
 
@@ -123,19 +107,14 @@ window.VSRF_ROLES=(function(){
     const s=window.VSRF_AUTH.state;
     if(!s.client) return {ok:false,error:"no client"};
     try{
-      const {error}=await s.client.rpc("admin_upsert_role",{
+      const {error}=await s.client.rpc("staff_upsert_role",{
         p_user_id:userId,
         p_role:role,
         p_display_name:displayName||null,
         p_custom_role_id:customRoleId||null
       });
       if(!error) return {ok:true};
-      console.warn("[VSRF_ROLES] admin_upsert_role RPC упал, fallback на upsert:",error.message);
-      const row={user_id:userId,role,display_name:displayName||null};
-      if(customRoleId!==undefined) row.custom_role_id=customRoleId||null;
-      const {error:e2}=await s.client.from("user_roles").upsert(row,{onConflict:"user_id"});
-      if(e2) return {ok:false,error:e2.message+" (RPC также упал: "+error.message+")"};
-      return {ok:true};
+      return {ok:false,error:error.message};
     }catch(e){return {ok:false,error:e.message}}
   }
 
@@ -195,5 +174,5 @@ window.VSRF_ROLES=(function(){
 
   return {loadMyRole,getMyRole,getMyCustomRole,getMyPermissions,can,isAdmin,isSS,isStaff,onChange,
           listAllRoles,setRole,removeUser,inviteAndSetRole,apply,
-          listCustomRoles,saveCustomRole,removeCustomRole};
+          listCustomRoles};
 })();
