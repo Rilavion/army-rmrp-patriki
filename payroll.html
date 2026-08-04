@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=99">
+<link rel="stylesheet" href="style.css?v=100">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -190,6 +190,13 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
         <label class="cr-notify"><input type="radio" name="prOutMode" value="both"><span>🖼📝 Картинка + текст</span></label>
       </div>
     </div>
+    <div class="form-group">
+      <label class="pr-toggle" style="display:flex">
+        <input type="checkbox" id="prSetSplit">
+        <span>✂ Дробить картинку по отделам (несколько сообщений)</span>
+      </label>
+      <span class="msg-help">Полезно если много отделов и картинка получается очень длинной. Каждый отдел уходит отдельным сообщением, пинг только в первом.</span>
+    </div>
     <div class="form-msg" id="prSettingsMsg"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
       <button class="btn btn-ghost btn-sm" id="prSettingsCancel">Отмена</button>
@@ -227,19 +234,19 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=99"></script>
-<script src="config.js?v=99"></script>
-<script src="main.js?v=99"></script>
-<script src="format-utils.js?v=99"></script>
-<script src="holiday-engine.js?v=99"></script>
-<script src="settings-panel.js?v=99"></script>
-<script src="sound-engine.js?v=99"></script>
-<script src="auth.js?v=99"></script>
-<script src="roles-engine.js?v=99"></script>
-<script src="search-engine.js?v=99"></script>
-<script src="notify-engine.js?v=99"></script>
-<script src="html2canvas.min.js?v=99"></script>
-<script src="payroll-engine.js?v=99"></script>
+<script src="supabase-loader.js?v=100"></script>
+<script src="config.js?v=100"></script>
+<script src="main.js?v=100"></script>
+<script src="format-utils.js?v=100"></script>
+<script src="holiday-engine.js?v=100"></script>
+<script src="settings-panel.js?v=100"></script>
+<script src="sound-engine.js?v=100"></script>
+<script src="auth.js?v=100"></script>
+<script src="roles-engine.js?v=100"></script>
+<script src="search-engine.js?v=100"></script>
+<script src="notify-engine.js?v=100"></script>
+<script src="html2canvas.min.js?v=100"></script>
+<script src="payroll-engine.js?v=100"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -555,6 +562,7 @@ $("prShowSettings").addEventListener("click",async()=>{
   $("prSetFooter").value=SETTINGS?SETTINGS.footer_text||"":"";
   const om=(SETTINGS&&SETTINGS.output_mode)||"both";
   document.querySelectorAll("[name=prOutMode]").forEach(r=>{r.checked=(r.value===om)});
+  $("prSetSplit").checked=!!(SETTINGS&&SETTINGS.split_by_dept);
   $("prSettingsMsg").textContent="";
   $("prSettingsModal").classList.add("active");
 });
@@ -569,7 +577,8 @@ $("prSettingsSave").addEventListener("click",async()=>{
     ping_role_id:$("prSetRole").value||null,
     header_text:$("prSetHeader").value.trim()||"ПРИКАЗ О ПРЕМИРОВАНИИ",
     footer_text:$("prSetFooter").value.trim()||null,
-    output_mode:outMode
+    output_mode:outMode,
+    split_by_dept:$("prSetSplit").checked
   });
   if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
   msg.className="form-msg success";msg.textContent="✓ Сохранено";
@@ -596,49 +605,58 @@ function renderPreviewHtml(calc){
       <div class="pr-pv-corner tr"></div>
       <div class="pr-pv-corner bl"></div>
       <div class="pr-pv-corner br"></div>
-      <div class="pr-pv-head">
-        <div class="pr-pv-emblem-wrap">
-          <div class="pr-pv-emblem">◈</div>
-          <div class="pr-pv-emblem-line"></div>
-          <div class="pr-pv-emblem-star">★</div>
-          <div class="pr-pv-emblem-line"></div>
-          <div class="pr-pv-emblem">◈</div>
-        </div>
-        <div class="pr-pv-title">${esc(head)}</div>
-        <div class="pr-pv-subtitle">№ ${new Date().getTime().toString().slice(-6)} · ${esc(dateNow)}</div>
-        <div class="pr-pv-name">«${esc(DRAFT.title||"Премия")}»</div>
-        ${periodTxt?`<div class="pr-pv-period">${esc(periodTxt)}</div>`:""}
-        <div class="pr-pv-fund-box">
-          <div class="pr-pv-fund-lbl">ОБЩИЙ ФОНД</div>
-          <div class="pr-pv-fund-val">${VSRF_PAYROLL.fmtMoney(calc.fund)}</div>
+
+      <div class="pr-pv-section pr-pv-part-head" data-part="head">
+        <div class="pr-pv-head">
+          <div class="pr-pv-emblem-wrap">
+            <div class="pr-pv-emblem">◈</div>
+            <div class="pr-pv-emblem-line"></div>
+            <div class="pr-pv-emblem-star">★</div>
+            <div class="pr-pv-emblem-line"></div>
+            <div class="pr-pv-emblem">◈</div>
+          </div>
+          <div class="pr-pv-title">${esc(head)}</div>
+          <div class="pr-pv-subtitle">№ ${new Date().getTime().toString().slice(-6)} · ${esc(dateNow)}</div>
+          <div class="pr-pv-name">«${esc(DRAFT.title||"Премия")}»</div>
+          ${periodTxt?`<div class="pr-pv-period">${esc(periodTxt)}</div>`:""}
+          <div class="pr-pv-fund-box">
+            <div class="pr-pv-fund-lbl">ОБЩИЙ ФОНД</div>
+            <div class="pr-pv-fund-val">${VSRF_PAYROLL.fmtMoney(calc.fund)}</div>
+          </div>
         </div>
       </div>
+
       ${calc.departments.map((d,di)=>{
         const active=d.members.filter(m=>!m.excluded);
         if(!active.length) return "";
-        return `<div class="pr-pv-dept">
-          <div class="pr-pv-dept-head">
-            <div class="pr-pv-dept-icon">${esc(d.icon||"🎖")}</div>
-            <div class="pr-pv-dept-title">${esc(d.name)}</div>
-            <div class="pr-pv-dept-meta"><span>${(+d.pct).toFixed(1)}%</span> · <b>${VSRF_PAYROLL.fmtMoney(d.dept_amount)}</b></div>
+        return `<div class="pr-pv-section pr-pv-part-dept" data-part="dept-${di}">
+          <div class="pr-pv-dept">
+            <div class="pr-pv-dept-head">
+              <div class="pr-pv-dept-icon">${esc(d.icon||"🎖")}</div>
+              <div class="pr-pv-dept-title">${esc(d.name)}</div>
+              <div class="pr-pv-dept-meta"><span>${(+d.pct).toFixed(1)}%</span> · <b>${VSRF_PAYROLL.fmtMoney(d.dept_amount)}</b></div>
+            </div>
+            <div class="pr-pv-mems">${active.map((m,mi)=>{
+              const num=String(mi+1).padStart(2,"0");
+              return `<div class="pr-pv-mem">
+                <span class="pr-pv-mnum">${num}</span>
+                <span class="pr-pv-mfio">${esc(m.fio)}</span>
+                ${m.static?`<span class="pr-pv-mstat">${esc(m.static)}</span>`:""}
+                <span class="pr-pv-mdots"></span>
+                <span class="pr-pv-mamt">${VSRF_PAYROLL.fmtMoney(m.amount)}</span>
+              </div>`;
+            }).join("")}</div>
           </div>
-          <div class="pr-pv-mems">${active.map((m,mi)=>{
-            const num=String(mi+1).padStart(2,"0");
-            return `<div class="pr-pv-mem">
-              <span class="pr-pv-mnum">${num}</span>
-              <span class="pr-pv-mfio">${esc(m.fio)}</span>
-              ${m.static?`<span class="pr-pv-mstat">${esc(m.static)}</span>`:""}
-              <span class="pr-pv-mdots"></span>
-              <span class="pr-pv-mamt">${VSRF_PAYROLL.fmtMoney(m.amount)}</span>
-            </div>`;
-          }).join("")}</div>
         </div>`;
       }).join("")}
-      <div class="pr-pv-totals">
-        <div class="pr-pv-tot-row"><span>Итого выдано:</span><b>${VSRF_PAYROLL.fmtMoney(calc.total_spent)}</b></div>
-        <div class="pr-pv-tot-row"><span>Остаток фонда:</span><b>${VSRF_PAYROLL.fmtMoney(calc.fund-calc.total_spent)}</b></div>
+
+      <div class="pr-pv-section pr-pv-part-foot" data-part="foot">
+        <div class="pr-pv-totals">
+          <div class="pr-pv-tot-row"><span>Итого выдано:</span><b>${VSRF_PAYROLL.fmtMoney(calc.total_spent)}</b></div>
+          <div class="pr-pv-tot-row"><span>Остаток фонда:</span><b>${VSRF_PAYROLL.fmtMoney(calc.fund-calc.total_spent)}</b></div>
+        </div>
+        <div class="pr-pv-footer">${esc(foot)}</div>
       </div>
-      <div class="pr-pv-footer">${esc(foot)}</div>
     </div>
   </div>`;
 }
@@ -671,8 +689,85 @@ async function generatePreviewImage(){
   try{
     const target=holder.querySelector("#prPreviewCapture");
     const canvas=await html2canvas(target,{backgroundColor:"#0e1a13",scale:2,logging:false,useCORS:true});
-    const dataUrl=canvas.toDataURL("image/png");
-    return dataUrl;
+    return canvas.toDataURL("image/png");
+  }finally{
+    holder.remove();
+  }
+}
+
+async function generateSplitImages(){
+  const calc=VSRF_PAYROLL.calc(DRAFT);
+  const head=(SETTINGS&&SETTINGS.header_text)||"ПРИКАЗ О ПРЕМИРОВАНИИ";
+  const foot=(SETTINGS&&SETTINGS.footer_text)||"Военная Бухгалтерия · Вооружённые Силы РФ";
+  const parts=[];
+  const holder=document.createElement("div");
+  holder.style.cssText="position:fixed;left:-99999px;top:0;width:900px;padding:0";
+  document.body.appendChild(holder);
+  try{
+    const headHtml=`<div class="pr-preview"><div class="pr-pv-inner">
+      <div class="pr-pv-corner tl"></div><div class="pr-pv-corner tr"></div>
+      <div class="pr-pv-corner bl"></div><div class="pr-pv-corner br"></div>
+      <div class="pr-pv-head" style="border-bottom:none;margin-bottom:0;padding-bottom:6px">
+        <div class="pr-pv-emblem-wrap">
+          <div class="pr-pv-emblem">◈</div><div class="pr-pv-emblem-line"></div>
+          <div class="pr-pv-emblem-star">★</div><div class="pr-pv-emblem-line"></div>
+          <div class="pr-pv-emblem">◈</div>
+        </div>
+        <div class="pr-pv-title">${esc(head)}</div>
+        <div class="pr-pv-subtitle">№ ${new Date().getTime().toString().slice(-6)} · ${esc(new Date().toLocaleDateString("ru-RU",{day:"2-digit",month:"long",year:"numeric"}))}</div>
+        <div class="pr-pv-name">«${esc(DRAFT.title||"Премия")}»</div>
+        ${DRAFT.period_from||DRAFT.period_to?`<div class="pr-pv-period">ЗА ПЕРИОД: ${esc(fmtDateRu(DRAFT.period_from))} — ${esc(fmtDateRu(DRAFT.period_to))}</div>`:""}
+        <div class="pr-pv-fund-box">
+          <div class="pr-pv-fund-lbl">ОБЩИЙ ФОНД</div>
+          <div class="pr-pv-fund-val">${VSRF_PAYROLL.fmtMoney(calc.fund)}</div>
+        </div>
+      </div>
+    </div></div>`;
+    holder.innerHTML=headHtml;
+    parts.push(await html2canvas(holder.firstElementChild,{backgroundColor:"#0e1a13",scale:2,logging:false}).then(c=>c.toDataURL("image/png")));
+
+    for(let di=0;di<calc.departments.length;di++){
+      const d=calc.departments[di];
+      const active=d.members.filter(m=>!m.excluded);
+      if(!active.length) continue;
+      const deptHtml=`<div class="pr-preview"><div class="pr-pv-inner">
+        <div class="pr-pv-corner tl"></div><div class="pr-pv-corner tr"></div>
+        <div class="pr-pv-corner bl"></div><div class="pr-pv-corner br"></div>
+        <div class="pr-pv-dept" style="margin:0">
+          <div class="pr-pv-dept-head">
+            <div class="pr-pv-dept-icon">${esc(d.icon||"🎖")}</div>
+            <div class="pr-pv-dept-title">${esc(d.name)}</div>
+            <div class="pr-pv-dept-meta"><span>${(+d.pct).toFixed(1)}%</span> · <b>${VSRF_PAYROLL.fmtMoney(d.dept_amount)}</b></div>
+          </div>
+          <div class="pr-pv-mems">${active.map((m,mi)=>{
+            const num=String(mi+1).padStart(2,"0");
+            return `<div class="pr-pv-mem">
+              <span class="pr-pv-mnum">${num}</span>
+              <span class="pr-pv-mfio">${esc(m.fio)}</span>
+              ${m.static?`<span class="pr-pv-mstat">${esc(m.static)}</span>`:""}
+              <span class="pr-pv-mdots"></span>
+              <span class="pr-pv-mamt">${VSRF_PAYROLL.fmtMoney(m.amount)}</span>
+            </div>`;
+          }).join("")}</div>
+        </div>
+      </div></div>`;
+      holder.innerHTML=deptHtml;
+      parts.push(await html2canvas(holder.firstElementChild,{backgroundColor:"#0e1a13",scale:2,logging:false}).then(c=>c.toDataURL("image/png")));
+    }
+
+    const footHtml=`<div class="pr-preview"><div class="pr-pv-inner">
+      <div class="pr-pv-corner tl"></div><div class="pr-pv-corner tr"></div>
+      <div class="pr-pv-corner bl"></div><div class="pr-pv-corner br"></div>
+      <div class="pr-pv-totals" style="margin-top:0;border-top:none">
+        <div class="pr-pv-tot-row"><span>Итого выдано:</span><b>${VSRF_PAYROLL.fmtMoney(calc.total_spent)}</b></div>
+        <div class="pr-pv-tot-row"><span>Остаток фонда:</span><b>${VSRF_PAYROLL.fmtMoney(calc.fund-calc.total_spent)}</b></div>
+      </div>
+      <div class="pr-pv-footer">${esc(foot)}</div>
+    </div></div>`;
+    holder.innerHTML=footHtml;
+    parts.push(await html2canvas(holder.firstElementChild,{backgroundColor:"#0e1a13",scale:2,logging:false}).then(c=>c.toDataURL("image/png")));
+
+    return parts;
   }finally{
     holder.remove();
   }
@@ -693,12 +788,17 @@ $("prSend").addEventListener("click",async()=>{
     fund_amount:DRAFT.fund_amount,data:DRAFT.data,pct_manual:DRAFT.pct_manual,status:"draft"
   });
 
-  let imageData=null;
+  const split=!!(s&&s.split_by_dept);
+  let imageData=null, imageParts=null;
   if(outMode==="image"||outMode==="both"){
     const btn=$("prSend");
     const oldTxt=btn.innerHTML;btn.innerHTML="🖼 Генерация...";btn.disabled=true;
     try{
-      imageData=await generatePreviewImage();
+      if(split){
+        imageParts=await generateSplitImages();
+      } else {
+        imageData=await generatePreviewImage();
+      }
     }catch(e){
       alert("Ошибка генерации картинки: "+e.message+"\nБудет отправлен только текст.");
     }
@@ -712,7 +812,9 @@ $("prSend").addEventListener("click",async()=>{
     requested_by:window.VSRF_AUTH.state.user.id,
     requested_by_name:displayName,
     image_data:imageData,
-    output_mode:outMode
+    image_parts:imageParts,
+    output_mode:outMode,
+    split_by_dept:split
   });
   if(error){alert("Не удалось отправить запрос: "+error.message);return}
   alert("Приказ отправлен на публикацию. Через ~10-15 сек бот опубликует его в DS.\nПосле публикации создастся новый пустой черновик.");
@@ -725,5 +827,5 @@ $("prSend").addEventListener("click",async()=>{
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25ef019acc9e950',t:'MTc4NTg2MDkzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25f0eebf83be918',t:'MTc4NTg2MjE5Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
