@@ -37,7 +37,7 @@ window.VSRF_REGISTRY=(function(){
     if(kind==="warn") return (settings.expire_warn_days||0)*86400000;
     if(kind==="reproach") return (settings.expire_reproach_days||0)*86400000;
     if(kind==="talk") return (settings.expire_talk_days||0)*86400000;
-    if(kind==="confinement") return (confinementMinutes||((settings.expire_confinement_hours||24)*60))*60000;
+    if(kind==="confinement") return (confinementMinutes||(settings.expire_confinement_minutes||((settings.expire_confinement_hours||24)*60)))*60000;
     return null;
   }
 
@@ -53,7 +53,7 @@ window.VSRF_REGISTRY=(function(){
     const ms=msFor(settings,row.kind,row.confinement_minutes);
     const nowIso=new Date();
     const expiresAt=ms?new Date(nowIso.getTime()+ms).toISOString():null;
-    const confHours=row.kind==="confinement"?(Math.round(((row.confinement_minutes||0)/60)*1000)/1000):null;
+    const confMin=row.kind==="confinement"?parseInt(row.confinement_minutes)||0:null;
     const insert={
       target_fio:row.target_fio,
       target_static:row.target_static,
@@ -68,7 +68,7 @@ window.VSRF_REGISTRY=(function(){
       issued_by_discord_id:row.issued_by_discord_id||null,
       notify_mode:notifyMode,
       expires_at:expiresAt,
-      confinement_hours:confHours
+      confinement_minutes:confMin
     };
     const {data,error}=await c.from("violations_registry").insert(insert).select().single();
     if(error) return {ok:false,error:error.message};

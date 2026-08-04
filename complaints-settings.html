@@ -7,7 +7,7 @@
 <title>Настройки жалоб и реестра</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=92">
+<link rel="stylesheet" href="style.css?v=94">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas><div class="bg-noise"></div>
@@ -98,7 +98,7 @@
           <div class="form-group msg-flex-1"><label>⚠ Предупреждение (дней)</label><input type="number" id="csExpW" class="msg-input" min="1" value="14"></div>
           <div class="form-group msg-flex-1"><label>‼ Выговор (дней)</label><input type="number" id="csExpR" class="msg-input" min="1" value="30"></div>
           <div class="form-group msg-flex-1"><label>💬 Беседа (дней)</label><input type="number" id="csExpT" class="msg-input" min="1" value="7"></div>
-          <div class="form-group msg-flex-1"><label>🔒 Заключение по умолч. (часов)</label><input type="number" id="csExpC" class="msg-input" min="1" value="24"></div>
+          <div class="form-group msg-flex-1"><label>🔒 Заключение по умолч. (минут)</label><input type="number" id="csExpC" class="msg-input" min="1" value="1440"></div>
         </div>
         <div class="msg-help">Увал не истекает автоматически. Дисциплинарное заключение — срок задаётся при выдаче (используется дефолт, если не указан). Автопроверка каждый час.</div>
 
@@ -122,18 +122,18 @@
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=92"></script>
-<script src="config.js?v=92"></script>
-<script src="main.js?v=92"></script>
-<script src="format-utils.js?v=92"></script>
-<script src="auth.js?v=92"></script>
-<script src="notify-engine.js?v=92"></script>
-<script src="search-engine.js?v=92"></script>
-<script src="sound-engine.js?v=92"></script>
-<script src="settings-panel.js?v=92"></script>
-<script src="holiday-engine.js?v=92"></script>
-<script src="roles-engine.js?v=92"></script>
-<script src="registry-engine.js?v=92"></script>
+<script src="supabase-loader.js?v=94"></script>
+<script src="config.js?v=94"></script>
+<script src="main.js?v=94"></script>
+<script src="format-utils.js?v=94"></script>
+<script src="auth.js?v=94"></script>
+<script src="notify-engine.js?v=94"></script>
+<script src="search-engine.js?v=94"></script>
+<script src="sound-engine.js?v=94"></script>
+<script src="settings-panel.js?v=94"></script>
+<script src="holiday-engine.js?v=94"></script>
+<script src="roles-engine.js?v=94"></script>
+<script src="registry-engine.js?v=94"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -152,7 +152,7 @@ async function boot(){
   $("csExpW").value=SETTINGS.expire_warn_days||14;
   $("csExpR").value=SETTINGS.expire_reproach_days||30;
   $("csExpT").value=SETTINGS.expire_talk_days||7;
-  $("csExpC").value=SETTINGS.expire_confinement_hours||24;
+  $("csExpC").value=SETTINGS.expire_confinement_minutes||((SETTINGS.expire_confinement_hours||24)*60);
   $("csThr").value=SETTINGS.warn_to_reproach_threshold||3;
 }
 
@@ -205,7 +205,7 @@ $("csSaveBtn").addEventListener("click",async()=>{
     expire_warn_days:parseInt($("csExpW").value)||14,
     expire_reproach_days:parseInt($("csExpR").value)||30,
     expire_talk_days:parseInt($("csExpT").value)||7,
-    expire_confinement_hours:parseInt($("csExpC").value)||24,
+    expire_confinement_minutes:parseInt($("csExpC").value)||1440,
     warn_to_reproach_threshold:parseInt($("csThr").value)||3
   };
   msg.className="form-msg info";msg.textContent="Сохранение...";
@@ -217,6 +217,5 @@ $("csSaveBtn").addEventListener("click",async()=>{
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,500);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25dea09fa70f103',t:'MTc4NTg1MDIwMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25e266b3b4ff103',t:'MTc4NTg1MjY3Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

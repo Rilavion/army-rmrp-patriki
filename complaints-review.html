@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=93">
+<link rel="stylesheet" href="style.css?v=94">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -264,28 +264,28 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=93"></script>
-<script src="config.js?v=93"></script>
-<script src="main.js?v=93"></script>
-<script src="holiday-engine.js?v=93"></script>
-<script src="settings-panel.js?v=93"></script>
-<script src="sound-engine.js?v=93"></script>
-<script src="auth.js?v=93"></script>
-<script src="roles-engine.js?v=93"></script>
-<script src="search-engine.js?v=93"></script>
-<script src="notify-engine.js?v=93"></script>
-<script src="format-utils.js?v=93"></script>
-<script src="complaints-engine.js?v=93"></script>
-<script src="registry-engine.js?v=93"></script>
+<script src="supabase-loader.js?v=94"></script>
+<script src="config.js?v=94"></script>
+<script src="main.js?v=94"></script>
+<script src="holiday-engine.js?v=94"></script>
+<script src="settings-panel.js?v=94"></script>
+<script src="sound-engine.js?v=94"></script>
+<script src="auth.js?v=94"></script>
+<script src="roles-engine.js?v=94"></script>
+<script src="search-engine.js?v=94"></script>
+<script src="notify-engine.js?v=94"></script>
+<script src="format-utils.js?v=94"></script>
+<script src="complaints-engine.js?v=94"></script>
+<script src="registry-engine.js?v=94"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ruDT=iso=>{if(!iso) return "—";const d=new Date(iso);return d.toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})};
 const ruDate=iso=>{if(!iso) return "—";const d=new Date(iso);return d.toLocaleDateString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric"})};
-function confLen(hours){
-  if(!hours) return "";
-  const totalMin=Math.round(hours*60);
+function confLen(minutes){
+  const totalMin=Math.round(minutes||0);
+  if(totalMin<=0) return "";
   const d=Math.floor(totalMin/1440);
   const h=Math.floor((totalMin%1440)/60);
   const m=totalMin%60;
@@ -294,6 +294,11 @@ function confLen(hours){
   if(h) parts.push(h+" ч");
   if(m) parts.push(m+" мин");
   return parts.join(" ")||"0 мин";
+}
+function confMinutesOf(x){
+  if(x.confinement_minutes!=null) return x.confinement_minutes;
+  if(x.confinement_hours!=null) return Math.round(x.confinement_hours*60);
+  return 0;
 }
 
 const VERDICTS=[
@@ -641,7 +646,8 @@ function itemHtml(x){
   const removed=!!x.removed_at;
   const canEdit=window.VSRF_ROLES&&window.VSRF_ROLES.can("registry","edit");
   const canRemove=window.VSRF_ROLES&&window.VSRF_ROLES.can("registry","remove");
-  const confPart=x.kind==="confinement"&&x.confinement_hours?` <span class="cr-conf-len">${confLen(x.confinement_hours)}</span>`:"";
+  const confMin=confMinutesOf(x);
+  const confPart=x.kind==="confinement"&&confMin>0?` <span class="cr-conf-len">${confLen(confMin)}</span>`:"";
   const expShow=x.expires_at&&!removed?(x.kind==="confinement"?ruDT(x.expires_at):ruDate(x.expires_at)):"";
   return `<div class="cr-reg-item ${removed?'cr-reg-removed':''}">
     <div class="cr-reg-item-head">
@@ -775,5 +781,5 @@ setTimeout(()=>{
   }
 },1500);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25e10a8a904f103',t:'MTc4NTg1MTc4Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25e26332bebf103',t:'MTc4NTg1MjY2NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
