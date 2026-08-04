@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=94">
+<link rel="stylesheet" href="style.css?v=95">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -209,7 +209,11 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       <div class="cf-group-title">🎯 Данные нарушителя (кому выдаётся)</div>
       <div class="cf-group-body">
         <div class="msg-row">
-          <div class="form-group msg-flex-2"><label>ФИО нарушителя *</label><input type="text" id="crAddFio" class="msg-input" placeholder="Иван Иванов" list="crDsMembers" autocomplete="off"></div>
+          <div class="form-group msg-flex-2" style="position:relative">
+            <label>ФИО нарушителя *</label>
+            <input type="text" id="crAddFio" class="msg-input" placeholder="Начните вводить ФИО..." autocomplete="off">
+            <div id="crAddDropdown" class="cr-dropdown" style="display:none"></div>
+          </div>
           <div class="form-group msg-flex-1"><label>Статик нарушителя *</label><input type="text" id="crAddStatic" class="msg-input" placeholder="123-456"></div>
         </div>
         <div class="form-group"><label>Должность / отдел нарушителя</label><input type="text" id="crAddPos" class="msg-input" placeholder="Мл. Сержант · ОГП"></div>
@@ -255,7 +259,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<datalist id="crDsMembers"></datalist>
+
 
 <div class="modal-back" id="loginModal">
   <div class="modal"><button class="modal-close" aria-label="Закрыть">✕</button><h3>Вход</h3>
@@ -264,19 +268,19 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=94"></script>
-<script src="config.js?v=94"></script>
-<script src="main.js?v=94"></script>
-<script src="holiday-engine.js?v=94"></script>
-<script src="settings-panel.js?v=94"></script>
-<script src="sound-engine.js?v=94"></script>
-<script src="auth.js?v=94"></script>
-<script src="roles-engine.js?v=94"></script>
-<script src="search-engine.js?v=94"></script>
-<script src="notify-engine.js?v=94"></script>
-<script src="format-utils.js?v=94"></script>
-<script src="complaints-engine.js?v=94"></script>
-<script src="registry-engine.js?v=94"></script>
+<script src="supabase-loader.js?v=95"></script>
+<script src="config.js?v=95"></script>
+<script src="main.js?v=95"></script>
+<script src="holiday-engine.js?v=95"></script>
+<script src="settings-panel.js?v=95"></script>
+<script src="sound-engine.js?v=95"></script>
+<script src="auth.js?v=95"></script>
+<script src="roles-engine.js?v=95"></script>
+<script src="search-engine.js?v=95"></script>
+<script src="notify-engine.js?v=95"></script>
+<script src="format-utils.js?v=95"></script>
+<script src="complaints-engine.js?v=95"></script>
+<script src="registry-engine.js?v=95"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -326,7 +330,7 @@ const FIELD_LABELS={
 };
 function labelOf(key){return FIELD_LABELS[key]||key}
 
-let TAB="pending", ALL_COMP=[], ALL_REG=[], CUR_COMP=null, CUR_ADD_KIND=null, CUR_VERDICT=null, DS_INDEX=new Map();
+let TAB="pending", ALL_COMP=[], ALL_REG=[], CUR_COMP=null, CUR_ADD_KIND=null, CUR_VERDICT=null;
 
 async function boot(){
   const canView=window.VSRF_ROLES&&(window.VSRF_ROLES.can("complaints","view")||window.VSRF_ROLES.can("complaints","review"));
@@ -350,28 +354,24 @@ async function loadAll(){
   renderTab();
 }
 
+let DS_LIST=[];
 async function loadDsMembers(){
   const c=window.VSRF_AUTH.state.client;
   if(!c) return;
   try{
-    const {data}=await c.from("ds_members").select("parsed_fio,parsed_static,discord_id").limit(500);
+    const {data}=await c.from("ds_members").select("parsed_fio,parsed_static,discord_id,position").limit(2000);
     if(!data) return;
-    const dl=$("crDsMembers");
     const seen=new Set();
-    dl.innerHTML=data.filter(m=>{
-      const fio=(m.parsed_fio||"").trim();
-      if(!fio||seen.has(fio)) return false;
-      seen.add(fio);return true;
-    }).map(m=>{
-      const fio=(m.parsed_fio||"").trim();
-      const hint=m.parsed_static?" — "+m.parsed_static:"";
-      return `<option value="${esc(fio)}" label="${esc(fio+hint)}" data-fio="${esc(fio)}" data-static="${esc(m.parsed_static||"")}" data-did="${esc(m.discord_id||"")}"></option>`;
-    }).join("");
-    DS_INDEX=new Map();
-    for(const m of data){
-      const fio=(m.parsed_fio||"").trim();
-      if(fio) DS_INDEX.set(fio.toLowerCase(),{static:m.parsed_static||"",did:m.discord_id||""});
-    }
+    DS_LIST=data.filter(m=>{
+      const key=(m.parsed_fio||"").trim()+"|"+(m.parsed_static||"");
+      if(!m.parsed_fio||seen.has(key)) return false;
+      seen.add(key);return true;
+    }).map(m=>({
+      fio:(m.parsed_fio||"").trim(),
+      static:m.parsed_static||"",
+      did:m.discord_id||"",
+      position:m.position||""
+    }));
   }catch(e){}
 }
 
@@ -655,7 +655,7 @@ function itemHtml(x){
       <span class="cr-reg-date">${ruDT(x.created_at)}</span>
       ${expShow?`<span class="cr-reg-exp">до ${expShow}</span>`:""}
       <span style="flex:1"></span>
-      ${x.notify_mode==="notify"?'<span class="cr-notify-b">📢 в DS</span>':'<span class="cr-notify-b cr-silent">🔕 тихо</span>'}
+
     </div>
     <div class="cr-reg-item-body">
       <div class="cr-reg-reason">${esc(x.reason)}</div>
@@ -690,14 +690,42 @@ $("crAddViolBtn").addEventListener("click",()=>{
   $("crAddViolModal").classList.add("active");
 });
 
-$("crAddFio").addEventListener("input",e=>{
-  const val=(e.target.value||"").trim().toLowerCase();
-  const hit=DS_INDEX.get(val);
-  if(hit){
-    if(hit.static&&!$("crAddStatic").value) $("crAddStatic").value=window.VSRF_FMT?window.VSRF_FMT.formatStatic(hit.static):hit.static;
-    if(hit.did&&!$("crAddDid").value) $("crAddDid").value=hit.did;
+function renderDsDropdown(query){
+  const box=$("crAddDropdown");
+  const q=(query||"").trim().toLowerCase();
+  if(!q){box.style.display="none";return}
+  const digits=q.replace(/\D/g,"");
+  const matches=DS_LIST.filter(m=>{
+    const fioLow=(m.fio||"").toLowerCase();
+    const statNorm=(m.static||"").replace(/\D/g,"");
+    return fioLow.includes(q) || (digits && statNorm.includes(digits));
+  }).slice(0,10);
+  if(!matches.length){
+    box.innerHTML='<div class="cr-dd-empty">Ничего не найдено</div>';
+    box.style.display="";return;
   }
-});
+  box.innerHTML=matches.map(m=>{
+    const posPart=m.position?`<span class="cr-dd-pos">${esc(m.position)}</span>`:"";
+    const statPart=m.static?`<span class="cr-dd-stat">${esc(m.static)}</span>`:"";
+    return `<div class="cr-dd-item" data-fio="${esc(m.fio)}" data-static="${esc(m.static)}" data-did="${esc(m.did)}" data-pos="${esc(m.position)}">
+      <div class="cr-dd-fio">${esc(m.fio)}</div>
+      <div class="cr-dd-meta">${statPart}${posPart}</div>
+    </div>`;
+  }).join("");
+  box.style.display="";
+  box.querySelectorAll(".cr-dd-item").forEach(el=>el.addEventListener("mousedown",e=>{
+    e.preventDefault();
+    $("crAddFio").value=el.dataset.fio;
+    if(el.dataset.static) $("crAddStatic").value=window.VSRF_FMT?window.VSRF_FMT.formatStatic(el.dataset.static):el.dataset.static;
+    if(el.dataset.did) $("crAddDid").value=el.dataset.did;
+    if(el.dataset.pos&&!$("crAddPos").value) $("crAddPos").value=el.dataset.pos;
+    box.style.display="none";
+  }));
+}
+$("crAddFio").addEventListener("input",e=>renderDsDropdown(e.target.value));
+$("crAddFio").addEventListener("focus",e=>{if(e.target.value.trim()) renderDsDropdown(e.target.value)});
+$("crAddFio").addEventListener("blur",()=>setTimeout(()=>$("crAddDropdown").style.display="none",180));
+$("crAddFio").addEventListener("keydown",e=>{if(e.key==="Escape") $("crAddDropdown").style.display="none"});
 
 $("crAddCancel").addEventListener("click",()=>$("crAddViolModal").classList.remove("active"));
 $("crAddViolModal").querySelector(".modal-close").addEventListener("click",()=>$("crAddViolModal").classList.remove("active"));
@@ -781,5 +809,5 @@ setTimeout(()=>{
   }
 },1500);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25e26332bebf103',t:'MTc4NTg1MjY2NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25e7c43490cf3b2',t:'MTc4NTg1NjE4OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

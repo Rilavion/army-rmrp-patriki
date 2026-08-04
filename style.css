@@ -5075,3 +5075,13 @@ body.vsrf-is-logged .footer-col a[data-loggedin]{display:block !important}
 .cr-hist-from{color:#e77070;text-decoration:line-through;opacity:.85}
 .cr-hist-to{color:#a9e5a9;font-weight:600}
 .cr-conf-len{font-weight:400;opacity:.85;margin-left:4px}
+
+.cr-dropdown{position:absolute;top:100%;left:0;right:0;z-index:10;background:#15241d;border:1px solid var(--gold);border-radius:8px;margin-top:4px;max-height:280px;overflow-y:auto;box-shadow:0 8px 20px rgba(0,0,0,.5)}
+.cr-dd-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid rgba(205,168,90,.1);transition:.12s}
+.cr-dd-item:last-child{border-bottom:none}
+.cr-dd-item:hover{background:rgba(205,168,90,.14)}
+.cr-dd-fio{color:#f5ecd6;font-weight:600;font-size:13px}
+.cr-dd-meta{margin-top:2px;display:flex;gap:8px;font-size:11px}
+.cr-dd-stat{color:var(--gold-b);background:rgba(0,0,0,.35);padding:1px 6px;border-radius:4px;font-family:'Inter',monospace}
+.cr-dd-pos{color:var(--muted)}
+.cr-dd-empty{padding:12px;color:var(--muted);font-size:13px;text-align:center;font-style:italic}
