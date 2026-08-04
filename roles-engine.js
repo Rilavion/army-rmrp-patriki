@@ -69,6 +69,28 @@ window.VSRF_ROLES=(function(){
     document.body.classList.toggle("vsrf-is-staff",myRole==="admin"||myRole==="ss");
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     document.body.classList.toggle("vsrf-is-logged",!!(s&&s.user));
+    applyPermGates();
+  }
+
+  function applyPermGates(){
+    document.querySelectorAll("[data-perm]").forEach(el=>{
+      const raw=el.getAttribute("data-perm");
+      if(!raw){el.style.display="";return}
+      const parts=raw.split(",").map(p=>p.trim()).filter(Boolean);
+      let allowed=false;
+      for(const p of parts){
+        const [sec,act]=p.split(":").map(x=>x.trim());
+        if(!sec) continue;
+        if(can(sec,act||"view")){allowed=true;break}
+      }
+      if(!allowed){
+        el.style.setProperty("display","none","important");
+        el.setAttribute("aria-hidden","true");
+      } else {
+        el.style.removeProperty("display");
+        el.removeAttribute("aria-hidden");
+      }
+    });
   }
 
   function getMyRole(){return myRole}
