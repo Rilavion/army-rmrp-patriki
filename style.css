@@ -217,6 +217,8 @@ select,option{color-scheme:inherit}
 .nav a[data-page="autopark.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>')}
 .nav a[data-page="map.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM10 5.47l4 1.4v11.66l-4-1.4zm-5 .99l3-1.01v11.7l-3 1.16zm14 11.08l-3 1.01V6.86l3-1.16z"/></svg>')}
 .nav a[data-page="faq.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>')}
+.nav a[data-page="complaints.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM11 14H9v-2h2v2zm0-4H9V6h2v4zm4 4h-2v-2h2v2zm0-4h-2V6h2v4z"/></svg>')}
+.nav a[data-page="complaints-review.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M12 3l-8 4v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V7l-8-4zm-1 14l-4-4 1.4-1.4 2.6 2.6 6.6-6.6L19 9l-8 8z"/></svg>')}
 .nav a[data-page="lk.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>')}
 .nav a[data-page="apps.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>')}
 .nav a[data-page="vp.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>')}
@@ -5062,3 +5064,14 @@ body.vsrf-is-logged .footer-col a[data-loggedin]{display:block !important}
 .cf-group::before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),transparent);opacity:.7}
 .cf-group-title{font:700 12px/1 'Inter',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-b);margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed rgba(205,168,90,.2)}
 .cf-group-body{display:flex;flex-direction:column;gap:12px}
+
+.cr-hist{background:rgba(21,36,29,.5);border:1px solid rgba(205,168,90,.2);border-radius:10px;padding:14px 16px;margin-top:10px}
+.cr-hist-title{font:700 12px/1 'Inter',sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--gold-b);margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed rgba(205,168,90,.2)}
+.cr-hist-item{padding:10px 12px;background:rgba(0,0,0,.2);border-left:2px solid var(--gold);border-radius:0 6px 6px 0;margin-bottom:8px}
+.cr-hist-head{font-size:12px;color:var(--muted);margin-bottom:6px}
+.cr-hist-body{font-size:13px}
+.cr-hist-ch{padding:2px 0}
+.cr-hist-k{color:var(--gold-b);font-weight:600}
+.cr-hist-from{color:#e77070;text-decoration:line-through;opacity:.85}
+.cr-hist-to{color:#a9e5a9;font-weight:600}
+.cr-conf-len{font-weight:400;opacity:.85;margin-left:4px}

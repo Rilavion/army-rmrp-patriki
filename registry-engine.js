@@ -32,29 +32,28 @@ window.VSRF_REGISTRY=(function(){
     return data||[];
   }
 
-  function msFor(settings,kind,confinementHours){
+  function msFor(settings,kind,confinementMinutes){
     if(!settings) return null;
     if(kind==="warn") return (settings.expire_warn_days||0)*86400000;
     if(kind==="reproach") return (settings.expire_reproach_days||0)*86400000;
     if(kind==="talk") return (settings.expire_talk_days||0)*86400000;
-    if(kind==="confinement") return (confinementHours||settings.expire_confinement_hours||24)*3600000;
+    if(kind==="confinement") return (confinementMinutes||((settings.expire_confinement_hours||24)*60))*60000;
     return null;
   }
 
   async function add(row,notifyMode,fromComplaint){
     const c=client();if(!c) return {ok:false,error:"no client"};
-    if(!notifyMode||(notifyMode!=="notify"&&notifyMode!=="silent")){
-      return {ok:false,error:"Выберите режим оповещения перед вносом"};
-    }
+    if(notifyMode==null||(notifyMode!=="notify"&&notifyMode!=="silent")) notifyMode="notify";
     const s=window.VSRF_AUTH.state;
     if(!s||!s.user) return {ok:false,error:"Требуется вход"};
-    if(row.kind==="confinement"&&(!row.confinement_hours||row.confinement_hours<=0)){
-      return {ok:false,error:"Для «Дисциплинарного заключения» укажите срок (в часах)"};
+    if(row.kind==="confinement"&&(!row.confinement_minutes||row.confinement_minutes<=0)){
+      return {ok:false,error:"Для «Дисциплинарного заключения» укажите срок"};
     }
     const settings=await fetchSettings();
-    const ms=msFor(settings,row.kind,row.confinement_hours);
+    const ms=msFor(settings,row.kind,row.confinement_minutes);
     const nowIso=new Date();
     const expiresAt=ms?new Date(nowIso.getTime()+ms).toISOString():null;
+    const confHours=row.kind==="confinement"?Math.max(1,Math.round((row.confinement_minutes||60)/60*100)/100):null;
     const insert={
       target_fio:row.target_fio,
       target_static:row.target_static,
@@ -69,7 +68,7 @@ window.VSRF_REGISTRY=(function(){
       issued_by_discord_id:row.issued_by_discord_id||null,
       notify_mode:notifyMode,
       expires_at:expiresAt,
-      confinement_hours:row.kind==="confinement"?row.confinement_hours:null
+      confinement_hours:confHours
     };
     const {data,error}=await c.from("violations_registry").insert(insert).select().single();
     if(error) return {ok:false,error:error.message};

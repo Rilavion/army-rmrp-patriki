@@ -7,7 +7,7 @@
 <title>Настройки жалоб и реестра</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=91">
+<link rel="stylesheet" href="style.css?v=92">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas><div class="bg-noise"></div>
@@ -76,9 +76,21 @@
           <span class="msg-help">Сюда приходят нарушения, внесённые через «Добавить нарушителя»</span>
         </div>
         <div class="form-group">
+          <label>🔒 Канал «Дисциплинарные заключения»</label>
+          <select id="csChConf" class="msg-input"></select>
+          <span class="msg-help">Отдельный канал для заключений (по жалобе и напрямую). Если пусто — уходит в «Вердикты»/«Приказы»</span>
+        </div>
+        <div class="form-group">
           <label>✓ Канал «Снятие нарушений» (авто-истечения и ручные снятия)</label>
           <select id="csCh3" class="msg-input"></select>
           <span class="msg-help">Хочешь всё в один канал — выбирай одинаковые</span>
+        </div>
+
+        <h3 style="margin-top:24px">Пинг-роль</h3>
+        <div class="form-group">
+          <label>Роль ВП для пинга при событиях жалоб</label>
+          <select id="csPingRole" class="msg-input"></select>
+          <span class="msg-help">Пингуется при: новая жалоба, вердикт, новое нарушение, снятие. Если пусто — только @user'ы. Список синхронизируется ботом раз в 30 мин.</span>
         </div>
 
         <h3 style="margin-top:24px">Сроки действия нарушений</h3>
@@ -110,17 +122,18 @@
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=91"></script>
-<script src="config.js?v=91"></script>
-<script src="main.js?v=91"></script>
-<script src="auth.js?v=91"></script>
-<script src="notify-engine.js?v=91"></script>
-<script src="search-engine.js?v=91"></script>
-<script src="sound-engine.js?v=91"></script>
-<script src="settings-panel.js?v=91"></script>
-<script src="holiday-engine.js?v=91"></script>
-<script src="roles-engine.js?v=91"></script>
-<script src="registry-engine.js?v=91"></script>
+<script src="supabase-loader.js?v=92"></script>
+<script src="config.js?v=92"></script>
+<script src="main.js?v=92"></script>
+<script src="format-utils.js?v=92"></script>
+<script src="auth.js?v=92"></script>
+<script src="notify-engine.js?v=92"></script>
+<script src="search-engine.js?v=92"></script>
+<script src="sound-engine.js?v=92"></script>
+<script src="settings-panel.js?v=92"></script>
+<script src="holiday-engine.js?v=92"></script>
+<script src="roles-engine.js?v=92"></script>
+<script src="registry-engine.js?v=92"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -135,11 +148,25 @@ async function boot(){
   SETTINGS=await VSRF_REGISTRY.fetchSettings();
   if(!SETTINGS) SETTINGS={id:1,expire_warn_days:14,expire_reproach_days:30,expire_talk_days:7,expire_confinement_hours:24,warn_to_reproach_threshold:3};
   await loadChannels();
+  await loadRoles();
   $("csExpW").value=SETTINGS.expire_warn_days||14;
   $("csExpR").value=SETTINGS.expire_reproach_days||30;
   $("csExpT").value=SETTINGS.expire_talk_days||7;
   $("csExpC").value=SETTINGS.expire_confinement_hours||24;
   $("csThr").value=SETTINGS.warn_to_reproach_threshold||3;
+}
+
+async function loadRoles(){
+  const c=window.VSRF_AUTH.state.client;
+  const sel=$("csPingRole");
+  const {data}=await c.from("ds_guild_roles").select("role_id,name,color,position").order("position",{ascending:false});
+  const roles=data||[];
+  if(!roles.length){
+    sel.innerHTML=`<option value="">— бот ещё не синхронизировал роли —</option>`;
+    return;
+  }
+  const cur=SETTINGS.ping_role_id||"";
+  sel.innerHTML=[`<option value="">— не выбрано —</option>`].concat(roles.map(r=>`<option value="${r.role_id}" ${r.role_id===cur?"selected":""}>@${(r.name||"").replace(/</g,"&lt;")}</option>`)).join("");
 }
 
 async function loadChannels(){
@@ -161,6 +188,7 @@ async function loadChannels(){
   buildSelect($("csCh1"),SETTINGS.complaints_channel_id||"");
   buildSelect($("csChV"),SETTINGS.verdicts_channel_id||"");
   buildSelect($("csCh2"),SETTINGS.report_channel_id||"");
+  buildSelect($("csChConf"),SETTINGS.confinement_channel_id||"");
   buildSelect($("csCh3"),SETTINGS.removal_channel_id||"");
 }
 
@@ -171,7 +199,9 @@ $("csSaveBtn").addEventListener("click",async()=>{
     complaints_channel_id:$("csCh1").value||null,
     verdicts_channel_id:$("csChV").value||null,
     report_channel_id:$("csCh2").value||null,
+    confinement_channel_id:$("csChConf").value||null,
     removal_channel_id:$("csCh3").value||null,
+    ping_role_id:$("csPingRole").value||null,
     expire_warn_days:parseInt($("csExpW").value)||14,
     expire_reproach_days:parseInt($("csExpR").value)||30,
     expire_talk_days:parseInt($("csExpT").value)||7,
@@ -188,5 +218,5 @@ if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,500);
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25dba75cf4cf147',t:'MTc4NTg0ODI1MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25dea09fa70f103',t:'MTc4NTg1MDIwMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

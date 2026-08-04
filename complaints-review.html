@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=91">
+<link rel="stylesheet" href="style.css?v=92">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -129,6 +129,46 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
+<div class="modal-back" id="crEditModal">
+  <div class="modal modal-xl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>Редактирование жалобы</h3>
+    <div class="modal-sub">Все изменения сохраняются в истории</div>
+    <div class="cf-group" style="margin-top:14px">
+      <div class="cf-group-title">📬 Данные заявителя</div>
+      <div class="cf-group-body">
+        <div class="msg-row">
+          <div class="form-group msg-flex-2"><label>ФИО заявителя</label><input type="text" id="crEditFio" class="msg-input"></div>
+          <div class="form-group msg-flex-1"><label>Статик</label><input type="text" id="crEditStatic" class="msg-input" data-static-input></div>
+        </div>
+        <div class="form-group"><label>Discord (@тег или ID)</label><input type="text" id="crEditDiscord" class="msg-input"></div>
+      </div>
+    </div>
+    <div class="cf-group">
+      <div class="cf-group-title">🎯 Данные нарушителя</div>
+      <div class="cf-group-body">
+        <div class="msg-row">
+          <div class="form-group msg-flex-2"><label>ФИО нарушителя</label><input type="text" id="crEditTFio" class="msg-input"></div>
+          <div class="form-group msg-flex-1"><label>Статик нарушителя</label><input type="text" id="crEditTStatic" class="msg-input" data-static-input></div>
+        </div>
+        <div class="form-group"><label>Discord ID нарушителя (для пинга)</label><input type="text" id="crEditTDid" class="msg-input"></div>
+      </div>
+    </div>
+    <div class="cf-group">
+      <div class="cf-group-title">📝 Обстоятельства</div>
+      <div class="cf-group-body">
+        <div id="crEditDyn"></div>
+        <div class="form-group"><label>Ссылка на доказательство</label><input type="text" id="crEditEvidence" class="msg-input"></div>
+      </div>
+    </div>
+    <div class="form-msg" id="crEditMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
+      <button class="btn btn-ghost btn-sm" id="crEditCancel">Отмена</button>
+      <button class="btn btn-gold btn-sm" id="crEditSave">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-back" id="crVerdictModal">
   <div class="modal">
     <button class="modal-close" aria-label="Закрыть">✕</button>
@@ -141,25 +181,15 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
     <div class="form-group" id="crVerdConfWrap" style="display:none">
       <label>Срок заключения *</label>
       <div style="display:flex;gap:8px;align-items:center">
-        <input type="number" id="crVerdConfNum" class="msg-input" min="1" value="24" style="max-width:120px">
-        <select id="crVerdConfUnit" class="msg-input" style="max-width:120px">
-          <option value="hours" selected>часов</option>
-          <option value="days">дней</option>
-        </select>
+        <input type="number" id="crVerdConfHours" class="msg-input" min="0" value="1" style="max-width:100px" placeholder="ч">
+        <span style="color:var(--muted)">ч</span>
+        <input type="number" id="crVerdConfMinutes" class="msg-input" min="0" max="59" value="0" style="max-width:100px" placeholder="м">
+        <span style="color:var(--muted)">мин</span>
       </div>
     </div>
     <div class="form-group" id="crVerdCommentWrap">
       <label id="crVerdCommentLabel">Комментарий</label>
       <textarea class="msg-input" id="crVerdComment" rows="3" placeholder="Обоснование решения..." style="resize:vertical;font-family:inherit"></textarea>
-    </div>
-    <div class="form-group" id="crVerdNotifyWrap" style="display:none">
-      <label>Оповещение о наказании *</label>
-      <div class="cr-notify-grid">
-        <label class="cr-notify"><input type="radio" name="crNotify" value=""><span>🚫 Ничего</span></label>
-        <label class="cr-notify"><input type="radio" name="crNotify" value="notify"><span>📢 Оповестить в DS</span></label>
-        <label class="cr-notify"><input type="radio" name="crNotify" value="silent"><span>🔕 Не оповещать</span></label>
-      </div>
-      <span class="msg-help">При «Ничего» — сохранение будет заблокировано</span>
     </div>
     <div class="form-msg" id="crVerdMsg"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
@@ -206,11 +236,10 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
         <div class="form-group" id="crAddConfWrap" style="display:none">
           <label>Срок заключения *</label>
           <div style="display:flex;gap:8px;align-items:center">
-            <input type="number" id="crAddConfNum" class="msg-input" min="1" value="24" style="max-width:120px">
-            <select id="crAddConfUnit" class="msg-input" style="max-width:120px">
-              <option value="hours" selected>часов</option>
-              <option value="days">дней</option>
-            </select>
+            <input type="number" id="crAddConfHours" class="msg-input" min="0" value="1" style="max-width:100px">
+            <span style="color:var(--muted)">ч</span>
+            <input type="number" id="crAddConfMinutes" class="msg-input" min="0" max="59" value="0" style="max-width:100px">
+            <span style="color:var(--muted)">мин</span>
           </div>
         </div>
         <div class="form-group"><label>Причина / формулировка *</label><textarea class="msg-input" id="crAddReason" rows="3" placeholder="За что выдано" style="resize:vertical;font-family:inherit"></textarea></div>
@@ -218,14 +247,6 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Оповещение *</label>
-      <div class="cr-notify-grid">
-        <label class="cr-notify"><input type="radio" name="crAddNotify" value=""><span>🚫 Ничего</span></label>
-        <label class="cr-notify"><input type="radio" name="crAddNotify" value="notify"><span>📢 Оповестить в DS</span></label>
-        <label class="cr-notify"><input type="radio" name="crAddNotify" value="silent"><span>🔕 Не оповещать</span></label>
-      </div>
-    </div>
     <div class="form-msg" id="crAddMsg"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
       <button class="btn btn-ghost btn-sm" id="crAddCancel">Отмена</button>
@@ -243,18 +264,19 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=91"></script>
-<script src="config.js?v=91"></script>
-<script src="main.js?v=91"></script>
-<script src="holiday-engine.js?v=91"></script>
-<script src="settings-panel.js?v=91"></script>
-<script src="sound-engine.js?v=91"></script>
-<script src="auth.js?v=91"></script>
-<script src="roles-engine.js?v=91"></script>
-<script src="search-engine.js?v=91"></script>
-<script src="notify-engine.js?v=91"></script>
-<script src="complaints-engine.js?v=91"></script>
-<script src="registry-engine.js?v=91"></script>
+<script src="supabase-loader.js?v=92"></script>
+<script src="config.js?v=92"></script>
+<script src="main.js?v=92"></script>
+<script src="holiday-engine.js?v=92"></script>
+<script src="settings-panel.js?v=92"></script>
+<script src="sound-engine.js?v=92"></script>
+<script src="auth.js?v=92"></script>
+<script src="roles-engine.js?v=92"></script>
+<script src="search-engine.js?v=92"></script>
+<script src="notify-engine.js?v=92"></script>
+<script src="format-utils.js?v=92"></script>
+<script src="complaints-engine.js?v=92"></script>
+<script src="registry-engine.js?v=92"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -401,8 +423,11 @@ async function openDetail(id){
     <div class="cr-fields">${valuesRows}</div>
     ${evLink?`<div style="margin:12px 0">${evLink}</div>`:""}
     ${verdictBlock}
+    <div id="crHistBlock" style="margin-top:14px"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--gold-b);margin-top:14px;flex-wrap:wrap">
       ${canDelete?`<button class="btn btn-ghost btn-sm" id="crDetDel">🗑 Удалить</button>`:""}
+      ${canReview?`<button class="btn btn-ghost btn-sm" id="crDetEdit">✎ Редактировать</button>`:""}
+      ${canReview?`<button class="btn btn-ghost btn-sm" id="crDetHist">📜 История</button>`:""}
       <div style="flex:1"></div>
       ${c.status==="pending"&&canReview?`<button class="btn btn-gold btn-sm" id="crDetVerdict">⚖ Вынести вердикт</button>`:""}
       ${c.status==="decided"&&canReview?`<button class="btn btn-ghost btn-sm" id="crDetVerdict">✎ Изменить вердикт</button>`:""}
@@ -410,6 +435,8 @@ async function openDetail(id){
   `;
   $("crDetailModal").classList.add("active");
   const dv=$("crDetVerdict");if(dv) dv.addEventListener("click",()=>openVerdict(c));
+  const de=$("crDetEdit");if(de) de.addEventListener("click",()=>openEditComplaint(c));
+  const dh=$("crDetHist");if(dh) dh.addEventListener("click",()=>toggleHistory(c.id));
   const dd=$("crDetDel");if(dd) dd.addEventListener("click",async()=>{
     if(!confirm("Удалить жалобу "+c.code+" безвозвратно?")) return;
     const r=await VSRF_COMPLAINTS.remove(c.id);
@@ -417,6 +444,57 @@ async function openDetail(id){
     $("crDetailModal").classList.remove("active");
     await loadAll();
   });
+}
+
+async function toggleHistory(id){
+  const box=$("crHistBlock");
+  if(box.dataset.open==="1"){box.innerHTML="";box.dataset.open="0";return}
+  box.innerHTML='<div style="padding:10px;color:var(--muted)">Загрузка истории...</div>';
+  const items=await VSRF_COMPLAINTS.getHistory(id);
+  if(!items.length){box.innerHTML='<div class="cr-hist"><div class="cr-hist-title">📜 История изменений</div><div style="padding:10px;color:var(--muted)">Изменений не было</div></div>';box.dataset.open="1";return}
+  box.innerHTML='<div class="cr-hist"><div class="cr-hist-title">📜 История изменений ('+items.length+')</div>'+items.map(h=>{
+    const isVerdict=h.action==="verdict_change";
+    const changes=h.changes||{};
+    const rows=[];
+    for(const [k,v] of Object.entries(changes)){
+      if(k==="values"){
+        for(const [vk,vv] of Object.entries(v)){
+          rows.push(`<div class="cr-hist-ch"><span class="cr-hist-k">${esc(labelOf(vk))}</span>: <span class="cr-hist-from">${esc(vv.from||"—")}</span> → <span class="cr-hist-to">${esc(vv.to||"—")}</span></div>`);
+        }
+      } else {
+        rows.push(`<div class="cr-hist-ch"><span class="cr-hist-k">${esc(labelOf(k))}</span>: <span class="cr-hist-from">${esc(v.from||"—")}</span> → <span class="cr-hist-to">${esc(v.to||"—")}</span></div>`);
+      }
+    }
+    return `<div class="cr-hist-item">
+      <div class="cr-hist-head">${isVerdict?"⚖ Изменение вердикта":"✎ Правка полей"} · <b>${esc(h.changed_by_name||"—")}</b> · ${ruDT(h.created_at)}</div>
+      <div class="cr-hist-body">${rows.join("")||"<div style=\"color:var(--muted)\">(без изменений)</div>"}</div>
+    </div>`;
+  }).join("")+'</div>';
+  box.dataset.open="1";
+}
+
+let EDIT_COMP=null;
+function openEditComplaint(c){
+  EDIT_COMP=c;
+  $("crEditFio").value=c.submitter_fio||"";
+  $("crEditStatic").value=c.submitter_static||"";
+  $("crEditDiscord").value=c.submitter_discord||"";
+  $("crEditTFio").value=c.target_fio||"";
+  $("crEditTStatic").value=c.target_static||"";
+  $("crEditTDid").value=c.target_discord_id||"";
+  $("crEditEvidence").value=c.evidence_url||"";
+  const dyn=$("crEditDyn");
+  const skipKeys=new Set(["submitter_fio","submitter_static","submitter_discord","target_fio","target_static","evidence_url"]);
+  const values=c.values||{};
+  const keys=Object.keys(values).filter(k=>!skipKeys.has(k));
+  dyn.innerHTML=keys.map(k=>{
+    const v=values[k]||"";
+    const isLong=v.length>60;
+    return `<div class="form-group"><label>${esc(labelOf(k))}</label>${isLong?`<textarea class="msg-input" data-vk="${esc(k)}" rows="3" style="resize:vertical;font-family:inherit">${esc(v)}</textarea>`:`<input class="msg-input" type="text" data-vk="${esc(k)}" value="${esc(v)}">`}</div>`;
+  }).join("");
+  $("crEditMsg").textContent="";
+  $("crEditModal").classList.add("active");
+  if(window.VSRF_FMT) window.VSRF_FMT.autoAttachAll($("crEditModal"));
 }
 
 function openVerdict(c){
@@ -435,7 +513,6 @@ function openVerdict(c){
     $("crVerdOpts").querySelectorAll("[data-v]").forEach(x=>x.classList.toggle("active",x.dataset.v===CUR_VERDICT));
     const v=VERDICTS.find(x=>x.key===CUR_VERDICT);
     $("crVerdCommentLabel").innerHTML="Комментарий"+(v.req_comment?` <span style="color:#e77070">*</span>`:` <span style="color:#8a8a8a;font-size:12px">(необязательно)</span>`);
-    $("crVerdNotifyWrap").style.display=v.notify?"":"none";
     $("crVerdConfWrap").style.display=v.confinement?"":"none";
   }));
   $("crVerdictModal").classList.add("active");
@@ -451,23 +528,20 @@ $("crVerdSave").addEventListener("click",async()=>{
   const v=VERDICTS.find(x=>x.key===CUR_VERDICT);
   const comment=$("crVerdComment").value.trim();
   if(v.req_comment&&!comment){msg.className="form-msg error";msg.textContent="Для этого вердикта комментарий обязателен";return}
-  let notify=null;
-  if(v.notify){
-    const nr=document.querySelector("[name=crNotify]:checked");
-    if(!nr||!nr.value){msg.className="form-msg error";msg.textContent="Выберите режим оповещения (Оповестить/Не оповещать). «Ничего» — сохранение блокируется";return}
-    notify=nr.value;
-  }
   const displayName=(function(){try{return localStorage.getItem("vsrf-my-display-name")||""}catch(e){return""}})();
   msg.className="form-msg info";msg.textContent="Сохранение вердикта...";
-  const r=await VSRF_COMPLAINTS.decide(CUR_COMP.id,CUR_VERDICT,comment,displayName);
+  const isChange=CUR_COMP.status==="decided";
+  const r=isChange
+    ? await VSRF_COMPLAINTS.changeVerdict(CUR_COMP.id,CUR_VERDICT,comment,displayName)
+    : await VSRF_COMPLAINTS.decide(CUR_COMP.id,CUR_VERDICT,comment,displayName);
   if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
   if(v.notify){
-    let confHours=null;
+    let confMinutes=null;
     if(v.confinement){
-      const num=parseInt($("crVerdConfNum").value)||0;
-      const unit=$("crVerdConfUnit").value;
-      confHours=unit==="days"?num*24:num;
-      if(!confHours||confHours<=0){msg.className="form-msg error";msg.textContent="Укажите срок заключения";return}
+      const h=parseInt($("crVerdConfHours").value)||0;
+      const mn=parseInt($("crVerdConfMinutes").value)||0;
+      confMinutes=h*60+mn;
+      if(!confMinutes||confMinutes<=0){msg.className="form-msg error";msg.textContent="Укажите срок заключения (часы+минуты)";return}
     }
     const rr=await VSRF_REGISTRY.add({
       target_fio:CUR_COMP.target_fio,
@@ -477,8 +551,8 @@ $("crVerdSave").addEventListener("click",async()=>{
       reason:comment||("Жалоба "+CUR_COMP.code),
       evidence_url:CUR_COMP.evidence_url,
       issued_by_name:displayName,
-      confinement_hours:confHours
-    },notify,CUR_COMP.id);
+      confinement_minutes:confMinutes
+    },"notify",CUR_COMP.id);
     if(!rr.ok){msg.className="form-msg error";msg.textContent="Вердикт сохранён, но не удалось создать запись в реестре: "+rr.error;return}
   }
   msg.className="form-msg success";msg.textContent="✓ Вердикт вынесен";
@@ -575,7 +649,7 @@ $("crAddViolBtn").addEventListener("click",()=>{
   const dn=(function(){try{return localStorage.getItem("vsrf-my-display-name")||""}catch(e){return""}})();
   $("crAddIssuerName").value=dn;
   $("crAddIssuerDid").value="";
-  document.querySelectorAll("[name=crAddNotify]").forEach(r=>r.checked=false);
+  $("crAddConfHours").value=1;$("crAddConfMinutes").value=0;
   $("crAddConfWrap").style.display="none";
   $("crAddKindOpts").innerHTML=VERDICTS.filter(v=>v.notify).map(v=>`<button type="button" class="cr-verd-btn" data-ak="${v.key}" style="--vc:${v.color}">${v.icon} ${esc(v.label)}</button>`).join("");
   $("crAddKindOpts").querySelectorAll("[data-ak]").forEach(b=>b.addEventListener("click",()=>{
@@ -614,25 +688,22 @@ $("crAddSave").addEventListener("click",async()=>{
   if(!fio||!stat){msg.className="form-msg error";msg.textContent="ФИО и статик нарушителя обязательны";return}
   if(!CUR_ADD_KIND){msg.className="form-msg error";msg.textContent="Выберите тип наказания";return}
   if(!reason){msg.className="form-msg error";msg.textContent="Укажите причину";return}
-  let confHours=null;
+  let confMinutes=null;
   const kindDef=VERDICTS.find(v=>v.key===CUR_ADD_KIND);
   if(kindDef&&kindDef.confinement){
-    const num=parseInt($("crAddConfNum").value)||0;
-    const unit=$("crAddConfUnit").value;
-    confHours=unit==="days"?num*24:num;
-    if(!confHours||confHours<=0){msg.className="form-msg error";msg.textContent="Укажите срок заключения (в часах или днях)";return}
+    const h=parseInt($("crAddConfHours").value)||0;
+    const mn=parseInt($("crAddConfMinutes").value)||0;
+    confMinutes=h*60+mn;
+    if(!confMinutes||confMinutes<=0){msg.className="form-msg error";msg.textContent="Укажите срок заключения (часы+минуты)";return}
   }
-  const nr=document.querySelector("[name=crAddNotify]:checked");
-  const notify=nr?nr.value:"";
-  if(!notify){msg.className="form-msg error";msg.textContent="Выберите режим оповещения. «Ничего» — сохранение блокируется";return}
   msg.className="form-msg info";msg.textContent="Сохранение...";
   const r=await VSRF_REGISTRY.add({
     target_fio:fio,target_static:stat,target_position:pos,target_discord_id:did||null,
     kind:CUR_ADD_KIND,reason,evidence_url:ev,
     issued_by_name:issuerName||null,
     issued_by_discord_id:issuerDid||null,
-    confinement_hours:confHours
-  },notify,null);
+    confinement_minutes:confMinutes
+  },"notify",null);
   if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
   msg.className="form-msg success";msg.textContent="✓ Добавлено в реестр";
   setTimeout(async()=>{$("crAddViolModal").classList.remove("active");await loadAll()},700);
@@ -640,6 +711,37 @@ $("crAddSave").addEventListener("click",async()=>{
 
 $("crDetailModal").querySelector(".modal-close").addEventListener("click",()=>$("crDetailModal").classList.remove("active"));
 $("crDetailModal").addEventListener("click",e=>{if(e.target===$("crDetailModal")) $("crDetailModal").classList.remove("active")});
+
+$("crEditCancel").addEventListener("click",()=>$("crEditModal").classList.remove("active"));
+$("crEditModal").querySelector(".modal-close").addEventListener("click",()=>$("crEditModal").classList.remove("active"));
+$("crEditModal").addEventListener("click",e=>{if(e.target===$("crEditModal")) $("crEditModal").classList.remove("active")});
+
+$("crEditSave").addEventListener("click",async()=>{
+  if(!EDIT_COMP) return;
+  const msg=$("crEditMsg");
+  const values={};
+  $("crEditDyn").querySelectorAll("[data-vk]").forEach(el=>{values[el.dataset.vk]=el.value.trim()});
+  const changes={
+    submitter_fio:$("crEditFio").value.trim(),
+    submitter_static:$("crEditStatic").value.trim(),
+    submitter_discord:$("crEditDiscord").value.trim(),
+    target_fio:$("crEditTFio").value.trim(),
+    target_static:$("crEditTStatic").value.trim(),
+    target_discord_id:$("crEditTDid").value.trim(),
+    evidence_url:$("crEditEvidence").value.trim(),
+    values
+  };
+  const dn=(function(){try{return localStorage.getItem("vsrf-my-display-name")||""}catch(e){return""}})();
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  const r=await VSRF_COMPLAINTS.editComplaint(EDIT_COMP.id,changes,dn);
+  if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+  msg.className="form-msg success";msg.textContent=r.noop?"Без изменений":"✓ Сохранено";
+  setTimeout(async()=>{
+    $("crEditModal").classList.remove("active");
+    await loadAll();
+    openDetail(EDIT_COMP.id);
+  },700);
+});
 
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,700);
@@ -651,6 +753,6 @@ setTimeout(()=>{
   }
 },1500);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25dba25acd3f147',t:'MTc4NTg0ODIzOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25de9fbaf27f103',t:'MTc4NTg1MDE5OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

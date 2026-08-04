@@ -80,5 +80,90 @@ window.VSRF_COMPLAINTS=(function(){
     return {ok:true};
   }
 
-  return {getForm,saveForm,submit,fetchAll,fetchOne,decide,remove};
+  async function editComplaint(id,changes,changedByName){
+    const c=client();if(!c) return {ok:false,error:"no client"};
+    const s=window.VSRF_AUTH.state;
+    if(!s||!s.user) return {ok:false,error:"Требуется вход"};
+    const before=await fetchOne(id);
+    if(!before) return {ok:false,error:"Жалоба не найдена"};
+    const patch={};
+    const diff={};
+    const trackable=["submitter_fio","submitter_static","submitter_discord","target_fio","target_static","target_discord_id","evidence_url"];
+    for(const k of trackable){
+      if(changes[k]!==undefined&&changes[k]!==before[k]){
+        patch[k]=changes[k];
+        diff[k]={from:before[k]||null,to:changes[k]||null};
+      }
+    }
+    if(changes.values){
+      const bv=before.values||{};
+      const nv=Object.assign({},bv,changes.values);
+      const vdiff={};
+      for(const k of Object.keys(nv)){
+        if(String(bv[k]||"")!==String(nv[k]||"")){
+          vdiff[k]={from:bv[k]||null,to:nv[k]||null};
+        }
+      }
+      if(Object.keys(vdiff).length){
+        patch.values=nv;
+        diff.values=vdiff;
+      }
+    }
+    if(!Object.keys(patch).length) return {ok:true,noop:true};
+    patch.edited_at=new Date().toISOString();
+    patch.edited_by_uid=s.user.id;
+    patch.edited_by_name=changedByName||s.user.email;
+    const {error}=await c.from("complaints").update(patch).eq("id",id);
+    if(error) return {ok:false,error:error.message};
+    await c.from("complaint_history").insert({
+      complaint_id:id,
+      action:"edit",
+      changed_by_uid:s.user.id,
+      changed_by_name:changedByName||s.user.email,
+      changes:diff,
+      note:changes.note||null
+    });
+    return {ok:true};
+  }
+
+  async function changeVerdict(id,verdict,comment,changedByName){
+    const c=client();if(!c) return {ok:false,error:"no client"};
+    const s=window.VSRF_AUTH.state;
+    if(!s||!s.user) return {ok:false,error:"Требуется вход"};
+    const before=await fetchOne(id);
+    if(!before) return {ok:false,error:"Жалоба не найдена"};
+    const diff={
+      verdict:{from:before.verdict,to:verdict},
+      verdict_comment:{from:before.verdict_comment||null,to:comment||null}
+    };
+    const patch={
+      verdict,
+      verdict_comment:comment||null,
+      verdict_by_uid:s.user.id,
+      verdict_by_name:changedByName||s.user.email,
+      verdict_at:new Date().toISOString(),
+      status:"decided",
+      edited_at:new Date().toISOString(),
+      edited_by_uid:s.user.id,
+      edited_by_name:changedByName||s.user.email
+    };
+    const {error}=await c.from("complaints").update(patch).eq("id",id);
+    if(error) return {ok:false,error:error.message};
+    await c.from("complaint_history").insert({
+      complaint_id:id,
+      action:"verdict_change",
+      changed_by_uid:s.user.id,
+      changed_by_name:changedByName||s.user.email,
+      changes:diff
+    });
+    return {ok:true};
+  }
+
+  async function getHistory(id){
+    const c=client();if(!c) return [];
+    const {data}=await c.from("complaint_history").select("*").eq("complaint_id",id).order("created_at",{ascending:false});
+    return data||[];
+  }
+
+  return {getForm,saveForm,submit,fetchAll,fetchOne,decide,remove,editComplaint,changeVerdict,getHistory};
 })();
