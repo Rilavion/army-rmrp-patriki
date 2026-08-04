@@ -143,15 +143,36 @@ window.VSRF_ROLES=(function(){
   async function inviteAndSetRole(email,password,role,displayName,customRoleId){
     const s=window.VSRF_AUTH.state;
     if(!s.client) return {ok:false,error:"no client"};
+    const cfg=window.SUPABASE_CONFIG;
+    if(!cfg||!cfg.url||!cfg.anonKey||!window.supabase) return {ok:false,error:"no config"};
+    let tempClient;
     try{
-      const {data,error}=await s.client.auth.signUp({email,password,options:{data:{display_name:displayName||""}}});
-      if(error) return {ok:false,error:error.message};
+      tempClient=window.supabase.createClient(cfg.url,cfg.anonKey,{
+        auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storageKey:"vsrf-invite-tmp-"+Date.now()}
+      });
+    }catch(e){return {ok:false,error:"Не удалось создать временный клиент: "+e.message}}
+    try{
+      const {data,error}=await tempClient.auth.signUp({email,password,options:{data:{display_name:displayName||""}}});
+      if(error){
+        const m=(error.message||"").toLowerCase();
+        if(m.includes("rate limit")||m.includes("email rate")||error.status===429){
+          return {ok:false,code:"rate_limit",error:"Supabase ограничил отправку писем подтверждения (лимит ~4/час на встроенном SMTP). Решения: 1) Dashboard → Auth → Providers → Email → выключить «Confirm email» (рекомендуется для внутреннего сайта); 2) Подождать ~1 час; 3) Настроить свой SMTP в Auth → SMTP Settings."};
+        }
+        if(m.includes("already registered")||m.includes("user already")){
+          return {ok:false,code:"exists",error:"Пользователь с таким email уже существует. Найди его в списке ниже и назначь роль вручную."};
+        }
+        return {ok:false,error:error.message};
+      }
       const uid=data&&data.user?data.user.id:null;
+      try{await tempClient.auth.signOut()}catch(e){}
       if(!uid) return {ok:true,warning:"Пользователь создан, но user_id не получен (возможно требуется подтверждение email). Проставь роль вручную после его первого входа."};
       const r=await setRole(uid,role,displayName,customRoleId);
       if(!r.ok) return {ok:false,error:"Пользователь создан, но не удалось назначить роль: "+r.error};
       return {ok:true,user_id:uid};
-    }catch(e){return {ok:false,error:e.message}}
+    }catch(e){
+      try{await tempClient.auth.signOut()}catch(_){}
+      return {ok:false,error:e.message};
+    }
   }
 
   document.addEventListener("DOMContentLoaded",()=>{

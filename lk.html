@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=82">
+<link rel="stylesheet" href="style.css?v=83">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -285,12 +285,12 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=82"></script>
-<script src="config.js?v=82"></script>
-<script src="main.js?v=82"></script>
-<script src="auth.js?v=82"></script>
-<script src="roles-engine.js?v=82"></script>
-<script src="holiday-engine.js?v=82"></script>
+<script src="supabase-loader.js?v=83"></script>
+<script src="config.js?v=83"></script>
+<script src="main.js?v=83"></script>
+<script src="auth.js?v=83"></script>
+<script src="roles-engine.js?v=84"></script>
+<script src="holiday-engine.js?v=83"></script>
 <script src="settings-panel.js"></script>
 <script src="sound-engine.js"></script>
 <script src="faq-engine.js"></script>
@@ -552,7 +552,17 @@ if(rolesBtn){
       fd.get("display_name").trim(),
       selectedId
     );
-    if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
+    if(!r.ok){
+      msg.className="form-msg error";
+      if(r.code==="rate_limit"){
+        msg.innerHTML='<b>⏱ Лимит писем Supabase превышен</b><br>На встроенном SMTP лимит ~4 письма/час. Рекомендация:<br>→ Supabase Dashboard → <b>Authentication → Providers → Email</b> → выключить <b>«Confirm email»</b>.<br>После этого юзеры создаются мгновенно без писем. Для внутреннего сайта части — норма.<br><br>Альтернативы: подождать час или настроить свой SMTP.';
+      } else if(r.code==="exists"){
+        msg.innerHTML='<b>👤 Уже зарегистрирован</b><br>'+String(r.error).replace(/</g,"&lt;");
+      } else {
+        msg.textContent=r.error;
+      }
+      return;
+    }
     msg.className="form-msg success";
     msg.textContent="✓ Создано. "+(r.warning||"");
     setTimeout(()=>{createModal.classList.remove("active");e.target.reset();loadRolesList()},1400);
@@ -561,5 +571,5 @@ if(rolesBtn){
 
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25c6650d85bf12b',t:'MTc4NTgzNDMxOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25c9640b9c2e48b',t:'MTc4NTgzNjI4Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
