@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=97">
+<link rel="stylesheet" href="style.css?v=109">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -212,8 +212,26 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
     <form id="vehForm">
       <input type="hidden" name="id">
       <div class="form-group"><label>Название</label><input name="title" required placeholder="Тигр-М"></div>
-      <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px">
-        <div class="form-group"><label>URL изображения</label><input name="image" type="url" placeholder="https://..."></div>
+      <div class="form-group">
+        <label>Изображение</label>
+        <div class="photo-controls">
+          <div class="photo-preview auto-preview"><div class="photo-preview-inner"><span>Нет фото</span></div></div>
+          <div class="photo-actions">
+            <input name="image" type="url" placeholder="https://... или загрузите файл ниже">
+            <div style="display:flex;gap:6px">
+              <label class="btn btn-ghost btn-sm" style="flex:1;min-height:34px;cursor:pointer">📁 Файл<input type="file" name="imageFile" accept="image/*" hidden></label>
+              <button type="button" class="btn btn-ghost btn-sm" data-clear-photo style="min-height:34px;padding:0 10px">×</button>
+            </div>
+            <div class="photo-tune">
+              <label class="photo-tune-row"><span>🔍 Приближение</span><input type="range" name="image_zoom" min="1" max="3" step="0.05" value="1"><span class="photo-tune-val" data-tune-val="zoom">1.00×</span></label>
+              <label class="photo-tune-row"><span>⇔ Гориз.</span><input type="range" name="image_x" min="0" max="100" step="1" value="50"><span class="photo-tune-val" data-tune-val="x">50%</span></label>
+              <label class="photo-tune-row"><span>⇕ Верт.</span><input type="range" name="image_y" min="0" max="100" step="1" value="50"><span class="photo-tune-val" data-tune-val="y">50%</span></label>
+              <button type="button" class="btn btn-ghost btn-sm" data-tune-reset style="width:100%;min-height:28px;font-size:11px">↺ Сбросить приближение</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr;gap:14px">
         <div class="form-group"><label>Тег</label>
           <select name="tag" class="form-select-custom">
             <option value="">— без тега —</option>
@@ -242,21 +260,22 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=97"></script>
-<script src="config.js?v=97"></script>
-<script src="main.js?v=97"></script>
-<script src="format-utils.js?v=97"></script>
-<script src="holiday-engine.js?v=97"></script>
-<script src="settings-panel.js?v=97"></script>
-<script src="sound-engine.js?v=97"></script>
-<script src="faq-engine.js?v=97"></script>
-<script src="search-engine.js?v=97"></script>
-<script src="notify-engine.js?v=97"></script>
+<script src="supabase-loader.js?v=109"></script>
+<script src="config.js?v=109"></script>
+<script src="main.js?v=109"></script>
+<script src="format-utils.js?v=109"></script>
+<script src="holiday-engine.js?v=109"></script>
+<script src="settings-panel.js?v=109"></script>
+<script src="sound-engine.js?v=109"></script>
+<script src="faq-engine.js?v=109"></script>
+<script src="search-engine.js?v=109"></script>
+<script src="notify-engine.js?v=109"></script>
 
-<script src="auth.js?v=97"></script>
-<script src="roles-engine.js?v=97"></script>
-<script src="select-enhance.js?v=97"></script>
-<script src="draft-engine.js?v=97"></script>
+<script src="auth.js?v=109"></script>
+<script src="roles-engine.js?v=109"></script>
+<script src="autopark-engine.js?v=109"></script>
+<script src="select-enhance.js?v=109"></script>
+<script src="draft-engine.js?v=109"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -292,24 +311,25 @@ function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 
 function cardHtml(v){
   const isAdmin=window.VSRF_ROLES&&window.VSRF_ROLES.can("autopark","edit");
+  const imgStyle=window.VSRF_AUTOPARK?VSRF_AUTOPARK.imageStyle(v):"";
   const media=v.image
-    ? `<img src="${esc(v.image)}" alt="${esc(v.title)}" loading="lazy">`
-    : `<div class="auto-placeholder">
-        <svg viewBox="0 0 24 24" width="72" height="72" fill="currentColor" style="opacity:.35"><path d="M3 17h1a2 2 0 0 0 4 0h8a2 2 0 0 0 4 0h1v-4l-2-4h-4V6H5a2 2 0 0 0-2 2v9zm3-9h8v3H6V8z"/></svg>
-      </div>`;
+    ? `<img src="${esc(v.image)}" alt="${esc(v.title)}" loading="lazy" style="${imgStyle}">`
+    : `<div class="auto-placeholder"><svg viewBox="0 0 24 24" width="80" height="80" fill="currentColor"><path d="M3 17h1a2 2 0 0 0 4 0h8a2 2 0 0 0 4 0h1v-4l-2-4h-4V6H5a2 2 0 0 0-2 2v9zm3-9h8v3H6V8z"/></svg></div>`;
   const edit=isAdmin?`<button class="veh-edit-btn admin-only" data-edit="${v.id}" title="Редактировать">✎</button>`:"";
   const t=tagInfo(v.tag);
-  const tagBadge=t?`<span class="auto-tag ${t.cls}">${t.label}</span>`:"";
+  const tagBadge=t?`<div class="auto-tag ${t.cls}">${t.label}</div>`:"";
   const specs=[];
-  if(v.crew) specs.push(`<span class="auto-spec"><span class="auto-spec-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span><span class="auto-spec-val">${esc(v.crew)}</span></span>`);
-  if(v.speed) specs.push(`<span class="auto-spec"><span class="auto-spec-icon"><svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44zm-9.79 6.84a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/></svg></span><span class="auto-spec-val">${esc(v.speed)}</span></span>`);
-  if(v.price) specs.push(`<span class="auto-spec"><span class="auto-spec-icon"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></span><span class="auto-spec-val">${esc(v.price)}</span></span>`);
-  if(v.rank) specs.push(`<span class="auto-spec"><span class="auto-spec-icon"><svg viewBox="0 0 24 24"><path d="M12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28z"/></svg></span><span class="auto-spec-val">${esc(v.rank)}</span></span>`);
+  if(v.crew) specs.push(`<span class="auto-spec" title="Экипаж"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><b>${esc(v.crew)}</b></span>`);
+  if(v.speed) specs.push(`<span class="auto-spec" title="Скорость"><svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44zm-9.79 6.84a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/></svg><b>${esc(v.speed)}</b></span>`);
+  if(v.price) specs.push(`<span class="auto-spec" title="Цена"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg><b>${esc(v.price)}</b></span>`);
+  if(v.rank) specs.push(`<span class="auto-spec" title="Доступно с"><svg viewBox="0 0 24 24"><path d="M12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28z"/></svg><b>${esc(v.rank)}</b></span>`);
   return `<div class="auto-card" data-veh-id="${v.id}">
-    <div class="auto-thumb">${media}${tagBadge}${edit}</div>
+    <div class="auto-photo">${media}</div>
+    ${tagBadge}
+    ${edit}
     <div class="auto-body">
       <div class="auto-title">${esc(v.title)}</div>
-      <div class="auto-specs">${specs.join("")}</div>
+      ${specs.length?`<div class="auto-specs">${specs.join("")}</div>`:""}
     </div>
   </div>`;
 }
@@ -377,15 +397,81 @@ function openEdit(v){
     form.speed.value=v.speed||"";
     form.price.value=v.price||"";
     form.rank.value=v.rank||"";
+    form.image_zoom.value=v.image_zoom||1;
+    form.image_x.value=v.image_x!=null?v.image_x:50;
+    form.image_y.value=v.image_y!=null?v.image_y:50;
     delBtn.style.display="";
   }else{
     form.tag.value="";
+    form.image_zoom.value=1;form.image_x.value=50;form.image_y.value=50;
     delBtn.style.display="none";
   }
   if(window.VSRF_SELECT) VSRF_SELECT.enhance(form.tag);
   form.tag.dispatchEvent(new Event("__vsrf_refresh"));
+  bindPhotoField(form);
   const msg=form.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
   modal.classList.add("active");
+}
+
+function bindPhotoField(f){
+  const alreadyBound=f.__vsrfBound;
+  f.__vsrfBound=true;
+  const urlInput=f.querySelector('input[name="image"]');
+  const fileInput=f.querySelector('input[name="imageFile"]');
+  const previewInner=f.querySelector(".photo-preview-inner");
+  const clear=f.querySelector('[data-clear-photo]');
+  const zoomIn=f.querySelector('input[name="image_zoom"]');
+  const xIn=f.querySelector('input[name="image_x"]');
+  const yIn=f.querySelector('input[name="image_y"]');
+  const resetBtn=f.querySelector('[data-tune-reset]');
+  const fileLabel=fileInput.parentElement;
+  function imgStyle(){
+    const z=Number(zoomIn.value)||1;
+    const x=Number(xIn.value);
+    const y=Number(yIn.value);
+    const size=(100*z).toFixed(2);
+    const leftShift=((100-100*z)*(x/100)).toFixed(2);
+    const topShift=((100-100*z)*(y/100)).toFixed(2);
+    return `position:absolute;width:${size}%;height:${size}%;left:${leftShift}%;top:${topShift}%;object-fit:cover`;
+  }
+  function updateVals(){
+    f.querySelector('[data-tune-val="zoom"]').textContent=(+zoomIn.value).toFixed(2)+"×";
+    f.querySelector('[data-tune-val="x"]').textContent=xIn.value+"%";
+    f.querySelector('[data-tune-val="y"]').textContent=yIn.value+"%";
+  }
+  function sync(){
+    const v=urlInput.value.trim();
+    previewInner.innerHTML=v?`<img src="${esc(v)}" style="${imgStyle()}">`:`<span>Нет фото</span>`;
+    updateVals();
+  }
+  function applyStyle(){
+    const img=previewInner.querySelector("img");
+    if(img) img.style.cssText=imgStyle();
+    updateVals();
+  }
+  if(!alreadyBound){
+  urlInput.addEventListener("input",sync);
+  [zoomIn,xIn,yIn].forEach(el=>el.addEventListener("input",applyStyle));
+  resetBtn.addEventListener("click",()=>{zoomIn.value=1;xIn.value=50;yIn.value=50;applyStyle()});
+  fileInput.addEventListener("change",async e=>{
+    const file=e.target.files[0];if(!file) return;
+    const oldTxt=fileLabel.innerHTML;
+    fileLabel.style.pointerEvents="none";fileLabel.style.opacity=".6";
+    fileLabel.innerHTML='⏳ Загрузка...';
+    try{
+      const r=new FileReader();
+      r.onload=ev=>{previewInner.innerHTML=`<img src="${ev.target.result}" style="${imgStyle()}">`};
+      r.readAsDataURL(file);
+      const up=await VSRF_AUTOPARK.uploadPhoto(file);
+      if(!up.ok){alert("Ошибка загрузки: "+up.error);sync();return}
+      urlInput.value=up.url;
+      sync();
+    }catch(err){alert("Ошибка: "+err.message);sync()}
+    finally{fileLabel.innerHTML=oldTxt;fileLabel.style.pointerEvents="";fileLabel.style.opacity="";fileInput.value=""}
+  });
+  clear.addEventListener("click",()=>{urlInput.value="";fileInput.value="";sync()});
+  }
+  sync();
 }
 
 let vehDraftHandle=null;
@@ -455,7 +541,10 @@ form.addEventListener("submit",async e=>{
     crew:form.crew.value.trim(),
     speed:form.speed.value.trim(),
     price:form.price.value.trim(),
-    rank:form.rank.value.trim()
+    rank:form.rank.value.trim(),
+    image_zoom:parseFloat(form.image_zoom.value)||1,
+    image_x:parseInt(form.image_x.value)||50,
+    image_y:parseInt(form.image_y.value)||50
   };
   const s=window.VSRF_AUTH.state;
   msg.className="form-msg info";msg.textContent="Сохранение...";
@@ -525,6 +614,5 @@ load();
 })();
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25ebb4f7a49f12a',t:'MTc4NTg1ODc3Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2615258c88c9d9a',t:'MTc4NTg4NTkzMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
