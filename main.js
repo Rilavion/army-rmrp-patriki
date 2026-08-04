@@ -50,7 +50,10 @@
         "supply-admin.html":"supply:admin",
         "docs.html":"docs:view",
         "message.html":"messages:send",
-        "lk.html":"lk:users,lk:roles,lk:settings"
+        "lk.html":"lk:users,lk:roles,lk:settings",
+        "complaints-review.html":"complaints:review,complaints:view",
+        "complaints-form.html":"complaints:form_edit,complaints:settings",
+        "complaints-settings.html":"complaints:settings"
       };
       links.forEach(a=>{
         const page=(a.dataset.page||"").toLowerCase();
@@ -59,9 +62,9 @@
         a.removeAttribute("data-staff");
       });
 
-      const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html"];
+      const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html","complaints.html"];
       const loggedInPages=["tests.html"];
-      const staffPages=["apps.html","vp.html","supply.html","supply-stats.html","docs.html","message.html","lk.html"];
+      const staffPages=["apps.html","vp.html","complaints-review.html","supply.html","supply-stats.html","docs.html","message.html","lk.html"];
       const publicLinks=links.filter(a=>publicPages.includes((a.dataset.page||"").toLowerCase()));
       const loggedInLinks=links.filter(a=>loggedInPages.includes((a.dataset.page||"").toLowerCase()));
       const staffLinks=links.filter(a=>staffPages.includes((a.dataset.page||"").toLowerCase()));
