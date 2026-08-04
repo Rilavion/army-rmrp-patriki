@@ -122,11 +122,21 @@ window.VSRF_ROLES=(function(){
   async function setRole(userId,role,displayName,customRoleId){
     const s=window.VSRF_AUTH.state;
     if(!s.client) return {ok:false,error:"no client"};
-    const row={user_id:userId,role,display_name:displayName||null};
-    if(customRoleId!==undefined) row.custom_role_id=customRoleId||null;
-    const {error}=await s.client.from("user_roles").upsert(row,{onConflict:"user_id"});
-    if(error) return {ok:false,error:error.message};
-    return {ok:true};
+    try{
+      const {error}=await s.client.rpc("admin_upsert_role",{
+        p_user_id:userId,
+        p_role:role,
+        p_display_name:displayName||null,
+        p_custom_role_id:customRoleId||null
+      });
+      if(!error) return {ok:true};
+      console.warn("[VSRF_ROLES] admin_upsert_role RPC упал, fallback на upsert:",error.message);
+      const row={user_id:userId,role,display_name:displayName||null};
+      if(customRoleId!==undefined) row.custom_role_id=customRoleId||null;
+      const {error:e2}=await s.client.from("user_roles").upsert(row,{onConflict:"user_id"});
+      if(e2) return {ok:false,error:e2.message+" (RPC также упал: "+error.message+")"};
+      return {ok:true};
+    }catch(e){return {ok:false,error:e.message}}
   }
 
   async function removeUser(userId){
@@ -166,8 +176,9 @@ window.VSRF_ROLES=(function(){
       const uid=data&&data.user?data.user.id:null;
       try{await tempClient.auth.signOut()}catch(e){}
       if(!uid) return {ok:true,warning:"Пользователь создан, но user_id не получен (возможно требуется подтверждение email). Проставь роль вручную после его первого входа."};
+      await new Promise(res=>setTimeout(res,300));
       const r=await setRole(uid,role,displayName,customRoleId);
-      if(!r.ok) return {ok:false,error:"Пользователь создан, но не удалось назначить роль: "+r.error};
+      if(!r.ok) return {ok:false,error:"Юзер создан в auth.users (uid: "+uid+"), но не удалось создать запись в user_roles: "+r.error+". Убедись что выполнил SQL RPC-ADMIN-UPSERT-ROLE-V84.sql и что ты залогинен как admin."};
       return {ok:true,user_id:uid};
     }catch(e){
       try{await tempClient.auth.signOut()}catch(_){}
