@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=97">
+<link rel="stylesheet" href="style.css?v=99">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -101,9 +101,13 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
           <div class="pr-summary" id="prSummary"></div>
         </div>
 
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;align-items:center">
           <button class="btn btn-gold btn-sm" id="prAddDept">＋ Добавить отдел (из роли DS)</button>
           <button class="btn btn-ghost btn-sm" id="prRefreshMembers">↻ Пересинхронизировать участников по ролям</button>
+          <label class="pr-toggle" title="Если выкл — фонд делится поровну между отделами автоматически">
+            <input type="checkbox" id="prPctManual" checked>
+            <span>Ручное распределение % между отделами</span>
+          </label>
           <div style="flex:1"></div>
           <button class="btn btn-ghost btn-sm" id="prPreviewDs">👁 Предпросмотр DS</button>
         </div>
@@ -178,6 +182,14 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       <label>Футер</label>
       <input type="text" id="prSetFooter" class="msg-input">
     </div>
+    <div class="form-group">
+      <label>Формат приказа в Discord</label>
+      <div class="cr-notify-grid" style="grid-template-columns:repeat(3,1fr)">
+        <label class="cr-notify"><input type="radio" name="prOutMode" value="image"><span>🖼 Только картинка</span></label>
+        <label class="cr-notify"><input type="radio" name="prOutMode" value="text"><span>📝 Только текст</span></label>
+        <label class="cr-notify"><input type="radio" name="prOutMode" value="both"><span>🖼📝 Картинка + текст</span></label>
+      </div>
+    </div>
     <div class="form-msg" id="prSettingsMsg"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
       <button class="btn btn-ghost btn-sm" id="prSettingsCancel">Отмена</button>
@@ -215,18 +227,19 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=97"></script>
-<script src="config.js?v=97"></script>
-<script src="main.js?v=97"></script>
-<script src="format-utils.js?v=97"></script>
-<script src="holiday-engine.js?v=97"></script>
-<script src="settings-panel.js?v=97"></script>
-<script src="sound-engine.js?v=97"></script>
-<script src="auth.js?v=97"></script>
-<script src="roles-engine.js?v=97"></script>
-<script src="search-engine.js?v=97"></script>
-<script src="notify-engine.js?v=97"></script>
-<script src="payroll-engine.js?v=97"></script>
+<script src="supabase-loader.js?v=99"></script>
+<script src="config.js?v=99"></script>
+<script src="main.js?v=99"></script>
+<script src="format-utils.js?v=99"></script>
+<script src="holiday-engine.js?v=99"></script>
+<script src="settings-panel.js?v=99"></script>
+<script src="sound-engine.js?v=99"></script>
+<script src="auth.js?v=99"></script>
+<script src="roles-engine.js?v=99"></script>
+<script src="search-engine.js?v=99"></script>
+<script src="notify-engine.js?v=99"></script>
+<script src="html2canvas.min.js?v=99"></script>
+<script src="payroll-engine.js?v=99"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -270,6 +283,7 @@ function fillDraftUI(){
   $("prFrom").value=DRAFT.period_from||"";
   $("prTo").value=DRAFT.period_to||"";
   $("prTitle").value=DRAFT.title||"Премия";
+  $("prPctManual").checked=DRAFT.pct_manual!==false;
 }
 
 function collectFromUI(){
@@ -277,6 +291,7 @@ function collectFromUI(){
   DRAFT.period_from=$("prFrom").value||null;
   DRAFT.period_to=$("prTo").value||null;
   DRAFT.title=$("prTitle").value.trim()||"Премия";
+  DRAFT.pct_manual=$("prPctManual").checked;
 }
 
 function scheduleSave(){
@@ -287,7 +302,7 @@ function scheduleSave(){
     collectFromUI();
     const r=await VSRF_PAYROLL.saveDraft(DRAFT.id,{
       title:DRAFT.title,period_from:DRAFT.period_from,period_to:DRAFT.period_to,
-      fund_amount:DRAFT.fund_amount,data:DRAFT.data
+      fund_amount:DRAFT.fund_amount,data:DRAFT.data,pct_manual:DRAFT.pct_manual
     });
     if(r.ok){$("prSaveHint").textContent="✓ Сохранено "+new Date().toLocaleTimeString("ru-RU");$("prSaveHint").className="pr-save-hint saved"}
     else {$("prSaveHint").textContent="⚠ Ошибка: "+r.error;$("prSaveHint").className="pr-save-hint err"}
@@ -295,12 +310,21 @@ function scheduleSave(){
 }
 
 ["prFund","prFrom","prTo","prTitle"].forEach(id=>$(id).addEventListener("input",()=>{scheduleSave();render()}));
+$("prPctManual").addEventListener("change",()=>{scheduleSave();render();updatePctInputsDisabled()});
+function updatePctInputsDisabled(){
+  const manual=$("prPctManual").checked;
+  document.querySelectorAll(".pr-pct-in").forEach(el=>{el.disabled=!manual;el.title=manual?"":"Автоматически по количеству отделов"});
+}
 
 function render(){
   collectFromUI();
   const calc=VSRF_PAYROLL.calc(DRAFT);
+  for(let i=0;i<calc.departments.length;i++){
+    if(!$("prPctManual").checked&&DRAFT.data.departments[i]) DRAFT.data.departments[i].pct=calc.departments[i].pct;
+  }
   renderSummary(calc);
   renderDepts(calc);
+  updatePctInputsDisabled();
 }
 
 function renderSummary(calc){
@@ -529,6 +553,8 @@ $("prShowSettings").addEventListener("click",async()=>{
 
   $("prSetHeader").value=SETTINGS?SETTINGS.header_text||"ПРИКАЗ О ПРЕМИРОВАНИИ":"ПРИКАЗ О ПРЕМИРОВАНИИ";
   $("prSetFooter").value=SETTINGS?SETTINGS.footer_text||"":"";
+  const om=(SETTINGS&&SETTINGS.output_mode)||"both";
+  document.querySelectorAll("[name=prOutMode]").forEach(r=>{r.checked=(r.value===om)});
   $("prSettingsMsg").textContent="";
   $("prSettingsModal").classList.add("active");
 });
@@ -537,11 +563,13 @@ $("prSettingsModal").querySelector(".modal-close").addEventListener("click",()=>
 $("prSettingsSave").addEventListener("click",async()=>{
   const msg=$("prSettingsMsg");
   msg.className="form-msg info";msg.textContent="Сохранение...";
+  const outMode=(document.querySelector("[name=prOutMode]:checked")||{}).value||"both";
   const r=await VSRF_PAYROLL.saveSettings({
     channel_id:$("prSetCh").value||null,
     ping_role_id:$("prSetRole").value||null,
     header_text:$("prSetHeader").value.trim()||"ПРИКАЗ О ПРЕМИРОВАНИИ",
-    footer_text:$("prSetFooter").value.trim()||null
+    footer_text:$("prSetFooter").value.trim()||null,
+    output_mode:outMode
   });
   if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
   msg.className="form-msg success";msg.textContent="✓ Сохранено";
@@ -559,29 +587,62 @@ $("prPreviewModal").querySelector(".modal-close").addEventListener("click",()=>$
 
 function renderPreviewHtml(calc){
   const head=(SETTINGS&&SETTINGS.header_text)||"ПРИКАЗ О ПРЕМИРОВАНИИ";
-  const foot=(SETTINGS&&SETTINGS.footer_text)||"";
-  const period=DRAFT.period_from||DRAFT.period_to?`Период: <b>${DRAFT.period_from||"—"}</b> — <b>${DRAFT.period_to||"—"}</b>`:"";
-  return `<div class="pr-preview">
-    <div class="pr-pv-head">
-      <div class="pr-pv-emblem">◈</div>
-      <div class="pr-pv-title">${esc(head)}</div>
-      <div class="pr-pv-sub">${esc(DRAFT.title||"Премия")}</div>
-      <div class="pr-pv-sub">${period}</div>
-      <div class="pr-pv-fund">Общий фонд: <b>${VSRF_PAYROLL.fmtMoney(calc.fund)}</b></div>
+  const foot=(SETTINGS&&SETTINGS.footer_text)||"Военная Бухгалтерия · Вооружённые Силы РФ";
+  const periodTxt=DRAFT.period_from||DRAFT.period_to?`ЗА ПЕРИОД: ${fmtDateRu(DRAFT.period_from)} — ${fmtDateRu(DRAFT.period_to)}`:"";
+  const dateNow=new Date().toLocaleDateString("ru-RU",{day:"2-digit",month:"long",year:"numeric"});
+  return `<div class="pr-preview" id="prPreviewCapture">
+    <div class="pr-pv-inner">
+      <div class="pr-pv-corner tl"></div>
+      <div class="pr-pv-corner tr"></div>
+      <div class="pr-pv-corner bl"></div>
+      <div class="pr-pv-corner br"></div>
+      <div class="pr-pv-head">
+        <div class="pr-pv-emblem-wrap">
+          <div class="pr-pv-emblem">◈</div>
+          <div class="pr-pv-emblem-line"></div>
+          <div class="pr-pv-emblem-star">★</div>
+          <div class="pr-pv-emblem-line"></div>
+          <div class="pr-pv-emblem">◈</div>
+        </div>
+        <div class="pr-pv-title">${esc(head)}</div>
+        <div class="pr-pv-subtitle">№ ${new Date().getTime().toString().slice(-6)} · ${esc(dateNow)}</div>
+        <div class="pr-pv-name">«${esc(DRAFT.title||"Премия")}»</div>
+        ${periodTxt?`<div class="pr-pv-period">${esc(periodTxt)}</div>`:""}
+        <div class="pr-pv-fund-box">
+          <div class="pr-pv-fund-lbl">ОБЩИЙ ФОНД</div>
+          <div class="pr-pv-fund-val">${VSRF_PAYROLL.fmtMoney(calc.fund)}</div>
+        </div>
+      </div>
+      ${calc.departments.map((d,di)=>{
+        const active=d.members.filter(m=>!m.excluded);
+        if(!active.length) return "";
+        return `<div class="pr-pv-dept">
+          <div class="pr-pv-dept-head">
+            <div class="pr-pv-dept-icon">${esc(d.icon||"🎖")}</div>
+            <div class="pr-pv-dept-title">${esc(d.name)}</div>
+            <div class="pr-pv-dept-meta"><span>${(+d.pct).toFixed(1)}%</span> · <b>${VSRF_PAYROLL.fmtMoney(d.dept_amount)}</b></div>
+          </div>
+          <div class="pr-pv-mems">${active.map((m,mi)=>{
+            const num=String(mi+1).padStart(2,"0");
+            return `<div class="pr-pv-mem">
+              <span class="pr-pv-mnum">${num}</span>
+              <span class="pr-pv-mfio">${esc(m.fio)}</span>
+              ${m.static?`<span class="pr-pv-mstat">${esc(m.static)}</span>`:""}
+              <span class="pr-pv-mdots"></span>
+              <span class="pr-pv-mamt">${VSRF_PAYROLL.fmtMoney(m.amount)}</span>
+            </div>`;
+          }).join("")}</div>
+        </div>`;
+      }).join("")}
+      <div class="pr-pv-totals">
+        <div class="pr-pv-tot-row"><span>Итого выдано:</span><b>${VSRF_PAYROLL.fmtMoney(calc.total_spent)}</b></div>
+        <div class="pr-pv-tot-row"><span>Остаток фонда:</span><b>${VSRF_PAYROLL.fmtMoney(calc.fund-calc.total_spent)}</b></div>
+      </div>
+      <div class="pr-pv-footer">${esc(foot)}</div>
     </div>
-    ${calc.departments.map(d=>{
-      const active=d.members.filter(m=>!m.excluded);
-      return `<div class="pr-pv-dept" style="border-left:3px solid #cda85a">
-        <div class="pr-pv-dept-head">${esc(d.icon||"🎖")} <b>${esc(d.name)}</b> · ${(+d.pct).toFixed(1)}% · ${VSRF_PAYROLL.fmtMoney(d.dept_amount)}</div>
-        <div class="pr-pv-mems">${active.map(m=>{
-          return `<div class="pr-pv-mem">▪ ${esc(m.fio)}${m.static?` · <code>${esc(m.static)}</code>`:""} — <b>${VSRF_PAYROLL.fmtMoney(m.amount)}</b></div>`;
-        }).join("")}</div>
-      </div>`;
-    }).join("")}
-    <div class="pr-pv-foot">Итого выдано: <b>${VSRF_PAYROLL.fmtMoney(calc.total_spent)}</b> · Остаток: <b>${VSRF_PAYROLL.fmtMoney(calc.fund-calc.total_spent)}</b></div>
-    ${foot?`<div class="pr-pv-footer">${esc(foot)}</div>`:""}
   </div>`;
 }
+function fmtDateRu(iso){if(!iso) return "—";try{return new Date(iso).toLocaleDateString("ru-RU",{day:"2-digit",month:"long",year:"numeric"})}catch(e){return iso}}
 
 $("prShowArchive").addEventListener("click",async()=>{
   const list=await VSRF_PAYROLL.listArchive(30);
@@ -601,22 +662,60 @@ $("prShowArchive").addEventListener("click",async()=>{
 $("prArchiveClose").addEventListener("click",()=>$("prArchiveModal").classList.remove("active"));
 $("prArchiveModal").querySelector(".modal-close").addEventListener("click",()=>$("prArchiveModal").classList.remove("active"));
 
+async function generatePreviewImage(){
+  const calc=VSRF_PAYROLL.calc(DRAFT);
+  const holder=document.createElement("div");
+  holder.style.cssText="position:fixed;left:-99999px;top:0;width:900px;padding:0";
+  holder.innerHTML=renderPreviewHtml(calc);
+  document.body.appendChild(holder);
+  try{
+    const target=holder.querySelector("#prPreviewCapture");
+    const canvas=await html2canvas(target,{backgroundColor:"#0e1a13",scale:2,logging:false,useCORS:true});
+    const dataUrl=canvas.toDataURL("image/png");
+    return dataUrl;
+  }finally{
+    holder.remove();
+  }
+}
+
 $("prSend").addEventListener("click",async()=>{
   const calc=VSRF_PAYROLL.calc(DRAFT);
   if(!calc.departments.length){alert("Добавьте хотя бы один отдел");return}
   if(calc.overspend){if(!confirm("⚠ Перерасход! Сумма выданного больше фонда. Всё равно отправить?")) return}
-  if(Math.abs(calc.total_pct-100)>0.5){if(!confirm("⚠ Сумма % отделов = "+calc.total_pct.toFixed(1)+"% (должно быть 100). Всё равно отправить?")) return}
+  if(Math.abs(calc.total_pct-100)>0.5&&DRAFT.pct_manual!==false){if(!confirm("⚠ Сумма % отделов = "+calc.total_pct.toFixed(1)+"% (должно быть 100). Всё равно отправить?")) return}
   const s=SETTINGS||await VSRF_PAYROLL.fetchSettings();
   if(!s||!s.channel_id){alert("Настройте канал DS в настройках");return}
-  if(!confirm("Отправить приказ о премировании в DS?\nПосле отправки текущий черновик уйдёт в архив и создастся новый пустой.")) return;
+  const outMode=(s&&s.output_mode)||"both";
+  if(!confirm("Отправить приказ о премировании в DS?\nФормат: "+outMode+"\nПосле отправки черновик уйдёт в архив.")) return;
   collectFromUI();
   await VSRF_PAYROLL.saveDraft(DRAFT.id,{
     title:DRAFT.title,period_from:DRAFT.period_from,period_to:DRAFT.period_to,
-    fund_amount:DRAFT.fund_amount,data:DRAFT.data,status:"draft"
+    fund_amount:DRAFT.fund_amount,data:DRAFT.data,pct_manual:DRAFT.pct_manual,status:"draft"
   });
+
+  let imageData=null;
+  if(outMode==="image"||outMode==="both"){
+    const btn=$("prSend");
+    const oldTxt=btn.innerHTML;btn.innerHTML="🖼 Генерация...";btn.disabled=true;
+    try{
+      imageData=await generatePreviewImage();
+    }catch(e){
+      alert("Ошибка генерации картинки: "+e.message+"\nБудет отправлен только текст.");
+    }
+    btn.innerHTML=oldTxt;btn.disabled=false;
+  }
+
   const c=window.VSRF_AUTH.state.client;
-  const req=await c.from("payroll_send_requests").insert({draft_id:DRAFT.id,requested_by:window.VSRF_AUTH.state.user.id,requested_by_name:(function(){try{return localStorage.getItem("vsrf-my-display-name")||""}catch(e){return""}})()}).select().single();
-  alert("Приказ отправлен на публикацию. Через ~15 сек бот опубликует его в DS.\nПосле публикации создастся новый пустой черновик.");
+  const displayName=(function(){try{return localStorage.getItem("vsrf-my-display-name")||""}catch(e){return""}})();
+  const {error}=await c.from("payroll_send_requests").insert({
+    draft_id:DRAFT.id,
+    requested_by:window.VSRF_AUTH.state.user.id,
+    requested_by_name:displayName,
+    image_data:imageData,
+    output_mode:outMode
+  });
+  if(error){alert("Не удалось отправить запрос: "+error.message);return}
+  alert("Приказ отправлен на публикацию. Через ~10-15 сек бот опубликует его в DS.\nПосле публикации создастся новый пустой черновик.");
   setTimeout(async()=>{
     DRAFT=await VSRF_PAYROLL.ensureDraft();
     fillDraftUI();render();
@@ -626,5 +725,5 @@ $("prSend").addEventListener("click",async()=>{
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25eba811970f12a',t:'MTc4NTg1ODczOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25ef019acc9e950',t:'MTc4NTg2MDkzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

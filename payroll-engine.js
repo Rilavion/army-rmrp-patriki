@@ -71,42 +71,55 @@ window.VSRF_PAYROLL=(function(){
   }
 
   function fmtMoney(n){
-    const v=Math.round((+n||0)*100)/100;
-    return v.toLocaleString("ru-RU",{minimumFractionDigits:0,maximumFractionDigits:2})+" ₽";
+    const v=Math.round((+n||0));
+    return v.toLocaleString("ru-RU")+" ₽";
   }
 
   function calc(draft){
     const data=(draft&&draft.data)||{departments:[]};
-    const fund=Number(draft&&draft.fund_amount)||0;
+    const fund=Math.round(Number(draft&&draft.fund_amount)||0);
     const depts=(data.departments||[]).map(d=>Object.assign({},d,{members:(d.members||[]).slice()}));
+    const manual=draft&&draft.pct_manual!==false;
+    if(!manual&&depts.length){
+      const equal=100/depts.length;
+      for(const d of depts) d.pct=equal;
+    }
     let totalPct=depts.reduce((s,d)=>s+(Number(d.pct)||0),0);
     for(const d of depts){
       const pct=Number(d.pct)||0;
-      d.dept_amount=fund*(pct/100);
+      d.dept_amount=Math.round(fund*(pct/100));
       const active=d.members.filter(m=>!m.excluded);
       let overrideSum=0;
       let sharesSum=0;
       for(const m of active){
         if(m.override_amount!=null&&m.override_amount!==""){
-          overrideSum+=Number(m.override_amount)||0;
+          overrideSum+=Math.round(Number(m.override_amount)||0);
         } else {
           sharesSum+=Number(m.share||1)||1;
         }
       }
       const remaining=Math.max(0,d.dept_amount-overrideSum);
-      let membersSum=0;
+      const shareItems=[];
       for(const m of d.members){
         if(m.excluded){m.amount=0;continue}
         if(m.override_amount!=null&&m.override_amount!==""){
-          m.amount=Number(m.override_amount)||0;
+          m.amount=Math.round(Number(m.override_amount)||0);
         } else {
           const share=Number(m.share||1)||1;
-          m.amount=sharesSum>0?(remaining*share/sharesSum):0;
+          const raw=sharesSum>0?(remaining*share/sharesSum):0;
+          m.amount=Math.floor(raw);
+          shareItems.push(m);
         }
-        membersSum+=m.amount;
       }
-      d.members_sum=membersSum;
-      d.overspend=membersSum>d.dept_amount+0.5;
+      const distributed=shareItems.reduce((s,m)=>s+m.amount,0);
+      let leftover=remaining-distributed;
+      let i=0;
+      while(leftover>0&&shareItems.length){
+        shareItems[i%shareItems.length].amount+=1;
+        leftover--;i++;
+      }
+      d.members_sum=d.members.reduce((s,m)=>s+(m.excluded?0:m.amount),0);
+      d.overspend=d.members_sum>d.dept_amount+0.5;
     }
     const totalSpent=depts.reduce((s,d)=>s+d.members_sum,0);
     return {fund,total_pct:totalPct,total_spent:totalSpent,departments:depts,overspend:totalSpent>fund+0.5};

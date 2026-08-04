@@ -5129,18 +5129,46 @@ body.vsrf-is-logged .footer-col a[data-loggedin]{display:block !important}
 .pr-mem-foot{padding:8px 12px;font-size:12px;color:var(--muted);border-top:1px dashed rgba(205,168,90,.1);margin-top:4px}
 .pr-warn{color:#e77070;font-weight:600}
 
-.pr-preview{padding:20px;background:linear-gradient(180deg,rgba(21,36,29,.9),rgba(0,0,0,.5));border-radius:10px;border:2px solid var(--gold-b);color:#e6ecec}
-.pr-pv-head{text-align:center;padding:14px 0 20px;border-bottom:1px dashed rgba(205,168,90,.3);margin-bottom:14px}
-.pr-pv-emblem{font-size:36px;color:var(--gold);margin-bottom:6px}
-.pr-pv-title{font:700 22px/1.1 'Cormorant Garamond',serif;color:var(--gold-b);letter-spacing:.08em;text-transform:uppercase}
-.pr-pv-sub{color:var(--muted);font-size:13px;margin-top:4px}
-.pr-pv-fund{color:var(--gold-b);font:600 17px 'Inter',sans-serif;margin-top:8px}
-.pr-pv-dept{margin:12px 0;padding:12px 14px;background:rgba(21,36,29,.5);border-radius:6px}
-.pr-pv-dept-head{color:var(--gold-b);font-size:14px;padding-bottom:6px;border-bottom:1px dashed rgba(205,168,90,.15);margin-bottom:6px}
-.pr-pv-mems{font-size:13px;line-height:1.8}
-.pr-pv-mem code{background:rgba(0,0,0,.35);padding:1px 5px;border-radius:3px;color:var(--gold-b);font-size:11px}
-.pr-pv-foot{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(205,168,90,.3);text-align:center;color:var(--gold-b);font-size:14px}
-.pr-pv-footer{margin-top:8px;text-align:center;color:var(--muted);font-size:11px;font-style:italic}
+.pr-preview{background:linear-gradient(160deg,#1a2b21 0%,#0e1a13 50%,#1a2b21 100%);border-radius:14px;border:3px double #cda85a;color:#e6ecec;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7),inset 0 0 60px rgba(205,168,90,.05)}
+.pr-pv-inner{padding:36px 40px;position:relative;background-image:radial-gradient(circle at 50% 0%,rgba(205,168,90,.1),transparent 60%),radial-gradient(circle at 50% 100%,rgba(205,168,90,.06),transparent 50%)}
+.pr-pv-corner{position:absolute;width:32px;height:32px;border:2px solid #cda85a;opacity:.5}
+.pr-pv-corner.tl{top:12px;left:12px;border-right:0;border-bottom:0}
+.pr-pv-corner.tr{top:12px;right:12px;border-left:0;border-bottom:0}
+.pr-pv-corner.bl{bottom:12px;left:12px;border-right:0;border-top:0}
+.pr-pv-corner.br{bottom:12px;right:12px;border-left:0;border-top:0}
+.pr-pv-head{text-align:center;padding:6px 0 28px;border-bottom:1px double rgba(205,168,90,.4);margin-bottom:24px}
+.pr-pv-emblem-wrap{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px;color:#cda85a;font-size:22px}
+.pr-pv-emblem-line{flex:0 0 60px;height:1px;background:linear-gradient(90deg,transparent,#cda85a,transparent)}
+.pr-pv-emblem{color:#f0d89b;text-shadow:0 0 12px #cda85a80}
+.pr-pv-emblem-star{color:#cda85a;font-size:16px}
+.pr-pv-title{font:700 26px/1.15 'Cormorant Garamond',serif;color:#f0d89b;letter-spacing:.14em;text-transform:uppercase;text-shadow:0 2px 8px rgba(205,168,90,.3);margin:8px 0 4px}
+.pr-pv-subtitle{color:#a99a72;font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-family:'Inter',sans-serif}
+.pr-pv-name{color:#e6ecec;font:600 18px/1.2 'Cormorant Garamond',serif;margin-top:14px;letter-spacing:.03em}
+.pr-pv-period{color:#8a8a8a;font-size:11px;letter-spacing:.12em;margin-top:4px;font-family:'Inter',sans-serif}
+.pr-pv-fund-box{display:inline-block;margin-top:18px;padding:12px 32px;background:linear-gradient(180deg,rgba(205,168,90,.14),rgba(205,168,90,.04));border:1px solid #cda85a;border-radius:6px}
+.pr-pv-fund-lbl{color:#a99a72;font:600 10px/1 'Inter',sans-serif;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
+.pr-pv-fund-val{color:#f0d89b;font:700 24px/1 'Inter',sans-serif;text-shadow:0 2px 6px rgba(0,0,0,.4)}
+.pr-pv-dept{margin:18px 0;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.15));border:1px solid rgba(205,168,90,.25);border-left:4px solid #cda85a;border-radius:6px;overflow:hidden}
+.pr-pv-dept-head{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(90deg,rgba(205,168,90,.15),rgba(205,168,90,.02));border-bottom:1px solid rgba(205,168,90,.15)}
+.pr-pv-dept-icon{font-size:22px;line-height:1}
+.pr-pv-dept-title{color:#f0d89b;font:700 15px/1 'Inter',sans-serif;letter-spacing:.04em;text-transform:uppercase;flex:1}
+.pr-pv-dept-meta{color:#cda85a;font:600 13px 'Inter',sans-serif;white-space:nowrap}
+.pr-pv-dept-meta b{color:#f0d89b}
+.pr-pv-mems{padding:8px 16px 12px}
+.pr-pv-mem{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px;border-bottom:1px dashed rgba(205,168,90,.08)}
+.pr-pv-mem:last-child{border-bottom:none}
+.pr-pv-mnum{color:#8a8a8a;font:600 11px 'Inter',monospace;background:rgba(205,168,90,.08);padding:2px 6px;border-radius:3px;min-width:26px;text-align:center}
+.pr-pv-mfio{color:#e6ecec;font-weight:500}
+.pr-pv-mstat{color:#cda85a;font:600 11px 'Inter',monospace;background:rgba(0,0,0,.4);padding:2px 7px;border-radius:3px}
+.pr-pv-mdots{flex:1;border-bottom:1px dotted rgba(205,168,90,.2);margin:0 4px;height:0;align-self:center;margin-top:8px}
+.pr-pv-mamt{color:#f0d89b;font:700 13px 'Inter',sans-serif;white-space:nowrap}
+.pr-pv-totals{margin-top:24px;padding:14px 20px;background:linear-gradient(180deg,rgba(205,168,90,.1),rgba(205,168,90,.02));border-top:1px double rgba(205,168,90,.4);border-bottom:1px double rgba(205,168,90,.4);text-align:right}
+.pr-pv-tot-row{display:flex;justify-content:space-between;padding:4px 0;font:600 14px 'Inter',sans-serif;color:#e6ecec}
+.pr-pv-tot-row b{color:#f0d89b}
+.pr-pv-footer{margin-top:20px;text-align:center;color:#a99a72;font-size:11px;letter-spacing:.1em;font-family:'Inter',sans-serif;font-style:italic}
+.pr-toggle{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(21,36,29,.5);border:1px solid rgba(205,168,90,.2);border-radius:6px;color:#c9d3c6;font-size:12px;cursor:pointer;user-select:none}
+.pr-toggle:has(input:checked){background:rgba(205,168,90,.12);border-color:var(--gold);color:var(--gold-b)}
+.pr-toggle input{accent-color:var(--gold)}
 
 .pr-arc-item{padding:12px 14px;background:rgba(21,36,29,.4);border:1px solid rgba(205,168,90,.15);border-radius:8px;margin-bottom:8px}
 .pr-arc-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
