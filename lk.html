@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=81">
+<link rel="stylesheet" href="style.css?v=82">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -272,10 +272,8 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <div class="form-group"><label>Отображаемое имя (Позывной / Звание+Фамилия)</label><input name="display_name" type="text" placeholder="Полковник Иванов" required></div>
       <div class="form-group">
         <label>Роль</label>
-        <select name="role" required>
-          <option value="ss">Старший Состав (СС) — доступ к служебным разделам</option>
-          <option value="admin">Администратор — полный доступ</option>
-          <option value="user">Обычный пользователь</option>
+        <select name="role" id="createUserRoleSel" required>
+          <option value="">Загрузка ролей…</option>
         </select>
       </div>
       <div class="form-msg"></div>
@@ -287,12 +285,12 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=81"></script>
-<script src="config.js?v=81"></script>
-<script src="main.js?v=81"></script>
-<script src="auth.js?v=81"></script>
-<script src="roles-engine.js?v=81"></script>
-<script src="holiday-engine.js?v=81"></script>
+<script src="supabase-loader.js?v=82"></script>
+<script src="config.js?v=82"></script>
+<script src="main.js?v=82"></script>
+<script src="auth.js?v=82"></script>
+<script src="roles-engine.js?v=82"></script>
+<script src="holiday-engine.js?v=82"></script>
 <script src="settings-panel.js"></script>
 <script src="sound-engine.js"></script>
 <script src="faq-engine.js"></script>
@@ -507,7 +505,34 @@ setTimeout(()=>{if(window.VSRF_ROLES&&VSRF_ROLES.isAdmin()) loadRolesList()},800
 const rolesBtn=$("rolesAddBtn");
 if(rolesBtn){
   const createModal=$("createUserModal");
-  rolesBtn.addEventListener("click",()=>{createModal.classList.add("active");createModal.querySelector(".form-msg").textContent=""});
+  const roleSel=$("createUserRoleSel");
+  async function fillRoleOptions(){
+    if(!window.VSRF_ROLES||!VSRF_ROLES.listCustomRoles) return;
+    try{
+      const list=await VSRF_ROLES.listCustomRoles();
+      if(!list.length){roleSel.innerHTML='<option value="">Нет ролей — создайте через «Управление ролями»</option>';return}
+      const order={admin:0,ss:1,user:2};
+      const sorted=list.slice().sort((a,b)=>{
+        const sa=a.is_system?(order[a.key]==null?3:order[a.key]):100;
+        const sb=b.is_system?(order[b.key]==null?3:order[b.key]):100;
+        if(sa!==sb) return sa-sb;
+        return (a.sort||100)-(b.sort||100);
+      });
+      roleSel.innerHTML=sorted.map(cr=>{
+        const desc=cr.description?" — "+cr.description:"";
+        const name=(cr.name||cr.key).replace(/</g,"&lt;");
+        const d=desc.replace(/</g,"&lt;");
+        return `<option value="${cr.id}" data-base="${cr.base_role}" data-key="${cr.key}">${name}${d}</option>`;
+      }).join("");
+      const ssOpt=sorted.find(cr=>cr.key==="ss");
+      if(ssOpt) roleSel.value=ssOpt.id;
+    }catch(e){roleSel.innerHTML='<option value="">Ошибка загрузки ролей</option>'}
+  }
+  rolesBtn.addEventListener("click",async()=>{
+    createModal.classList.add("active");
+    createModal.querySelector(".form-msg").textContent="";
+    await fillRoleOptions();
+  });
   createModal.querySelector(".modal-close").addEventListener("click",()=>createModal.classList.remove("active"));
   $("createUserCancel").addEventListener("click",()=>createModal.classList.remove("active"));
   createModal.addEventListener("click",e=>{if(e.target===createModal) createModal.classList.remove("active")});
@@ -515,12 +540,17 @@ if(rolesBtn){
     e.preventDefault();
     const fd=new FormData(e.target);
     const msg=createModal.querySelector(".form-msg");
+    const selectedId=fd.get("role");
+    if(!selectedId){msg.className="form-msg error";msg.textContent="Выберите роль";return}
+    const opt=roleSel.options[roleSel.selectedIndex];
+    const baseRole=opt&&opt.dataset.base?opt.dataset.base:"user";
     msg.className="form-msg info";msg.textContent="Создание...";
     const r=await VSRF_ROLES.inviteAndSetRole(
       fd.get("email").trim(),
       fd.get("password"),
-      fd.get("role"),
-      fd.get("display_name").trim()
+      baseRole,
+      fd.get("display_name").trim(),
+      selectedId
     );
     if(!r.ok){msg.className="form-msg error";msg.textContent=r.error;return}
     msg.className="form-msg success";
@@ -530,6 +560,6 @@ if(rolesBtn){
 }
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2585d69381ae848',t:'MTc4NTc5MjAxMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25c6650d85bf12b',t:'MTc4NTgzNDMxOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

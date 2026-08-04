@@ -140,7 +140,7 @@ window.VSRF_ROLES=(function(){
   // ==== Создание нового пользователя ====
   // Через обычный signUp — новому юзеру приходит confirm-email, потом админ ему проставляет роль.
   // Второй вариант — админ вручную знает user_id (из auth.users) и вызывает setRole.
-  async function inviteAndSetRole(email,password,role,displayName){
+  async function inviteAndSetRole(email,password,role,displayName,customRoleId){
     const s=window.VSRF_AUTH.state;
     if(!s.client) return {ok:false,error:"no client"};
     try{
@@ -148,7 +148,7 @@ window.VSRF_ROLES=(function(){
       if(error) return {ok:false,error:error.message};
       const uid=data&&data.user?data.user.id:null;
       if(!uid) return {ok:true,warning:"Пользователь создан, но user_id не получен (возможно требуется подтверждение email). Проставь роль вручную после его первого входа."};
-      const r=await setRole(uid,role,displayName);
+      const r=await setRole(uid,role,displayName,customRoleId);
       if(!r.ok) return {ok:false,error:"Пользователь создан, но не удалось назначить роль: "+r.error};
       return {ok:true,user_id:uid};
     }catch(e){return {ok:false,error:e.message}}
