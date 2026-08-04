@@ -47,6 +47,7 @@
         "vp.html":"vp:view",
         "supply.html":"supply:view",
         "supply-stats.html":"supply:stats",
+        "apps-stats.html":"apps:view",
         "supply-admin.html":"supply:admin",
         "docs.html":"docs:view",
         "message.html":"messages:send",
@@ -65,7 +66,7 @@
 
       const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html","complaints.html"];
       const loggedInPages=["tests.html"];
-      const staffPages=["apps.html","vp.html","complaints-review.html","payroll.html","supply.html","supply-stats.html","docs.html","message.html","lk.html"];
+      const staffPages=["apps.html","apps-stats.html","vp.html","complaints-review.html","payroll.html","supply.html","supply-stats.html","docs.html","message.html","lk.html"];
       const publicLinks=links.filter(a=>publicPages.includes((a.dataset.page||"").toLowerCase()));
       const loggedInLinks=links.filter(a=>loggedInPages.includes((a.dataset.page||"").toLowerCase()));
       const staffLinks=links.filter(a=>staffPages.includes((a.dataset.page||"").toLowerCase()));
