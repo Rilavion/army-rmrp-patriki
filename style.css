@@ -1859,41 +1859,35 @@ body.light-mode .doc-toggle-row{color:#3a2f18}
   animation:hierIn .6s cubic-bezier(.2,.8,.2,1) both;
 }
 .hier-sub-head{
-  position:relative;padding:12px 18px;display:flex;align-items:center;gap:12px;
-  background:linear-gradient(135deg,var(--sub-color),var(--sub-color-2));color:#fff;
-  border-radius:14px;margin-bottom:18px;
-  box-shadow:0 10px 24px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.06);
+  position:relative;padding:14px 24px;display:flex;align-items:center;justify-content:center;gap:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  backdrop-filter:blur(14px) saturate(1.2);
+  -webkit-backdrop-filter:blur(14px) saturate(1.2);
+  border-radius:14px;margin-bottom:20px;
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 8px 24px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.08);
   overflow:hidden;
 }
-.hier-sub-head::after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 45%,rgba(0,0,0,.22));
+.hier-sub-head::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg,var(--sub-color),var(--sub-color-2));
+  border-radius:14px 0 0 14px;
 }
-.hier-sub-icon{
-  width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
-  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);
-  font-size:20px;flex-shrink:0;backdrop-filter:blur(4px);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.2);position:relative;z-index:1;
+.hier-sub-head::after{
+  content:"";position:absolute;right:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg,var(--sub-color),var(--sub-color-2));
+  border-radius:0 14px 14px 0;
 }
 .hier-sub-title{
-  flex:1;min-width:0;position:relative;z-index:1;
-  font-family:"Cormorant Garamond",serif;font-size:26px;line-height:1.05;color:#fff;font-weight:700;letter-spacing:-.01em;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  text-shadow:0 2px 8px rgba(0,0,0,.4);
-}
-.hier-sub-badge{
   position:relative;z-index:1;
-  padding:3px 11px;border-radius:999px;
-  background:rgba(0,0,0,.45);color:#fff;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-  font-weight:800;border:1px solid rgba(255,255,255,.25);white-space:nowrap;
+  font-family:'Inter','Cormorant Garamond',sans-serif;
+  font-size:22px;line-height:1.1;color:#fff;
+  font-weight:900;letter-spacing:.14em;text-transform:uppercase;
+  text-align:center;
+  text-shadow:0 2px 12px rgba(0,0,0,.55),0 0 24px color-mix(in srgb,var(--sub-color) 30%,transparent);
 }
-.hier-sub-count{
-  padding:3px 11px;border-radius:9px;background:rgba(0,0,0,.5);color:#fff;
-  font-weight:800;font-size:12px;position:relative;z-index:1;border:1px solid rgba(255,255,255,.22);
-  min-width:30px;text-align:center;
-}
-.hier-sub-edit-btn{position:relative !important;top:auto !important;right:auto !important;background:rgba(0,0,0,.4);border-color:rgba(255,255,255,.4);color:#fff;z-index:2}
-.hier-sub-edit-btn:hover{background:rgba(0,0,0,.6);border-color:#fff}
+.hier-sub-edit-btn{position:absolute !important;top:50% !important;right:14px !important;transform:translateY(-50%);background:rgba(0,0,0,.35);border-color:rgba(255,255,255,.3);color:#fff;z-index:2}
+.hier-sub-edit-btn:hover{background:rgba(0,0,0,.55);border-color:#fff}
 .hier-empty{padding:20px;text-align:center;color:var(--muted);font-style:italic;font-size:13px;opacity:.7}
 .hier-sub-section .hier-staff-grid{
   grid-template-columns:repeat(auto-fit,minmax(190px,220px));gap:16px;
@@ -1979,7 +1973,7 @@ body.light-mode .doc-toggle-row{color:#3a2f18}
   background:var(--input-bg);border:1px solid var(--line);
   color:var(--muted);font-size:11px;text-align:center;position:relative;
 }
-.photo-preview-inner{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
+.photo-preview-inner{position:absolute;inset:0;overflow:hidden}
 .photo-preview img{width:100%;height:100%;object-fit:cover;transition:transform .15s ease}
 .photo-actions{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
 .photo-actions input[type="url"]{
