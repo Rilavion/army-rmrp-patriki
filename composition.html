@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=105">
+<link rel="stylesheet" href="style.css?v=106">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -196,20 +196,20 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 
 <div class="toast" id="toast"></div>
 
-<script src="supabase-loader.js?v=105"></script>
-<script src="config.js?v=105"></script>
-<script src="main.js?v=105"></script>
-<script src="format-utils.js?v=105"></script>
-<script src="holiday-engine.js?v=105"></script>
-<script src="settings-panel.js?v=105"></script>
-<script src="sound-engine.js?v=105"></script>
-<script src="faq-engine.js?v=105"></script>
-<script src="search-engine.js?v=105"></script>
-<script src="notify-engine.js?v=105"></script>
-<script src="auth.js?v=105"></script>
-<script src="roles-engine.js?v=105"></script>
-<script src="select-enhance.js?v=105"></script>
-<script src="composition-engine.js?v=105"></script>
+<script src="supabase-loader.js?v=106"></script>
+<script src="config.js?v=106"></script>
+<script src="main.js?v=106"></script>
+<script src="format-utils.js?v=106"></script>
+<script src="holiday-engine.js?v=106"></script>
+<script src="settings-panel.js?v=106"></script>
+<script src="sound-engine.js?v=106"></script>
+<script src="faq-engine.js?v=106"></script>
+<script src="search-engine.js?v=106"></script>
+<script src="notify-engine.js?v=106"></script>
+<script src="auth.js?v=106"></script>
+<script src="roles-engine.js?v=106"></script>
+<script src="select-enhance.js?v=106"></script>
+<script src="composition-engine.js?v=106"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -221,6 +221,11 @@ function showToast(t,type){toast.textContent=t;toast.className="toast show "+(ty
 
 function esc(s){return VSRF_COMP.esc(s)}
 
+function photoStyle(p){
+  if(!p) return "";
+  const z=p.photo_zoom||1, x=p.photo_x!=null?p.photo_x:50, y=p.photo_y!=null?p.photo_y:50;
+  return `transform:scale(${z});object-position:${x}% ${y}%`;
+}
 function initials(name){
   const parts=(name||"").trim().split(/\s+/);
   return parts.slice(0,2).map(p=>p[0]||"").join("").toUpperCase()||"?";
@@ -243,12 +248,14 @@ function render(){
   const cmd=STATE.hq.cmd_brigade||{};
   const cmdHasPhoto=!!(cmd&&cmd.photo);
   const cmdFilled=!!cmd.name;
+  const cmdSlot=(STATE.hq_slots||[]).find(s=>s.key==="cmd_brigade")||{};
+  const cmdBadge=cmdSlot.badge||"Ген-Майор";
   const cmdCard=`<div class="hier-cmd">
     <div class="hier-cmd-inner">
       <div class="hier-cmd-badge">Командир бригады</div>
       <div class="hier-officer-photo hier-cmd-photo ${cmdHasPhoto?"":"no-photo"}">
-        ${cmdHasPhoto?`<img src="${esc(cmd.photo)}" alt="">`:`<span class="hier-officer-initials">${cmdFilled?esc(initials(cmd.name)):"—"}</span>`}
-        <div class="hier-officer-role-tag">Ген-Майор</div>
+        ${cmdHasPhoto?`<img src="${esc(cmd.photo)}" alt="" style="${photoStyle(cmd)}">`:`<span class="hier-officer-initials">${cmdFilled?esc(initials(cmd.name)):"—"}</span>`}
+        <div class="hier-officer-role-tag">${esc(cmdBadge)}</div>
       </div>
       <div class="hier-cmd-body">
         <div class="hier-cmd-name">${cmdFilled?esc(cmd.name):`<span style="opacity:.5">Вакансия</span>`}</div>
@@ -272,7 +279,7 @@ function render(){
         const hasPhoto=!!(p&&p.photo);
         return `<div class="hier-officer ${filled?"":"hier-officer-empty"}" data-hq="${slot.key}">
           <div class="hier-officer-photo ${hasPhoto?"":"no-photo"}">
-            ${hasPhoto?`<img src="${esc(p.photo)}" alt="">`:`<span class="hier-officer-initials">${filled?esc(initials(p.name)):"—"}</span>`}
+            ${hasPhoto?`<img src="${esc(p.photo)}" alt="" style="${photoStyle(p)}">`:`<span class="hier-officer-initials">${filled?esc(initials(p.name)):"—"}</span>`}
             <div class="hier-officer-role-tag">${esc(slot.badge)}</div>
           </div>
           <div class="hier-officer-body">
@@ -294,7 +301,7 @@ function render(){
   </div>`;
 
   const subsHtml=`<div class="hier-subs-title"><span class="hier-line"></span><span class="hier-staff-label">Подразделения · ${STATE.subs.length} шт.</span><span class="hier-line"></span></div>
-  <div class="hier-subs-wrap"><div class="hier-subs">
+  <div class="hier-subs-list">
     ${STATE.subs.map(sub=>{
       const color=sub.color||"#7a8a4a";
       const icon=sub.icon||"★";
@@ -304,7 +311,7 @@ function render(){
         const hasPhoto=!!(m&&m.photo);
         return `<div class="hier-member" style="--m-color:${color}">
           <div class="hier-member-photo ${hasPhoto?"":"no-photo"}">
-            ${hasPhoto?`<img src="${esc(m.photo)}" alt="">`:`<span class="hier-officer-initials">${esc(initials(m.name||""))}</span>`}
+            ${hasPhoto?`<img src="${esc(m.photo)}" alt="" style="${photoStyle(m)}">`:`<span class="hier-officer-initials">${esc(initials(m.name||""))}</span>`}
             <div class="hier-member-rank-tag" style="background:${color}">${esc(r.label)}</div>
           </div>
           <div class="hier-member-body">
@@ -320,10 +327,10 @@ function render(){
             <button class="mini-icon-btn danger" data-del-member="${sub.id}::${sub.members.indexOf(m)}">×</button>
           </div>`:""}
         </div>`;
-      }).join("")||`<div class="hier-empty">В составе никого нет</div>`;
-      const editBtn=editing?`<button class="hier-edit-btn" data-edit-sub="${sub.id}">⚙</button>`:"";
-      const addBtn=editing?`<button class="hier-add-btn" data-add-member="${sub.id}">+ Добавить в подразделение</button>`:"";
-      return `<div class="hier-sub" style="--sub-color:${color};--sub-color-2:${shade(color,-25)}">
+      }).join("");
+      const editBtn=editing?`<button class="hier-edit-btn hier-sub-edit-btn" data-edit-sub="${sub.id}">⚙</button>`:"";
+      const addBtn=editing?`<button class="hier-officer hier-officer-add" data-add-member="${sub.id}">＋ Добавить в подразделение</button>`:"";
+      return `<section class="hier-sub-section" style="--sub-color:${color};--sub-color-2:${shade(color,-25)}">
         <div class="hier-sub-head">
           <div class="hier-sub-icon">${esc(icon)}</div>
           <div class="hier-sub-title">${esc(sub.name)}</div>
@@ -331,11 +338,10 @@ function render(){
           <div class="hier-sub-count">${sub.members.length}</div>
           ${editBtn}
         </div>
-        <div class="hier-sub-body">${rows}</div>
-        ${addBtn?`<div class="hier-sub-footer">${addBtn}</div>`:""}
-      </div>`;
+        <div class="hier-staff-grid">${rows}${addBtn}</div>
+      </section>`;
     }).join("")}
-  </div></div>
+  </div>
   ${editing?`<div style="margin-top:16px;width:100%;max-width:500px;margin-left:auto;margin-right:auto"><button class="hier-add-btn" id="addSubBtn" style="width:100%;padding:16px">+ Добавить подразделение</button></div>`:""}`;
 
   hier.innerHTML=`${cmdCard}<div class="hier-connector"></div>${staffHtml}<div class="hier-connector"></div>${subsHtml}`;
@@ -356,15 +362,23 @@ pModal.querySelector(".modal-close").addEventListener("click",()=>pModal.classLi
 sModal.addEventListener("click",e=>{if(e.target===sModal) sModal.classList.remove("active")});
 sModal.querySelector(".modal-close").addEventListener("click",()=>sModal.classList.remove("active"));
 
-function photoField(current){
+function photoField(current,zoom,x,y){
+  const z=zoom||1, px=x!=null?x:50, py=y!=null?y:50;
+  const imgStyle=`transform:scale(${z});object-position:${px}% ${py}%`;
   return `<div class="form-group"><label>Фото</label>
     <div class="photo-controls">
-      <div class="photo-preview">${current?`<img src="${esc(current)}">`:`<span>Нет фото</span>`}</div>
+      <div class="photo-preview"><div class="photo-preview-inner">${current?`<img src="${esc(current)}" style="${imgStyle}">`:`<span>Нет фото</span>`}</div></div>
       <div class="photo-actions">
         <input type="url" name="photo" value="${esc(current)}" placeholder="https://... или Data URL">
         <div style="display:flex;gap:6px">
           <label class="btn btn-ghost btn-sm" style="flex:1;min-height:34px;cursor:pointer">📁 Файл<input type="file" name="photoFile" accept="image/*" hidden></label>
           <button type="button" class="btn btn-ghost btn-sm" data-clear-photo style="min-height:34px;padding:0 10px">×</button>
+        </div>
+        <div class="photo-tune">
+          <label class="photo-tune-row"><span>🔍 Приближение</span><input type="range" name="photo_zoom" min="1" max="3" step="0.05" value="${z}"><span class="photo-tune-val" data-tune-val="zoom">${(+z).toFixed(2)}×</span></label>
+          <label class="photo-tune-row"><span>⇔ Гориз.</span><input type="range" name="photo_x" min="0" max="100" step="1" value="${px}"><span class="photo-tune-val" data-tune-val="x">${px}%</span></label>
+          <label class="photo-tune-row"><span>⇕ Верт.</span><input type="range" name="photo_y" min="0" max="100" step="1" value="${py}"><span class="photo-tune-val" data-tune-val="y">${py}%</span></label>
+          <button type="button" class="btn btn-ghost btn-sm" data-tune-reset style="width:100%;min-height:28px;font-size:11px">↺ Сбросить приближение</button>
         </div>
       </div>
     </div>
@@ -374,14 +388,34 @@ function photoField(current){
 function bindPhotoField(form){
   const urlInput=form.querySelector('input[name="photo"]');
   const fileInput=form.querySelector('input[name="photoFile"]');
-  const preview=form.querySelector(".photo-preview");
+  const previewInner=form.querySelector(".photo-preview-inner");
   const clear=form.querySelector('[data-clear-photo]');
+  const zoomIn=form.querySelector('input[name="photo_zoom"]');
+  const xIn=form.querySelector('input[name="photo_x"]');
+  const yIn=form.querySelector('input[name="photo_y"]');
+  const resetBtn=form.querySelector('[data-tune-reset]');
   const fileLabel=fileInput.parentElement;
+  function imgStyle(){
+    return `transform:scale(${zoomIn.value});object-position:${xIn.value}% ${yIn.value}%`;
+  }
+  function updateVals(){
+    form.querySelector('[data-tune-val="zoom"]').textContent=(+zoomIn.value).toFixed(2)+"×";
+    form.querySelector('[data-tune-val="x"]').textContent=xIn.value+"%";
+    form.querySelector('[data-tune-val="y"]').textContent=yIn.value+"%";
+  }
   function sync(){
     const v=urlInput.value.trim();
-    preview.innerHTML=v?`<img src="${esc(v)}">`:`<span>Нет фото</span>`;
+    previewInner.innerHTML=v?`<img src="${esc(v)}" style="${imgStyle()}">`:`<span>Нет фото</span>`;
+    updateVals();
+  }
+  function applyStyle(){
+    const img=previewInner.querySelector("img");
+    if(img) img.style.cssText=imgStyle();
+    updateVals();
   }
   urlInput.addEventListener("input",sync);
+  [zoomIn,xIn,yIn].forEach(el=>el.addEventListener("input",applyStyle));
+  resetBtn.addEventListener("click",()=>{zoomIn.value=1;xIn.value=50;yIn.value=50;applyStyle()});
   fileInput.addEventListener("change",async e=>{
     const f=e.target.files[0];if(!f) return;
     const oldTxt=fileLabel.innerHTML;
@@ -389,7 +423,7 @@ function bindPhotoField(form){
     fileLabel.innerHTML='⏳ Загрузка...';
     try{
       const r=new FileReader();
-      r.onload=ev=>{preview.innerHTML=`<img src="${ev.target.result}">`};
+      r.onload=ev=>{previewInner.innerHTML=`<img src="${ev.target.result}" style="${imgStyle()}">`};
       r.readAsDataURL(f);
       const up=await VSRF_COMP.uploadPhoto(f);
       if(!up.ok){alert("Ошибка загрузки фото: "+up.error);sync();return}
@@ -416,12 +450,15 @@ function openHqEdit(key,isNew){
     ${canEditMeta?`
     <div class="form-group"><label>Название должности</label><input name="label" value="${esc(slot.label||"")}" placeholder="Зам. по связи" required></div>
     <div class="form-group"><label>Звание должности (бейдж)</label><input name="badge" value="${esc(slot.badge||"")}" placeholder="Полковник"></div>
-    `:`<div class="form-group" style="opacity:.6;font-size:12px">Должность: <b>${esc(slot.label)}</b> (защищена от изменений)</div>`}
+    `:`
+    <div class="form-group" style="opacity:.6;font-size:12px">Должность: <b>${esc(slot.label)}</b> (защищена от изменений)</div>
+    <div class="form-group"><label>Звание должности (бейдж)</label><input name="badge" value="${esc(slot.badge||"")}" placeholder="Ген-Майор"></div>
+    `}
     <div class="form-group"><label>ФИО</label><input name="name" value="${esc(p.name||"")}" placeholder="Иван Иванов"></div>
     <div class="form-group"><label>Статик / Код</label><input name="code" value="${esc(p.code||"")}" placeholder="123-456"></div>
     <div class="form-group"><label>Спец. связь (Discord/иное)</label><input name="comm" value="${esc(p.comm||"")}" placeholder="@username или Telegram/etc"></div>
     <div class="form-group"><label>Заметка</label><input name="tag" value="${esc(p.tag||"")}" placeholder="ком. бриг"></div>
-    ${photoField(p.photo||"")}
+    ${photoField(p.photo||"",p.photo_zoom,p.photo_x,p.photo_y)}
   `;
   bindPhotoField(pForm);
   pDel.style.display=(!isNew&&p.name)?"":"none";
@@ -444,7 +481,7 @@ function openMemberEdit(subId,memberIdx){
     <div class="form-group"><label>Должность / роль</label><input name="role" value="${esc(m.role||"")}" placeholder="Ком. батальона ВП"></div>
     <div class="form-group"><label>Статик / Код</label><input name="code" value="${esc(m.code||"")}" placeholder="123-456"></div>
     <div class="form-group"><label>Спец. связь (Discord/иное)</label><input name="comm" value="${esc(m.comm||"")}" placeholder="@username"></div>
-    ${photoField(m.photo||"")}
+    ${photoField(m.photo||"",m.photo_zoom,m.photo_x,m.photo_y)}
   `;
   bindPhotoField(pForm);
   pDel.style.display=memberIdx>=0?"":"none";
@@ -461,20 +498,20 @@ pForm.addEventListener("submit",async e=>{
   });
   if(ctx[0]==="hq"){
     const slot=(STATE.hq_slots||[]).find(s=>s.key===ctx[1]);
-    if(slot&&!slot.locked){
-      if(data.label) slot.label=data.label;
+    if(slot){
+      if(!slot.locked&&data.label) slot.label=data.label;
       if(data.badge) slot.badge=data.badge;
     }
-    STATE.hq[ctx[1]]={name:data.name,code:data.code,comm:data.comm,tag:data.tag,photo:data.photo};
+    STATE.hq[ctx[1]]={name:data.name,code:data.code,comm:data.comm,tag:data.tag,photo:data.photo,photo_zoom:parseFloat(data.photo_zoom)||1,photo_x:parseFloat(data.photo_x)||50,photo_y:parseFloat(data.photo_y)||50};
   }else if(ctx[0]==="hqnew"){
     if(!data.label){pForm.querySelector(".form-msg").className="form-msg error";pForm.querySelector(".form-msg").textContent="Укажите название должности";return}
     const newKey="hq_"+Math.random().toString(36).slice(2,8);
     STATE.hq_slots.push({key:newKey,label:data.label,badge:data.badge||"Полковник",tier:2});
-    STATE.hq[newKey]={name:data.name,code:data.code,tag:data.tag,photo:data.photo};
+    STATE.hq[newKey]={name:data.name,code:data.code,tag:data.tag,photo:data.photo,photo_zoom:parseFloat(data.photo_zoom)||1,photo_x:parseFloat(data.photo_x)||50,photo_y:parseFloat(data.photo_y)||50};
   }else{
     const sub=STATE.subs.find(s=>s.id===ctx[1]);if(!sub) return;
     const idx=parseInt(ctx[2]);
-    const m={rank:data.rank,name:data.name,code:data.code,comm:data.comm,role:data.role,photo:data.photo};
+    const m={rank:data.rank,name:data.name,code:data.code,comm:data.comm,role:data.role,photo:data.photo,photo_zoom:parseFloat(data.photo_zoom)||1,photo_x:parseFloat(data.photo_x)||50,photo_y:parseFloat(data.photo_y)||50};
     if(idx>=0) sub.members[idx]=m;else sub.members.push(m);
   }
   await VSRF_COMP.save(STATE);
@@ -555,5 +592,5 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26104185ca8f10d',t:'MTc4NTg4MjcyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2611af1a87cf10d',t:'MTc4NTg4MzY2MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
