@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=92">
+<link rel="stylesheet" href="style.css?v=93">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -264,25 +264,37 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=92"></script>
-<script src="config.js?v=92"></script>
-<script src="main.js?v=92"></script>
-<script src="holiday-engine.js?v=92"></script>
-<script src="settings-panel.js?v=92"></script>
-<script src="sound-engine.js?v=92"></script>
-<script src="auth.js?v=92"></script>
-<script src="roles-engine.js?v=92"></script>
-<script src="search-engine.js?v=92"></script>
-<script src="notify-engine.js?v=92"></script>
-<script src="format-utils.js?v=92"></script>
-<script src="complaints-engine.js?v=92"></script>
-<script src="registry-engine.js?v=92"></script>
+<script src="supabase-loader.js?v=93"></script>
+<script src="config.js?v=93"></script>
+<script src="main.js?v=93"></script>
+<script src="holiday-engine.js?v=93"></script>
+<script src="settings-panel.js?v=93"></script>
+<script src="sound-engine.js?v=93"></script>
+<script src="auth.js?v=93"></script>
+<script src="roles-engine.js?v=93"></script>
+<script src="search-engine.js?v=93"></script>
+<script src="notify-engine.js?v=93"></script>
+<script src="format-utils.js?v=93"></script>
+<script src="complaints-engine.js?v=93"></script>
+<script src="registry-engine.js?v=93"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ruDT=iso=>{if(!iso) return "—";const d=new Date(iso);return d.toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})};
 const ruDate=iso=>{if(!iso) return "—";const d=new Date(iso);return d.toLocaleDateString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric"})};
+function confLen(hours){
+  if(!hours) return "";
+  const totalMin=Math.round(hours*60);
+  const d=Math.floor(totalMin/1440);
+  const h=Math.floor((totalMin%1440)/60);
+  const m=totalMin%60;
+  const parts=[];
+  if(d) parts.push(d+" д");
+  if(h) parts.push(h+" ч");
+  if(m) parts.push(m+" мин");
+  return parts.join(" ")||"0 мин";
+}
 
 const VERDICTS=[
   {key:"refuse",label:"Отказать",color:"#7a8a4a",icon:"✕",req_comment:true,notify:false},
@@ -309,7 +321,7 @@ const FIELD_LABELS={
 };
 function labelOf(key){return FIELD_LABELS[key]||key}
 
-let TAB="pending", ALL_COMP=[], ALL_REG=[], CUR_COMP=null, CUR_ADD_KIND=null, CUR_VERDICT=null;
+let TAB="pending", ALL_COMP=[], ALL_REG=[], CUR_COMP=null, CUR_ADD_KIND=null, CUR_VERDICT=null, DS_INDEX=new Map();
 
 async function boot(){
   const canView=window.VSRF_ROLES&&(window.VSRF_ROLES.can("complaints","view")||window.VSRF_ROLES.can("complaints","review"));
@@ -340,10 +352,21 @@ async function loadDsMembers(){
     const {data}=await c.from("ds_members").select("parsed_fio,parsed_static,discord_id").limit(500);
     if(!data) return;
     const dl=$("crDsMembers");
-    dl.innerHTML=data.map(m=>{
-      const label=(m.parsed_fio||"")+(m.parsed_static?" "+m.parsed_static:"");
-      return `<option value="${esc(label)}" data-static="${esc(m.parsed_static||"")}" data-did="${esc(m.discord_id||"")}"></option>`;
+    const seen=new Set();
+    dl.innerHTML=data.filter(m=>{
+      const fio=(m.parsed_fio||"").trim();
+      if(!fio||seen.has(fio)) return false;
+      seen.add(fio);return true;
+    }).map(m=>{
+      const fio=(m.parsed_fio||"").trim();
+      const hint=m.parsed_static?" — "+m.parsed_static:"";
+      return `<option value="${esc(fio)}" label="${esc(fio+hint)}" data-fio="${esc(fio)}" data-static="${esc(m.parsed_static||"")}" data-did="${esc(m.discord_id||"")}"></option>`;
     }).join("");
+    DS_INDEX=new Map();
+    for(const m of data){
+      const fio=(m.parsed_fio||"").trim();
+      if(fio) DS_INDEX.set(fio.toLowerCase(),{static:m.parsed_static||"",did:m.discord_id||""});
+    }
   }catch(e){}
 }
 
@@ -503,11 +526,10 @@ function openVerdict(c){
   $("crVerdSub").textContent="Нарушитель: "+(c.target_fio||"—")+(c.target_static?" · "+c.target_static:"");
   $("crVerdOpts").innerHTML=VERDICTS.map(v=>`<button type="button" class="cr-verd-btn" data-v="${v.key}" style="--vc:${v.color}">${v.icon} ${esc(v.label)}</button>`).join("");
   $("crVerdComment").value="";
-  document.querySelectorAll("[name=crNotify]").forEach(r=>r.checked=false);
-  $("crVerdNotifyWrap").style.display="none";
   $("crVerdCommentLabel").textContent="Комментарий";
   $("crVerdMsg").textContent="";
   $("crVerdConfWrap").style.display="none";
+  $("crVerdConfHours").value=1;$("crVerdConfMinutes").value=0;
   $("crVerdOpts").querySelectorAll("[data-v]").forEach(b=>b.addEventListener("click",()=>{
     CUR_VERDICT=b.dataset.v;
     $("crVerdOpts").querySelectorAll("[data-v]").forEach(x=>x.classList.toggle("active",x.dataset.v===CUR_VERDICT));
@@ -619,7 +641,7 @@ function itemHtml(x){
   const removed=!!x.removed_at;
   const canEdit=window.VSRF_ROLES&&window.VSRF_ROLES.can("registry","edit");
   const canRemove=window.VSRF_ROLES&&window.VSRF_ROLES.can("registry","remove");
-  const confPart=x.kind==="confinement"&&x.confinement_hours?` <span class="cr-conf-len">${x.confinement_hours>=24?Math.round(x.confinement_hours/24*10)/10+" д":x.confinement_hours+" ч"}</span>`:"";
+  const confPart=x.kind==="confinement"&&x.confinement_hours?` <span class="cr-conf-len">${confLen(x.confinement_hours)}</span>`:"";
   const expShow=x.expires_at&&!removed?(x.kind==="confinement"?ruDT(x.expires_at):ruDate(x.expires_at)):"";
   return `<div class="cr-reg-item ${removed?'cr-reg-removed':''}">
     <div class="cr-reg-item-head">
@@ -663,11 +685,11 @@ $("crAddViolBtn").addEventListener("click",()=>{
 });
 
 $("crAddFio").addEventListener("input",e=>{
-  const val=e.target.value;
-  const opt=$("crDsMembers").querySelector(`option[value="${val.replace(/"/g,'\\"')}"]`);
-  if(opt){
-    if(opt.dataset.static&&!$("crAddStatic").value) $("crAddStatic").value=opt.dataset.static;
-    if(opt.dataset.did&&!$("crAddDid").value) $("crAddDid").value=opt.dataset.did;
+  const val=(e.target.value||"").trim().toLowerCase();
+  const hit=DS_INDEX.get(val);
+  if(hit){
+    if(hit.static&&!$("crAddStatic").value) $("crAddStatic").value=window.VSRF_FMT?window.VSRF_FMT.formatStatic(hit.static):hit.static;
+    if(hit.did&&!$("crAddDid").value) $("crAddDid").value=hit.did;
   }
 });
 
@@ -753,6 +775,5 @@ setTimeout(()=>{
   }
 },1500);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25de9fbaf27f103',t:'MTc4NTg1MDE5OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25e10a8a904f103',t:'MTc4NTg1MTc4Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

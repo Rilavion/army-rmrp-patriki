@@ -53,7 +53,7 @@ window.VSRF_REGISTRY=(function(){
     const ms=msFor(settings,row.kind,row.confinement_minutes);
     const nowIso=new Date();
     const expiresAt=ms?new Date(nowIso.getTime()+ms).toISOString():null;
-    const confHours=row.kind==="confinement"?Math.max(1,Math.round((row.confinement_minutes||60)/60*100)/100):null;
+    const confHours=row.kind==="confinement"?(Math.round(((row.confinement_minutes||0)/60)*1000)/1000):null;
     const insert={
       target_fio:row.target_fio,
       target_static:row.target_static,
