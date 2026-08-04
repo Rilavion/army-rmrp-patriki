@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
 <title>ВС РФ — Рассмотрение жалоб</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=90">
 <style id="vsrf-admin-guard">
@@ -18,23 +19,28 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 </style>
 </head>
 <body>
-<canvas id="bgCanvas"></canvas><div class="bg-noise"></div>
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise"></div>
 
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" href="index.html"><div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
-      <div class="brand-text"><span class="brand-label">Военная Полиция</span><span class="brand-name">Рассмотрение жалоб</span></div>
+    <a class="brand" href="index.html">
+      <div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-text">
+        <span class="brand-label">Военная Полиция</span>
+        <span class="brand-name">Рассмотрение жалоб</span>
+      </div>
     </a>
     <nav class="nav" id="mainNav">
       <a href="index.html" data-page="index.html" data-transition>Главная</a>
       <a href="info.html" data-page="info.html" data-transition>Информация</a>
       <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
       <a href="training.html" data-page="training.html" data-transition>Обучение</a>
-      <a href="tests.html" data-page="tests.html" data-transition data-loggedin>Тестирование</a>
       <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
       <a href="docs.html" data-page="docs.html" data-transition data-perm="docs:view">Документы</a>
       <a href="news.html" data-page="news.html" data-transition>Новости</a>
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
       <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
       <a href="complaints.html" data-page="complaints.html" data-transition>Жалобы</a>
       <a href="supply.html" data-page="supply.html" data-transition data-perm="supply:view">Поставки</a>
@@ -44,12 +50,26 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       <a href="message.html" data-page="message.html" data-transition data-perm="messages:send">Сообщения</a>
       <a href="lk.html" data-page="lk.html" data-transition data-perm="lk:users,lk:roles,lk:settings">Личный кабинет</a>
     </nav>
-    <div class="header-actions" style="margin-left:auto">
-      <a href="complaints.html" data-page="complaints.html" class="btn btn-ghost btn-sm">📨 Форма жалобы</a>
-      <a href="complaints-form.html" data-page="complaints-form.html" class="btn btn-ghost btn-sm" data-perm="complaints:form_edit">✎ Форма</a>
-      <a href="complaints-settings.html" data-page="complaints-settings.html" class="btn btn-gold btn-sm" data-perm="complaints:settings">⚙ Настройки</a>
-      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему"><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-      <button class="login-btn" data-open-login><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg><span>Войти</span></button>
+    <div class="header-actions">
+      <a href="complaints-form.html" data-page="complaints-form.html" class="btn btn-ghost btn-sm" data-perm="complaints:form_edit" style="display:none">✎ Форма</a>
+      <a href="complaints-settings.html" data-page="complaints-settings.html" class="btn btn-gold btn-sm" data-perm="complaints:settings" style="display:none">⚙ Настройки</a>
+      <button class="search-btn" data-open-search title="Поиск (Ctrl+K)">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <span>Поиск</span>
+      </button>
+      <button class="icon-btn" data-open-notify title="Уведомления" style="position:relative">
+        <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        <span class="vsrf-notify-badge" data-notify-badge></span>
+      </button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="login-btn" data-open-login>
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        <span>Войти</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
     </div>
   </div>
 </header>
@@ -57,7 +77,13 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 <main>
   <section class="apps-head">
     <div class="container">
-      <div class="apps-head-ribbon"><span class="apps-head-ribbon-line"></span><span class="apps-head-ribbon-emblem">◈</span><span class="apps-head-ribbon-name">Военная Полиция · Рассмотрение и реестр нарушений</span><span class="apps-head-ribbon-emblem">◈</span><span class="apps-head-ribbon-line"></span></div>
+      <div class="apps-head-ribbon">
+        <span class="apps-head-ribbon-line"></span>
+        <span class="apps-head-ribbon-emblem">◈</span>
+        <span class="apps-head-ribbon-name">Военная Полиция · Рассмотрение и реестр нарушений</span>
+        <span class="apps-head-ribbon-emblem">◈</span>
+        <span class="apps-head-ribbon-line"></span>
+      </div>
       <h1 class="apps-head-title">Рассмотрение жалоб и Реестр нарушений</h1>
     </div>
   </section>
@@ -176,8 +202,13 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 <script src="supabase-loader.js?v=90"></script>
 <script src="config.js?v=90"></script>
 <script src="main.js?v=90"></script>
+<script src="holiday-engine.js?v=90"></script>
+<script src="settings-panel.js?v=90"></script>
+<script src="sound-engine.js?v=90"></script>
 <script src="auth.js?v=90"></script>
 <script src="roles-engine.js?v=90"></script>
+<script src="search-engine.js?v=90"></script>
+<script src="notify-engine.js?v=90"></script>
 <script src="complaints-engine.js?v=90"></script>
 <script src="registry-engine.js?v=90"></script>
 <script>
@@ -206,8 +237,10 @@ async function boot(){
 }
 
 async function loadAll(){
-  ALL_COMP=await VSRF_COMPLAINTS.fetchAll();
-  ALL_REG=await VSRF_REGISTRY.fetchAll();
+  try{
+    ALL_COMP=await VSRF_COMPLAINTS.fetchAll();
+    ALL_REG=await VSRF_REGISTRY.fetchAll();
+  }catch(e){console.warn("loadAll:",e.message)}
   const pend=ALL_COMP.filter(x=>x.status==="pending");
   const dec=ALL_COMP.filter(x=>x.status==="decided");
   const activeReg=ALL_REG.filter(x=>!x.removed_at);
@@ -519,10 +552,13 @@ $("crDetailModal").addEventListener("click",e=>{if(e.target===$("crDetailModal")
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,700);
 
-const c=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.client;
-if(c){
-  c.channel("cr-live").on("postgres_changes",{event:"*",schema:"public",table:"complaints"},loadAll).on("postgres_changes",{event:"*",schema:"public",table:"violations_registry"},loadAll).subscribe();
-}
+setTimeout(()=>{
+  const c=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.client;
+  if(c){
+    try{c.channel("cr-live").on("postgres_changes",{event:"*",schema:"public",table:"complaints"},loadAll).on("postgres_changes",{event:"*",schema:"public",table:"violations_registry"},loadAll).subscribe()}catch(e){}
+  }
+},1500);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25d66069b31e83e',t:'MTc4NTg0NDc5Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25d856a2c02e83e',t:'MTc4NTg0NjA3OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

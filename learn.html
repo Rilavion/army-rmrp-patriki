@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=89">
+<link rel="stylesheet" href="style.css?v=90">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -46,9 +46,11 @@ body.vsrf-is-logged [data-loggedin]:not(.nav a){display:initial !important}
       <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
       <a href="map.html" data-page="map.html" data-transition>Карта</a>
       <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
+      <a href="complaints.html" data-page="complaints.html" data-transition>Жалобы</a>
       <a href="supply.html" data-page="supply.html" data-transition data-perm="supply:view">Поставки</a>
       <a href="apps.html" data-page="apps.html" data-transition data-perm="apps:view">Заявления</a>
       <a href="vp.html" data-page="vp.html" data-transition data-perm="vp:view">Проверки ВП</a>
+      <a href="complaints-review.html" data-page="complaints-review.html" data-transition data-perm="complaints:review,complaints:view">Рассмотрение жалоб</a>
       <a href="message.html" data-page="message.html" data-transition data-perm="messages:send">Сообщения</a>
       <a href="lk.html" data-page="lk.html" data-transition data-perm="lk:users,lk:roles,lk:settings">Личный кабинет</a>
     </nav>
@@ -213,18 +215,18 @@ body.vsrf-is-logged [data-loggedin]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=89"></script>
-<script src="config.js?v=89"></script>
-<script src="auth.js?v=89"></script>
-<script src="roles-engine.js?v=89"></script>
-<script src="learn-engine.js?v=89"></script>
-<script src="main.js?v=89"></script>
-<script src="holiday-engine.js?v=89"></script>
-<script src="settings-panel.js?v=89"></script>
-<script src="faq-engine.js?v=89"></script>
-<script src="search-engine.js?v=89"></script>
-<script src="notify-engine.js?v=89"></script>
-<script src="sound-engine.js?v=89"></script>
+<script src="supabase-loader.js?v=90"></script>
+<script src="config.js?v=90"></script>
+<script src="auth.js?v=90"></script>
+<script src="roles-engine.js?v=90"></script>
+<script src="learn-engine.js?v=90"></script>
+<script src="main.js?v=90"></script>
+<script src="holiday-engine.js?v=90"></script>
+<script src="settings-panel.js?v=90"></script>
+<script src="faq-engine.js?v=90"></script>
+<script src="search-engine.js?v=90"></script>
+<script src="notify-engine.js?v=90"></script>
+<script src="sound-engine.js?v=90"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -377,6 +379,6 @@ if(window.VSRF_ROLES) VSRF_ROLES.onChange(applyAdminVisibility);
 if(window.VSRF_AUTH) VSRF_AUTH.onChange(updateLoggedFlag);
 setTimeout(()=>{loadAll();applyAdminVisibility()},600);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25d85d7bfcce83e',t:'MTc4NTg0NjA5Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

@@ -14,14 +14,42 @@
 
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" href="index.html"><div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
-      <div class="brand-text"><span class="brand-label">Настройка</span><span class="brand-name">Форма жалобы</span></div>
+    <a class="brand" href="index.html">
+      <div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-text">
+        <span class="brand-label">Военная Полиция</span>
+        <span class="brand-name">Редактор формы</span>
+      </div>
     </a>
-    <div class="header-actions" style="margin-left:auto">
-      <a href="complaints.html" class="btn btn-ghost btn-sm">← К форме</a>
-      <a href="complaints-review.html" class="btn btn-ghost btn-sm">📋 Рассмотрение</a>
-      <a href="complaints-settings.html" class="btn btn-ghost btn-sm">⚙ Настройки</a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="info.html" data-page="info.html" data-transition>Информация</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="training.html" data-page="training.html" data-transition>Обучение</a>
+      <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
+      <a href="docs.html" data-page="docs.html" data-transition data-perm="docs:view">Документы</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+      <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
+      <a href="complaints.html" data-page="complaints.html" data-transition>Жалобы</a>
+      <a href="supply.html" data-page="supply.html" data-transition data-perm="supply:view">Поставки</a>
+      <a href="apps.html" data-page="apps.html" data-transition data-perm="apps:view">Заявления</a>
+      <a href="vp.html" data-page="vp.html" data-transition data-perm="vp:view">Проверки ВП</a>
+      <a href="complaints-review.html" data-page="complaints-review.html" data-transition data-perm="complaints:review,complaints:view">Рассмотрение жалоб</a>
+      <a href="message.html" data-page="message.html" data-transition data-perm="messages:send">Сообщения</a>
+      <a href="lk.html" data-page="lk.html" data-transition data-perm="lk:users,lk:roles,lk:settings">Личный кабинет</a>
+    </nav>
+    <div class="header-actions">
+      <a href="complaints.html" data-page="complaints.html" class="btn btn-ghost btn-sm">← К форме</a>
+      <a href="complaints-review.html" data-page="complaints-review.html" class="btn btn-ghost btn-sm">📋 Рассмотрение</a>
+      <a href="complaints-settings.html" data-page="complaints-settings.html" class="btn btn-ghost btn-sm">⚙ Настройки</a>
       <button class="btn btn-gold btn-sm" id="cfSaveBtn">💾 Сохранить</button>
+      <button class="search-btn" data-open-search title="Поиск"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg><span>Поиск</span></button>
+      <button class="icon-btn" data-open-notify title="Уведомления" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span class="vsrf-notify-badge" data-notify-badge></span></button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему"><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <button class="login-btn" data-open-login><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg><span>Войти</span></button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
     </div>
   </div>
 </header>
@@ -59,6 +87,11 @@
 <script src="config.js?v=90"></script>
 <script src="main.js?v=90"></script>
 <script src="auth.js?v=90"></script>
+<script src="notify-engine.js?v=90"></script>
+<script src="search-engine.js?v=90"></script>
+<script src="sound-engine.js?v=90"></script>
+<script src="settings-panel.js?v=90"></script>
+<script src="holiday-engine.js?v=90"></script>
 <script src="roles-engine.js?v=90"></script>
 <script src="complaints-engine.js?v=90"></script>
 <script>
@@ -99,6 +132,7 @@ function renderFields(){
       </div>
       <div class="msg-row">
         <div class="form-group msg-flex-2"><label>Подсказка (placeholder)</label><input type="text" data-k="placeholder" class="msg-input" value="${esc(f.placeholder||"")}"></div>
+        <div class="form-group msg-flex-1"><label>Группа</label><input type="text" data-k="group" class="msg-input" value="${esc(f.group||"")}" placeholder="Ваши данные"></div>
         <div class="form-group msg-flex-2 cfe-opts" style="${f.type==="select"?"":"display:none"}"><label>Опции (по строкам)</label><textarea data-k="options" class="msg-input" rows="2" style="resize:vertical;font-family:inherit">${esc(Array.isArray(f.options)?f.options.join("\n"):"")}</textarea></div>
         <div class="form-group" style="flex:0 0 auto"><label>Порядок</label><input type="number" data-k="order" class="msg-input" value="${f.order||10}" style="width:80px"></div>
       </div>
@@ -147,13 +181,14 @@ $("cfeAdd").addEventListener("click",()=>{
 $("cfeReset").addEventListener("click",()=>{
   if(!confirm("Сбросить форму к настройкам по умолчанию?")) return;
   FORM.fields=[
-    {key:"submitter_fio",label:"ФИО заявителя",type:"text",required:true,placeholder:"Иван Иванов",order:10},
-    {key:"submitter_static",label:"Статик заявителя",type:"text",required:true,placeholder:"123-456",order:20},
-    {key:"target_fio",label:"ФИО нарушителя",type:"text",required:true,placeholder:"Пётр Петров",order:40},
-    {key:"target_static",label:"Статик нарушителя",type:"text",required:true,placeholder:"789-012",order:50},
-    {key:"incident_date",label:"Дата и время инцидента",type:"text",required:true,placeholder:"04.08.2026 15:30",order:70},
-    {key:"description",label:"Подробное описание",type:"textarea",required:true,placeholder:"Что произошло",order:90},
-    {key:"evidence_url",label:"Ссылка на доказательство",type:"text",required:true,placeholder:"https://...",order:100}
+    {key:"submitter_fio",label:"Ваше ФИО",type:"text",required:true,placeholder:"Иван Иванов",order:10,group:"Ваши данные"},
+    {key:"submitter_static",label:"Ваш статик",type:"text",required:true,placeholder:"123-456",order:20,group:"Ваши данные"},
+    {key:"submitter_discord",label:"Ваш @тег Discord",type:"text",required:false,placeholder:"@username или ID",order:30,group:"Ваши данные"},
+    {key:"target_fio",label:"ФИО нарушителя",type:"text",required:false,placeholder:"Пётр Петров",order:40,group:"Данные нарушителя"},
+    {key:"target_static",label:"Статик нарушителя",type:"text",required:true,placeholder:"789-012",order:50,group:"Данные нарушителя"},
+    {key:"description",label:"Суть нарушения",type:"textarea",required:true,placeholder:"Опишите, что произошло, где и когда",order:60,group:"Обстоятельства"},
+    {key:"norms",label:"Нарушенные нормы (ВУ ВС РФ, УК, ПК и иные)",type:"textarea",required:true,placeholder:"Например: ст. 12 ВУ ВС РФ, п.3 ПК",order:70,group:"Обстоятельства"},
+    {key:"evidence_url",label:"Доказательства нарушения",type:"text",required:true,placeholder:"https:// (ссылка на видео/скриншот)",order:80,group:"Обстоятельства"}
   ];
   renderFields();
 });
@@ -171,5 +206,6 @@ $("cfSaveBtn").addEventListener("click",async()=>{
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,500);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25d6614bd42e83e',t:'MTc4NTg0NDc5NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25d855fdf20e83e',t:'MTc4NTg0NjA3Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
