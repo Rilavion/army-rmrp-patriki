@@ -1,9 +1,9 @@
 window.VSRF_REGISTRY=(function(){
   function client(){return window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.client}
 
-  const KIND_LABELS={warn:"Предупреждение",reproach:"Выговор",talk:"Беседа с ВП",uval:"Увал"};
-  const KIND_COLORS={warn:"#e6b800",reproach:"#e67e22",talk:"#5a8fcd",uval:"#e74c3c"};
-  const KIND_ICONS={warn:"⚠",reproach:"‼",talk:"💬",uval:"⛔"};
+  const KIND_LABELS={warn:"Предупреждение",reproach:"Выговор",talk:"Беседа с ВП",confinement:"Дисциплинарное заключение",uval:"Увал"};
+  const KIND_COLORS={warn:"#e6b800",reproach:"#e67e22",talk:"#5a8fcd",confinement:"#9b59b6",uval:"#e74c3c"};
+  const KIND_ICONS={warn:"⚠",reproach:"‼",talk:"💬",confinement:"🔒",uval:"⛔"};
 
   async function fetchSettings(){
     const c=client();if(!c) return null;
@@ -32,11 +32,12 @@ window.VSRF_REGISTRY=(function(){
     return data||[];
   }
 
-  function daysFor(settings,kind){
+  function msFor(settings,kind,confinementHours){
     if(!settings) return null;
-    if(kind==="warn") return settings.expire_warn_days||null;
-    if(kind==="reproach") return settings.expire_reproach_days||null;
-    if(kind==="talk") return settings.expire_talk_days||null;
+    if(kind==="warn") return (settings.expire_warn_days||0)*86400000;
+    if(kind==="reproach") return (settings.expire_reproach_days||0)*86400000;
+    if(kind==="talk") return (settings.expire_talk_days||0)*86400000;
+    if(kind==="confinement") return (confinementHours||settings.expire_confinement_hours||24)*3600000;
     return null;
   }
 
@@ -47,10 +48,13 @@ window.VSRF_REGISTRY=(function(){
     }
     const s=window.VSRF_AUTH.state;
     if(!s||!s.user) return {ok:false,error:"Требуется вход"};
+    if(row.kind==="confinement"&&(!row.confinement_hours||row.confinement_hours<=0)){
+      return {ok:false,error:"Для «Дисциплинарного заключения» укажите срок (в часах)"};
+    }
     const settings=await fetchSettings();
-    const days=daysFor(settings,row.kind);
+    const ms=msFor(settings,row.kind,row.confinement_hours);
     const nowIso=new Date();
-    const expiresAt=days?new Date(nowIso.getTime()+days*86400000).toISOString():null;
+    const expiresAt=ms?new Date(nowIso.getTime()+ms).toISOString():null;
     const insert={
       target_fio:row.target_fio,
       target_static:row.target_static,
@@ -64,7 +68,8 @@ window.VSRF_REGISTRY=(function(){
       issued_by_name:row.issued_by_name||s.user.email,
       issued_by_discord_id:row.issued_by_discord_id||null,
       notify_mode:notifyMode,
-      expires_at:expiresAt
+      expires_at:expiresAt,
+      confinement_hours:row.kind==="confinement"?row.confinement_hours:null
     };
     const {data,error}=await c.from("violations_registry").insert(insert).select().single();
     if(error) return {ok:false,error:error.message};
@@ -112,5 +117,5 @@ window.VSRF_REGISTRY=(function(){
   }
 
   return {fetchSettings,saveSettings,fetchAll,add,removeViolation,hardDelete,
-          groupByPerson,activeCount,daysFor,KIND_LABELS,KIND_COLORS,KIND_ICONS};
+          groupByPerson,activeCount,msFor,KIND_LABELS,KIND_COLORS,KIND_ICONS};
 })();
