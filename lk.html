@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=128">
+<link rel="stylesheet" href="style.css?v=131">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -129,6 +129,26 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
             <div class="lk-panel-body">
               <div class="lk-audit" id="lkAudit">
                 <div class="lk-act-empty">Загрузка активности...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lk-panel">
+            <div class="lk-panel-head">
+              <span class="lk-panel-title">🔔 Уведомления на сайте</span>
+            </div>
+            <div class="lk-panel-body">
+              <div id="npBox">
+                <div class="np-status">💡 Работают <b>только когда сайт открыт</b> в вкладке. Всплывающие карточки в правом верхнем углу + короткий звук. Проверяют новые события каждые 25 секунд.</div>
+                <div class="np-master">
+                  <label class="np-toggle"><input type="checkbox" id="npEnabled"><span>🔔 Показывать всплывающие уведомления</span></label>
+                  <label class="np-toggle"><input type="checkbox" id="npSound"><span>🔊 Проигрывать звук</span></label>
+                  <button class="btn btn-ghost btn-sm" id="npTestBtn" style="margin-top:8px">🎯 Тест (звук + карточка)</button>
+                </div>
+                <div class="np-events" id="npEvents" style="display:none;margin-top:14px">
+                  <div class="np-events-title">Типы событий (доступны по вашей роли)</div>
+                  <div id="npEventsList"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -306,18 +326,19 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=128"></script>
-<script src="config.js?v=128"></script>
-<script src="main.js?v=128"></script>
-<script src="format-utils.js?v=128"></script>
-<script src="auth.js?v=128"></script>
-<script src="roles-engine.js?v=128"></script>
-<script src="holiday-engine.js?v=128"></script>
+<script src="supabase-loader.js?v=131"></script>
+<script src="config.js?v=131"></script>
+<script src="main.js?v=131"></script>
+<script src="format-utils.js?v=131"></script>
+<script src="auth.js?v=131"></script>
+<script src="roles-engine.js?v=131"></script>
+<script src="holiday-engine.js?v=131"></script>
 <script src="settings-panel.js"></script>
 <script src="sound-engine.js"></script>
 <script src="faq-engine.js"></script>
 <script src="search-engine.js"></script>
 <script src="notify-engine.js"></script>
+<script src="notify-live.js?v=131"></script>
 
 <script src="lk-engine.js"></script>
 <script>
@@ -343,6 +364,62 @@ async function boot(){
   $("lkEmail").textContent=s.user.email+" · онлайн";
   renderAudit();
   renderHolidayUI();
+  initNotifyPanel();
+}
+
+const NOTIFY_EVENTS=[
+  {key:"apps.new",label:"📋 Новые заявления",perm:["apps","view"]},
+  {key:"complaints.new",label:"⚠ Новые жалобы",perm:["complaints","review"]},
+  {key:"requests.leave.new",label:"🕒 Заявки на увольнительные",perm:["requests","review"]},
+  {key:"requests.vacation_ic.new",label:"🏖 Заявки на отпуск IC",perm:["requests","review"]},
+  {key:"requests.vacation_ooc.new",label:"💤 Заявки на отпуск OOC",perm:["requests","review"]},
+  {key:"requests.promotion.new",label:"⭐ Заявки на повышение",perm:["requests","review"]},
+  {key:"requests.dismissal.new",label:"⛔ Заявки на увольнение",perm:["requests","review"]}
+];
+
+function initNotifyPanel(){
+  if(!window.VSRF_NOTIFY_LIVE) return;
+  const eventsBox=$("npEvents"),eventsList=$("npEventsList");
+
+  function render(){
+    const p=VSRF_NOTIFY_LIVE.readPrefs();
+    $("npEnabled").checked=p.enabled!==false;
+    $("npSound").checked=p.sound!==false;
+    const perms=window.VSRF_ROLES;
+    const available=NOTIFY_EVENTS.filter(ev=>{
+      if(!perms||!ev.perm) return true;
+      return perms.can(ev.perm[0],ev.perm[1]);
+    });
+    if(available.length){
+      eventsBox.style.display="";
+      eventsList.innerHTML=available.map(ev=>{
+        const on=(ev.key in (p.events||{}))?p.events[ev.key]:true;
+        return `<label class="np-toggle np-event"><input type="checkbox" data-ev="${ev.key}" ${on?"checked":""}><span>${ev.label}</span></label>`;
+      }).join("");
+      eventsList.querySelectorAll("[data-ev]").forEach(el=>el.addEventListener("change",()=>{
+        const key=el.getAttribute("data-ev");
+        const cur=VSRF_NOTIFY_LIVE.readPrefs();
+        cur.events=cur.events||{};cur.events[key]=el.checked;
+        VSRF_NOTIFY_LIVE.savePrefs(cur);
+      }));
+    } else {
+      eventsBox.style.display="none";
+    }
+  }
+
+  $("npEnabled").addEventListener("change",()=>{
+    const p=VSRF_NOTIFY_LIVE.readPrefs();p.enabled=$("npEnabled").checked;VSRF_NOTIFY_LIVE.savePrefs(p);
+  });
+  $("npSound").addEventListener("change",()=>{
+    const p=VSRF_NOTIFY_LIVE.readPrefs();p.sound=$("npSound").checked;VSRF_NOTIFY_LIVE.savePrefs(p);
+  });
+  $("npTestBtn").addEventListener("click",()=>{
+    VSRF_NOTIFY_LIVE.showTest();
+    if($("npSound").checked) VSRF_NOTIFY_LIVE.playTestSound();
+  });
+
+  if(window.VSRF_ROLES) window.VSRF_ROLES.onChange(render);
+  setTimeout(render,300);
 }
 
 async function renderAudit(){
@@ -594,6 +671,6 @@ if(rolesBtn){
 }
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2683fb96ad3f3aa',t:'MTc4NTk1ODU2Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
