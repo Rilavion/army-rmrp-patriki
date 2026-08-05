@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=119">
+<link rel="stylesheet" href="style.css?v=120">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -230,21 +230,21 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="html2canvas.min.js?v=119"></script>
-<script src="supabase-loader.js?v=119"></script>
-<script src="config.js?v=119"></script>
-<script src="main.js?v=119"></script>
-<script src="format-utils.js?v=119"></script>
-<script src="holiday-engine.js?v=119"></script>
-<script src="settings-panel.js?v=119"></script>
-<script src="sound-engine.js?v=119"></script>
-<script src="faq-engine.js?v=119"></script>
-<script src="search-engine.js?v=119"></script>
-<script src="notify-engine.js?v=119"></script>
-<script src="auth.js?v=119"></script>
-<script src="roles-engine.js?v=119"></script>
-<script src="select-enhance.js?v=119"></script>
-<script src="composition-engine.js?v=119"></script>
+<script src="html2canvas.min.js?v=120"></script>
+<script src="supabase-loader.js?v=120"></script>
+<script src="config.js?v=120"></script>
+<script src="main.js?v=120"></script>
+<script src="format-utils.js?v=120"></script>
+<script src="holiday-engine.js?v=120"></script>
+<script src="settings-panel.js?v=120"></script>
+<script src="sound-engine.js?v=120"></script>
+<script src="faq-engine.js?v=120"></script>
+<script src="search-engine.js?v=120"></script>
+<script src="notify-engine.js?v=120"></script>
+<script src="auth.js?v=120"></script>
+<script src="roles-engine.js?v=120"></script>
+<script src="select-enhance.js?v=120"></script>
+<script src="composition-engine.js?v=120"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -402,66 +402,36 @@ function ruDate(){
 function expBuildHtml(opts){
   const showContacts=opts&&opts.showContacts!==false;
   const showPhotos=opts&&opts.showPhotos!==false;
-  const cmd=STATE.hq.cmd_brigade||{};
-  const cmdSlot=(STATE.hq_slots||[]).find(s=>s.key==="cmd_brigade")||{};
-  const cmdBadge=cmdSlot.badge||"Ген-Майор";
-  const cmdHasPhoto=showPhotos&&!!(cmd&&cmd.photo);
-  const cmdFilled=!!cmd.name;
 
-  const staffMembers=(STATE.hq_slots||[]).filter(s=>s.key!=="cmd_brigade");
-  const staffCards=staffMembers.map(slot=>{
-    const p=STATE.hq[slot.key]||{};
-    const filled=!!p.name;
-    const hasPhoto=showPhotos&&!!(p&&p.photo);
-    return `<div class="exp-officer ${filled?"":"exp-empty"}">
-      <div class="exp-photo ${hasPhoto?"":"no-photo"}">
-        ${hasPhoto?`<img src="${esc(p.photo)}" style="${photoStyle(p)}">`:`<span class="exp-init">${filled?esc(initials(p.name)):"—"}</span>`}
-        <div class="exp-rank-tag">${esc(slot.badge)}</div>
-      </div>
-      <div class="exp-body">
-        <div class="exp-role">${esc(slot.label)}</div>
-        <div class="exp-name">${filled?esc(p.name):`<span style="opacity:.4">— вакансия —</span>`}</div>
-        ${showContacts&&(p.code||p.comm)?`<div class="exp-meta">
-          ${p.code?`<span>📞 ${esc(p.code)}</span>`:""}
-          ${p.comm?`<span>📡 ${esc(p.comm)}</span>`:""}
-        </div>`:""}
-      </div>
-    </div>`;
-  }).join("");
+  const src=document.getElementById("hier");
+  if(!src){return `<div style="padding:40px;color:#e77070">Ошибка: иерархия не найдена</div>`}
 
-  const subsHtml=(STATE.subs||[]).map(sub=>{
-    const color=sub.color||"#7a8a4a";
-    const sorted=(sub.members||[]).slice().sort((a,b)=>VSRF_COMP.rankInfo(a.rank).tier-VSRF_COMP.rankInfo(b.rank).tier);
-    const rows=sorted.map(m=>{
-      const r=VSRF_COMP.rankInfo(m.rank);
-      const hasPhoto=showPhotos&&!!(m&&m.photo);
-      return `<div class="exp-member" style="--m-color:${color}">
-        <div class="exp-mphoto ${hasPhoto?"":"no-photo"}">
-          ${hasPhoto?`<img src="${esc(m.photo)}" style="${photoStyle(m)}">`:`<span class="exp-init">${esc(initials(m.name||""))}</span>`}
-          <div class="exp-mrank-tag" style="background:${color}">${esc(r.label)}</div>
-        </div>
-        <div class="exp-mbody">
-          <div class="exp-mname">${esc(m.name||"")}</div>
-          ${m.role?`<div class="exp-mrole">${esc(m.role)}</div>`:""}
-          ${showContacts&&(m.code||m.comm)?`<div class="exp-mmeta">
-            ${m.code?`<span>📞 ${esc(m.code)}</span>`:""}
-            ${m.comm?`<span>📡 ${esc(m.comm)}</span>`:""}
-          </div>`:""}
-        </div>
-      </div>`;
-    }).join("");
-    return `<section class="exp-sub" style="--sub-color:${color};--sub-color-2:${shade(color,-30)}">
-      <div class="exp-sub-head">
-        <div class="exp-sub-title">${esc(sub.name||"")}</div>
-        <div class="exp-sub-count">${(sub.members||[]).length} чел.</div>
-      </div>
-      <div class="exp-sub-grid">${rows||`<div style="opacity:.5;padding:12px;grid-column:1/-1;text-align:center">— пусто —</div>`}</div>
-    </section>`;
-  }).join("");
+  const clone=src.cloneNode(true);
+  clone.querySelectorAll(".hier-edit-btn,.hier-edit-group,.hier-edit-corner,.hier-sub-edit-btn,.hier-member-actions,.hier-officer-add,.hier-add-btn,#addHqBtn,#addSubBtn,[data-add-member]").forEach(el=>el.remove());
+  clone.querySelectorAll("canvas,svg").forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(!r.width||!r.height) el.remove();
+  });
+  if(!showContacts){
+    clone.querySelectorAll(".hier-officer-code,.hier-officer-comm,.hier-member-code,.hier-member-comm,.hier-cmd-contacts").forEach(el=>el.remove());
+  }
+  if(!showPhotos){
+    clone.querySelectorAll(".hier-officer-photo img,.hier-cmd-photo img,.hier-member-photo img").forEach(el=>{
+      const parent=el.parentElement;
+      const initEl=document.createElement("span");
+      initEl.className="hier-officer-initials";
+      initEl.textContent="—";
+      el.replaceWith(initEl);
+      if(parent) parent.classList.add("no-photo");
+    });
+  }
 
-  const totalPeople=1+staffMembers.filter(s=>{const p=STATE.hq[s.key];return p&&p.name}).length + (STATE.subs||[]).reduce((a,s)=>a+((s.members||[]).length),0);
+  const totalPeople=1+(STATE.hq_slots||[]).filter(s=>s.key!=="cmd_brigade"&&STATE.hq[s.key]&&STATE.hq[s.key].name).length + (STATE.subs||[]).reduce((a,s)=>a+((s.members||[]).length),0);
 
-  return `<div id="expCanvas" class="exp-canvas">
+  const wrap=document.createElement("div");
+  wrap.id="expCanvas";
+  wrap.className="exp-canvas";
+  wrap.innerHTML=`
     <div class="exp-cover">
       <div class="exp-cover-emblem">
         <img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" crossorigin="anonymous" alt="">
@@ -476,42 +446,14 @@ function expBuildHtml(opts){
           <span>🎖 Подразделений: ${(STATE.subs||[]).length}</span>
         </div>
       </div>
-      <div class="exp-cover-ribbon"><span></span><span>◈</span><span></span></div>
     </div>
-
-    <div class="exp-cmd">
-      <div class="exp-cmd-badge">Командир бригады</div>
-      <div class="exp-cmd-inner">
-        <div class="exp-cmd-photo ${cmdHasPhoto?"":"no-photo"}">
-          ${cmdHasPhoto?`<img src="${esc(cmd.photo)}" style="${photoStyle(cmd)}">`:`<span class="exp-init big">${cmdFilled?esc(initials(cmd.name)):"—"}</span>`}
-          <div class="exp-cmd-rank-tag">${esc(cmdBadge)}</div>
-        </div>
-        <div class="exp-cmd-body">
-          <div class="exp-cmd-name">${cmdFilled?esc(cmd.name):`<span style="opacity:.5">Вакансия</span>`}</div>
-          ${cmd.tag?`<div class="exp-cmd-tag">${esc(cmd.tag)}</div>`:""}
-          ${showContacts&&(cmd.code||cmd.comm)?`<div class="exp-cmd-contacts">
-            ${cmd.code?`<span>📞 ${esc(cmd.code)}</span>`:""}
-            ${cmd.comm?`<span>📡 ${esc(cmd.comm)}</span>`:""}
-          </div>`:""}
-        </div>
-      </div>
-    </div>
-
-    <div class="exp-conn"></div>
-
-    <div class="exp-section-title"><span class="exp-line"></span><span class="exp-section-label">Штаб · Заместители</span><span class="exp-line"></span></div>
-    <div class="exp-staff-grid">${staffCards}</div>
-
-    <div class="exp-conn"></div>
-
-    <div class="exp-section-title"><span class="exp-line"></span><span class="exp-section-label">Подразделения</span><span class="exp-line"></span></div>
-    <div class="exp-subs-list">${subsHtml}</div>
-
+    <div class="exp-hier-wrap"></div>
     <div class="exp-footer">
       <div class="exp-footer-motto">Честь · Долг · Отвага</div>
-      <div class="exp-footer-sub">Служим Отечеству · vsrf-official</div>
-    </div>
-  </div>`;
+      <div class="exp-footer-sub">Служим Отечеству · 1-я ОБрСпН · в/ч №12132</div>
+    </div>`;
+  wrap.querySelector(".exp-hier-wrap").appendChild(clone);
+  return wrap.outerHTML;
 }
 
 function expRefresh(){
@@ -526,13 +468,27 @@ async function expRender(){
   const scale=parseFloat($("expScale").value)||2;
   const node=document.getElementById("expCanvas");
   if(!node) return null;
+  node.querySelectorAll("canvas,svg,iframe").forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(!r.width||!r.height) el.remove();
+  });
   const canvas=await html2canvas(node,{
-    backgroundColor:null,
+    backgroundColor:"#0f1e17",
     scale:scale,
     useCORS:true,
-    allowTaint:false,
+    allowTaint:true,
     logging:false,
-    imageTimeout:15000
+    imageTimeout:15000,
+    ignoreElements:function(el){
+      if(el.tagName==="CANVAS"||el.tagName==="IFRAME") return true;
+      if(el.id==="bgCanvas") return true;
+      if(el.classList&&el.classList.contains("bg-noise")) return true;
+      if(el.tagName==="SVG"){
+        const r=el.getBoundingClientRect();
+        if(!r.width||!r.height) return true;
+      }
+      return false;
+    }
   });
   return canvas;
 }
@@ -831,6 +787,6 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26544ee8fa3e921',t:'MTc4NTkyNzMyMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2654dc4fe43e921',t:'MTc4NTkyNzY4NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
