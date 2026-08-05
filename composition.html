@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=118">
+<link rel="stylesheet" href="style.css?v=119">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -102,6 +102,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap" id="adminBar" class="admin-only">
           <button class="btn btn-ghost btn-sm" id="editModeBtn">✎ Режим редактирования</button>
+          <button class="btn btn-gold btn-sm" id="exportPngBtn" style="display:none">📸 Скопировать иерархию (PNG)</button>
         </div>
       </div>
 
@@ -202,20 +203,48 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
 
 <div class="toast" id="toast"></div>
 
-<script src="supabase-loader.js?v=118"></script>
-<script src="config.js?v=118"></script>
-<script src="main.js?v=118"></script>
-<script src="format-utils.js?v=118"></script>
-<script src="holiday-engine.js?v=118"></script>
-<script src="settings-panel.js?v=118"></script>
-<script src="sound-engine.js?v=118"></script>
-<script src="faq-engine.js?v=118"></script>
-<script src="search-engine.js?v=118"></script>
-<script src="notify-engine.js?v=118"></script>
-<script src="auth.js?v=118"></script>
-<script src="roles-engine.js?v=118"></script>
-<script src="select-enhance.js?v=118"></script>
-<script src="composition-engine.js?v=118"></script>
+<div class="modal-back" id="exportModal">
+  <div class="modal" style="max-width:1000px;width:96vw">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3 style="margin:0 0 8px">📸 Экспорт иерархии в PNG</h3>
+    <div class="modal-sub" style="margin-bottom:14px">Красивая обложка для публикации в Discord / соц.сети. Превью ниже — что вы видите, то и получите.</div>
+    <div class="exp-controls" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding:12px;background:rgba(21,36,29,.45);border-radius:10px;border:1px solid rgba(205,168,90,.2)">
+      <label class="cr-notify" style="display:inline-flex"><input type="checkbox" id="expShowContacts" checked><span>Показывать контакты (📞 📡)</span></label>
+      <label class="cr-notify" style="display:inline-flex"><input type="checkbox" id="expShowPhotos" checked><span>Показывать фото</span></label>
+      <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)">
+        Масштаб: <select id="expScale" class="msg-input" style="width:auto;padding:4px 8px">
+          <option value="1">1× (обычный)</option>
+          <option value="2" selected>2× (Retina)</option>
+          <option value="3">3× (максимум)</option>
+        </select>
+      </label>
+    </div>
+    <div style="max-height:60vh;overflow:auto;border:1px solid rgba(205,168,90,.2);border-radius:12px;background:#0a1410;padding:16px">
+      <div id="expPreviewWrap" style="display:flex;justify-content:center"><div id="expPreview"></div></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-ghost" id="expRefreshBtn">🔄 Обновить превью</button>
+      <button class="btn btn-ghost" id="expCopyBtn">📋 В буфер</button>
+      <button class="btn btn-gold" id="expDownloadBtn">💾 Скачать PNG</button>
+    </div>
+  </div>
+</div>
+
+<script src="html2canvas.min.js?v=119"></script>
+<script src="supabase-loader.js?v=119"></script>
+<script src="config.js?v=119"></script>
+<script src="main.js?v=119"></script>
+<script src="format-utils.js?v=119"></script>
+<script src="holiday-engine.js?v=119"></script>
+<script src="settings-panel.js?v=119"></script>
+<script src="sound-engine.js?v=119"></script>
+<script src="faq-engine.js?v=119"></script>
+<script src="search-engine.js?v=119"></script>
+<script src="notify-engine.js?v=119"></script>
+<script src="auth.js?v=119"></script>
+<script src="roles-engine.js?v=119"></script>
+<script src="select-enhance.js?v=119"></script>
+<script src="composition-engine.js?v=119"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -360,8 +389,204 @@ async function boot(){STATE=await VSRF_COMP.load();render()}
 $("editModeBtn").addEventListener("click",()=>{
   editing=!editing;
   $("editModeBtn").textContent=editing?"✓ Готово":"✎ Режим редактирования";
+  $("exportPngBtn").style.display=editing?"":"none";
   render();
 });
+
+function ruDate(){
+  const d=new Date();
+  const mm=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+  return d.getDate()+" "+mm[d.getMonth()]+" "+d.getFullYear()+" г.";
+}
+
+function expBuildHtml(opts){
+  const showContacts=opts&&opts.showContacts!==false;
+  const showPhotos=opts&&opts.showPhotos!==false;
+  const cmd=STATE.hq.cmd_brigade||{};
+  const cmdSlot=(STATE.hq_slots||[]).find(s=>s.key==="cmd_brigade")||{};
+  const cmdBadge=cmdSlot.badge||"Ген-Майор";
+  const cmdHasPhoto=showPhotos&&!!(cmd&&cmd.photo);
+  const cmdFilled=!!cmd.name;
+
+  const staffMembers=(STATE.hq_slots||[]).filter(s=>s.key!=="cmd_brigade");
+  const staffCards=staffMembers.map(slot=>{
+    const p=STATE.hq[slot.key]||{};
+    const filled=!!p.name;
+    const hasPhoto=showPhotos&&!!(p&&p.photo);
+    return `<div class="exp-officer ${filled?"":"exp-empty"}">
+      <div class="exp-photo ${hasPhoto?"":"no-photo"}">
+        ${hasPhoto?`<img src="${esc(p.photo)}" style="${photoStyle(p)}">`:`<span class="exp-init">${filled?esc(initials(p.name)):"—"}</span>`}
+        <div class="exp-rank-tag">${esc(slot.badge)}</div>
+      </div>
+      <div class="exp-body">
+        <div class="exp-role">${esc(slot.label)}</div>
+        <div class="exp-name">${filled?esc(p.name):`<span style="opacity:.4">— вакансия —</span>`}</div>
+        ${showContacts&&(p.code||p.comm)?`<div class="exp-meta">
+          ${p.code?`<span>📞 ${esc(p.code)}</span>`:""}
+          ${p.comm?`<span>📡 ${esc(p.comm)}</span>`:""}
+        </div>`:""}
+      </div>
+    </div>`;
+  }).join("");
+
+  const subsHtml=(STATE.subs||[]).map(sub=>{
+    const color=sub.color||"#7a8a4a";
+    const sorted=(sub.members||[]).slice().sort((a,b)=>VSRF_COMP.rankInfo(a.rank).tier-VSRF_COMP.rankInfo(b.rank).tier);
+    const rows=sorted.map(m=>{
+      const r=VSRF_COMP.rankInfo(m.rank);
+      const hasPhoto=showPhotos&&!!(m&&m.photo);
+      return `<div class="exp-member" style="--m-color:${color}">
+        <div class="exp-mphoto ${hasPhoto?"":"no-photo"}">
+          ${hasPhoto?`<img src="${esc(m.photo)}" style="${photoStyle(m)}">`:`<span class="exp-init">${esc(initials(m.name||""))}</span>`}
+          <div class="exp-mrank-tag" style="background:${color}">${esc(r.label)}</div>
+        </div>
+        <div class="exp-mbody">
+          <div class="exp-mname">${esc(m.name||"")}</div>
+          ${m.role?`<div class="exp-mrole">${esc(m.role)}</div>`:""}
+          ${showContacts&&(m.code||m.comm)?`<div class="exp-mmeta">
+            ${m.code?`<span>📞 ${esc(m.code)}</span>`:""}
+            ${m.comm?`<span>📡 ${esc(m.comm)}</span>`:""}
+          </div>`:""}
+        </div>
+      </div>`;
+    }).join("");
+    return `<section class="exp-sub" style="--sub-color:${color};--sub-color-2:${shade(color,-30)}">
+      <div class="exp-sub-head">
+        <div class="exp-sub-title">${esc(sub.name||"")}</div>
+        <div class="exp-sub-count">${(sub.members||[]).length} чел.</div>
+      </div>
+      <div class="exp-sub-grid">${rows||`<div style="opacity:.5;padding:12px;grid-column:1/-1;text-align:center">— пусто —</div>`}</div>
+    </section>`;
+  }).join("");
+
+  const totalPeople=1+staffMembers.filter(s=>{const p=STATE.hq[s.key];return p&&p.name}).length + (STATE.subs||[]).reduce((a,s)=>a+((s.members||[]).length),0);
+
+  return `<div id="expCanvas" class="exp-canvas">
+    <div class="exp-cover">
+      <div class="exp-cover-emblem">
+        <img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" crossorigin="anonymous" alt="">
+      </div>
+      <div class="exp-cover-text">
+        <div class="exp-cover-eyebrow">Вооружённые Силы Российской Федерации</div>
+        <h1 class="exp-cover-title">1-я ОБрСпН</h1>
+        <div class="exp-cover-sub">Войсковая часть №12132 · Иерархия командования</div>
+        <div class="exp-cover-meta">
+          <span>📅 ${ruDate()}</span>
+          <span>👥 Личный состав: ${totalPeople}</span>
+          <span>🎖 Подразделений: ${(STATE.subs||[]).length}</span>
+        </div>
+      </div>
+      <div class="exp-cover-ribbon"><span></span><span>◈</span><span></span></div>
+    </div>
+
+    <div class="exp-cmd">
+      <div class="exp-cmd-badge">Командир бригады</div>
+      <div class="exp-cmd-inner">
+        <div class="exp-cmd-photo ${cmdHasPhoto?"":"no-photo"}">
+          ${cmdHasPhoto?`<img src="${esc(cmd.photo)}" style="${photoStyle(cmd)}">`:`<span class="exp-init big">${cmdFilled?esc(initials(cmd.name)):"—"}</span>`}
+          <div class="exp-cmd-rank-tag">${esc(cmdBadge)}</div>
+        </div>
+        <div class="exp-cmd-body">
+          <div class="exp-cmd-name">${cmdFilled?esc(cmd.name):`<span style="opacity:.5">Вакансия</span>`}</div>
+          ${cmd.tag?`<div class="exp-cmd-tag">${esc(cmd.tag)}</div>`:""}
+          ${showContacts&&(cmd.code||cmd.comm)?`<div class="exp-cmd-contacts">
+            ${cmd.code?`<span>📞 ${esc(cmd.code)}</span>`:""}
+            ${cmd.comm?`<span>📡 ${esc(cmd.comm)}</span>`:""}
+          </div>`:""}
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-conn"></div>
+
+    <div class="exp-section-title"><span class="exp-line"></span><span class="exp-section-label">Штаб · Заместители</span><span class="exp-line"></span></div>
+    <div class="exp-staff-grid">${staffCards}</div>
+
+    <div class="exp-conn"></div>
+
+    <div class="exp-section-title"><span class="exp-line"></span><span class="exp-section-label">Подразделения</span><span class="exp-line"></span></div>
+    <div class="exp-subs-list">${subsHtml}</div>
+
+    <div class="exp-footer">
+      <div class="exp-footer-motto">Честь · Долг · Отвага</div>
+      <div class="exp-footer-sub">Служим Отечеству · vsrf-official</div>
+    </div>
+  </div>`;
+}
+
+function expRefresh(){
+  const opts={
+    showContacts:$("expShowContacts").checked,
+    showPhotos:$("expShowPhotos").checked
+  };
+  $("expPreview").innerHTML=expBuildHtml(opts);
+}
+
+async function expRender(){
+  const scale=parseFloat($("expScale").value)||2;
+  const node=document.getElementById("expCanvas");
+  if(!node) return null;
+  const canvas=await html2canvas(node,{
+    backgroundColor:null,
+    scale:scale,
+    useCORS:true,
+    allowTaint:false,
+    logging:false,
+    imageTimeout:15000
+  });
+  return canvas;
+}
+
+$("exportPngBtn").addEventListener("click",()=>{
+  if(!STATE){showToast("Ещё грузится...","error");return}
+  expRefresh();
+  $("exportModal").classList.add("active");
+});
+$("expRefreshBtn").addEventListener("click",expRefresh);
+$("expShowContacts").addEventListener("change",expRefresh);
+$("expShowPhotos").addEventListener("change",expRefresh);
+
+$("expDownloadBtn").addEventListener("click",async()=>{
+  const btn=$("expDownloadBtn");
+  const orig=btn.textContent;
+  btn.disabled=true;btn.textContent="⏳ Рендер...";
+  try{
+    const canvas=await expRender();
+    if(!canvas){showToast("Ошибка рендера","error");return}
+    canvas.toBlob(blob=>{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;a.download="ВСРФ_Иерархия_"+new Date().toISOString().slice(0,10)+".png";
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      showToast("✓ PNG скачан","success");
+    },"image/png");
+  }catch(e){showToast("Ошибка: "+e.message,"error");console.warn(e)}
+  finally{btn.disabled=false;btn.textContent=orig}
+});
+
+$("expCopyBtn").addEventListener("click",async()=>{
+  const btn=$("expCopyBtn");
+  const orig=btn.textContent;
+  btn.disabled=true;btn.textContent="⏳ Рендер...";
+  try{
+    const canvas=await expRender();
+    if(!canvas) throw new Error("нет canvas");
+    canvas.toBlob(async blob=>{
+      try{
+        await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
+        showToast("✓ Скопировано в буфер (Ctrl+V в Discord)","success");
+      }catch(err){
+        showToast("Буфер недоступен — используйте «Скачать»","error");
+        console.warn("clipboard err:",err);
+      }
+    },"image/png");
+  }catch(e){showToast("Ошибка: "+e.message,"error")}
+  finally{btn.disabled=false;btn.textContent=orig}
+});
+
+$("exportModal").querySelector(".modal-close").addEventListener("click",()=>$("exportModal").classList.remove("active"));
+$("exportModal").addEventListener("click",e=>{if(e.target===$("exportModal")) $("exportModal").classList.remove("active")});
 
 const pModal=$("personModal"),pForm=$("pForm"),pFields=$("pFormFields"),pDel=$("pDeleteBtn");
 const sModal=$("subModal"),sForm=$("sForm"),sDel=$("sDeleteBtn");
@@ -606,6 +831,6 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26512150839e917',t:'MTc4NTkyNTI0MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26544ee8fa3e921',t:'MTc4NTkyNzMyMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
