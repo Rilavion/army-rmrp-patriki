@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<title>Настройки форм заявок</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=112">
+</head>
+<body>
+<canvas id="bgCanvas"></canvas><div class="bg-noise"></div>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="index.html"><div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div><div class="brand-text"><span class="brand-label">Настройки</span><span class="brand-name">Формы заявок</span></div></a>
+  <div class="header-actions" style="margin-left:auto">
+    <a href="requests-review.html" class="btn btn-ghost btn-sm">← К заявкам</a>
+    <button class="btn btn-gold btn-sm" id="rsSaveAll">💾 Сохранить всё</button>
+  </div>
+</div></header>
+
+<main><section class="apps-body"><div class="container" style="max-width:1100px">
+  <div id="rsGuard" style="display:none"><div class="apps-guard-box"><div class="apps-guard-icon">⚠</div><h2>Доступ ограничен</h2><p>Только для админов.</p></div></div>
+  <div id="rsRoot" style="display:none">
+    <h3>🔧 Общие параметры</h3>
+    <div class="cf-group"><div class="cf-group-body">
+      <div class="msg-row">
+        <div class="form-group msg-flex-1"><label>Мин. звание для увала</label><input type="text" id="rsMinLeave" class="msg-input"></div>
+        <div class="form-group msg-flex-1"><label>Мин. звание для отпуска</label><input type="text" id="rsMinVac" class="msg-input"></div>
+      </div>
+      <div class="msg-row">
+        <div class="form-group msg-flex-1"><label>Макс. минут увала</label><input type="number" id="rsMaxLeave" class="msg-input" value="60"></div>
+        <div class="form-group msg-flex-1"><label>Макс. дней отпуска</label><input type="number" id="rsMaxVac" class="msg-input" value="7"></div>
+      </div>
+      <div class="msg-row">
+        <div class="form-group msg-flex-1"><label>Распорядок с</label><input type="time" id="rsWStart" class="msg-input"></div>
+        <div class="form-group msg-flex-1"><label>Будни до</label><input type="time" id="rsWEnd" class="msg-input"></div>
+        <div class="form-group msg-flex-1"><label>Выходные до</label><input type="time" id="rsWkEnd" class="msg-input"></div>
+        <div class="form-group msg-flex-1"><label>Праздники до</label><input type="time" id="rsHEnd" class="msg-input"></div>
+      </div>
+      <div class="msg-row">
+        <div class="form-group msg-flex-1"><label>Обед с</label><input type="time" id="rsLS" class="msg-input"></div>
+        <div class="form-group msg-flex-1"><label>Обед до</label><input type="time" id="rsLE" class="msg-input"></div>
+        <div class="form-group msg-flex-1"><label>Поверка</label><input type="time" id="rsPov" class="msg-input"></div>
+        <div class="form-group msg-flex-1"><label>Окно поверки ±мин</label><input type="number" id="rsPovW" class="msg-input" value="30"></div>
+      </div>
+      <div class="form-group">
+        <label class="cr-notify" style="display:inline-flex">
+          <input type="checkbox" id="rsBlockViol"><span>⛔ Блокировать увольнение/повышение при активных нарушениях в реестре</span>
+        </label>
+      </div>
+    </div></div>
+
+    <h3 style="margin-top:24px">📦 Поставки → баллы (для повышения)</h3>
+    <div class="cf-group"><div class="cf-group-body">
+      <div class="msg-help">Формат: одна пара «тип: балл» в строке. Пример: <code>РЛС: 2</code></div>
+      <div class="form-group"><textarea id="rsSupplyScore" class="msg-input" rows="6" style="resize:vertical;font-family:monospace" placeholder="РЛС: 2&#10;Боеприпасы: 1"></textarea></div>
+    </div></div>
+
+    <h3 style="margin-top:24px">📨 Каналы DS и пинги</h3>
+    <div id="rsForms"></div>
+    <div class="form-msg" id="rsMsg" style="margin-top:14px"></div>
+  </div>
+</div></section></main>
+
+<div class="modal-back" id="loginModal"><div class="modal"><button class="modal-close" aria-label="Закрыть">✕</button><h3>Вход</h3>
+  <form><div class="form-group"><label>Email</label><input type="email" name="email" required></div><div class="form-group"><label>Пароль</label><input type="password" name="password" required></div><button class="btn btn-gold" style="width:100%" type="submit">Войти</button><div class="form-msg"></div></form></div></div>
+
+<footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
+
+<script src="supabase-loader.js?v=112"></script>
+<script src="config.js?v=112"></script>
+<script src="main.js?v=112"></script>
+<script src="auth.js?v=112"></script>
+<script src="roles-engine.js?v=112"></script>
+<script src="requests-engine.js?v=112"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const KINDS=["leave","vacation_ic","vacation_ooc","dismissal","promotion"];
+let SETTINGS=null, FORMS={}, CHANNELS=[], ROLES=[];
+
+async function boot(){
+  const can=window.VSRF_ROLES&&window.VSRF_ROLES.can("requests","settings");
+  if(!can){$("rsGuard").style.display="";$("rsRoot").style.display="none";return}
+  $("rsGuard").style.display="none";$("rsRoot").style.display="";
+
+  SETTINGS=await VSRF_REQUESTS.getSettings()||{};
+  const c=window.VSRF_AUTH.state.client;
+  const {data:ch}=await c.from("ds_channels").select("channel_id,name,parent_name").order("name");
+  CHANNELS=ch||[];
+  const {data:rl}=await c.from("ds_guild_roles").select("role_id,name,position").order("position",{ascending:false});
+  ROLES=rl||[];
+
+  for(const k of KINDS){
+    FORMS[k]=await VSRF_REQUESTS.getForm(k)||{id:k};
+  }
+
+  fillCommon();
+  renderForms();
+}
+
+function fillCommon(){
+  $("rsMinLeave").value=SETTINGS.min_rank_leave||"Ефрейтор";
+  $("rsMinVac").value=SETTINGS.min_rank_vacation||"Старший Сержант";
+  $("rsMaxLeave").value=SETTINGS.max_leave_minutes||60;
+  $("rsMaxVac").value=SETTINGS.max_vacation_days||7;
+  $("rsWStart").value=(SETTINGS.weekday_start||"09:00").slice(0,5);
+  $("rsWEnd").value=(SETTINGS.weekday_end||"22:00").slice(0,5);
+  $("rsWkEnd").value=(SETTINGS.weekend_end||"21:00").slice(0,5);
+  $("rsHEnd").value=(SETTINGS.holiday_end||"20:00").slice(0,5);
+  $("rsLS").value=(SETTINGS.lunch_start||"14:00").slice(0,5);
+  $("rsLE").value=(SETTINGS.lunch_end||"15:00").slice(0,5);
+  $("rsPov").value=(SETTINGS.poverka_time||"21:00").slice(0,5);
+  $("rsPovW").value=SETTINGS.poverka_window_min||30;
+  $("rsBlockViol").checked=SETTINGS.block_if_violations!==false;
+  const ss=SETTINGS.supply_score||{"РЛС":2,"Боеприпасы":1,"Медикаменты":1.5,"Продовольствие":1,"ГСМ":0.5};
+  $("rsSupplyScore").value=Object.entries(ss).map(([k,v])=>k+": "+v).join("\n");
+}
+
+function chSelect(id,cur){
+  const byParent=new Map();
+  for(const c of CHANNELS){const k=c.parent_name||"Без категории";if(!byParent.has(k)) byParent.set(k,[]);byParent.get(k).push(c)}
+  let opts=`<option value="">— не выбрано —</option>`;
+  for(const [pn,list] of byParent){
+    opts+=`<optgroup label="${esc(pn)}">`;
+    for(const c of list) opts+=`<option value="${c.channel_id}" ${c.channel_id===cur?"selected":""}>#${esc(c.name)}</option>`;
+    opts+=`</optgroup>`;
+  }
+  return `<select id="${id}" class="msg-input">${opts}</select>`;
+}
+function roleSelect(id,cur){
+  return `<select id="${id}" class="msg-input"><option value="">— не выбрано —</option>${ROLES.filter(r=>r.name!=="@everyone").map(r=>`<option value="${r.role_id}" ${r.role_id===cur?"selected":""}>@${esc(r.name)}</option>`).join("")}</select>`;
+}
+
+function renderForms(){
+  $("rsForms").innerHTML=KINDS.map(k=>{
+    const meta=VSRF_REQUESTS.KIND_META[k];
+    const f=FORMS[k]||{};
+    return `<div class="cf-group" data-kind="${k}">
+      <div class="cf-group-title">${meta.icon} ${esc(meta.label)}</div>
+      <div class="cf-group-body">
+        <div class="form-group"><label>Канал DS</label>${chSelect("rsCh_"+k,f.channel_id||"")}</div>
+        <div class="msg-row">
+          <div class="form-group msg-flex-1"><label>Пинг-роль #1</label>${roleSelect("rsR1_"+k,f.ping_role_id||"")}</div>
+          <div class="form-group msg-flex-1"><label>Пинг-роль #2 (опц.)</label>${roleSelect("rsR2_"+k,f.ping_role_id_2||"")}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+$("rsSaveAll").addEventListener("click",async()=>{
+  const msg=$("rsMsg");
+  const supplyScore={};
+  ($("rsSupplyScore").value||"").split("\n").forEach(line=>{
+    const m=line.match(/^\s*([^:]+):\s*(\d+(?:\.\d+)?)\s*$/);
+    if(m) supplyScore[m[1].trim()]=parseFloat(m[2]);
+  });
+  msg.className="form-msg info";msg.textContent="Сохранение...";
+  const set={
+    min_rank_leave:$("rsMinLeave").value.trim()||null,
+    min_rank_vacation:$("rsMinVac").value.trim()||null,
+    max_leave_minutes:parseInt($("rsMaxLeave").value)||60,
+    max_vacation_days:parseInt($("rsMaxVac").value)||7,
+    weekday_start:$("rsWStart").value||"09:00",
+    weekday_end:$("rsWEnd").value||"22:00",
+    weekend_end:$("rsWkEnd").value||"21:00",
+    holiday_end:$("rsHEnd").value||"20:00",
+    lunch_start:$("rsLS").value||"14:00",
+    lunch_end:$("rsLE").value||"15:00",
+    poverka_time:$("rsPov").value||"21:00",
+    poverka_window_min:parseInt($("rsPovW").value)||30,
+    block_if_violations:$("rsBlockViol").checked,
+    supply_score:supplyScore
+  };
+  const r1=await VSRF_REQUESTS.saveSettings(set);
+  if(!r1.ok){msg.className="form-msg error";msg.textContent="Общие: "+r1.error;return}
+  for(const k of KINDS){
+    const patch={
+      id:k,
+      channel_id:document.getElementById("rsCh_"+k).value||null,
+      ping_role_id:document.getElementById("rsR1_"+k).value||null,
+      ping_role_id_2:document.getElementById("rsR2_"+k).value||null
+    };
+    const r=await VSRF_REQUESTS.saveForm(patch);
+    if(!r.ok){msg.className="form-msg error";msg.textContent="Форма "+k+": "+r.error;return}
+  }
+  msg.className="form-msg success";msg.textContent="✓ Сохранено";
+});
+
+if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
+setTimeout(boot,500);
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2644de5c88c6657',t:'MTc4NTkxNzIwNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

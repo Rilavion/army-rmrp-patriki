@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=111">
+<link rel="stylesheet" href="style.css?v=112">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -62,6 +62,12 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <a href="apps.html" data-page="apps.html" data-transition data-perm="apps:view">Заявления</a>
       <a href="vp.html" data-page="vp.html" data-transition data-perm="vp:view">Проверки ВП</a>
       <a href="complaints-review.html" data-page="complaints-review.html" data-transition data-perm="complaints:review,complaints:view">Рассмотрение жалоб</a>
+      <a href="leave.html" data-page="leave.html" data-transition data-loggedin>Увольнительная</a>
+      <a href="vacation-ic.html" data-page="vacation-ic.html" data-transition data-loggedin>Отпуск IC</a>
+      <a href="vacation-ooc.html" data-page="vacation-ooc.html" data-transition data-loggedin>Отпуск OOC</a>
+      <a href="dismissal.html" data-page="dismissal.html" data-transition data-loggedin>Увольнение</a>
+      <a href="promotion.html" data-page="promotion.html" data-transition data-loggedin>Повышение</a>
+      <a href="requests-review.html" data-page="requests-review.html" data-transition data-perm="requests:review,requests:view">Рассмотрение заявок</a>
       <a href="payroll.html" data-page="payroll.html" data-transition data-perm="payroll:view">Реестр премирования</a>
       <a href="message.html" data-page="message.html" data-transition data-perm="messages:send">Сообщения</a>
       <a href="lk.html" data-page="lk.html" data-transition data-perm="lk:users,lk:roles,lk:settings">Личный кабинет</a>
@@ -260,22 +266,22 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=111"></script>
-<script src="config.js?v=111"></script>
-<script src="main.js?v=111"></script>
-<script src="format-utils.js?v=111"></script>
-<script src="holiday-engine.js?v=111"></script>
-<script src="settings-panel.js?v=111"></script>
-<script src="sound-engine.js?v=111"></script>
-<script src="faq-engine.js?v=111"></script>
-<script src="search-engine.js?v=111"></script>
-<script src="notify-engine.js?v=111"></script>
+<script src="supabase-loader.js?v=112"></script>
+<script src="config.js?v=112"></script>
+<script src="main.js?v=112"></script>
+<script src="format-utils.js?v=112"></script>
+<script src="holiday-engine.js?v=112"></script>
+<script src="settings-panel.js?v=112"></script>
+<script src="sound-engine.js?v=112"></script>
+<script src="faq-engine.js?v=112"></script>
+<script src="search-engine.js?v=112"></script>
+<script src="notify-engine.js?v=112"></script>
 
-<script src="auth.js?v=111"></script>
-<script src="roles-engine.js?v=111"></script>
-<script src="autopark-engine.js?v=111"></script>
-<script src="select-enhance.js?v=111"></script>
-<script src="draft-engine.js?v=111"></script>
+<script src="auth.js?v=112"></script>
+<script src="roles-engine.js?v=112"></script>
+<script src="autopark-engine.js?v=112"></script>
+<script src="select-enhance.js?v=112"></script>
+<script src="draft-engine.js?v=112"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -614,5 +620,5 @@ load();
 })();
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2634f73ffd8f3ab',t:'MTc4NTkwNjc4Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2644cffbf4b6657',t:'MTc4NTkxNzE2OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<title id="rfTitle">Подача заявки · ВС РФ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=112">
+<style id="vsrf-admin-guard">
+[data-admin]{display:none !important}[data-staff]{display:none !important}
+body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
+body.vsrf-is-staff .nav a[data-staff]{display:inline-flex !important}
+body.vsrf-is-admin [data-admin]:not(.nav a){display:initial !important}
+body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas><div class="bg-noise"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-text"><span class="brand-label">Штаб</span><span class="brand-name" id="rfBrand">Заявка</span></div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="info.html" data-page="info.html" data-transition>Информация</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="training.html" data-page="training.html" data-transition>Обучение</a>
+      <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
+      <a href="docs.html" data-page="docs.html" data-transition data-perm="docs:view">Документы</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
+      <a href="complaints.html" data-page="complaints.html" data-transition>Жалобы</a>
+      <a href="leave.html" data-page="leave.html" data-transition data-loggedin>Увольнительная</a>
+      <a href="vacation-ic.html" data-page="vacation-ic.html" data-transition data-loggedin>Отпуск IC</a>
+      <a href="vacation-ooc.html" data-page="vacation-ooc.html" data-transition data-loggedin>Отпуск OOC</a>
+      <a href="dismissal.html" data-page="dismissal.html" data-transition data-loggedin>Увольнение</a>
+      <a href="promotion.html" data-page="promotion.html" data-transition data-loggedin>Повышение</a>
+      <a href="supply.html" data-page="supply.html" data-transition data-perm="supply:view">Поставки</a>
+      <a href="apps.html" data-page="apps.html" data-transition data-perm="apps:view">Заявления</a>
+      <a href="vp.html" data-page="vp.html" data-transition data-perm="vp:view">Проверки ВП</a>
+      <a href="requests-review.html" data-page="requests-review.html" data-transition data-perm="requests:review,requests:view">Рассмотрение заявок</a>
+      <a href="complaints-review.html" data-page="complaints-review.html" data-transition data-perm="complaints:review,complaints:view">Рассмотрение жалоб</a>
+      <a href="payroll.html" data-page="payroll.html" data-transition data-perm="payroll:view">Реестр премирования</a>
+      <a href="message.html" data-page="message.html" data-transition data-perm="messages:send">Сообщения</a>
+      <a href="lk.html" data-page="lk.html" data-transition data-perm="lk:users,lk:roles,lk:settings">Личный кабинет</a>
+    </nav>
+    <div class="header-actions">
+      <a href="requests-settings.html" data-page="requests-settings.html" class="btn btn-gold btn-sm" data-perm="requests:settings">⚙ Настройки форм</a>
+      <button class="search-btn" data-open-search title="Поиск"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg><span>Поиск</span></button>
+      <button class="icon-btn" data-open-notify title="Уведомления" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span class="vsrf-notify-badge" data-notify-badge></span></button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему"><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <button class="login-btn" data-open-login><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg><span>Войти</span></button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="apps-head">
+    <div class="container">
+      <div class="apps-head-ribbon"><span class="apps-head-ribbon-line"></span><span class="apps-head-ribbon-emblem">◈</span><span class="apps-head-ribbon-name" id="rfRibbon">Заявка</span><span class="apps-head-ribbon-emblem">◈</span><span class="apps-head-ribbon-line"></span></div>
+      <h1 class="apps-head-title" id="rfTitleH1">Заявка</h1>
+      <div class="apps-head-subtitle" id="rfSubtitle"></div>
+    </div>
+  </section>
+
+  <section class="apps-body">
+    <div class="container">
+      <div id="rfRoot"><div class="apps-empty"><p>Загрузка формы...</p></div></div>
+    </div>
+  </section>
+</main>
+
+<div class="modal-back" id="rfSuccessModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <div style="text-align:center;padding:12px 0">
+      <div style="font-size:56px">✅</div>
+      <h3 style="margin:8px 0 6px">Заявка принята</h3>
+      <div class="modal-sub">Ваш уникальный код:</div>
+      <div id="rfCode" style="font:700 22px/1 Inter,sans-serif;color:var(--gold-b);letter-spacing:.05em;background:rgba(21,36,29,.6);padding:14px 18px;border-radius:10px;border:1px dashed var(--gold);margin:12px auto;display:inline-block"></div>
+      <div class="modal-sub">Ожидайте рассмотрения командованием</div>
+      <button class="btn btn-gold" style="margin-top:14px" id="rfSuccessOk">Понятно</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal"><button class="modal-close" aria-label="Закрыть">✕</button><h3>Вход</h3>
+    <form><div class="form-group"><label>Email</label><input type="email" name="email" required></div><div class="form-group"><label>Пароль</label><input type="password" name="password" required></div><button class="btn btn-gold" style="width:100%" type="submit">Войти</button><div class="form-msg"></div></form></div>
+</div>
+
+<footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
+
+<script src="supabase-loader.js?v=112"></script>
+<script src="config.js?v=112"></script>
+<script src="main.js?v=112"></script>
+<script src="format-utils.js?v=112"></script>
+<script src="holiday-engine.js?v=112"></script>
+<script src="settings-panel.js?v=112"></script>
+<script src="sound-engine.js?v=112"></script>
+<script src="auth.js?v=112"></script>
+<script src="roles-engine.js?v=112"></script>
+<script src="search-engine.js?v=112"></script>
+<script src="notify-engine.js?v=112"></script>
+<script src="requests-engine.js?v=112"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const PAGE_MAP={"leave.html":"leave","vacation-ic.html":"vacation_ic","vacation-ooc.html":"vacation_ooc","dismissal.html":"dismissal","promotion.html":"promotion"};
+const currentFile=(location.pathname.split("/").pop()||"leave.html").toLowerCase();
+const KIND=PAGE_MAP[currentFile]||"leave";
+
+const DEFAULT_FIELDS={
+  leave:[
+    {key:"submitter_fio",label:"ФИО",type:"text",required:true,placeholder:"Иванов И.",group:"Личные данные"},
+    {key:"submitter_static",label:"Статик",type:"text",required:true,placeholder:"123-456",group:"Личные данные"},
+    {key:"position",label:"Должность",type:"text",required:true,placeholder:"Мл. Сержант · ОГП",group:"Личные данные"},
+    {key:"submitter_discord",label:"Discord (@тег или ID)",type:"text",required:false,placeholder:"@user",group:"Личные данные"},
+    {key:"leave_date",label:"Дата увала",type:"date",required:true,group:"Время увала"},
+    {key:"split",label:"Разбить на 2 части (по 30 мин)",type:"checkbox",required:false,group:"Время увала"},
+    {key:"time_start",label:"Начало (часть 1)",type:"time",required:true,group:"Время увала"},
+    {key:"duration",label:"Длительность (минут)",type:"select",required:true,options:["15","30","45","60"],group:"Время увала"},
+    {key:"time_start_2",label:"Начало (часть 2)",type:"time",required:false,group:"Время увала",show_if:"split"},
+    {key:"reason",label:"Причина увала",type:"textarea",required:true,placeholder:"По каким причинам необходим увал",group:"Обоснование"}
+  ],
+  vacation_ic:[
+    {key:"submitter_fio",label:"ФИО",type:"text",required:true,placeholder:"Иванов И.",group:"Личные данные"},
+    {key:"submitter_static",label:"Статик",type:"text",required:true,placeholder:"123-456",group:"Личные данные"},
+    {key:"position",label:"Должность",type:"text",required:true,placeholder:"Ст. Сержант · ССО",group:"Личные данные"},
+    {key:"mil_id",label:"Военный билет №",type:"text",required:true,placeholder:"№ ВБ",group:"Личные данные"},
+    {key:"submitter_discord",label:"Discord",type:"text",required:false,group:"Личные данные"},
+    {key:"from_date",label:"Дата начала",type:"date",required:true,group:"Период"},
+    {key:"to_date",label:"Дата окончания",type:"date",required:true,group:"Период"},
+    {key:"reason",label:"Причина отпуска (IC/RP)",type:"textarea",required:true,placeholder:"По сюжету/RP",group:"Обоснование"}
+  ],
+  vacation_ooc:[
+    {key:"submitter_fio",label:"ФИО",type:"text",required:true,group:"Личные данные"},
+    {key:"submitter_static",label:"Статик",type:"text",required:true,group:"Личные данные"},
+    {key:"position",label:"Должность",type:"text",required:false,group:"Личные данные"},
+    {key:"submitter_discord",label:"Discord",type:"text",required:false,group:"Личные данные"},
+    {key:"from_date",label:"Дата начала",type:"date",required:true,group:"Период"},
+    {key:"to_date",label:"Дата окончания",type:"date",required:true,group:"Период"},
+    {key:"reason",label:"Причина (OOC/NonRP)",type:"textarea",required:true,placeholder:"Работа/учёба/личное",group:"Обоснование"}
+  ],
+  dismissal:[
+    {key:"submitter_fio",label:"ФИО",type:"text",required:true,group:"Личные данные"},
+    {key:"submitter_static",label:"Статик",type:"text",required:true,group:"Личные данные"},
+    {key:"position",label:"Текущая должность",type:"text",required:true,group:"Личные данные"},
+    {key:"submitter_discord",label:"Discord",type:"text",required:false,group:"Личные данные"},
+    {key:"reason",label:"Причина увольнения",type:"textarea",required:true,placeholder:"Развёрнутый ответ",group:"Обоснование"},
+    {key:"return_gear",label:"Обязуюсь сдать выданное имущество",type:"checkbox",required:true,group:"Обоснование"}
+  ],
+  promotion:[
+    {key:"submitter_fio",label:"ФИО",type:"text",required:true,group:"Личные данные"},
+    {key:"submitter_static",label:"Статик",type:"text",required:true,group:"Личные данные"},
+    {key:"current_rank",label:"Текущее звание",type:"text",required:true,group:"Личные данные"},
+    {key:"target_rank",label:"Желаемое звание",type:"text",required:true,group:"Личные данные"},
+    {key:"submitter_discord",label:"Discord",type:"text",required:false,group:"Личные данные"},
+    {key:"exam_link",label:"Ссылка на сдачу экзамена (DS)",type:"url",required:true,placeholder:"https://discord.com/channels/.../...",group:"Подтверждения"},
+    {key:"supply_link",label:"Ссылка на статистику поставок (DS)",type:"url",required:false,placeholder:"https://discord.com/channels/.../...",group:"Подтверждения"},
+    {key:"vp_link",label:"Ссылка на успешную проверку ВП (DS)",type:"url",required:false,group:"Подтверждения"},
+    {key:"achievements",label:"Достижения / Заслуги",type:"textarea",required:true,placeholder:"Опишите чем заслужили повышение",group:"Обоснование"}
+  ]
+};
+
+const KIND_TITLES={
+  leave:"Увольнительная (Увал)",
+  vacation_ic:"Отпуск IC (RP)",
+  vacation_ooc:"Отпуск OOC (NonRP)",
+  dismissal:"Увольнение из бригады",
+  promotion:"Заявка на повышение"
+};
+const KIND_SUBS={
+  leave:"Не более 60 минут (можно разбить 2×30). Ефрейтор и выше.",
+  vacation_ic:"Ролевой отпуск — до 7 дней раз в месяц. Ст. Сержант и выше · Военный билет обязателен.",
+  vacation_ooc:"Отпуск по личным причинам (работа/учёба/жизнь).",
+  dismissal:"Заявление на выход из состава бригады. Требуется одобрение командования.",
+  promotion:"Заявка с прикреплением подтверждений (экзамен, статистика поставок и т.д.)."
+};
+
+let FORM=null, SETTINGS=null;
+
+async function boot(){
+  const kindMeta=VSRF_REQUESTS.KIND_META[KIND];
+  document.title=KIND_TITLES[KIND]+" · ВС РФ";
+  $("rfTitle").textContent=document.title;
+  $("rfBrand").textContent=kindMeta.icon+" "+kindMeta.label;
+  $("rfRibbon").textContent="Штаб · "+kindMeta.label;
+  $("rfTitleH1").textContent=KIND_TITLES[KIND];
+  $("rfSubtitle").textContent=KIND_SUBS[KIND];
+
+  SETTINGS=await VSRF_REQUESTS.getSettings();
+  const f=await VSRF_REQUESTS.getForm(KIND);
+  FORM={
+    id:KIND,
+    title:(f&&f.title)||KIND_TITLES[KIND],
+    fields:(f&&f.fields&&f.fields.length)?f.fields:DEFAULT_FIELDS[KIND],
+    description:(f&&f.description)||KIND_SUBS[KIND]
+  };
+  render();
+}
+
+function fieldHtml(f){
+  const req=f.required?` <span style="color:#e77070">*</span>`:` <span style="color:#8a8a8a;font-size:12px">(необязательно)</span>`;
+  const ph=f.placeholder||"";
+  const nm=esc(f.key);
+  if(f.type==="textarea") return `<div class="form-group" data-fkey="${nm}"><label>${esc(f.label)}${req}</label><textarea class="msg-input" name="${nm}" ${f.required?"required":""} placeholder="${esc(ph)}" rows="4" style="resize:vertical;font-family:inherit"></textarea></div>`;
+  if(f.type==="select"){
+    const opts=(f.options||[]).map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join("");
+    return `<div class="form-group" data-fkey="${nm}"><label>${esc(f.label)}${req}</label><select class="msg-input" name="${nm}" ${f.required?"required":""}><option value="">— выбрать —</option>${opts}</select></div>`;
+  }
+  if(f.type==="date") return `<div class="form-group" data-fkey="${nm}"><label>${esc(f.label)}${req}</label><input class="msg-input" type="date" name="${nm}" ${f.required?"required":""}></div>`;
+  if(f.type==="time") return `<div class="form-group" data-fkey="${nm}"><label>${esc(f.label)}${req}</label><input class="msg-input" type="time" name="${nm}" ${f.required?"required":""}></div>`;
+  if(f.type==="checkbox") return `<div class="form-group" data-fkey="${nm}"><label class="cr-notify" style="display:inline-flex"><input type="checkbox" name="${nm}"><span>${esc(f.label)}</span></label></div>`;
+  if(f.type==="url") return `<div class="form-group" data-fkey="${nm}"><label>${esc(f.label)}${req}</label><input class="msg-input" type="url" name="${nm}" ${f.required?"required":""} placeholder="${esc(ph)}"></div>`;
+  return `<div class="form-group" data-fkey="${nm}"><label>${esc(f.label)}${req}</label><input class="msg-input" type="text" name="${nm}" ${f.required?"required":""} placeholder="${esc(ph)}"></div>`;
+}
+
+function render(){
+  const fields=(FORM.fields||[]).slice();
+  const groups=new Map();
+  for(const f of fields){
+    const g=f.group||"Данные";
+    if(!groups.has(g)) groups.set(g,[]);
+    groups.get(g).push(f);
+  }
+  let html=`<form id="rfForm" class="cf-form">`;
+  if(KIND==="leave"||KIND==="vacation_ic"||KIND==="vacation_ooc"){
+    html+=`<div class="rf-rules">📖 <b>Правила:</b> ${esc(KIND_SUBS[KIND])}</div>`;
+  }
+  for(const [gn,gf] of groups){
+    html+=`<div class="cf-group"><div class="cf-group-title">${esc(gn)}</div><div class="cf-group-body">${gf.map(fieldHtml).join("")}</div></div>`;
+  }
+  html+=`<div class="form-msg" id="rfMsg"></div>
+    <div style="display:flex;justify-content:center;padding-top:8px">
+      <button type="submit" class="btn btn-gold" style="min-width:280px;padding:14px 28px;font-size:15px">📨 Подать заявку</button>
+    </div></form>`;
+  $("rfRoot").innerHTML=html;
+  $("rfForm").addEventListener("submit",onSubmit);
+  applyConditionals();
+  document.querySelectorAll('#rfForm input[type="checkbox"]').forEach(el=>el.addEventListener("change",applyConditionals));
+}
+
+function applyConditionals(){
+  const fields=FORM.fields||[];
+  for(const f of fields){
+    if(!f.show_if) continue;
+    const master=document.querySelector(`#rfForm [name="${f.show_if}"]`);
+    const target=document.querySelector(`#rfForm [data-fkey="${f.key}"]`);
+    if(!target) continue;
+    const show=master&&master.type==="checkbox"?master.checked:master&&!!master.value;
+    target.style.display=show?"":"none";
+  }
+}
+
+async function onSubmit(e){
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  const values={};
+  (FORM.fields||[]).forEach(f=>{
+    const el=e.target.elements[f.key];
+    if(!el) return;
+    if(f.type==="checkbox") values[f.key]=el.checked;
+    else values[f.key]=(fd.get(f.key)||"").toString().trim();
+  });
+  const msg=$("rfMsg");
+
+  const fio=values.submitter_fio||"";
+  const stat=values.submitter_static||"";
+  const discord=values.submitter_discord||"";
+
+  if(KIND==="dismissal"||KIND==="promotion"){
+    if(stat&&SETTINGS&&SETTINGS.block_if_violations){
+      msg.className="form-msg info";msg.textContent="Проверка реестра нарушений...";
+      const cnt=await VSRF_REQUESTS.checkActiveViolations(stat);
+      if(cnt>0){
+        msg.className="form-msg error";
+        msg.innerHTML="⛔ У сотрудника с этим статиком есть <b>"+cnt+"</b> активн"+(cnt===1?"ое нарушение":"ых нарушений")+" в реестре. Подача "+(KIND==="dismissal"?"увольнения":"повышения")+" заблокирована. Обратитесь к ВП для их снятия.";
+        return;
+      }
+    }
+  }
+
+  if(KIND==="leave"){
+    const startStr=values.time_start;
+    const dur=parseInt(values.duration)||0;
+    const dateStr=values.leave_date;
+    const chk=VSRF_REQUESTS.validateLeaveTime(startStr,dur,SETTINGS,dateStr);
+    if(!chk.ok){msg.className="form-msg error";msg.textContent="⏱ "+chk.error;return}
+    if(values.split){
+      const chk2=VSRF_REQUESTS.validateLeaveTime(values.time_start_2,30,SETTINGS,dateStr);
+      if(!chk2.ok){msg.className="form-msg error";msg.textContent="⏱ Часть 2: "+chk2.error;return}
+    }
+  }
+
+  msg.className="form-msg info";msg.textContent="Отправка заявки...";
+  const r=await VSRF_REQUESTS.submit(KIND,values,fio,stat,discord);
+  if(!r.ok){msg.className="form-msg error";msg.textContent="Ошибка: "+r.error;return}
+  $("rfCode").textContent=r.code;
+  $("rfSuccessModal").classList.add("active");
+  e.target.reset();
+  applyConditionals();
+}
+
+$("rfSuccessOk").addEventListener("click",()=>$("rfSuccessModal").classList.remove("active"));
+$("rfSuccessModal").querySelector(".modal-close").addEventListener("click",()=>$("rfSuccessModal").classList.remove("active"));
+$("rfSuccessModal").addEventListener("click",e=>{if(e.target===$("rfSuccessModal")) $("rfSuccessModal").classList.remove("active")});
+
+boot();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2644eb32dc26657',t:'MTc4NTkxNzIzOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
