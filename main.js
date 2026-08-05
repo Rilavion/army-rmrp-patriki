@@ -66,14 +66,21 @@
       });
 
       const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html","complaints.html"];
-      const loggedInPages=["tests.html","leave.html","vacation-ic.html","vacation-ooc.html","dismissal.html","promotion.html","lk.html"];
-      const staffPages=["apps.html","apps-stats.html","vp.html","complaints-review.html","requests-review.html","requests-settings.html","payroll.html","supply.html","supply-stats.html","docs.html","message.html"];
+      const loggedInPages=["tests.html","leave.html","vacation-ic.html","vacation-ooc.html","dismissal.html","promotion.html"];
+      const staffPages=["apps.html","apps-stats.html","vp.html","complaints-review.html","requests-review.html","requests-settings.html","payroll.html","supply.html","supply-stats.html","docs.html","message.html","lk.html"];
+      const alwaysVisibleForLogged=["lk.html"];
 
 
       const publicLinks=links.filter(a=>publicPages.includes((a.dataset.page||"").toLowerCase()));
       const loggedInLinks=links.filter(a=>loggedInPages.includes((a.dataset.page||"").toLowerCase()));
       const staffLinks=links.filter(a=>staffPages.includes((a.dataset.page||"").toLowerCase()));
       loggedInLinks.forEach(a=>a.setAttribute("data-loggedin",""));
+      staffLinks.forEach(a=>{
+        if(alwaysVisibleForLogged.includes((a.dataset.page||"").toLowerCase())){
+          a.setAttribute("data-loggedin","");
+          a.removeAttribute("data-perm");
+        }
+      });
 
       nav.innerHTML="";
       const header=document.createElement("div");
@@ -109,8 +116,7 @@
       if(staffLinks.length){
         const sec2=document.createElement("div");
         sec2.className="nav-section";
-        const staffPerms=staffLinks.map(a=>a.getAttribute("data-perm")).filter(Boolean).join(",");
-        if(staffPerms) sec2.setAttribute("data-perm",staffPerms);
+        sec2.setAttribute("data-loggedin","");
         sec2.innerHTML='<div class="nav-section-title">Служебное</div>';
         const g2=document.createElement("div");
         g2.className="nav-links";
