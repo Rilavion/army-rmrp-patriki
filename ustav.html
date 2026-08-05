@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=123">
+<link rel="stylesheet" href="style.css?v=128">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -41,7 +41,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
       <div class="brand-text">
         <span class="brand-label">Вооружённые Силы РФ</span>
-        <span class="brand-name">1-я ОБрСпН · в/ч №12132</span>
+        <span class="brand-name">1-я МСБр · в/ч №12132</span>
       </div>
     </a>
     <nav class="nav" id="mainNav">
@@ -99,8 +99,8 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
     <section class="hero">
       <div class="container hero-grid">
         <div class="reveal-l">
-          <h1>Уставы&nbsp;подразделения</h1>
-          <p class="hero-lead">Полный каталог внутренних уставов 1-й ОБрСпН, в/ч №12132. Регламент службы, дисциплины и взаимоотношений военнослужащих.</p>
+          <h1>Общевойсковые&nbsp;уставы</h1>
+          <p class="hero-lead">Общевойсковые уставы Вооружённых Сил Российской Федерации.</p>
           <div class="hero-actions">
             <a class="btn btn-gold" href="#doc/ustav-vnutrenney-sluzhby">Основной устав →</a>
             <a class="btn btn-ghost" href="#catalog">К каталогу</a>
@@ -118,7 +118,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
                 <div class="hb-divider"></div>
                 <div class="c-kicker">Вооружённые Силы РФ</div>
                 <div class="c-title">Уставы<br>подразделения</div>
-                <p class="c-sub">1-я отдельная гвардейская бригада специального назначения (ОБрСпН)</p>
+                <p class="c-sub">1-я мотострелковая бригада Московской области (МСБр)</p>
                 <div class="c-meta">в/ч №12132</div>
                 <div class="c-tag">1781813346950</div>
               </div>
@@ -135,7 +135,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
           <div>
             <span class="badge">Каталог документов</span>
             <h2>Все уставы</h2>
-            <p>Кликните на книгу — откроется полная страница документа с боковой навигацией и оглавлением.</p>
+            <p>Кликните на книгу — откроется документ.</p>
           </div>
           <button class="btn btn-gold admin-only" id="addUstavBtn" style="display:none">＋ Новый устав</button>
         </div>
@@ -153,7 +153,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
         </button>
         <div class="doc-chips">
           <div class="chip" id="dChipCode"></div>
-          <div class="chip">1-я ОБрСпН · в/ч №12132</div>
+          <div class="chip">1-я МСБр · в/ч №12132</div>
           <button class="btn btn-ghost btn-sm admin-only" id="editMetaBtn" style="display:none">⚙ Метаданные</button>
           <button class="btn btn-ghost btn-sm admin-only" id="editDocBtn" style="display:none">✎ Редактировать содержание</button>
           <button class="btn btn-ghost btn-sm btn-danger admin-only" id="deleteDocBtn" style="display:none">Удалить</button>
@@ -192,8 +192,8 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   <div class="container">
     <div class="footer-inner">
       <div class="footer-brand">
-        <h4>1-я ОБрСпН · в/ч №12132</h4>
-        <p>Вооружённые Силы Российской Федерации. Отдельная гвардейская бригада специального назначения.</p>
+        <h4>1-я МСБр · в/ч №12132</h4>
+        <p>Вооружённые Силы Российской Федерации. Мотострелковая бригада Московской области.</p>
       </div>
       <div class="footer-col">
         <h5>Разделы</h5>
@@ -212,7 +212,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
     </div>
     <div class="footer-bottom">
       <span>© <span id="year"></span> · Вооружённые Силы Российской Федерации</span>
-      <span>1-я ОБрСпН · в/ч №12132</span>
+      <span>1-я МСБр · в/ч №12132</span>
     </div>
   </div>
 </footer>
@@ -285,7 +285,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
           <div style="font-size:12px;color:var(--muted)">Превью герба</div>
         </div>
       </div>
-      <div class="form-group"><label>Подзаголовок документа</label><input name="sub" placeholder="1-я ОБрСпН · в/ч №12132"></div>
+      <div class="form-group"><label>Подзаголовок документа</label><input name="sub" placeholder="1-я МСБр · в/ч №12132"></div>
       <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">
         <button class="btn btn-ghost btn-sm" id="metaCancel" type="button">Отмена</button>
         <button class="btn btn-gold btn-sm" type="submit">Сохранить</button>
@@ -318,20 +318,20 @@ try{
   console.log("[VSRF_USTAV] localStorage cache cleared");
 }catch(e){}
 </script>
-<script src="supabase-loader.js?v=123"></script>
-<script src="config.js?v=123"></script>
-<script src="auth.js?v=123"></script>
-<script src="roles-engine.js?v=123"></script>
-<script src="ustav-engine.js?v=123"></script>
-<script src="main.js?v=123"></script>
-<script src="format-utils.js?v=123"></script>
-<script src="holiday-engine.js?v=123"></script>
-<script src="sound-engine.js?v=123"></script>
-<script src="settings-panel.js?v=123"></script>
-<script src="faq-engine.js?v=123"></script>
-<script src="search-engine.js?v=123"></script>
-<script src="notify-engine.js?v=123"></script>
-<script src="select-enhance.js?v=123"></script>
+<script src="supabase-loader.js?v=128"></script>
+<script src="config.js?v=128"></script>
+<script src="auth.js?v=128"></script>
+<script src="roles-engine.js?v=128"></script>
+<script src="ustav-engine.js?v=128"></script>
+<script src="main.js?v=128"></script>
+<script src="format-utils.js?v=128"></script>
+<script src="holiday-engine.js?v=128"></script>
+<script src="sound-engine.js?v=128"></script>
+<script src="settings-panel.js?v=128"></script>
+<script src="faq-engine.js?v=128"></script>
+<script src="search-engine.js?v=128"></script>
+<script src="notify-engine.js?v=128"></script>
+<script src="select-enhance.js?v=128"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -364,7 +364,7 @@ function renderList(){
           <div class="b-divider"></div>
           <div class="b-label">ВС РФ</div>
           <h3>${VSRF_USTAV.esc(d.title)}</h3>
-          <div class="b-meta">1-я ОБрСпН<br>в/ч №12132</div>
+          <div class="b-meta">1-я МСБр<br>в/ч №12132</div>
         </div>
         <div class="b-pages"></div>
       </div>
@@ -388,7 +388,7 @@ function showDoc(slug,anchor){
   currentSlug=slug;
   $("dChipCode").textContent=d.code||"";
   $("dBookTitle").textContent=d.title;
-  $("dBookMeta").innerHTML=d.meta||"1-я ОБрСпН<br>в/ч №12132";
+  $("dBookMeta").innerHTML=d.meta||"1-я МСБр<br>в/ч №12132";
 
   $("dBookFront").className="b-front "+(d.theme||"t1");
   const emblemBox=$("dBookEmblem");
@@ -498,9 +498,9 @@ function openMeta(doc,isNew){
   metaForm.slug_input.value=doc?doc.slug:"";
   metaForm.theme.value=doc?doc.theme:"t1";
   metaForm.code.value=doc?(doc.code||""):"";
-  metaForm.meta.value=doc?(doc.meta||"1-я ОБрСпН<br>в/ч №12132"):"1-я ОБрСпН<br>в/ч №12132";
+  metaForm.meta.value=doc?(doc.meta||"1-я МСБр<br>в/ч №12132"):"1-я МСБр<br>в/ч №12132";
   metaForm.emblem.value=doc?(doc.emblem||""):"";
-  metaForm.sub.value=doc?(doc.sub||"1-я ОБрСпН · в/ч №12132"):"1-я ОБрСпН · в/ч №12132";
+  metaForm.sub.value=doc?(doc.sub||"1-я МСБр · в/ч №12132"):"1-я МСБр · в/ч №12132";
   themeSelect.dispatchEvent(new Event("__vsrf_refresh"));
   $("emblemImg").src=metaForm.emblem.value||VSRF_USTAV.DEFAULT_EMBLEM;
   const msg=metaForm.querySelector(".form-msg");msg.className="form-msg";msg.textContent="";
@@ -526,10 +526,10 @@ metaForm.addEventListener("submit",async e=>{
     slug:newSlug,
     title:metaForm.title.value.trim(),
     full:metaForm.full.value.trim()||metaForm.title.value.trim().toUpperCase(),
-    sub:metaForm.sub.value.trim()||"1-я ОБрСпН · в/ч №12132",
+    sub:metaForm.sub.value.trim()||"1-я МСБр · в/ч №12132",
     theme:metaForm.theme.value,
     code:metaForm.code.value.trim(),
-    meta:metaForm.meta.value.trim()||"1-я ОБрСпН<br>в/ч №12132",
+    meta:metaForm.meta.value.trim()||"1-я МСБр<br>в/ч №12132",
     emblem:metaForm.emblem.value.trim()||VSRF_USTAV.DEFAULT_EMBLEM
   });
   msg.className="form-msg info";msg.textContent="Сохранение...";
@@ -711,6 +711,6 @@ window.VSRF_USTAV_TOC=[];
 boot();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9dbb0e82ce92c',t:'MTc4NDgwMTAzNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2677c30c9cc9da9',t:'MTc4NTk1MDU1OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9dbb0e82ce92c',t:'MTc4NDgwMTAzNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26840ca2a31f3aa',t:'MTc4NTk1ODYxMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -81,7 +81,7 @@
       header.className="nav-header";
       header.innerHTML=`<div class="nav-header-emblem"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt=""></div>
         <div class="nav-header-label">В/Ч №12132</div>
-        <div class="nav-header-unit">1-я ОБрСпН</div>`;
+        <div class="nav-header-unit">1-я МСБр</div>`;
       nav.appendChild(header);
 
       const scroll=document.createElement("div");

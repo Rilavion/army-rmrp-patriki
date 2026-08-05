@@ -4,18 +4,18 @@ window.VSRF_USTAV=(function(){
   const DEFAULT_DATA=[
     {slug:"ustav-vnutrenney-sluzhby",theme:"t1",title:"Устав внутренней службы",code:"1781813401486",meta:"Министерство обороны РФ<br>в/ч №12132",emblem:DEFAULT_EMBLEM,
       full:"УСТАВ ВНУТРЕННЕЙ СЛУЖБЫ ВООРУЖЕННЫХ СИЛ РОССИЙСКОЙ ФЕДЕРАЦИИ",
-      sub:"1-я отдельная гвардейская бригада специального назначения · в/ч №12132",
+      sub:"1-я мотострелковая бригада Московской области · в/ч №12132",
       preamble:"",chapters:[],
       signature:{title:"Командир 1-ой мотострелковой бригады",rank:"генерал-лейтенант",name:"Волков Р.А."}
     },
     {slug:"stroevoy-ustav",theme:"t2",title:"Строевой устав",code:"1781813453292",meta:"Строевая подготовка<br>в/ч №12132",emblem:DEFAULT_EMBLEM,
-      full:"СТРОЕВОЙ УСТАВ",sub:"1-я ОБрСпН · в/ч №12132",preamble:"",chapters:[],signature:null},
+      full:"СТРОЕВОЙ УСТАВ",sub:"1-я МСБр · в/ч №12132",preamble:"",chapters:[],signature:null},
     {slug:"karaulnaya-i-garnizonnaya",theme:"t3",title:"Устав караульной и гарнизонной служб",code:"1781813512103",meta:"Караульная и гарнизонная служба<br>в/ч №12132",emblem:DEFAULT_EMBLEM,
-      full:"УСТАВ КАРАУЛЬНОЙ И ГАРНИЗОННОЙ СЛУЖБ",sub:"1-я ОБрСпН · в/ч №12132",preamble:"",chapters:[],signature:null},
+      full:"УСТАВ КАРАУЛЬНОЙ И ГАРНИЗОННОЙ СЛУЖБ",sub:"1-я МСБр · в/ч №12132",preamble:"",chapters:[],signature:null},
     {slug:"disciplinarnyy-ustav",theme:"t4",title:"Дисциплинарный устав",code:"1781813587291",meta:"Воинская дисциплина<br>в/ч №12132",emblem:DEFAULT_EMBLEM,
-      full:"ДИСЦИПЛИНАРНЫЙ УСТАВ",sub:"1-я ОБрСпН · в/ч №12132",preamble:"",chapters:[],signature:null},
+      full:"ДИСЦИПЛИНАРНЫЙ УСТАВ",sub:"1-я МСБр · в/ч №12132",preamble:"",chapters:[],signature:null},
     {slug:"ustav-voennoy-politsii",theme:"t5",title:"Устав военной полиции",code:"1781813632975",meta:"Военная полиция<br>в/ч №12132",emblem:DEFAULT_EMBLEM,
-      full:"УСТАВ ВОЕННОЙ ПОЛИЦИИ",sub:"1-я ОБрСпН · в/ч №12132",preamble:"",chapters:[],signature:null}
+      full:"УСТАВ ВОЕННОЙ ПОЛИЦИИ",sub:"1-я МСБр · в/ч №12132",preamble:"",chapters:[],signature:null}
   ];
 
   const THEMES=[
@@ -52,7 +52,7 @@ window.VSRF_USTAV=(function(){
       <div class="paper-emblem"><img src="${esc(emblem)}" alt=""></div>
       <div class="ministry">МИНИСТЕРСТВО ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ</div>
       <h1>${esc(doc.full||doc.title)}</h1>
-      <div class="sub">${esc(doc.sub||"1-я ОБрСпН · в/ч №12132")}</div>
+      <div class="sub">${esc(doc.sub||"1-я МСБр · в/ч №12132")}</div>
     </div>
     <div class="paper-body">`;
 

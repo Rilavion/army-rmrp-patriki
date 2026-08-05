@@ -53,7 +53,7 @@ window.VSRF_SETTINGS_PANEL=(function(){
         <div class="vsrf-sp-section">
           <div class="vsrf-sp-section-title">О сайте</div>
           <div class="vsrf-sp-info">
-            <div>1-я ОБрСпН · в/ч №12132</div>
+            <div>1-я МСБр · в/ч №12132</div>
             <div>Вооружённые Силы Российской Федерации</div>
             <div class="vsrf-sp-copy">© <span id="spYear"></span> · Все права защищены</div>
           </div>

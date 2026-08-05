@@ -5442,3 +5442,5 @@ body.vsrf-is-logged .footer-col a[data-loggedin]{display:block !important}
 }
 .rs-dept-tab.rs-dept-add{border-style:dashed;opacity:.75}
 .rs-dept-tab.rs-dept-add:hover{opacity:1;border-style:solid}
+
+.apps-head-ribbon{display:none !important}
