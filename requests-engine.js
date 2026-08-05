@@ -24,6 +24,18 @@ window.VSRF_REQUESTS=(function(){
     return {ok:true};
   }
 
+  const DEFAULT_RANKS=["Рядовой","Ефрейтор","Младший Сержант","Сержант","Старший Сержант","Старшина","Прапорщик","Старший Прапорщик"];
+
+  function getRankList(promoForm){
+    if(promoForm && promoForm.rank_matrix && Array.isArray(promoForm.rank_matrix.ranks) && promoForm.rank_matrix.ranks.length) return promoForm.rank_matrix.ranks;
+    return DEFAULT_RANKS.slice();
+  }
+  function getRankFields(promoForm,targetRank){
+    if(!promoForm || !promoForm.rank_matrix) return [];
+    const map=promoForm.rank_matrix.fields||{};
+    return Array.isArray(map[targetRank])?map[targetRank]:[];
+  }
+
   async function getSettings(){
     const c=client();if(!c) return null;
     const {data}=await c.from("requests_settings").select("*").eq("id",1).maybeSingle();
@@ -138,5 +150,5 @@ window.VSRF_REQUESTS=(function(){
     return String(h).padStart(2,"0")+":"+String(mm).padStart(2,"0");
   }
 
-  return {KIND_META,getForm,saveForm,getSettings,saveSettings,submit,fetchAll,fetchOne,decide,remove,checkActiveViolations,validateLeaveTime,minutesToTime,timeToMinutes};
+  return {KIND_META,DEFAULT_RANKS,getForm,saveForm,getSettings,saveSettings,submit,fetchAll,fetchOne,decide,remove,checkActiveViolations,validateLeaveTime,minutesToTime,timeToMinutes,getRankList,getRankFields};
 })();

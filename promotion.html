@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=112">
+<link rel="stylesheet" href="style.css?v=113">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}[data-staff]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
@@ -98,18 +98,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=112"></script>
-<script src="config.js?v=112"></script>
-<script src="main.js?v=112"></script>
-<script src="format-utils.js?v=112"></script>
-<script src="holiday-engine.js?v=112"></script>
-<script src="settings-panel.js?v=112"></script>
-<script src="sound-engine.js?v=112"></script>
-<script src="auth.js?v=112"></script>
-<script src="roles-engine.js?v=112"></script>
-<script src="search-engine.js?v=112"></script>
-<script src="notify-engine.js?v=112"></script>
-<script src="requests-engine.js?v=112"></script>
+<script src="supabase-loader.js?v=113"></script>
+<script src="config.js?v=113"></script>
+<script src="main.js?v=113"></script>
+<script src="format-utils.js?v=113"></script>
+<script src="holiday-engine.js?v=113"></script>
+<script src="settings-panel.js?v=113"></script>
+<script src="sound-engine.js?v=113"></script>
+<script src="auth.js?v=113"></script>
+<script src="roles-engine.js?v=113"></script>
+<script src="search-engine.js?v=113"></script>
+<script src="notify-engine.js?v=113"></script>
+<script src="requests-engine.js?v=113"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -124,7 +124,7 @@ const DEFAULT_FIELDS={
     {key:"submitter_fio",label:"ФИО",type:"text",required:true,placeholder:"Иванов И.",group:"Личные данные"},
     {key:"submitter_static",label:"Статик",type:"text",required:true,placeholder:"123-456",group:"Личные данные"},
     {key:"position",label:"Должность",type:"text",required:true,placeholder:"Мл. Сержант · ОГП",group:"Личные данные"},
-    {key:"submitter_discord",label:"Discord (@тег или ID)",type:"text",required:false,placeholder:"@user",group:"Личные данные"},
+    {key:"submitter_discord",label:"Discord (@тег или ID)",type:"text",required:true,placeholder:"@user или 1234567890...",group:"Личные данные"},
     {key:"leave_date",label:"Дата увала",type:"date",required:true,group:"Время увала"},
     {key:"split",label:"Разбить на 2 части (по 30 мин)",type:"checkbox",required:false,group:"Время увала"},
     {key:"time_start",label:"Начало (часть 1)",type:"time",required:true,group:"Время увала"},
@@ -136,8 +136,7 @@ const DEFAULT_FIELDS={
     {key:"submitter_fio",label:"ФИО",type:"text",required:true,placeholder:"Иванов И.",group:"Личные данные"},
     {key:"submitter_static",label:"Статик",type:"text",required:true,placeholder:"123-456",group:"Личные данные"},
     {key:"position",label:"Должность",type:"text",required:true,placeholder:"Ст. Сержант · ССО",group:"Личные данные"},
-    {key:"mil_id",label:"Военный билет №",type:"text",required:true,placeholder:"№ ВБ",group:"Личные данные"},
-    {key:"submitter_discord",label:"Discord",type:"text",required:false,group:"Личные данные"},
+    {key:"submitter_discord",label:"Discord (@тег или ID)",type:"text",required:true,placeholder:"@user или 1234567890...",group:"Личные данные"},
     {key:"from_date",label:"Дата начала",type:"date",required:true,group:"Период"},
     {key:"to_date",label:"Дата окончания",type:"date",required:true,group:"Период"},
     {key:"reason",label:"Причина отпуска (IC/RP)",type:"textarea",required:true,placeholder:"По сюжету/RP",group:"Обоснование"}
@@ -146,7 +145,7 @@ const DEFAULT_FIELDS={
     {key:"submitter_fio",label:"ФИО",type:"text",required:true,group:"Личные данные"},
     {key:"submitter_static",label:"Статик",type:"text",required:true,group:"Личные данные"},
     {key:"position",label:"Должность",type:"text",required:false,group:"Личные данные"},
-    {key:"submitter_discord",label:"Discord",type:"text",required:false,group:"Личные данные"},
+    {key:"submitter_discord",label:"Discord (@тег или ID)",type:"text",required:true,placeholder:"@user или 1234567890...",group:"Личные данные"},
     {key:"from_date",label:"Дата начала",type:"date",required:true,group:"Период"},
     {key:"to_date",label:"Дата окончания",type:"date",required:true,group:"Период"},
     {key:"reason",label:"Причина (OOC/NonRP)",type:"textarea",required:true,placeholder:"Работа/учёба/личное",group:"Обоснование"}
@@ -155,20 +154,15 @@ const DEFAULT_FIELDS={
     {key:"submitter_fio",label:"ФИО",type:"text",required:true,group:"Личные данные"},
     {key:"submitter_static",label:"Статик",type:"text",required:true,group:"Личные данные"},
     {key:"position",label:"Текущая должность",type:"text",required:true,group:"Личные данные"},
-    {key:"submitter_discord",label:"Discord",type:"text",required:false,group:"Личные данные"},
-    {key:"reason",label:"Причина увольнения",type:"textarea",required:true,placeholder:"Развёрнутый ответ",group:"Обоснование"},
-    {key:"return_gear",label:"Обязуюсь сдать выданное имущество",type:"checkbox",required:true,group:"Обоснование"}
+    {key:"submitter_discord",label:"Discord (@тег или ID)",type:"text",required:true,placeholder:"@user или 1234567890...",group:"Личные данные"},
+    {key:"reason",label:"Причина увольнения",type:"textarea",required:true,placeholder:"Развёрнутый ответ",group:"Обоснование"}
   ],
   promotion:[
     {key:"submitter_fio",label:"ФИО",type:"text",required:true,group:"Личные данные"},
     {key:"submitter_static",label:"Статик",type:"text",required:true,group:"Личные данные"},
-    {key:"current_rank",label:"Текущее звание",type:"text",required:true,group:"Личные данные"},
-    {key:"target_rank",label:"Желаемое звание",type:"text",required:true,group:"Личные данные"},
-    {key:"submitter_discord",label:"Discord",type:"text",required:false,group:"Личные данные"},
-    {key:"exam_link",label:"Ссылка на сдачу экзамена (DS)",type:"url",required:true,placeholder:"https://discord.com/channels/.../...",group:"Подтверждения"},
-    {key:"supply_link",label:"Ссылка на статистику поставок (DS)",type:"url",required:false,placeholder:"https://discord.com/channels/.../...",group:"Подтверждения"},
-    {key:"vp_link",label:"Ссылка на успешную проверку ВП (DS)",type:"url",required:false,group:"Подтверждения"},
-    {key:"achievements",label:"Достижения / Заслуги",type:"textarea",required:true,placeholder:"Опишите чем заслужили повышение",group:"Обоснование"}
+    {key:"submitter_discord",label:"Discord (@тег или ID)",type:"text",required:true,placeholder:"@user или 1234567890...",group:"Личные данные"},
+    {key:"current_rank",label:"Текущее звание",type:"select",required:true,options:["Рядовой","Ефрейтор","Младший Сержант","Сержант","Старший Сержант","Старшина","Прапорщик","Старший Прапорщик"],group:"Звание"},
+    {key:"target_rank",label:"Желаемое звание",type:"select",required:true,options:["Ефрейтор","Младший Сержант","Сержант","Старший Сержант","Старшина","Прапорщик","Старший Прапорщик"],group:"Звание"}
   ]
 };
 
@@ -181,7 +175,7 @@ const KIND_TITLES={
 };
 const KIND_SUBS={
   leave:"Не более 60 минут (можно разбить 2×30). Ефрейтор и выше.",
-  vacation_ic:"Ролевой отпуск — до 7 дней раз в месяц. Ст. Сержант и выше · Военный билет обязателен.",
+  vacation_ic:"Ролевой отпуск — до 7 дней раз в месяц. Ст. Сержант и выше.",
   vacation_ooc:"Отпуск по личным причинам (работа/учёба/жизнь).",
   dismissal:"Заявление на выход из состава бригады. Требуется одобрение командования.",
   promotion:"Заявка с прикреплением подтверждений (экзамен, статистика поставок и т.д.)."
@@ -204,8 +198,18 @@ async function boot(){
     id:KIND,
     title:(f&&f.title)||KIND_TITLES[KIND],
     fields:(f&&f.fields&&f.fields.length)?f.fields:DEFAULT_FIELDS[KIND],
-    description:(f&&f.description)||KIND_SUBS[KIND]
+    description:(f&&f.description)||KIND_SUBS[KIND],
+    rank_matrix:(f&&f.rank_matrix)||null
   };
+  if(KIND==="promotion"){
+    const ranks=VSRF_REQUESTS.getRankList(f||{});
+    FORM.fields=FORM.fields.map(fd=>{
+      if(fd.key==="current_rank"||fd.key==="target_rank"){
+        return Object.assign({},fd,{type:"select",options:ranks.slice()});
+      }
+      return fd;
+    });
+  }
   render();
 }
 
@@ -240,6 +244,9 @@ function render(){
   for(const [gn,gf] of groups){
     html+=`<div class="cf-group"><div class="cf-group-title">${esc(gn)}</div><div class="cf-group-body">${gf.map(fieldHtml).join("")}</div></div>`;
   }
+  if(KIND==="promotion"){
+    html+=`<div id="rfDynGroup"></div>`;
+  }
   html+=`<div class="form-msg" id="rfMsg"></div>
     <div style="display:flex;justify-content:center;padding-top:8px">
       <button type="submit" class="btn btn-gold" style="min-width:280px;padding:14px 28px;font-size:15px">📨 Подать заявку</button>
@@ -248,6 +255,27 @@ function render(){
   $("rfForm").addEventListener("submit",onSubmit);
   applyConditionals();
   document.querySelectorAll('#rfForm input[type="checkbox"]').forEach(el=>el.addEventListener("change",applyConditionals));
+  if(KIND==="promotion"){
+    const sel=document.querySelector('#rfForm [name="target_rank"]');
+    if(sel){
+      sel.addEventListener("change",renderDynamicPromotionFields);
+      renderDynamicPromotionFields();
+    }
+  }
+}
+
+function renderDynamicPromotionFields(){
+  const box=$("rfDynGroup");
+  if(!box) return;
+  const target=(document.querySelector('#rfForm [name="target_rank"]')||{}).value||"";
+  if(!target){box.innerHTML="";return}
+  const list=VSRF_REQUESTS.getRankFields(FORM,target);
+  if(!list.length){
+    box.innerHTML=`<div class="cf-group"><div class="cf-group-title">Подтверждения · ${esc(target)}</div><div class="cf-group-body"><div class="msg-help">Для этого звания администратор не настроил дополнительные подтверждения.</div></div></div>`;
+    return;
+  }
+  const inner=list.map(f=>fieldHtml(f)).join("");
+  box.innerHTML=`<div class="cf-group"><div class="cf-group-title">Подтверждения · ${esc(target)}</div><div class="cf-group-body">${inner}</div></div>`;
 }
 
 function applyConditionals(){
@@ -266,7 +294,15 @@ async function onSubmit(e){
   e.preventDefault();
   const fd=new FormData(e.target);
   const values={};
-  (FORM.fields||[]).forEach(f=>{
+  const allFields=(FORM.fields||[]).slice();
+  if(KIND==="promotion"){
+    const target=(fd.get("target_rank")||"").toString();
+    if(target){
+      const extras=VSRF_REQUESTS.getRankFields(FORM,target);
+      extras.forEach(f=>allFields.push(f));
+    }
+  }
+  allFields.forEach(f=>{
     const el=e.target.elements[f.key];
     if(!el) return;
     if(f.type==="checkbox") values[f.key]=el.checked;
@@ -277,6 +313,22 @@ async function onSubmit(e){
   const fio=values.submitter_fio||"";
   const stat=values.submitter_static||"";
   const discord=values.submitter_discord||"";
+
+  if(!discord){msg.className="form-msg error";msg.textContent="Discord обязателен для связи и пинга в канале.";return}
+  if(KIND==="promotion"){
+    const target=values.target_rank;
+    if(target){
+      const extras=VSRF_REQUESTS.getRankFields(FORM,target);
+      for(const f of extras){
+        if(f.required){
+          const v=values[f.key];
+          if(f.type==="checkbox"?!v:!String(v||"").trim()){
+            msg.className="form-msg error";msg.textContent="Заполните: "+f.label;return;
+          }
+        }
+      }
+    }
+  }
 
   if(KIND==="dismissal"||KIND==="promotion"){
     if(stat&&SETTINGS&&SETTINGS.block_if_violations){
@@ -317,5 +369,5 @@ $("rfSuccessModal").addEventListener("click",e=>{if(e.target===$("rfSuccessModal
 
 boot();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2644dcdabae6657',t:'MTc4NTkxNzIwMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2647f6eec4ef375',t:'MTc4NTkxOTIzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

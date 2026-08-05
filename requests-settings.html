@@ -7,7 +7,7 @@
 <title>Настройки форм заявок</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=112">
+<link rel="stylesheet" href="style.css?v=113">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas><div class="bg-noise"></div>
@@ -59,6 +59,17 @@
 
     <h3 style="margin-top:24px">📨 Каналы DS и пинги</h3>
     <div id="rsForms"></div>
+
+    <h3 style="margin-top:24px">⭐ Конструктор формы «Повышение»</h3>
+    <div class="cf-group"><div class="cf-group-body">
+      <div class="msg-help">Здесь вы задаёте список званий и настраиваете какие подтверждения появятся в форме, когда сотрудник выбирает «Желаемое звание».</div>
+      <div class="form-group">
+        <label>Список званий (одно в строке — порядок сверху вниз)</label>
+        <textarea id="rsPromoRanks" class="msg-input" rows="8" style="resize:vertical;font-family:monospace" placeholder="Рядовой&#10;Ефрейтор&#10;Младший Сержант"></textarea>
+      </div>
+      <div id="rsPromoMatrix"></div>
+    </div></div>
+
     <div class="form-msg" id="rsMsg" style="margin-top:14px"></div>
   </div>
 </div></section></main>
@@ -68,12 +79,12 @@
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=112"></script>
-<script src="config.js?v=112"></script>
-<script src="main.js?v=112"></script>
-<script src="auth.js?v=112"></script>
-<script src="roles-engine.js?v=112"></script>
-<script src="requests-engine.js?v=112"></script>
+<script src="supabase-loader.js?v=113"></script>
+<script src="config.js?v=113"></script>
+<script src="main.js?v=113"></script>
+<script src="auth.js?v=113"></script>
+<script src="roles-engine.js?v=113"></script>
+<script src="requests-engine.js?v=113"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -81,6 +92,11 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 
 const KINDS=["leave","vacation_ic","vacation_ooc","dismissal","promotion"];
 let SETTINGS=null, FORMS={}, CHANNELS=[], ROLES=[];
+let PROMO_RANKS=[], PROMO_FIELDS={};
+const FIELD_TYPES=[
+  {v:"text",l:"Текст"},{v:"textarea",l:"Многострочный текст"},{v:"url",l:"Ссылка"},
+  {v:"date",l:"Дата"},{v:"time",l:"Время"},{v:"select",l:"Выпадающий список"},{v:"checkbox",l:"Галочка"}
+];
 
 async function boot(){
   const can=window.VSRF_ROLES&&window.VSRF_ROLES.can("requests","settings");
@@ -98,8 +114,85 @@ async function boot(){
     FORMS[k]=await VSRF_REQUESTS.getForm(k)||{id:k};
   }
 
+  const pm=(FORMS.promotion&&FORMS.promotion.rank_matrix)||{};
+  PROMO_RANKS=(Array.isArray(pm.ranks)&&pm.ranks.length)?pm.ranks.slice():(VSRF_REQUESTS.DEFAULT_RANKS||["Рядовой","Ефрейтор","Младший Сержант","Сержант","Старший Сержант","Старшина","Прапорщик","Старший Прапорщик"]).slice();
+  PROMO_FIELDS=(pm.fields&&typeof pm.fields==="object")?JSON.parse(JSON.stringify(pm.fields)):{};
+
   fillCommon();
   renderForms();
+  renderPromoMatrix();
+  $("rsPromoRanks").value=PROMO_RANKS.join("\n");
+  $("rsPromoRanks").addEventListener("input",()=>{
+    PROMO_RANKS=$("rsPromoRanks").value.split("\n").map(s=>s.trim()).filter(Boolean);
+    renderPromoMatrix();
+  });
+}
+
+function renderPromoMatrix(){
+  const box=$("rsPromoMatrix");
+  if(!box) return;
+  if(!PROMO_RANKS.length){box.innerHTML=`<div class="msg-help">Добавьте хотя бы одно звание в список выше.</div>`;return}
+  box.innerHTML=PROMO_RANKS.map(r=>{
+    const arr=Array.isArray(PROMO_FIELDS[r])?PROMO_FIELDS[r]:[];
+    return `<div class="cf-group" style="margin-top:14px" data-rank="${esc(r)}">
+      <div class="cf-group-title">⭐ Повышение → <b>${esc(r)}</b> · подтверждения</div>
+      <div class="cf-group-body">
+        <div class="msg-help">Поля, которые появятся когда сотрудник выберет «Желаемое звание» = ${esc(r)}.</div>
+        <div class="rs-fields">${arr.map((f,i)=>fieldRowHtml(r,i,f)).join("")||`<div class="msg-help">Пока пусто</div>`}</div>
+        <div style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-add-field="${esc(r)}">+ Добавить поле</button></div>
+      </div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("[data-add-field]").forEach(b=>b.addEventListener("click",()=>{
+    const r=b.getAttribute("data-add-field");
+    if(!PROMO_FIELDS[r]) PROMO_FIELDS[r]=[];
+    PROMO_FIELDS[r].push({key:"field_"+Date.now().toString(36),label:"Новое поле",type:"text",required:false,placeholder:"",options:[]});
+    renderPromoMatrix();
+  }));
+  box.querySelectorAll("[data-del-field]").forEach(b=>b.addEventListener("click",()=>{
+    const r=b.getAttribute("data-rank");const i=parseInt(b.getAttribute("data-del-field"));
+    PROMO_FIELDS[r].splice(i,1);renderPromoMatrix();
+  }));
+  box.querySelectorAll("[data-up-field]").forEach(b=>b.addEventListener("click",()=>{
+    const r=b.getAttribute("data-rank");const i=parseInt(b.getAttribute("data-up-field"));
+    if(i<=0) return;
+    const a=PROMO_FIELDS[r];[a[i-1],a[i]]=[a[i],a[i-1]];renderPromoMatrix();
+  }));
+  box.querySelectorAll("[data-dn-field]").forEach(b=>b.addEventListener("click",()=>{
+    const r=b.getAttribute("data-rank");const i=parseInt(b.getAttribute("data-dn-field"));
+    const a=PROMO_FIELDS[r];if(i>=a.length-1) return;
+    [a[i+1],a[i]]=[a[i],a[i+1]];renderPromoMatrix();
+  }));
+  box.querySelectorAll("[data-inp]").forEach(el=>el.addEventListener("input",()=>{
+    const r=el.getAttribute("data-rank");const i=parseInt(el.getAttribute("data-idx"));const k=el.getAttribute("data-inp");
+    if(!PROMO_FIELDS[r]||!PROMO_FIELDS[r][i]) return;
+    if(k==="required") PROMO_FIELDS[r][i].required=el.checked;
+    else if(k==="options") PROMO_FIELDS[r][i].options=el.value.split("\n").map(s=>s.trim()).filter(Boolean);
+    else PROMO_FIELDS[r][i][k]=el.value;
+  }));
+  box.querySelectorAll("[data-inp='type']").forEach(el=>el.addEventListener("change",()=>renderPromoMatrix()));
+}
+
+function fieldRowHtml(rank,i,f){
+  const typeOpts=FIELD_TYPES.map(t=>`<option value="${t.v}" ${t.v===(f.type||"text")?"selected":""}>${esc(t.l)}</option>`).join("");
+  const showOpts=(f.type==="select");
+  return `<div class="cf-group" style="background:rgba(21,36,29,.35);margin:8px 0;padding:10px;border-radius:8px">
+    <div class="msg-row">
+      <div class="form-group msg-flex-1"><label>Название поля</label><input class="msg-input" data-rank="${esc(rank)}" data-idx="${i}" data-inp="label" value="${esc(f.label||"")}"></div>
+      <div class="form-group msg-flex-1"><label>Тип</label><select class="msg-input" data-rank="${esc(rank)}" data-idx="${i}" data-inp="type">${typeOpts}</select></div>
+      <div class="form-group msg-flex-1"><label>Ключ (в БД)</label><input class="msg-input" data-rank="${esc(rank)}" data-idx="${i}" data-inp="key" value="${esc(f.key||"")}"></div>
+    </div>
+    <div class="msg-row">
+      <div class="form-group msg-flex-1"><label>Плейсхолдер</label><input class="msg-input" data-rank="${esc(rank)}" data-idx="${i}" data-inp="placeholder" value="${esc(f.placeholder||"")}"></div>
+      <div class="form-group"><label class="cr-notify" style="display:inline-flex;margin-top:22px"><input type="checkbox" data-rank="${esc(rank)}" data-idx="${i}" data-inp="required" ${f.required?"checked":""}><span>Обязательное</span></label></div>
+    </div>
+    ${showOpts?`<div class="form-group"><label>Варианты (для выпадающего списка, по строке)</label><textarea class="msg-input" rows="3" data-rank="${esc(rank)}" data-idx="${i}" data-inp="options" style="font-family:monospace;resize:vertical">${esc((f.options||[]).join("\n"))}</textarea></div>`:""}
+    <div style="display:flex;gap:6px;justify-content:flex-end">
+      <button type="button" class="btn btn-ghost btn-sm" data-up-field="${i}" data-rank="${esc(rank)}">↑</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-dn-field="${i}" data-rank="${esc(rank)}">↓</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-del-field="${i}" data-rank="${esc(rank)}" style="color:#e77070">✕ Удалить</button>
+    </div>
+  </div>`;
 }
 
 function fillCommon(){
@@ -185,6 +278,22 @@ $("rsSaveAll").addEventListener("click",async()=>{
       ping_role_id:document.getElementById("rsR1_"+k).value||null,
       ping_role_id_2:document.getElementById("rsR2_"+k).value||null
     };
+    if(k==="promotion"){
+      const cleanFields={};
+      for(const r of PROMO_RANKS){
+        const arr=PROMO_FIELDS[r]||[];
+        cleanFields[r]=arr.filter(f=>f.label&&f.key).map(f=>({
+          key:String(f.key).trim(),
+          label:String(f.label).trim(),
+          type:f.type||"text",
+          required:!!f.required,
+          placeholder:f.placeholder||"",
+          options:Array.isArray(f.options)?f.options:[],
+          group:"Подтверждения"
+        }));
+      }
+      patch.rank_matrix={ranks:PROMO_RANKS.slice(),fields:cleanFields};
+    }
     const r=await VSRF_REQUESTS.saveForm(patch);
     if(!r.ok){msg.className="form-msg error";msg.textContent="Форма "+k+": "+r.error;return}
   }
@@ -194,5 +303,5 @@ $("rsSaveAll").addEventListener("click",async()=>{
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,500);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2644de5c88c6657',t:'MTc4NTkxNzIwNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2647f9f4b6ef375',t:'MTc4NTkxOTI0Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
