@@ -127,9 +127,11 @@ window.VSRF_COMP=(function(){
     const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
     if(!s||!s.client) return {ok:false,error:"no client"};
     if(!file) return {ok:false,error:"no file"};
-    const maxBytes=5*1024*1024;
-    if(file.size>maxBytes) return {ok:false,error:"Файл больше 5 МБ. Сожми или выбери меньший."};
-    const ext=(file.name.match(/\.([a-z0-9]+)$/i)||[])[1]||"png";
+    if(file.size>10*1024*1024) return {ok:false,error:"Файл больше 10 МБ."};
+    if(window.VSRF_IMG&&window.VSRF_IMG.compress){
+      file=await window.VSRF_IMG.compress(file,{maxW:800,maxH:800,quality:0.82});
+    }
+    const ext=(file.name.match(/\.([a-z0-9]+)$/i)||[])[1]||"webp";
     const path="comp_"+Date.now()+"_"+Math.random().toString(36).slice(2,8)+"."+ext.toLowerCase();
     try{
       const {error}=await s.client.storage.from("composition-photos").upload(path,file,{contentType:file.type||undefined,upsert:false});

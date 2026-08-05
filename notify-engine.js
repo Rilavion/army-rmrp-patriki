@@ -2,7 +2,7 @@ window.VSRF_NOTIFY=(function(){
   const KEY_SEEN="vsrf-notify-seen";
   const KEY_QUEUE="vsrf-notify-queue";
   const KEY_MUTE="vsrf-notify-mute";
-  const POLL_MS=60000;
+  const POLL_MS=5*60000;
 
   function readSeen(){try{return JSON.parse(localStorage.getItem(KEY_SEEN)||"{}")}catch(e){return {}}}
   function writeSeen(s){try{localStorage.setItem(KEY_SEEN,JSON.stringify(s))}catch(e){}}
@@ -175,8 +175,19 @@ window.VSRF_NOTIFY=(function(){
     const auth=window.VSRF_AUTH;
     if(!auth||!auth.state||!auth.state.available) return;
     started=true;
-    poll();
-    setInterval(poll,POLL_MS);
+    setTimeout(()=>{if(!document.hidden) poll()},8000);
+    let t=null;
+    function schedule(){
+      if(t) clearTimeout(t);
+      t=setTimeout(async()=>{
+        if(!document.hidden){try{await poll()}catch(e){}}
+        schedule();
+      },document.hidden?15*60000:POLL_MS);
+    }
+    schedule();
+    document.addEventListener("visibilitychange",()=>{
+      if(!document.hidden){try{poll()}catch(e){};schedule()}
+    });
   }
 
   document.addEventListener("DOMContentLoaded",init);

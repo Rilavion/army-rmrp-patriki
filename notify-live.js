@@ -1,5 +1,6 @@
 window.VSRF_NOTIFY_LIVE=(function(){
-  const POLL_MS=25000;
+  const POLL_MS_ACTIVE=90000;
+  const POLL_MS_IDLE=5*60000;
   const SEEN_KEY="vsrf-nlive-seen";
   const PREFS_KEY="vsrf-nlive-prefs";
   const INIT_KEY="vsrf-nlive-inited";
@@ -127,6 +128,19 @@ window.VSRF_NOTIFY_LIVE=(function(){
     }catch(e){}
   }
 
+  function currentInterval(){
+    if(document.hidden) return POLL_MS_IDLE;
+    return POLL_MS_ACTIVE;
+  }
+  function scheduleNext(){
+    if(timer){clearTimeout(timer);timer=null}
+    timer=setTimeout(async()=>{
+      if(!document.hidden){
+        try{await poll()}catch(e){}
+      }
+      scheduleNext();
+    },currentInterval());
+  }
   function start(){
     if(started) return;started=true;
     if(!document.getElementById("vsrfToastKeyframes")){
@@ -134,10 +148,18 @@ window.VSRF_NOTIFY_LIVE=(function(){
       s.textContent="@keyframes vsrfToastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}";
       document.head.appendChild(s);
     }
-    setTimeout(poll,3000);
-    timer=setInterval(poll,POLL_MS);
+    setTimeout(async()=>{
+      if(!document.hidden){try{await poll()}catch(e){}}
+      scheduleNext();
+    },5000);
+    document.addEventListener("visibilitychange",()=>{
+      if(!document.hidden){
+        try{poll()}catch(e){}
+        scheduleNext();
+      }
+    });
   }
-  function stop(){if(timer){clearInterval(timer);timer=null;started=false}}
+  function stop(){if(timer){clearTimeout(timer);timer=null;started=false}}
 
   function onChange(fn){listeners.push(fn);fn(readPrefs());return()=>{const i=listeners.indexOf(fn);if(i>=0) listeners.splice(i,1)}}
 

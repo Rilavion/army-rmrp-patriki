@@ -306,5 +306,5 @@ document.addEventListener("DOMContentLoaded",function(){
   }
   if(window.VSRF_AUTH&&window.VSRF_AUTH.onChange) window.VSRF_AUTH.onChange(tryPull);
   setTimeout(tryPull,300);
-  setInterval(tryPull,120000);
+  setInterval(()=>{if(!document.hidden) tryPull()},15*60000);
 });

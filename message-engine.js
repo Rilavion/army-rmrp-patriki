@@ -14,6 +14,14 @@ window.VSRF_MSG=(function(){
   }
 
   async function fetchChannels(){
+    if(window.VSRF_DS_CACHE){
+      return await window.VSRF_DS_CACHE.fetchCached("channels",async()=>{
+        const c=await client();if(!c) return [];
+        const {data,error}=await c.from("ds_channels").select("*").order("parent_name",{ascending:true,nullsFirst:true}).order("position",{ascending:true});
+        if(error){console.warn("[MSG channels]",error.message);return []}
+        return data||[];
+      });
+    }
     const c=await client();if(!c) return [];
     const {data,error}=await c.from("ds_channels").select("*").order("parent_name",{ascending:true,nullsFirst:true}).order("position",{ascending:true});
     if(error){console.warn("[MSG channels]",error.message);return []}
@@ -21,6 +29,14 @@ window.VSRF_MSG=(function(){
   }
 
   async function fetchRoles(){
+    if(window.VSRF_DS_CACHE){
+      return await window.VSRF_DS_CACHE.fetchCached("roles",async()=>{
+        const c=await client();if(!c) return [];
+        const {data,error}=await c.from("ds_roles").select("*").order("position",{ascending:false});
+        if(error){console.warn("[MSG roles]",error.message);return []}
+        return data||[];
+      });
+    }
     const c=await client();if(!c) return [];
     const {data,error}=await c.from("ds_roles").select("*").order("position",{ascending:false});
     if(error){console.warn("[MSG roles]",error.message);return []}
@@ -28,6 +44,14 @@ window.VSRF_MSG=(function(){
   }
 
   async function fetchMembers(){
+    if(window.VSRF_DS_CACHE){
+      return await window.VSRF_DS_CACHE.fetchCached("members_light",async()=>{
+        const c=await client();if(!c) return [];
+        const {data,error}=await c.from("ds_members").select("discord_id,display_name,username,parsed_fio,parsed_dept").eq("active",true).order("parsed_fio",{ascending:true});
+        if(error){console.warn("[MSG members]",error.message);return []}
+        return data||[];
+      });
+    }
     const c=await client();if(!c) return [];
     const {data,error}=await c.from("ds_members").select("discord_id,display_name,username,parsed_fio,parsed_dept").eq("active",true).order("parsed_fio",{ascending:true});
     if(error){console.warn("[MSG members]",error.message);return []}
