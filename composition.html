@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=125">
+<link rel="stylesheet" href="style.css?v=126">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -231,21 +231,21 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="html2canvas.min.js?v=125"></script>
-<script src="supabase-loader.js?v=125"></script>
-<script src="config.js?v=125"></script>
-<script src="main.js?v=125"></script>
-<script src="format-utils.js?v=125"></script>
-<script src="holiday-engine.js?v=125"></script>
-<script src="settings-panel.js?v=125"></script>
-<script src="sound-engine.js?v=125"></script>
-<script src="faq-engine.js?v=125"></script>
-<script src="search-engine.js?v=125"></script>
-<script src="notify-engine.js?v=125"></script>
-<script src="auth.js?v=125"></script>
-<script src="roles-engine.js?v=125"></script>
-<script src="select-enhance.js?v=125"></script>
-<script src="composition-engine.js?v=125"></script>
+<script src="html2canvas.min.js?v=126"></script>
+<script src="supabase-loader.js?v=126"></script>
+<script src="config.js?v=126"></script>
+<script src="main.js?v=126"></script>
+<script src="format-utils.js?v=126"></script>
+<script src="holiday-engine.js?v=126"></script>
+<script src="settings-panel.js?v=126"></script>
+<script src="sound-engine.js?v=126"></script>
+<script src="faq-engine.js?v=126"></script>
+<script src="search-engine.js?v=126"></script>
+<script src="notify-engine.js?v=126"></script>
+<script src="auth.js?v=126"></script>
+<script src="roles-engine.js?v=126"></script>
+<script src="select-enhance.js?v=126"></script>
+<script src="composition-engine.js?v=126"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -369,17 +369,18 @@ function renderSub(sub){
         cells+=`<div class="hier-grid-cell filled" ${dropAttrs}>${memberCardHtml(sub,cell.m,cell.i,color)}</div>`;
       } else if(editing){
         cells+=`<div class="hier-grid-cell empty" ${dropAttrs} data-empty-add="${sub.id}::${r}::${c}" title="Кликнуть — добавить бойца · Перетащить — сюда"><div class="hier-empty-slot"><span>+</span></div></div>`;
+      } else {
+        cells+=`<div class="hier-grid-cell hollow" aria-hidden="true"></div>`;
       }
     }
   }
 
   const editBtn=editing?`<button class="hier-edit-btn hier-sub-edit-btn" data-edit-sub="${sub.id}">⚙</button>`:"";
-  const compactBtn=editing?`<button class="hier-edit-btn hier-sub-edit-btn" data-compact-grid="${sub.id}" title="Убрать пустые строки/сжать" style="right:60px !important">⇱</button>`:"";
   const addBtn=editing?`<button class="hier-officer hier-officer-add" data-add-member="${sub.id}">＋ Добавить в подразделение</button>`:"";
   return `<section class="hier-sub-section" style="--sub-color:${color};--sub-color-2:${shade(color,-25)}">
     <div class="hier-sub-head">
       <div class="hier-sub-title">${esc(sub.name)}</div>
-      ${compactBtn}${editBtn}
+      ${editBtn}
     </div>
     <div class="hier-grid" style="grid-template-columns:repeat(${cols},minmax(0,220px));justify-content:center" data-sub-id="${sub.id}">${cells}</div>
     ${addBtn?`<div class="hier-add-wrap">${addBtn}</div>`:""}
@@ -1136,6 +1137,6 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a267aadd7c539da9',t:'MTc4NTk1MjQ3MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a267b616aea19da9',t:'MTc4NTk1MjkzMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

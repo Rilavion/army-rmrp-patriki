@@ -5390,12 +5390,12 @@ body.vsrf-is-logged .footer-col a[data-loggedin]{display:block !important}
 
 .hier-grid{
   display:grid;gap:16px;padding:20px;
-  background:linear-gradient(160deg,rgba(21,36,29,.35),rgba(15,30,23,.65));
 }
 .hier-grid-cell{
   min-height:120px;display:flex;position:relative;transition:.18s;border-radius:14px;
 }
 .hier-grid-cell.filled>.hier-member{width:100%;margin:0}
+.hier-grid-cell.hollow{background:transparent;border:none;pointer-events:none;min-height:0}
 .hier-grid-cell.empty{
   border:2px dashed rgba(205,168,90,.25);
   background:rgba(205,168,90,.03);
