@@ -11,7 +11,9 @@ window.VSRF_REQUESTS=(function(){
 
   async function getForm(kind){
     const c=client();if(!c) return null;
-    const {data}=await c.from("request_forms").select("*").eq("id",kind).maybeSingle();
+    const {data,error}=await c.from("request_forms").select("*").eq("id",kind).maybeSingle();
+    if(error) console.warn("[REQ] getForm error:",error.message);
+    console.log("[REQ] getForm("+kind+") →",data);
     return data;
   }
   async function saveForm(row){
@@ -19,9 +21,17 @@ window.VSRF_REQUESTS=(function(){
     row.updated_at=new Date().toISOString();
     const s=window.VSRF_AUTH.state;
     if(s.user) row.updated_by=s.user.id;
-    const {error}=await c.from("request_forms").upsert(row);
-    if(error) return {ok:false,error:error.message};
-    return {ok:true};
+    console.log("[REQ] saveForm payload:",JSON.parse(JSON.stringify(row)));
+    const {data,error}=await c.from("request_forms").upsert(row).select().maybeSingle();
+    if(error){
+      console.warn("[REQ] saveForm error:",error);
+      return {ok:false,error:error.message};
+    }
+    console.log("[REQ] saveForm → back:",data);
+    if(row.rank_matrix && data && !data.rank_matrix){
+      return {ok:false,error:"Колонка rank_matrix не найдена в таблице request_forms. Выполните SQL/SUPABASE-REQUESTS-V113.sql в Supabase."};
+    }
+    return {ok:true,data};
   }
 
   const DEFAULT_RANKS=["Рядовой","Ефрейтор","Младший Сержант","Сержант","Старший Сержант","Старшина","Прапорщик","Старший Прапорщик"];

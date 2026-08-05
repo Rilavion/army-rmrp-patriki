@@ -7,7 +7,7 @@
 <title>Настройки форм заявок</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=113">
+<link rel="stylesheet" href="style.css?v=114">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas><div class="bg-noise"></div>
@@ -79,12 +79,12 @@
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=113"></script>
-<script src="config.js?v=113"></script>
-<script src="main.js?v=113"></script>
-<script src="auth.js?v=113"></script>
-<script src="roles-engine.js?v=113"></script>
-<script src="requests-engine.js?v=113"></script>
+<script src="supabase-loader.js?v=114"></script>
+<script src="config.js?v=114"></script>
+<script src="main.js?v=114"></script>
+<script src="auth.js?v=114"></script>
+<script src="roles-engine.js?v=114"></script>
+<script src="requests-engine.js?v=114"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -297,11 +297,19 @@ $("rsSaveAll").addEventListener("click",async()=>{
     const r=await VSRF_REQUESTS.saveForm(patch);
     if(!r.ok){msg.className="form-msg error";msg.textContent="Форма "+k+": "+r.error;return}
   }
-  msg.className="form-msg success";msg.textContent="✓ Сохранено";
+  const check=await VSRF_REQUESTS.getForm("promotion");
+  if(check&&check.rank_matrix&&check.rank_matrix.fields){
+    const cnt=Object.values(check.rank_matrix.fields).reduce((a,b)=>a+(Array.isArray(b)?b.length:0),0);
+    msg.className="form-msg success";
+    msg.innerHTML="✓ Сохранено. В БД лежит: <b>"+((check.rank_matrix.ranks||[]).length)+"</b> званий, <b>"+cnt+"</b> полей подтверждения.";
+  }else{
+    msg.className="form-msg error";
+    msg.innerHTML="⚠ Сохранено, но rank_matrix не вернулся из БД. <br>Скорее всего не создана колонка. Выполните <code>sql/SUPABASE-REQUESTS-V113.sql</code> в Supabase.";
+  }
 });
 
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,500);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2647f9f4b6ef375',t:'MTc4NTkxOTI0Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2649c13db5ff375',t:'MTc4NTkyMDQwNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
