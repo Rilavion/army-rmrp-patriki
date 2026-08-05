@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=123">
+<link rel="stylesheet" href="style.css?v=127">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}[data-staff]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
@@ -98,18 +98,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=123"></script>
-<script src="config.js?v=123"></script>
-<script src="main.js?v=123"></script>
-<script src="format-utils.js?v=123"></script>
-<script src="holiday-engine.js?v=123"></script>
-<script src="settings-panel.js?v=123"></script>
-<script src="sound-engine.js?v=123"></script>
-<script src="auth.js?v=123"></script>
-<script src="roles-engine.js?v=123"></script>
-<script src="search-engine.js?v=123"></script>
-<script src="notify-engine.js?v=123"></script>
-<script src="requests-engine.js?v=123"></script>
+<script src="supabase-loader.js?v=127"></script>
+<script src="config.js?v=127"></script>
+<script src="main.js?v=127"></script>
+<script src="format-utils.js?v=127"></script>
+<script src="holiday-engine.js?v=127"></script>
+<script src="settings-panel.js?v=127"></script>
+<script src="sound-engine.js?v=127"></script>
+<script src="auth.js?v=127"></script>
+<script src="roles-engine.js?v=127"></script>
+<script src="search-engine.js?v=127"></script>
+<script src="notify-engine.js?v=127"></script>
+<script src="requests-engine.js?v=127"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -203,12 +203,28 @@ async function boot(){
   };
   if(KIND==="promotion"){
     const ranks=VSRF_REQUESTS.getRankList(f||{});
+    const depts=VSRF_REQUESTS.getDeptList(f||{});
     FORM.fields=FORM.fields.map(fd=>{
       if(fd.key==="current_rank"||fd.key==="target_rank"){
         return Object.assign({},fd,{type:"select",options:ranks.slice()});
       }
       return fd;
     });
+    if(depts.length){
+      const already=FORM.fields.some(fd=>fd.key==="department");
+      if(!already){
+        FORM.fields.unshift({
+          key:"department",
+          label:"Отдел / Подразделение",
+          type:"select",
+          required:true,
+          options:depts.map(d=>d.name),
+          group:"Личные данные"
+        });
+      } else {
+        FORM.fields=FORM.fields.map(fd=>fd.key==="department"?Object.assign({},fd,{type:"select",options:depts.map(d=>d.name),required:true}):fd);
+      }
+    }
   }
   render();
 }
@@ -259,25 +275,40 @@ function render(){
     const sel=document.querySelector('#rfForm [name="target_rank"]');
     if(sel){
       sel.addEventListener("change",renderDynamicPromotionFields);
-      renderDynamicPromotionFields();
     }
+    const dsel=document.querySelector('#rfForm [name="department"]');
+    if(dsel) dsel.addEventListener("change",renderDynamicPromotionFields);
+    renderDynamicPromotionFields();
   }
+}
+
+function currentDeptKey(){
+  const val=(document.querySelector('#rfForm [name="department"]')||{}).value||"";
+  if(!val) return "";
+  const depts=VSRF_REQUESTS.getDeptList(FORM);
+  const found=depts.find(d=>d.name===val);
+  return found?found.key:"";
 }
 
 function renderDynamicPromotionFields(){
   const box=$("rfDynGroup");
   if(!box) return;
   const target=(document.querySelector('#rfForm [name="target_rank"]')||{}).value||"";
-  console.log("[REQ-FORM] target rank:",target,"FORM.rank_matrix:",FORM.rank_matrix);
+  const deptKey=currentDeptKey();
+  const deptName=(document.querySelector('#rfForm [name="department"]')||{}).value||"";
+  console.log("[REQ-FORM] target rank:",target,"dept:",deptKey,"FORM.rank_matrix:",FORM.rank_matrix);
   if(!target){box.innerHTML="";return}
-  const list=VSRF_REQUESTS.getRankFields(FORM,target);
-  console.log("[REQ-FORM] extra fields for",target,":",list);
+  const list=VSRF_REQUESTS.getRankFields(FORM,target,deptKey);
+  console.log("[REQ-FORM] extra fields for",target,"/"+deptKey+":",list);
+  const titleParts=["Подтверждения · "+esc(target)];
+  if(deptName) titleParts.push("Отдел: "+esc(deptName));
+  const titleHtml=titleParts.join(" <span style=\"opacity:.55;font-size:12px;font-weight:400\">·</span> ");
   if(!list.length){
-    box.innerHTML=`<div class="cf-group"><div class="cf-group-title">Подтверждения · ${esc(target)}</div><div class="cf-group-body"><div class="msg-help">Для этого звания администратор не настроил дополнительные подтверждения.</div></div></div>`;
+    box.innerHTML=`<div class="cf-group"><div class="cf-group-title">${titleHtml}</div><div class="cf-group-body"><div class="msg-help">Для ${deptName?"отдела «"+esc(deptName)+"» и ":""}звания «${esc(target)}» администратор не настроил дополнительные подтверждения.</div></div></div>`;
     return;
   }
   const inner=list.map(f=>fieldHtml(f)).join("");
-  box.innerHTML=`<div class="cf-group"><div class="cf-group-title">Подтверждения · ${esc(target)}</div><div class="cf-group-body">${inner}</div></div>`;
+  box.innerHTML=`<div class="cf-group"><div class="cf-group-title">${titleHtml}</div><div class="cf-group-body">${inner}</div></div>`;
 }
 
 function applyConditionals(){
@@ -301,8 +332,12 @@ async function onSubmit(e){
   const allFields=(FORM.fields||[]).slice();
   if(KIND==="promotion"){
     const target=(fd.get("target_rank")||"").toString();
+    const deptName=(fd.get("department")||"").toString();
+    const depts=VSRF_REQUESTS.getDeptList(FORM);
+    const dept=depts.find(d=>d.name===deptName);
+    const deptKey=dept?dept.key:"";
     if(target){
-      const extras=VSRF_REQUESTS.getRankFields(FORM,target);
+      const extras=VSRF_REQUESTS.getRankFields(FORM,target,deptKey);
       extras.forEach(f=>allFields.push(f));
     }
   }
@@ -321,8 +356,12 @@ async function onSubmit(e){
   if(!discord){msg.className="form-msg error";msg.textContent="Discord обязателен для связи и пинга в канале.";return}
   if(KIND==="promotion"){
     const target=values.target_rank;
+    const deptName=values.department||"";
+    const depts=VSRF_REQUESTS.getDeptList(FORM);
+    const dept=depts.find(d=>d.name===deptName);
+    const deptKey=dept?dept.key:"";
     if(target){
-      const extras=VSRF_REQUESTS.getRankFields(FORM,target);
+      const extras=VSRF_REQUESTS.getRankFields(FORM,target,deptKey);
       for(const f of extras){
         if(f.required){
           const v=values[f.key];
@@ -396,6 +435,6 @@ setTimeout(bootWhenReady,300);
 setTimeout(bootWhenReady,1500);
 setTimeout(bootWhenReady,3000);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2677b08a93d9da9',t:'MTc4NTk1MDUxMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2682d997c81f3aa',t:'MTc4NTk1NzgyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>

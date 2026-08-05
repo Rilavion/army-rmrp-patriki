@@ -41,9 +41,22 @@ window.VSRF_REQUESTS=(function(){
     if(promoForm && promoForm.rank_matrix && Array.isArray(promoForm.rank_matrix.ranks) && promoForm.rank_matrix.ranks.length) return promoForm.rank_matrix.ranks;
     return DEFAULT_RANKS.slice();
   }
-  function getRankFields(promoForm,targetRank){
+  function getDeptList(promoForm){
+    if(!promoForm||!promoForm.rank_matrix) return [];
+    const d=promoForm.rank_matrix.departments;
+    return Array.isArray(d)?d:[];
+  }
+  function getDeptByKey(promoForm,deptKey){
+    return getDeptList(promoForm).find(d=>d.key===deptKey)||null;
+  }
+  function getRankFields(promoForm,targetRank,deptKey){
     if(!promoForm || !promoForm.rank_matrix) return [];
-    const map=promoForm.rank_matrix.fields||{};
+    const rm=promoForm.rank_matrix;
+    if(deptKey){
+      const dept=(rm.dept_fields||{})[deptKey];
+      if(dept && Array.isArray(dept[targetRank]) && dept[targetRank].length) return dept[targetRank];
+    }
+    const map=rm.fields||{};
     return Array.isArray(map[targetRank])?map[targetRank]:[];
   }
 
@@ -169,5 +182,5 @@ window.VSRF_REQUESTS=(function(){
     return String(h).padStart(2,"0")+":"+String(mm).padStart(2,"0");
   }
 
-  return {KIND_META,DEFAULT_RANKS,getForm,saveForm,getSettings,saveSettings,submit,fetchAll,fetchOne,decide,remove,checkActiveViolations,validateLeaveTime,minutesToTime,timeToMinutes,getRankList,getRankFields};
+  return {KIND_META,DEFAULT_RANKS,getForm,saveForm,getSettings,saveSettings,submit,fetchAll,fetchOne,decide,remove,checkActiveViolations,validateLeaveTime,minutesToTime,timeToMinutes,getRankList,getRankFields,getDeptList,getDeptByKey};
 })();

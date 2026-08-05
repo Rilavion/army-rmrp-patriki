@@ -5427,3 +5427,18 @@ body.vsrf-is-logged .footer-col a[data-loggedin]{display:block !important}
 .mini-icon-btn.drag-handle:hover{opacity:1;background:rgba(205,168,90,.15)}
 .hier-add-wrap{padding:0 20px 20px;display:flex;justify-content:center}
 .hier-add-wrap .hier-officer-add{max-width:400px;width:100%}
+
+.rs-dept-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:rgba(21,36,29,.4);border:1px solid rgba(205,168,90,.15);border-radius:10px}
+.rs-dept-tab{
+  padding:8px 14px;border-radius:8px;background:rgba(0,0,0,.25);
+  border:1px solid rgba(205,168,90,.2);color:var(--muted);font-family:inherit;font-size:13px;
+  cursor:pointer;transition:.18s;
+}
+.rs-dept-tab:hover{background:rgba(205,168,90,.1);color:var(--gold-b);border-color:rgba(205,168,90,.4)}
+.rs-dept-tab.active{
+  background:linear-gradient(135deg,rgba(205,168,90,.25),rgba(205,168,90,.1));
+  color:var(--gold-b);border-color:var(--gold);font-weight:600;
+  box-shadow:0 0 12px rgba(205,168,90,.25);
+}
+.rs-dept-tab.rs-dept-add{border-style:dashed;opacity:.75}
+.rs-dept-tab.rs-dept-add:hover{opacity:1;border-style:solid}

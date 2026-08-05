@@ -7,7 +7,7 @@
 <title>Настройки форм заявок</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=123">
+<link rel="stylesheet" href="style.css?v=127">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas><div class="bg-noise"></div>
@@ -68,12 +68,19 @@
 
     <h3 style="margin-top:24px">⭐ Конструктор формы «Повышение»</h3>
     <div class="cf-group"><div class="cf-group-body">
-      <div class="msg-help">Здесь вы задаёте список званий и настраиваете какие подтверждения появятся в форме, когда сотрудник выбирает «Желаемое звание».</div>
+      <div class="msg-help">Задайте список званий и настройте какие подтверждения появятся в форме. Отделы позволяют иметь <b>свою</b> форму для каждого подразделения + свой канал/пинги.</div>
       <div class="form-group">
         <label>Список званий (одно в строке — порядок сверху вниз)</label>
         <textarea id="rsPromoRanks" class="msg-input" rows="8" style="resize:vertical;font-family:monospace" placeholder="Рядовой&#10;Ефрейтор&#10;Младший Сержант"></textarea>
       </div>
-      <div id="rsPromoMatrix"></div>
+      <div style="margin-top:16px">
+        <label style="font-weight:600;color:var(--gold);font-size:13px;letter-spacing:.05em">🏢 Отделы (для каждого — свой канал, пинг-роли и своя форма)</label>
+        <div id="rsPromoDepts"></div>
+      </div>
+      <div style="margin-top:16px">
+        <label style="font-weight:600;color:var(--gold);font-size:13px;letter-spacing:.05em">📋 Форма подтверждений (по званиям)</label>
+        <div id="rsPromoMatrix"></div>
+      </div>
     </div></div>
 
     <div class="form-msg" id="rsMsg" style="margin-top:14px"></div>
@@ -85,12 +92,12 @@
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=123"></script>
-<script src="config.js?v=123"></script>
-<script src="main.js?v=123"></script>
-<script src="auth.js?v=123"></script>
-<script src="roles-engine.js?v=123"></script>
-<script src="requests-engine.js?v=123"></script>
+<script src="supabase-loader.js?v=127"></script>
+<script src="config.js?v=127"></script>
+<script src="main.js?v=127"></script>
+<script src="auth.js?v=127"></script>
+<script src="roles-engine.js?v=127"></script>
+<script src="requests-engine.js?v=127"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -99,10 +106,15 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const KINDS=["leave","vacation_ic","vacation_ooc","dismissal","promotion"];
 let SETTINGS=null, FORMS={}, CHANNELS=[], ROLES=[];
 let PROMO_RANKS=[], PROMO_FIELDS={};
+let PROMO_DEPTS=[], PROMO_DEPT_FIELDS={};
+let PROMO_ACTIVE_DEPT="";
 const FIELD_TYPES=[
   {v:"text",l:"Текст"},{v:"textarea",l:"Многострочный текст"},{v:"url",l:"Ссылка"},
   {v:"date",l:"Дата"},{v:"time",l:"Время"},{v:"select",l:"Выпадающий список"},{v:"checkbox",l:"Галочка"}
 ];
+function slugKey(name){
+  return String(name||"").toLowerCase().replace(/[^\wа-я0-9]+/gi,"_").replace(/^_+|_+$/g,"").slice(0,40)||"dept_"+Date.now().toString(36);
+}
 
 async function boot(){
   const can=window.VSRF_ROLES&&window.VSRF_ROLES.can("requests","settings");
@@ -124,9 +136,13 @@ async function boot(){
   console.log("[RS] promotion from DB:",FORMS.promotion,"rank_matrix:",pm);
   PROMO_RANKS=(Array.isArray(pm.ranks)&&pm.ranks.length)?pm.ranks.slice():(VSRF_REQUESTS.DEFAULT_RANKS||["Рядовой","Ефрейтор","Младший Сержант","Сержант","Старший Сержант","Старшина","Прапорщик","Старший Прапорщик"]).slice();
   PROMO_FIELDS=(pm.fields&&typeof pm.fields==="object")?JSON.parse(JSON.stringify(pm.fields)):{};
+  PROMO_DEPTS=Array.isArray(pm.departments)?JSON.parse(JSON.stringify(pm.departments)):[];
+  PROMO_DEPT_FIELDS=(pm.dept_fields&&typeof pm.dept_fields==="object")?JSON.parse(JSON.stringify(pm.dept_fields)):{};
+  PROMO_ACTIVE_DEPT="";
 
   fillCommon();
   renderForms();
+  renderPromoDepts();
   renderPromoMatrix();
   $("rsPromoRanks").value=PROMO_RANKS.join("\n");
   $("rsPromoRanks").addEventListener("input",()=>{
@@ -135,47 +151,121 @@ async function boot(){
   });
 }
 
+function renderPromoDepts(){
+  const box=$("rsPromoDepts");
+  if(!box) return;
+  const tabsHtml=`
+    <div class="rs-dept-tabs">
+      <button type="button" class="rs-dept-tab ${PROMO_ACTIVE_DEPT===""?"active":""}" data-select-dept="">🌐 Общая форма (fallback)</button>
+      ${PROMO_DEPTS.map(d=>`<button type="button" class="rs-dept-tab ${PROMO_ACTIVE_DEPT===d.key?"active":""}" data-select-dept="${esc(d.key)}">${esc(d.name)}</button>`).join("")}
+      <button type="button" class="rs-dept-tab rs-dept-add" data-add-dept>＋ Отдел</button>
+    </div>`;
+  const cfgHtml=PROMO_DEPTS.map(d=>{
+    if(d.key!==PROMO_ACTIVE_DEPT) return "";
+    return `<div class="cf-group" data-dept-cfg="${esc(d.key)}" style="margin-top:12px">
+      <div class="cf-group-title">⚙ Настройки отдела «${esc(d.name)}»</div>
+      <div class="cf-group-body">
+        <div class="msg-row">
+          <div class="form-group msg-flex-1"><label>Название отдела</label><input class="msg-input" data-dept-inp="name" data-dept-k="${esc(d.key)}" value="${esc(d.name||"")}"></div>
+          <div class="form-group"><button type="button" class="btn btn-ghost btn-sm" data-del-dept="${esc(d.key)}" style="color:#e77070;margin-top:22px">✕ Удалить отдел</button></div>
+        </div>
+        <div class="form-group"><label>Канал DS для этого отдела</label>${chSelect("rsDeptCh_"+d.key,d.channel_id||"")}</div>
+        <div class="msg-row">
+          <div class="form-group msg-flex-1"><label>Пинг-роль #1</label>${roleSelect("rsDeptR1_"+d.key,d.ping_role_id||"")}</div>
+          <div class="form-group msg-flex-1"><label>Пинг-роль #2 (опц.)</label>${roleSelect("rsDeptR2_"+d.key,d.ping_role_id_2||"")}</div>
+        </div>
+        <div class="msg-help">Если у отдела заданы канал/пинги — они переопределят общие настройки повышения ниже.</div>
+      </div>
+    </div>`;
+  }).join("");
+  box.innerHTML=tabsHtml+cfgHtml;
+
+  box.querySelectorAll("[data-select-dept]").forEach(b=>b.addEventListener("click",()=>{
+    PROMO_ACTIVE_DEPT=b.getAttribute("data-select-dept");
+    renderPromoDepts();renderPromoMatrix();
+  }));
+  const addBtn=box.querySelector("[data-add-dept]");
+  if(addBtn) addBtn.addEventListener("click",()=>{
+    const name=prompt("Название нового отдела?");
+    if(!name||!name.trim()) return;
+    let key=slugKey(name.trim());
+    let i=1;while(PROMO_DEPTS.some(x=>x.key===key)){key=slugKey(name.trim())+"_"+(i++)}
+    PROMO_DEPTS.push({key,name:name.trim(),channel_id:null,ping_role_id:null,ping_role_id_2:null});
+    PROMO_DEPT_FIELDS[key]={};
+    PROMO_ACTIVE_DEPT=key;
+    renderPromoDepts();renderPromoMatrix();
+  });
+  box.querySelectorAll("[data-del-dept]").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.getAttribute("data-del-dept");
+    if(!confirm("Удалить отдел «"+(PROMO_DEPTS.find(x=>x.key===k)||{}).name+"» и все его настройки?")) return;
+    PROMO_DEPTS=PROMO_DEPTS.filter(x=>x.key!==k);
+    delete PROMO_DEPT_FIELDS[k];
+    if(PROMO_ACTIVE_DEPT===k) PROMO_ACTIVE_DEPT="";
+    renderPromoDepts();renderPromoMatrix();
+  }));
+  box.querySelectorAll("[data-dept-inp]").forEach(el=>el.addEventListener("input",()=>{
+    const k=el.getAttribute("data-dept-k");const prop=el.getAttribute("data-dept-inp");
+    const d=PROMO_DEPTS.find(x=>x.key===k);
+    if(d) d[prop]=el.value;
+  }));
+}
+
+function activeMap(){
+  if(PROMO_ACTIVE_DEPT){
+    if(!PROMO_DEPT_FIELDS[PROMO_ACTIVE_DEPT]) PROMO_DEPT_FIELDS[PROMO_ACTIVE_DEPT]={};
+    return PROMO_DEPT_FIELDS[PROMO_ACTIVE_DEPT];
+  }
+  return PROMO_FIELDS;
+}
+
 function renderPromoMatrix(){
   const box=$("rsPromoMatrix");
   if(!box) return;
   if(!PROMO_RANKS.length){box.innerHTML=`<div class="msg-help">Добавьте хотя бы одно звание в список выше.</div>`;return}
-  box.innerHTML=PROMO_RANKS.map(r=>{
-    const arr=Array.isArray(PROMO_FIELDS[r])?PROMO_FIELDS[r]:[];
+  const map=activeMap();
+  const deptName=PROMO_ACTIVE_DEPT?((PROMO_DEPTS.find(d=>d.key===PROMO_ACTIVE_DEPT)||{}).name||PROMO_ACTIVE_DEPT):"";
+  const header=PROMO_ACTIVE_DEPT
+    ?`<div class="msg-help" style="margin-bottom:8px">✎ Редактируется форма отдела: <b>${esc(deptName)}</b>. Если для звания оставите список пустым — будут показаны поля из «Общей формы».</div>`
+    :`<div class="msg-help" style="margin-bottom:8px">✎ Редактируется <b>общая</b> форма (fallback). Отделы без своей формы будут использовать её.</div>`;
+  box.innerHTML=header+PROMO_RANKS.map(r=>{
+    const arr=Array.isArray(map[r])?map[r]:[];
     return `<div class="cf-group" style="margin-top:14px" data-rank="${esc(r)}">
-      <div class="cf-group-title">⭐ Повышение → <b>${esc(r)}</b> · подтверждения</div>
+      <div class="cf-group-title">⭐ Повышение → <b>${esc(r)}</b>${PROMO_ACTIVE_DEPT?` · ${esc(deptName)}`:""} · подтверждения</div>
       <div class="cf-group-body">
-        <div class="msg-help">Поля, которые появятся когда сотрудник выберет «Желаемое звание» = ${esc(r)}.</div>
-        <div class="rs-fields">${arr.map((f,i)=>fieldRowHtml(r,i,f)).join("")||`<div class="msg-help">Пока пусто</div>`}</div>
+        <div class="msg-help">Поля, которые появятся когда сотрудник выберет «Желаемое звание» = ${esc(r)}${PROMO_ACTIVE_DEPT?` и «Отдел» = «${esc(deptName)}»`:""}.</div>
+        <div class="rs-fields">${arr.map((f,i)=>fieldRowHtml(r,i,f)).join("")||`<div class="msg-help">Пока пусто${PROMO_ACTIVE_DEPT?" — будет использована общая форма.":""}</div>`}</div>
         <div style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-add-field="${esc(r)}">+ Добавить поле</button></div>
       </div>
     </div>`;
   }).join("");
   box.querySelectorAll("[data-add-field]").forEach(b=>b.addEventListener("click",()=>{
     const r=b.getAttribute("data-add-field");
-    if(!PROMO_FIELDS[r]) PROMO_FIELDS[r]=[];
-    PROMO_FIELDS[r].push({key:"field_"+Date.now().toString(36),label:"Новое поле",type:"text",required:false,placeholder:"",options:[]});
+    const m=activeMap();
+    if(!m[r]) m[r]=[];
+    m[r].push({key:"field_"+Date.now().toString(36),label:"Новое поле",type:"text",required:false,placeholder:"",options:[]});
     renderPromoMatrix();
   }));
   box.querySelectorAll("[data-del-field]").forEach(b=>b.addEventListener("click",()=>{
     const r=b.getAttribute("data-rank");const i=parseInt(b.getAttribute("data-del-field"));
-    PROMO_FIELDS[r].splice(i,1);renderPromoMatrix();
+    const m=activeMap();m[r].splice(i,1);renderPromoMatrix();
   }));
   box.querySelectorAll("[data-up-field]").forEach(b=>b.addEventListener("click",()=>{
     const r=b.getAttribute("data-rank");const i=parseInt(b.getAttribute("data-up-field"));
     if(i<=0) return;
-    const a=PROMO_FIELDS[r];[a[i-1],a[i]]=[a[i],a[i-1]];renderPromoMatrix();
+    const a=activeMap()[r];[a[i-1],a[i]]=[a[i],a[i-1]];renderPromoMatrix();
   }));
   box.querySelectorAll("[data-dn-field]").forEach(b=>b.addEventListener("click",()=>{
     const r=b.getAttribute("data-rank");const i=parseInt(b.getAttribute("data-dn-field"));
-    const a=PROMO_FIELDS[r];if(i>=a.length-1) return;
+    const a=activeMap()[r];if(i>=a.length-1) return;
     [a[i+1],a[i]]=[a[i],a[i+1]];renderPromoMatrix();
   }));
   box.querySelectorAll("[data-inp]").forEach(el=>el.addEventListener("input",()=>{
     const r=el.getAttribute("data-rank");const i=parseInt(el.getAttribute("data-idx"));const k=el.getAttribute("data-inp");
-    if(!PROMO_FIELDS[r]||!PROMO_FIELDS[r][i]) return;
-    if(k==="required") PROMO_FIELDS[r][i].required=el.checked;
-    else if(k==="options") PROMO_FIELDS[r][i].options=el.value.split("\n").map(s=>s.trim()).filter(Boolean);
-    else PROMO_FIELDS[r][i][k]=el.value;
+    const m=activeMap();
+    if(!m[r]||!m[r][i]) return;
+    if(k==="required") m[r][i].required=el.checked;
+    else if(k==="options") m[r][i].options=el.value.split("\n").map(s=>s.trim()).filter(Boolean);
+    else m[r][i][k]=el.value;
   }));
   box.querySelectorAll("[data-inp='type']").forEach(el=>el.addEventListener("change",()=>renderPromoMatrix()));
 }
@@ -288,25 +378,41 @@ $("rsSaveAll").addEventListener("click",async()=>{
       ping_role_id_2:document.getElementById("rsR2_"+k).value||null
     };
     if(k==="promotion"){
-      const cleanFields={};
-      for(const r of PROMO_RANKS){
-        const arr=PROMO_FIELDS[r]||[];
-        cleanFields[r]=arr.map((f,idx)=>{
-          const label=(f.label||"").trim()||("Поле "+(idx+1));
-          let key=(f.key||"").trim();
-          if(!key) key="field_"+(idx+1)+"_"+Date.now().toString(36);
-          return {
-            key:key,
-            label:label,
-            type:f.type||"text",
-            required:!!f.required,
-            placeholder:f.placeholder||"",
-            options:Array.isArray(f.options)?f.options:[],
-            group:"Подтверждения"
-          };
-        });
+      function cleanMap(src){
+        const out={};
+        for(const r of PROMO_RANKS){
+          const arr=src[r]||[];
+          out[r]=arr.map((f,idx)=>{
+            const label=(f.label||"").trim()||("Поле "+(idx+1));
+            let key=(f.key||"").trim();
+            if(!key) key="field_"+(idx+1)+"_"+Date.now().toString(36);
+            return {
+              key:key,label:label,type:f.type||"text",required:!!f.required,
+              placeholder:f.placeholder||"",options:Array.isArray(f.options)?f.options:[],
+              group:"Подтверждения"
+            };
+          });
+        }
+        return out;
       }
-      patch.rank_matrix={ranks:PROMO_RANKS.slice(),fields:cleanFields};
+      const cleanFields=cleanMap(PROMO_FIELDS);
+      const deptFieldsClean={};
+      for(const d of PROMO_DEPTS){
+        deptFieldsClean[d.key]=cleanMap(PROMO_DEPT_FIELDS[d.key]||{});
+      }
+      const deptsClean=PROMO_DEPTS.map(d=>({
+        key:d.key,
+        name:(d.name||"").trim()||d.key,
+        channel_id:document.getElementById("rsDeptCh_"+d.key)?document.getElementById("rsDeptCh_"+d.key).value||null:(d.channel_id||null),
+        ping_role_id:document.getElementById("rsDeptR1_"+d.key)?document.getElementById("rsDeptR1_"+d.key).value||null:(d.ping_role_id||null),
+        ping_role_id_2:document.getElementById("rsDeptR2_"+d.key)?document.getElementById("rsDeptR2_"+d.key).value||null:(d.ping_role_id_2||null)
+      }));
+      patch.rank_matrix={
+        ranks:PROMO_RANKS.slice(),
+        fields:cleanFields,
+        departments:deptsClean,
+        dept_fields:deptFieldsClean
+      };
       console.log("[RS] promotion patch:",JSON.parse(JSON.stringify(patch)));
     }
     const r=await VSRF_REQUESTS.saveForm(patch);
@@ -316,7 +422,9 @@ $("rsSaveAll").addEventListener("click",async()=>{
   if(check&&check.rank_matrix&&check.rank_matrix.fields){
     const cnt=Object.values(check.rank_matrix.fields).reduce((a,b)=>a+(Array.isArray(b)?b.length:0),0);
     msg.className="form-msg success";
-    msg.innerHTML="✓ Сохранено. В БД лежит: <b>"+((check.rank_matrix.ranks||[]).length)+"</b> званий, <b>"+cnt+"</b> полей подтверждения.";
+    const deptCnt=(check.rank_matrix.departments||[]).length;
+    const deptFieldsCnt=Object.values(check.rank_matrix.dept_fields||{}).reduce((a,ranksMap)=>a+Object.values(ranksMap||{}).reduce((b,arr)=>b+(Array.isArray(arr)?arr.length:0),0),0);
+    msg.innerHTML="✓ Сохранено. В БД лежит: <b>"+((check.rank_matrix.ranks||[]).length)+"</b> званий, <b>"+cnt+"</b> общих полей, <b>"+deptCnt+"</b> отделов с <b>"+deptFieldsCnt+"</b> полями.";
   }else{
     msg.className="form-msg error";
     msg.innerHTML="⚠ Сохранено, но rank_matrix не вернулся из БД. <br>Скорее всего не создана колонка. Выполните <code>sql/SUPABASE-REQUESTS-V113.sql</code> в Supabase.";
@@ -326,6 +434,6 @@ $("rsSaveAll").addEventListener("click",async()=>{
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,500);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2677b72a9119da9',t:'MTc4NTk1MDUyOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2682d0bb98bf3aa',t:'MTc4NTk1NzgwMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
