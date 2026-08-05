@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=131">
+<link rel="stylesheet" href="style.css?v=132">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -25,8 +25,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
     var role=window.VSRF_ROLES.getMyRole();
     if(role===null&&s.user) return;
     _lkChecked=true;
-    var canLk=window.VSRF_ROLES.can("lk","users")||window.VSRF_ROLES.can("lk","roles")||window.VSRF_ROLES.can("lk","settings");
-    if(!canLk){location.replace("index.html");return}
+    if(!s.user){return}
   }
   document.addEventListener("DOMContentLoaded",function(){
     apply();
@@ -77,7 +76,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <a href="requests-review.html" data-page="requests-review.html" data-transition data-perm="requests:review,requests:view">Рассмотрение заявок</a>
       <a href="payroll.html" data-page="payroll.html" data-transition data-perm="payroll:view">Реестр премирования</a>
       <a href="message.html" data-page="message.html" data-transition data-perm="messages:send">Сообщения</a>
-      <a href="lk.html" data-page="lk.html" data-transition data-perm="lk:users,lk:roles,lk:settings">Личный кабинет</a>
+      <a href="lk.html" data-page="lk.html" data-transition>Личный кабинет</a>
     </nav>
     <div class="header-actions">
       <button class="icon-btn" data-open-notify title="Уведомления" style="position:relative">
@@ -116,7 +115,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
             <div class="lk-email" id="lkEmail">—</div>
           </div>
           <div class="lk-head-actions">
-            <button class="lk-logout lk-settings-btn" data-open-settings title="Панель сайта">⚙ Панель сайта</button>
+            <button class="lk-logout lk-settings-btn" data-open-settings title="Панель сайта" data-admin>⚙ Панель сайта</button>
             <button class="lk-logout" id="lkLogout">Выйти</button>
           </div>
         </div>
@@ -326,19 +325,19 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=131"></script>
-<script src="config.js?v=131"></script>
-<script src="main.js?v=131"></script>
-<script src="format-utils.js?v=131"></script>
-<script src="auth.js?v=131"></script>
-<script src="roles-engine.js?v=131"></script>
-<script src="holiday-engine.js?v=131"></script>
+<script src="supabase-loader.js?v=132"></script>
+<script src="config.js?v=132"></script>
+<script src="main.js?v=132"></script>
+<script src="format-utils.js?v=132"></script>
+<script src="auth.js?v=132"></script>
+<script src="roles-engine.js?v=132"></script>
+<script src="holiday-engine.js?v=132"></script>
 <script src="settings-panel.js"></script>
 <script src="sound-engine.js"></script>
 <script src="faq-engine.js"></script>
 <script src="search-engine.js"></script>
 <script src="notify-engine.js"></script>
-<script src="notify-live.js?v=131"></script>
+<script src="notify-live.js?v=132"></script>
 
 <script src="lk-engine.js"></script>
 <script>
@@ -349,8 +348,30 @@ const lkGuest=$("lkGuest"),lkApp=$("lkApp");
 function initials(s){const p=(s||"").trim().split(/[\s@.]+/);return (p.slice(0,2).map(x=>x[0]||"").join("")||"?").toUpperCase()}
 function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
-const TYPE_COLORS={news:"#f0d89b",vehicle:"#8fd97a",ustav:"#7ac3f0",lesson:"#c99af7"};
-const TYPE_LABELS={news:"Новость",vehicle:"Техника",ustav:"Устав",lesson:"Урок"};
+const TYPE_COLORS={
+  news:"#f0d89b",vehicle:"#8fd97a",ustav:"#7ac3f0",lesson:"#c99af7",
+  app:"#5a8fcd","app-verdict":"#a2d8ff",
+  complaint:"#e97a7a","complaint-verdict":"#f0d89b",
+  violation:"#e97a7a","violation-removed":"#8fd97a",
+  vp:"#cda85a","vp-check":"#8fd97a",
+  supply:"#c99af7",payroll:"#f0d89b",
+  role:"#cda85a"
+};
+const TYPE_LABELS={
+  news:"Новость",vehicle:"Техника",ustav:"Устав",lesson:"Урок",
+  app:"Заявление","app-verdict":"Вердикт",
+  complaint:"Жалоба","complaint-verdict":"Вердикт",
+  violation:"Нарушение","violation-removed":"Снятие",
+  vp:"ВП","vp-check":"Проверка ВП",
+  supply:"Поставка",payroll:"Премирование",
+  role:"Роль"
+};
+["leave","vacation_ic","vacation_ooc","promotion","dismissal"].forEach(k=>{
+  TYPE_COLORS["request-"+k]="#5a8fcd";
+  TYPE_LABELS["request-"+k]="Заявка";
+});
+TYPE_COLORS["request-verdict"]="#a2d8ff";
+TYPE_LABELS["request-verdict"]="Вердикт";
 
 async function boot(){
   await VSRF_LK.waitReady();
@@ -424,18 +445,20 @@ function initNotifyPanel(){
 
 async function renderAudit(){
   const box=$("lkAudit");
-  const items=await VSRF_LK.recent();
+  const items=await VSRF_LK.recent({limit:50});
   if(!items.length){box.innerHTML=`<div class="lk-act-empty">Пока нет действий на сайте.<br>Создайте первую запись — и здесь появится история.</div>`;return}
   box.innerHTML=items.map(it=>{
     const when=it.at?new Date(it.at).toLocaleString("ru-RU",{timeZone:"Europe/Moscow",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
     const color=TYPE_COLORS[it.type]||"var(--gold)";
     const label=TYPE_LABELS[it.type]||"Запись";
+    const who=it.who&&it.who!=="—"?`<span class="lk-audit-meta-sep">·</span><span class="lk-audit-who">👤 ${esc(it.who)}</span>`:"";
     return `<a class="lk-audit-item" href="${it.href}" style="--item-color:${color}">
       <span class="lk-audit-icon">${it.icon}</span>
       <div class="lk-audit-body">
         <div class="lk-audit-title">${esc(it.title)}</div>
         <div class="lk-audit-meta">
           <span class="lk-audit-meta-type">${label}</span>
+          ${who}
           <span class="lk-audit-meta-sep">·</span>
           <span>${when}</span>
         </div>

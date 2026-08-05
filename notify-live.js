@@ -22,10 +22,10 @@ window.VSRF_NOTIFY_LIVE=(function(){
   const EVENTS={
     "apps.new":{
       label:"📋 Новые заявления",
-      table:"apps",fields:"id,fio,static_id,kind,created_at",
-      filter:q=>q.is("responded_by",null),
-      title:r=>"📋 Новое заявление",
-      body:r=>`${r.fio||""} · ${r.static_id||""} · ${r.kind||""}`,
+      table:"applications",fields:"id,submitter_name,submitter_discord,app_type,status,created_at",
+      filter:q=>q.eq("status","new"),
+      title:r=>"📋 Новое заявление · "+(r.app_type||""),
+      body:r=>`${r.submitter_name||"—"}${r.submitter_discord?" · "+r.submitter_discord:""}`,
       url:()=>"apps.html",perm:{sec:"apps",act:"view"}
     },
     "complaints.new":{

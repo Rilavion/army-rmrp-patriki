@@ -3193,7 +3193,7 @@ body.home-page-body .fab-stack{display:none !important}
     radial-gradient(circle at 32% 30%,rgba(240,216,155,.35),rgba(205,168,90,.05) 45%,rgba(21,36,29,.95) 75%),
     linear-gradient(160deg,rgba(205,168,90,.3),rgba(21,36,29,.9));
   border:2px solid var(--gold);
-  display:grid;place-items:center;overflow:visible;
+  display:grid;place-items:center;overflow:hidden;
   box-shadow:
     0 0 80px rgba(205,168,90,.4),
     inset 0 0 50px rgba(0,0,0,.7),
@@ -3203,9 +3203,8 @@ body.home-page-body .fab-stack{display:none !important}
   transform:translateZ(20px);
 }
 .hero-v4-emblem-inner img{
-  width:240%;height:240%;object-fit:contain;
-  position:relative;z-index:3;
-  filter:drop-shadow(0 10px 26px rgba(0,0,0,.75)) drop-shadow(0 0 18px rgba(205,168,90,.4));
+  width:80%;height:80%;object-fit:contain;
+  filter:drop-shadow(0 6px 14px rgba(0,0,0,.6)) drop-shadow(0 0 12px rgba(205,168,90,.3));
   transform:translateZ(30px);
 }
 .hero-v4-emblem-shine{
@@ -5456,3 +5455,5 @@ body.vsrf-is-logged .footer-col a[data-loggedin]{display:block !important}
 .np-events-title{font:600 11px/1 Inter;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;opacity:.85}
 .np-event{background:rgba(0,0,0,.15);font-size:12.5px}
 .np-msg{margin-top:10px;font-size:13px}
+
+.lk-audit-who{color:#cda85a;font-weight:500}
