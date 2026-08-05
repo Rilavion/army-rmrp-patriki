@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=123">
+<link rel="stylesheet" href="style.css?v=124">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -187,10 +187,11 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
     <form id="sForm">
       <input type="hidden" name="id">
       <div class="form-group"><label>Полное название</label><input name="name" required></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">
         <div class="form-group"><label>Аббревиатура</label><input name="short" required placeholder="ВП"></div>
         <div class="form-group"><label>Цвет</label><input name="color" type="color" value="#7a8a4a" style="height:44px;padding:4px"></div>
         <div class="form-group"><label>Эмблема (эмодзи)</label><input name="icon" value="★" placeholder="🛡"></div>
+        <div class="form-group"><label>Колонок в сетке</label><input name="grid_cols" type="number" min="2" max="10" value="3"></div>
       </div>
       <div style="display:flex;gap:10px;justify-content:space-between;margin-top:8px">
         <button type="button" class="btn btn-ghost btn-sm btn-danger" id="sDeleteBtn" style="display:none">Удалить подразделение</button>
@@ -230,21 +231,21 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="html2canvas.min.js?v=123"></script>
-<script src="supabase-loader.js?v=123"></script>
-<script src="config.js?v=123"></script>
-<script src="main.js?v=123"></script>
-<script src="format-utils.js?v=123"></script>
-<script src="holiday-engine.js?v=123"></script>
-<script src="settings-panel.js?v=123"></script>
-<script src="sound-engine.js?v=123"></script>
-<script src="faq-engine.js?v=123"></script>
-<script src="search-engine.js?v=123"></script>
-<script src="notify-engine.js?v=123"></script>
-<script src="auth.js?v=123"></script>
-<script src="roles-engine.js?v=123"></script>
-<script src="select-enhance.js?v=123"></script>
-<script src="composition-engine.js?v=123"></script>
+<script src="html2canvas.min.js?v=124"></script>
+<script src="supabase-loader.js?v=124"></script>
+<script src="config.js?v=124"></script>
+<script src="main.js?v=124"></script>
+<script src="format-utils.js?v=124"></script>
+<script src="holiday-engine.js?v=124"></script>
+<script src="settings-panel.js?v=124"></script>
+<script src="sound-engine.js?v=124"></script>
+<script src="faq-engine.js?v=124"></script>
+<script src="search-engine.js?v=124"></script>
+<script src="notify-engine.js?v=124"></script>
+<script src="auth.js?v=124"></script>
+<script src="roles-engine.js?v=124"></script>
+<script src="select-enhance.js?v=124"></script>
+<script src="composition-engine.js?v=124"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -280,6 +281,96 @@ function shade(hex,percent){
   let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
   const f=1+percent/100;r=Math.max(0,Math.min(255,r*f))|0;g=Math.max(0,Math.min(255,g*f))|0;b=Math.max(0,Math.min(255,b*f))|0;
   return "#"+((r<<16)|(g<<8)|b).toString(16).padStart(6,"0");
+}
+
+function memberCardHtml(sub,m,origIdx,color){
+  const r=VSRF_COMP.rankInfo(m.rank);
+  const hasPhoto=!!(m&&m.photo);
+  const drag=editing?`draggable="true" data-drag-src="${sub.id}::${origIdx}"`:"";
+  return `<div class="hier-member ${editing?"is-draggable":""}" style="--m-color:${color}" ${drag}>
+    <div class="hier-member-photo ${hasPhoto?"":"no-photo"}">
+      ${hasPhoto?`<img src="${esc(m.photo)}" alt="" style="${photoStyle(m)}">`:`<span class="hier-officer-initials">${esc(initials(m.name||""))}</span>`}
+      <div class="hier-member-rank-tag" style="background:${color}">${esc(r.label)}</div>
+    </div>
+    <div class="hier-member-body">
+      <div class="hier-member-name">${esc(m.name)}</div>
+      ${m.role?`<div class="hier-member-role">${esc(m.role)}</div>`:""}
+      <div class="hier-member-ids">
+        ${m.code?`<span class="hier-member-code" title="Статик / Код">📞 ${esc(m.code)}</span>`:""}
+        ${m.comm?`<span class="hier-member-comm" title="Спец. связь">📡 ${esc(m.comm)}</span>`:""}
+      </div>
+    </div>
+    ${editing?`<div class="hier-member-actions">
+      <button class="mini-icon-btn drag-handle" title="Перетащить">⋮⋮</button>
+      <button class="mini-icon-btn" data-edit-member="${sub.id}::${origIdx}" title="Редактировать">✎</button>
+      <button class="mini-icon-btn danger" data-del-member="${sub.id}::${origIdx}" title="Удалить">×</button>
+    </div>`:""}
+  </div>`;
+}
+
+function ensureGridPositions(sub){
+  const cols=Math.max(2,Math.min(10,parseInt(sub.grid_cols)||3));
+  const arr=sub.members||[];
+  const occupied=new Set();
+  arr.forEach(m=>{
+    if(typeof m.grid_row==="number"&&typeof m.grid_col==="number"){
+      occupied.add(m.grid_row+":"+m.grid_col);
+    }
+  });
+  function nextFree(){
+    for(let r=0;r<200;r++){
+      for(let c=0;c<cols;c++){
+        if(!occupied.has(r+":"+c)) return {r,c};
+      }
+    }
+    return {r:0,c:0};
+  }
+  const sorted=arr.slice().sort((a,b)=>VSRF_COMP.rankInfo(a.rank).tier-VSRF_COMP.rankInfo(b.rank).tier);
+  sorted.forEach(m=>{
+    if(typeof m.grid_row!=="number"||typeof m.grid_col!=="number"||m.grid_col>=cols){
+      const p=nextFree();
+      m.grid_row=p.r;m.grid_col=p.c;
+      occupied.add(p.r+":"+p.c);
+    }
+  });
+}
+
+function renderSub(sub){
+  const color=sub.color||"#7a8a4a";
+  const cols=Math.max(2,Math.min(10,parseInt(sub.grid_cols)||3));
+  ensureGridPositions(sub);
+  const arr=sub.members||[];
+  let maxRow=0;
+  arr.forEach(m=>{if(typeof m.grid_row==="number"&&m.grid_row>maxRow) maxRow=m.grid_row});
+  const rows=maxRow+1+(editing?1:0);
+  const map={};
+  arr.forEach((m,i)=>{map[m.grid_row+":"+m.grid_col]={m,i}});
+
+  let cells="";
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const key=r+":"+c;
+      const cell=map[key];
+      const dropAttrs=editing?`data-drop-cell="${sub.id}::${r}::${c}"`:"";
+      if(cell){
+        cells+=`<div class="hier-grid-cell filled" ${dropAttrs}>${memberCardHtml(sub,cell.m,cell.i,color)}</div>`;
+      } else if(editing){
+        cells+=`<div class="hier-grid-cell empty" ${dropAttrs} data-empty-add="${sub.id}::${r}::${c}" title="Кликнуть — добавить бойца · Перетащить — сюда"><div class="hier-empty-slot"><span>+</span></div></div>`;
+      }
+    }
+  }
+
+  const editBtn=editing?`<button class="hier-edit-btn hier-sub-edit-btn" data-edit-sub="${sub.id}">⚙</button>`:"";
+  const compactBtn=editing?`<button class="hier-edit-btn hier-sub-edit-btn" data-compact-grid="${sub.id}" title="Убрать пустые строки/сжать" style="right:52px">⇱</button>`:"";
+  const addBtn=editing?`<button class="hier-officer hier-officer-add" data-add-member="${sub.id}">＋ Добавить в подразделение</button>`:"";
+  return `<section class="hier-sub-section" style="--sub-color:${color};--sub-color-2:${shade(color,-25)}">
+    <div class="hier-sub-head">
+      <div class="hier-sub-title">${esc(sub.name)}</div>
+      ${compactBtn}${editBtn}
+    </div>
+    <div class="hier-grid" style="grid-template-columns:repeat(${cols},minmax(0,1fr))" data-sub-id="${sub.id}">${cells}</div>
+    ${addBtn?`<div class="hier-add-wrap">${addBtn}</div>`:""}
+  </section>`;
 }
 
 function render(){
@@ -342,61 +433,7 @@ function render(){
 
   const subsHtml=`<div class="hier-subs-title"><span class="hier-line"></span><span class="hier-staff-label">Подразделения · ${STATE.subs.length} шт.</span><span class="hier-line"></span></div>
   <div class="hier-subs-list">
-    ${STATE.subs.map(sub=>{
-      const color=sub.color||"#7a8a4a";
-      const icon=sub.icon||"★";
-      const raw=(sub.members||[]);
-      const hasCustomOrder=raw.some(m=>typeof m.sort_order==="number");
-      const idxMap=raw.map((m,i)=>({m,i}));
-      if(hasCustomOrder){
-        idxMap.sort((a,b)=>{
-          const ao=typeof a.m.sort_order==="number"?a.m.sort_order:9999+a.i;
-          const bo=typeof b.m.sort_order==="number"?b.m.sort_order:9999+b.i;
-          return ao-bo;
-        });
-      } else {
-        idxMap.sort((a,b)=>VSRF_COMP.rankInfo(a.m.rank).tier-VSRF_COMP.rankInfo(b.m.rank).tier);
-      }
-      const total=idxMap.length;
-      const rows=idxMap.map((entry,visualIdx)=>{
-        const m=entry.m;
-        const origIdx=entry.i;
-        const r=VSRF_COMP.rankInfo(m.rank);
-        const hasPhoto=!!(m&&m.photo);
-        const isFirst=visualIdx===0;
-        const isLast=visualIdx===total-1;
-        return `<div class="hier-member" style="--m-color:${color}">
-          <div class="hier-member-photo ${hasPhoto?"":"no-photo"}">
-            ${hasPhoto?`<img src="${esc(m.photo)}" alt="" style="${photoStyle(m)}">`:`<span class="hier-officer-initials">${esc(initials(m.name||""))}</span>`}
-            <div class="hier-member-rank-tag" style="background:${color}">${esc(r.label)}</div>
-          </div>
-          <div class="hier-member-body">
-            <div class="hier-member-name">${esc(m.name)}</div>
-            ${m.role?`<div class="hier-member-role">${esc(m.role)}</div>`:""}
-            <div class="hier-member-ids">
-              ${m.code?`<span class="hier-member-code" title="Статик / Код">📞 ${esc(m.code)}</span>`:""}
-              ${m.comm?`<span class="hier-member-comm" title="Спец. связь">📡 ${esc(m.comm)}</span>`:""}
-            </div>
-          </div>
-          ${editing?`<div class="hier-member-actions">
-            <button class="mini-icon-btn move-btn" data-move-up="${sub.id}::${origIdx}" ${isFirst?"disabled":""} title="Выше">▲</button>
-            <button class="mini-icon-btn move-btn" data-move-dn="${sub.id}::${origIdx}" ${isLast?"disabled":""} title="Ниже">▼</button>
-            <button class="mini-icon-btn" data-edit-member="${sub.id}::${origIdx}" title="Редактировать">✎</button>
-            <button class="mini-icon-btn danger" data-del-member="${sub.id}::${origIdx}" title="Удалить">×</button>
-          </div>`:""}
-        </div>`;
-      }).join("");
-      const editBtn=editing?`<button class="hier-edit-btn hier-sub-edit-btn" data-edit-sub="${sub.id}">⚙</button>`:"";
-      const resetBtn=(editing&&hasCustomOrder)?`<button class="hier-edit-btn hier-sub-edit-btn" data-reset-order="${sub.id}" title="Сбросить порядок → сортировка по званию" style="right:52px">⇅</button>`:"";
-      const addBtn=editing?`<button class="hier-officer hier-officer-add" data-add-member="${sub.id}">＋ Добавить в подразделение</button>`:"";
-      return `<section class="hier-sub-section" style="--sub-color:${color};--sub-color-2:${shade(color,-25)}">
-        <div class="hier-sub-head">
-          <div class="hier-sub-title">${esc(sub.name)}</div>
-          ${resetBtn}${editBtn}
-        </div>
-        <div class="hier-staff-grid">${rows}${addBtn}</div>
-      </section>`;
-    }).join("")}
+    ${STATE.subs.map(sub=>renderSub(sub)).join("")}
   </div>
   ${editing?`<div style="margin-top:16px;width:100%;max-width:500px;margin-left:auto;margin-right:auto"><button class="hier-add-btn" id="addSubBtn" style="width:100%;padding:16px">+ Добавить подразделение</button></div>`:""}`;
 
@@ -426,7 +463,8 @@ function expBuildHtml(opts){
   if(!src){return `<div style="padding:40px;color:#e77070">Ошибка: иерархия не найдена</div>`}
 
   const clone=src.cloneNode(true);
-  clone.querySelectorAll(".hier-edit-btn,.hier-edit-group,.hier-edit-corner,.hier-sub-edit-btn,.hier-member-actions,.hier-officer-add,.hier-add-btn,#addHqBtn,#addSubBtn,[data-add-member]").forEach(el=>el.remove());
+  clone.querySelectorAll(".hier-edit-btn,.hier-edit-group,.hier-edit-corner,.hier-sub-edit-btn,.hier-member-actions,.hier-officer-add,.hier-add-btn,.hier-add-wrap,.hier-grid-cell.empty,#addHqBtn,#addSubBtn,[data-add-member]").forEach(el=>el.remove());
+  clone.querySelectorAll(".hier-member").forEach(el=>el.removeAttribute("draggable"));
   clone.querySelectorAll("canvas,svg").forEach(el=>{
     const r=el.getBoundingClientRect();
     if(!r.width||!r.height) el.remove();
@@ -741,8 +779,8 @@ $("exportModal").addEventListener("click",e=>{if(e.target===$("exportModal")) $(
 
 const pModal=$("personModal"),pForm=$("pForm"),pFields=$("pFormFields"),pDel=$("pDeleteBtn");
 const sModal=$("subModal"),sForm=$("sForm"),sDel=$("sDeleteBtn");
-pModal.addEventListener("click",e=>{if(e.target===pModal) pModal.classList.remove("active")});
-pModal.querySelector(".modal-close").addEventListener("click",()=>pModal.classList.remove("active"));
+pModal.addEventListener("click",e=>{if(e.target===pModal){pModal.classList.remove("active");window.__pendingCell=null}});
+pModal.querySelector(".modal-close").addEventListener("click",()=>{pModal.classList.remove("active");window.__pendingCell=null});
 sModal.addEventListener("click",e=>{if(e.target===sModal) sModal.classList.remove("active")});
 sModal.querySelector(".modal-close").addEventListener("click",()=>sModal.classList.remove("active"));
 
@@ -902,7 +940,18 @@ pForm.addEventListener("submit",async e=>{
     const sub=STATE.subs.find(s=>s.id===ctx[1]);if(!sub) return;
     const idx=parseInt(ctx[2]);
     const m={rank:data.rank,name:data.name,code:data.code,comm:data.comm,role:data.role,photo:data.photo,photo_zoom:parseFloat(data.photo_zoom)||1,photo_x:parseFloat(data.photo_x)||50,photo_y:parseFloat(data.photo_y)||50};
-    if(idx>=0) sub.members[idx]=m;else sub.members.push(m);
+    if(idx>=0){
+      const old=sub.members[idx];
+      if(old){if(typeof old.grid_row==="number") m.grid_row=old.grid_row;if(typeof old.grid_col==="number") m.grid_col=old.grid_col}
+      sub.members[idx]=m;
+    } else {
+      if(window.__pendingCell&&window.__pendingCell.sub===sub.id){
+        m.grid_row=window.__pendingCell.row;
+        m.grid_col=window.__pendingCell.col;
+        window.__pendingCell=null;
+      }
+      sub.members.push(m);
+    }
   }
   await VSRF_COMP.save(STATE);
   pModal.classList.remove("active");render();showToast("Сохранено","success");
@@ -922,8 +971,8 @@ function openSubEdit(subId){
   $("sModalTitle").textContent=sub?"Настройки подразделения":"Новое подразделение";
   sForm.reset();
   sForm.id.value=sub?sub.id:"";
-  if(sub){sForm.name.value=sub.name;sForm.short.value=sub.short;sForm.color.value=sub.color||"#7a8a4a";sForm.icon.value=sub.icon||"★"}
-  else{sForm.color.value="#7a8a4a";sForm.icon.value="★"}
+  if(sub){sForm.name.value=sub.name;sForm.short.value=sub.short;sForm.color.value=sub.color||"#7a8a4a";sForm.icon.value=sub.icon||"★";sForm.grid_cols.value=sub.grid_cols||3}
+  else{sForm.color.value="#7a8a4a";sForm.icon.value="★";sForm.grid_cols.value=3}
   sDel.style.display=sub?"":"none";
   sModal.classList.add("active");
 }
@@ -931,7 +980,8 @@ function openSubEdit(subId){
 sForm.addEventListener("submit",async e=>{
   e.preventDefault();
   const id=sForm.id.value;
-  const data={name:sForm.name.value.trim(),short:sForm.short.value.trim(),color:sForm.color.value,icon:sForm.icon.value.trim()||"★"};
+  const gc=Math.max(2,Math.min(10,parseInt(sForm.grid_cols.value)||3));
+  const data={name:sForm.name.value.trim(),short:sForm.short.value.trim(),color:sForm.color.value,icon:sForm.icon.value.trim()||"★",grid_cols:gc};
   if(id){const sub=STATE.subs.find(s=>s.id===id);if(sub) Object.assign(sub,data)}
   else{STATE.subs.push(Object.assign({id:VSRF_COMP.uid(),members:[]},data))}
   await VSRF_COMP.save(STATE);
@@ -968,40 +1018,98 @@ hier.addEventListener("click",e=>{
     return;
   }
   const es=e.target.closest("[data-edit-sub]");if(es) return openSubEdit(es.dataset.editSub);
-  const mu=e.target.closest("[data-move-up]");if(mu){
-    const [s,i]=mu.dataset.moveUp.split("::");
-    return moveMember(s,parseInt(i),-1);
-  }
-  const md=e.target.closest("[data-move-dn]");if(md){
-    const [s,i]=md.dataset.moveDn.split("::");
-    return moveMember(s,parseInt(i),+1);
-  }
-  const ro=e.target.closest("[data-reset-order]");if(ro){
-    if(!confirm("Сбросить ручной порядок и вернуть автосортировку по званию?")) return;
-    const sub=STATE.subs.find(x=>x.id===ro.dataset.resetOrder);
-    if(sub){
-      (sub.members||[]).forEach(m=>{delete m.sort_order});
-      VSRF_COMP.save(STATE).then(()=>{render();showToast("Порядок сброшен","success")});
-    }
+  const cg=e.target.closest("[data-compact-grid]");if(cg){
+    const sub=STATE.subs.find(x=>x.id===cg.dataset.compactGrid);
+    if(sub) compactGrid(sub);
     return;
+  }
+  const es2=e.target.closest("[data-empty-add]");if(es2){
+    const [s,r,c]=es2.dataset.emptyAdd.split("::");
+    return openMemberEditAtCell(s,parseInt(r),parseInt(c));
   }
   if(e.target.id==="addSubBtn") return openSubEdit(null);
 });
 
-function moveMember(subId,origIdx,delta){
-  const sub=STATE.subs.find(x=>x.id===subId);
-  if(!sub||!sub.members) return;
-  const arr=sub.members;
-  arr.forEach((m,i)=>{if(typeof m.sort_order!=="number") m.sort_order=i*10});
-  const withOrder=arr.map((m,i)=>({m,i,o:m.sort_order})).sort((a,b)=>a.o-b.o);
-  const pos=withOrder.findIndex(x=>x.i===origIdx);
-  if(pos<0) return;
-  const swapWith=pos+delta;
-  if(swapWith<0||swapWith>=withOrder.length) return;
-  const tmp=withOrder[pos].m.sort_order;
-  withOrder[pos].m.sort_order=withOrder[swapWith].m.sort_order;
-  withOrder[swapWith].m.sort_order=tmp;
+let __dragSrc=null;
+
+hier.addEventListener("dragstart",e=>{
+  const card=e.target.closest("[data-drag-src]");
+  if(!card){e.preventDefault();return}
+  __dragSrc=card.dataset.dragSrc;
+  try{e.dataTransfer.setData("text/plain",__dragSrc);e.dataTransfer.effectAllowed="move"}catch(_){}
+  card.classList.add("dragging");
+});
+hier.addEventListener("dragend",e=>{
+  const card=e.target.closest("[data-drag-src]");
+  if(card) card.classList.remove("dragging");
+  hier.querySelectorAll(".drop-hover").forEach(el=>el.classList.remove("drop-hover"));
+  __dragSrc=null;
+});
+hier.addEventListener("dragover",e=>{
+  const cell=e.target.closest("[data-drop-cell]");
+  if(!cell) return;
+  e.preventDefault();
+  try{e.dataTransfer.dropEffect="move"}catch(_){}
+});
+hier.addEventListener("dragenter",e=>{
+  const cell=e.target.closest("[data-drop-cell]");
+  if(!cell) return;
+  cell.classList.add("drop-hover");
+});
+hier.addEventListener("dragleave",e=>{
+  const cell=e.target.closest("[data-drop-cell]");
+  if(!cell) return;
+  if(cell.contains(e.relatedTarget)) return;
+  cell.classList.remove("drop-hover");
+});
+hier.addEventListener("drop",e=>{
+  const cell=e.target.closest("[data-drop-cell]");
+  if(!cell) return;
+  e.preventDefault();
+  cell.classList.remove("drop-hover");
+  let src=__dragSrc;
+  if(!src){try{src=e.dataTransfer.getData("text/plain")}catch(_){}}
+  if(!src) return;
+  const [srcSub,srcIdx]=src.split("::");
+  const [dstSub,dstRow,dstCol]=cell.dataset.dropCell.split("::");
+  if(srcSub!==dstSub){showToast("Перемещение между подразделениями пока нельзя","error");return}
+  const sub=STATE.subs.find(x=>x.id===srcSub);
+  if(!sub) return;
+  const srcMember=sub.members[parseInt(srcIdx)];
+  if(!srcMember) return;
+  const r=parseInt(dstRow),c=parseInt(dstCol);
+  const dstMember=(sub.members||[]).find(m=>m.grid_row===r&&m.grid_col===c);
+  if(dstMember===srcMember) return;
+  if(dstMember){
+    const tr=srcMember.grid_row,tc=srcMember.grid_col;
+    srcMember.grid_row=dstMember.grid_row;
+    srcMember.grid_col=dstMember.grid_col;
+    dstMember.grid_row=tr;
+    dstMember.grid_col=tc;
+  } else {
+    srcMember.grid_row=r;
+    srcMember.grid_col=c;
+  }
   VSRF_COMP.save(STATE).then(()=>render()).catch(err=>showToast("Ошибка: "+err.message,"error"));
+});
+
+function compactGrid(sub){
+  const cols=Math.max(2,Math.min(10,parseInt(sub.grid_cols)||3));
+  const rowsUsed=new Set();
+  (sub.members||[]).forEach(m=>{if(typeof m.grid_row==="number") rowsUsed.add(m.grid_row)});
+  const sortedRows=Array.from(rowsUsed).sort((a,b)=>a-b);
+  const rowMap={};
+  sortedRows.forEach((r,i)=>{rowMap[r]=i});
+  (sub.members||[]).forEach(m=>{
+    if(typeof m.grid_row==="number") m.grid_row=rowMap[m.grid_row];
+  });
+  VSRF_COMP.save(STATE).then(()=>{render();showToast("Пустые строки убраны","success")}).catch(err=>showToast("Ошибка: "+err.message,"error"));
+}
+
+function openMemberEditAtCell(subId,row,col){
+  const sub=STATE.subs.find(x=>x.id===subId);if(!sub) return;
+  window.__pendingCell={sub:subId,row:row,col:col};
+  openMemberEdit(subId,-1);
 }
 
 function updateAdmin(){
@@ -1015,6 +1123,6 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2677aa758949da9',t:'MTc4NTk1MDQ5NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26792fada1c9da9',t:'MTc4NTk1MTQ5Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
