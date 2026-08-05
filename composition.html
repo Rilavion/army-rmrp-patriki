@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=122">
+<link rel="stylesheet" href="style.css?v=123">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -230,21 +230,21 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="html2canvas.min.js?v=122"></script>
-<script src="supabase-loader.js?v=122"></script>
-<script src="config.js?v=122"></script>
-<script src="main.js?v=122"></script>
-<script src="format-utils.js?v=122"></script>
-<script src="holiday-engine.js?v=122"></script>
-<script src="settings-panel.js?v=122"></script>
-<script src="sound-engine.js?v=122"></script>
-<script src="faq-engine.js?v=122"></script>
-<script src="search-engine.js?v=122"></script>
-<script src="notify-engine.js?v=122"></script>
-<script src="auth.js?v=122"></script>
-<script src="roles-engine.js?v=122"></script>
-<script src="select-enhance.js?v=122"></script>
-<script src="composition-engine.js?v=122"></script>
+<script src="html2canvas.min.js?v=123"></script>
+<script src="supabase-loader.js?v=123"></script>
+<script src="config.js?v=123"></script>
+<script src="main.js?v=123"></script>
+<script src="format-utils.js?v=123"></script>
+<script src="holiday-engine.js?v=123"></script>
+<script src="settings-panel.js?v=123"></script>
+<script src="sound-engine.js?v=123"></script>
+<script src="faq-engine.js?v=123"></script>
+<script src="search-engine.js?v=123"></script>
+<script src="notify-engine.js?v=123"></script>
+<script src="auth.js?v=123"></script>
+<script src="roles-engine.js?v=123"></script>
+<script src="select-enhance.js?v=123"></script>
+<script src="composition-engine.js?v=123"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -345,10 +345,26 @@ function render(){
     ${STATE.subs.map(sub=>{
       const color=sub.color||"#7a8a4a";
       const icon=sub.icon||"★";
-      const sorted=(sub.members||[]).slice().sort((a,b)=>VSRF_COMP.rankInfo(a.rank).tier-VSRF_COMP.rankInfo(b.rank).tier);
-      const rows=sorted.map(m=>{
+      const raw=(sub.members||[]);
+      const hasCustomOrder=raw.some(m=>typeof m.sort_order==="number");
+      const idxMap=raw.map((m,i)=>({m,i}));
+      if(hasCustomOrder){
+        idxMap.sort((a,b)=>{
+          const ao=typeof a.m.sort_order==="number"?a.m.sort_order:9999+a.i;
+          const bo=typeof b.m.sort_order==="number"?b.m.sort_order:9999+b.i;
+          return ao-bo;
+        });
+      } else {
+        idxMap.sort((a,b)=>VSRF_COMP.rankInfo(a.m.rank).tier-VSRF_COMP.rankInfo(b.m.rank).tier);
+      }
+      const total=idxMap.length;
+      const rows=idxMap.map((entry,visualIdx)=>{
+        const m=entry.m;
+        const origIdx=entry.i;
         const r=VSRF_COMP.rankInfo(m.rank);
         const hasPhoto=!!(m&&m.photo);
+        const isFirst=visualIdx===0;
+        const isLast=visualIdx===total-1;
         return `<div class="hier-member" style="--m-color:${color}">
           <div class="hier-member-photo ${hasPhoto?"":"no-photo"}">
             ${hasPhoto?`<img src="${esc(m.photo)}" alt="" style="${photoStyle(m)}">`:`<span class="hier-officer-initials">${esc(initials(m.name||""))}</span>`}
@@ -363,17 +379,20 @@ function render(){
             </div>
           </div>
           ${editing?`<div class="hier-member-actions">
-            <button class="mini-icon-btn" data-edit-member="${sub.id}::${sub.members.indexOf(m)}">✎</button>
-            <button class="mini-icon-btn danger" data-del-member="${sub.id}::${sub.members.indexOf(m)}">×</button>
+            <button class="mini-icon-btn move-btn" data-move-up="${sub.id}::${origIdx}" ${isFirst?"disabled":""} title="Выше">▲</button>
+            <button class="mini-icon-btn move-btn" data-move-dn="${sub.id}::${origIdx}" ${isLast?"disabled":""} title="Ниже">▼</button>
+            <button class="mini-icon-btn" data-edit-member="${sub.id}::${origIdx}" title="Редактировать">✎</button>
+            <button class="mini-icon-btn danger" data-del-member="${sub.id}::${origIdx}" title="Удалить">×</button>
           </div>`:""}
         </div>`;
       }).join("");
       const editBtn=editing?`<button class="hier-edit-btn hier-sub-edit-btn" data-edit-sub="${sub.id}">⚙</button>`:"";
+      const resetBtn=(editing&&hasCustomOrder)?`<button class="hier-edit-btn hier-sub-edit-btn" data-reset-order="${sub.id}" title="Сбросить порядок → сортировка по званию" style="right:52px">⇅</button>`:"";
       const addBtn=editing?`<button class="hier-officer hier-officer-add" data-add-member="${sub.id}">＋ Добавить в подразделение</button>`:"";
       return `<section class="hier-sub-section" style="--sub-color:${color};--sub-color-2:${shade(color,-25)}">
         <div class="hier-sub-head">
           <div class="hier-sub-title">${esc(sub.name)}</div>
-          ${editBtn}
+          ${resetBtn}${editBtn}
         </div>
         <div class="hier-staff-grid">${rows}${addBtn}</div>
       </section>`;
@@ -949,8 +968,41 @@ hier.addEventListener("click",e=>{
     return;
   }
   const es=e.target.closest("[data-edit-sub]");if(es) return openSubEdit(es.dataset.editSub);
+  const mu=e.target.closest("[data-move-up]");if(mu){
+    const [s,i]=mu.dataset.moveUp.split("::");
+    return moveMember(s,parseInt(i),-1);
+  }
+  const md=e.target.closest("[data-move-dn]");if(md){
+    const [s,i]=md.dataset.moveDn.split("::");
+    return moveMember(s,parseInt(i),+1);
+  }
+  const ro=e.target.closest("[data-reset-order]");if(ro){
+    if(!confirm("Сбросить ручной порядок и вернуть автосортировку по званию?")) return;
+    const sub=STATE.subs.find(x=>x.id===ro.dataset.resetOrder);
+    if(sub){
+      (sub.members||[]).forEach(m=>{delete m.sort_order});
+      VSRF_COMP.save(STATE).then(()=>{render();showToast("Порядок сброшен","success")});
+    }
+    return;
+  }
   if(e.target.id==="addSubBtn") return openSubEdit(null);
 });
+
+function moveMember(subId,origIdx,delta){
+  const sub=STATE.subs.find(x=>x.id===subId);
+  if(!sub||!sub.members) return;
+  const arr=sub.members;
+  arr.forEach((m,i)=>{if(typeof m.sort_order!=="number") m.sort_order=i*10});
+  const withOrder=arr.map((m,i)=>({m,i,o:m.sort_order})).sort((a,b)=>a.o-b.o);
+  const pos=withOrder.findIndex(x=>x.i===origIdx);
+  if(pos<0) return;
+  const swapWith=pos+delta;
+  if(swapWith<0||swapWith>=withOrder.length) return;
+  const tmp=withOrder[pos].m.sort_order;
+  withOrder[pos].m.sort_order=withOrder[swapWith].m.sort_order;
+  withOrder[swapWith].m.sort_order=tmp;
+  VSRF_COMP.save(STATE).then(()=>render()).catch(err=>showToast("Ошибка: "+err.message,"error"));
+}
 
 function updateAdmin(){
   const canEdit=window.VSRF_ROLES&&window.VSRF_ROLES.can("composition","edit");
@@ -963,6 +1015,6 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2655d211abee921',t:'MTc4NTkyODMxNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2677aa758949da9',t:'MTc4NTk1MDQ5NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

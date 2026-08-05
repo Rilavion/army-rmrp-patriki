@@ -72,7 +72,7 @@ window.VSRF_PAYROLL=(function(){
 
   function fmtMoney(n){
     const v=Math.round((+n||0));
-    return v.toLocaleString("ru-RU")+" ₽";
+    return v.toLocaleString("ru-RU",{timeZone:"Europe/Moscow"})+" ₽";
   }
 
   function calc(draft){

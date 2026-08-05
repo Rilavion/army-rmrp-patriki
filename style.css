@@ -1690,6 +1690,9 @@ body.light-mode .doc-toggle-row{color:#3a2f18}
 }
 .mini-icon-btn:hover{color:var(--gold-b);border-color:rgba(205,168,90,.3)}
 .mini-icon-btn.danger:hover{color:#f8b0b0;border-color:rgba(220,60,60,.4)}
+.mini-icon-btn.move-btn{font-size:10px;color:#cda85a;opacity:.85}
+.mini-icon-btn.move-btn:hover{background:rgba(205,168,90,.15);opacity:1}
+.mini-icon-btn:disabled,.mini-icon-btn.move-btn:disabled{opacity:.25;cursor:not-allowed;pointer-events:none}
 
 .hier{display:flex;flex-direction:column;align-items:center;gap:0;padding:20px 0;max-width:1400px;margin:0 auto}
 .hier-connector{width:2px;height:52px;background:linear-gradient(180deg,rgba(205,168,90,.6),rgba(205,168,90,.1));margin:0 auto;position:relative}

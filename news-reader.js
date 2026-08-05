@@ -4,7 +4,7 @@ window.VSRF_NEWS_READER=(function(){
   var current=null,currentImgs=[],idx=0,lbIdx=0;
 
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-  function fmt(d){try{return new Date(d).toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"})}catch(e){return d}}
+  function fmt(d){try{return new Date(d).toLocaleDateString("ru-RU",{timeZone:"Europe/Moscow",day:"numeric",month:"long",year:"numeric"})}catch(e){return d}}
 
   function build(){
     if(reader) return;

@@ -208,7 +208,7 @@ window.VSRF_VP=(function(){
     const name=(function(){try{return localStorage.getItem("vsrf-my-display-name")||(s&&s.user&&s.user.email)||"ss"}catch(e){return "ss"}})();
     const stats=calcSnapshotStats(payload.snapshot);
     const row={
-      title:payload.title||("Проверка от "+new Date().toLocaleDateString("ru-RU")),
+      title:payload.title||("Проверка от "+new Date().toLocaleDateString("ru-RU",{timeZone:"Europe/Moscow"})),
       period_from:payload.period_from||null,
       period_to:payload.period_to||new Date().toISOString(),
       saved_by:s&&s.user?s.user.id:null,

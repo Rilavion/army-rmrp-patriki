@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=118">
+<link rel="stylesheet" href="style.css?v=123">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -178,16 +178,16 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <div class="fab-stack"><button class="fab" id="fabUp" title="Наверх"><svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg></button></div>
 
-<script src="supabase-loader.js?v=118"></script>
-<script src="config.js?v=118"></script>
-<script src="auth.js?v=118"></script>
-<script src="roles-engine.js?v=118"></script>
-<script src="tests-engine.js?v=118"></script>
-<script src="main.js?v=118"></script>
-<script src="format-utils.js?v=118"></script>
-<script src="holiday-engine.js?v=118"></script>
-<script src="settings-panel.js?v=118"></script>
-<script src="sound-engine.js?v=118"></script>
+<script src="supabase-loader.js?v=123"></script>
+<script src="config.js?v=123"></script>
+<script src="auth.js?v=123"></script>
+<script src="roles-engine.js?v=123"></script>
+<script src="tests-engine.js?v=123"></script>
+<script src="main.js?v=123"></script>
+<script src="format-utils.js?v=123"></script>
+<script src="holiday-engine.js?v=123"></script>
+<script src="settings-panel.js?v=123"></script>
+<script src="sound-engine.js?v=123"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -374,7 +374,7 @@ function renderAttemptsList(){
         <div class="a-row-test">${esc(test?test.title:a.test_id)}</div>
       </div>
       <div class="a-row-score"><b>${a.score}/${a.max_score}</b> · ${a.percent}%</div>
-      <div class="a-row-date">${new Date(a.finished_at||a.started_at).toLocaleString("ru-RU")}</div>
+      <div class="a-row-date">${new Date(a.finished_at||a.started_at).toLocaleString("ru-RU",{timeZone:"Europe/Moscow"})}</div>
       ${a.reviewed_by_name?`<div class="a-row-rev">✎ ${esc(a.reviewed_by_name)}</div>`:""}
     </div>`;
   }).join("");
@@ -388,7 +388,7 @@ async function openAttempt(id){
   const test=TESTS.find(t=>t.id===CURRENT_ATTEMPT.test_id);
   const qs=test?await VSRF_TESTS.fetchQuestions(test.id):[];
   $("adTitle").textContent="Прохождение · "+(test?test.title:"?");
-  $("adSub").innerHTML=`<b>${esc(CURRENT_ATTEMPT.fio)}</b> · <code>${esc(CURRENT_ATTEMPT.static_id)}</code> · ${esc(CURRENT_ATTEMPT.discord||"—")} · ${new Date(CURRENT_ATTEMPT.finished_at).toLocaleString("ru-RU")}`;
+  $("adSub").innerHTML=`<b>${esc(CURRENT_ATTEMPT.fio)}</b> · <code>${esc(CURRENT_ATTEMPT.static_id)}</code> · ${esc(CURRENT_ATTEMPT.discord||"—")} · ${new Date(CURRENT_ATTEMPT.finished_at).toLocaleString("ru-RU",{timeZone:"Europe/Moscow"})}`;
   const ans=CURRENT_ATTEMPT.answers||{};
   const body=[];
   body.push(`<div class="msg-row" style="margin-bottom:12px">
@@ -414,7 +414,7 @@ async function openAttempt(id){
   if(CURRENT_ATTEMPT.review_history&&CURRENT_ATTEMPT.review_history.length){
     body.push(`<div class="ad-history"><b>История правок:</b>`);
     for(const h of CURRENT_ATTEMPT.review_history){
-      body.push(`<div class="ad-hist-item">${new Date(h.at).toLocaleString("ru-RU")} · <b>${esc(h.by)}</b> · ${esc(JSON.stringify(h.patch))}</div>`);
+      body.push(`<div class="ad-hist-item">${new Date(h.at).toLocaleString("ru-RU",{timeZone:"Europe/Moscow"})} · <b>${esc(h.by)}</b> · ${esc(JSON.stringify(h.patch))}</div>`);
     }
     body.push(`</div>`);
   }
@@ -465,6 +465,6 @@ if(window.VSRF_ROLES) VSRF_ROLES.onChange(()=>{applyRoles();loadAll()});
 if(window.VSRF_AUTH) VSRF_AUTH.onChange(updateLoggedFlag);
 setTimeout(()=>{loadAll();applyRoles()},600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26513990fade917',t:'MTc4NTkyNTMwMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2677c1a1b849da9',t:'MTc4NTk1MDU1NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

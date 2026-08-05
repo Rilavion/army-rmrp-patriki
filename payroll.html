@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=118">
+<link rel="stylesheet" href="style.css?v=123">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -240,19 +240,19 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=118"></script>
-<script src="config.js?v=118"></script>
-<script src="main.js?v=118"></script>
-<script src="format-utils.js?v=118"></script>
-<script src="holiday-engine.js?v=118"></script>
-<script src="settings-panel.js?v=118"></script>
-<script src="sound-engine.js?v=118"></script>
-<script src="auth.js?v=118"></script>
-<script src="roles-engine.js?v=118"></script>
-<script src="search-engine.js?v=118"></script>
-<script src="notify-engine.js?v=118"></script>
-<script src="html2canvas.min.js?v=118"></script>
-<script src="payroll-engine.js?v=118"></script>
+<script src="supabase-loader.js?v=123"></script>
+<script src="config.js?v=123"></script>
+<script src="main.js?v=123"></script>
+<script src="format-utils.js?v=123"></script>
+<script src="holiday-engine.js?v=123"></script>
+<script src="settings-panel.js?v=123"></script>
+<script src="sound-engine.js?v=123"></script>
+<script src="auth.js?v=123"></script>
+<script src="roles-engine.js?v=123"></script>
+<script src="search-engine.js?v=123"></script>
+<script src="notify-engine.js?v=123"></script>
+<script src="html2canvas.min.js?v=123"></script>
+<script src="payroll-engine.js?v=123"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -261,7 +261,7 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 let DRAFT=null, ROLES=[], SETTINGS=null, ADD_DEPT_IDX=null, DS_MEMBERS=[], AUTOSAVE_T=null;
 
 function parseMoney(s){return Number(String(s||"").replace(/[^\d.]/g,""))||0}
-function fmtMoneyInput(n){const v=Math.round(n);return v.toLocaleString("ru-RU")}
+function fmtMoneyInput(n){const v=Math.round(n);return v.toLocaleString("ru-RU",{timeZone:"Europe/Moscow"})}
 function attachMoneyInput(el){
   el.addEventListener("blur",()=>{el.value=fmtMoneyInput(parseMoney(el.value))});
 }
@@ -317,7 +317,7 @@ function scheduleSave(){
       title:DRAFT.title,period_from:DRAFT.period_from,period_to:DRAFT.period_to,
       fund_amount:DRAFT.fund_amount,data:DRAFT.data,pct_manual:DRAFT.pct_manual
     });
-    if(r.ok){$("prSaveHint").textContent="✓ Сохранено "+new Date().toLocaleTimeString("ru-RU");$("prSaveHint").className="pr-save-hint saved"}
+    if(r.ok){$("prSaveHint").textContent="✓ Сохранено "+new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow"});$("prSaveHint").className="pr-save-hint saved"}
     else {$("prSaveHint").textContent="⚠ Ошибка: "+r.error;$("prSaveHint").className="pr-save-hint err"}
   },800);
 }
@@ -610,7 +610,7 @@ function renderPreviewHtml(calc){
   const head=(SETTINGS&&SETTINGS.header_text)||"ПРИКАЗ О ПРЕМИРОВАНИИ";
   const foot=(SETTINGS&&SETTINGS.footer_text)||"Военная Бухгалтерия · Вооружённые Силы РФ";
   const periodTxt=DRAFT.period_from||DRAFT.period_to?`ЗА ПЕРИОД: ${fmtDateRu(DRAFT.period_from)} — ${fmtDateRu(DRAFT.period_to)}`:"";
-  const dateNow=new Date().toLocaleDateString("ru-RU",{day:"2-digit",month:"long",year:"numeric"});
+  const dateNow=new Date().toLocaleDateString("ru-RU",{timeZone:"Europe/Moscow",day:"2-digit",month:"long",year:"numeric"});
   return `<div class="pr-preview" id="prPreviewCapture">
     <div class="pr-pv-inner">
       <div class="pr-pv-corner tl"></div>
@@ -672,7 +672,7 @@ function renderPreviewHtml(calc){
     </div>
   </div>`;
 }
-function fmtDateRu(iso){if(!iso) return "—";try{return new Date(iso).toLocaleDateString("ru-RU",{day:"2-digit",month:"long",year:"numeric"})}catch(e){return iso}}
+function fmtDateRu(iso){if(!iso) return "—";try{return new Date(iso).toLocaleDateString("ru-RU",{timeZone:"Europe/Moscow",day:"2-digit",month:"long",year:"numeric"})}catch(e){return iso}}
 
 $("prShowArchive").addEventListener("click",async()=>{
   const list=await VSRF_PAYROLL.listArchive(30);
@@ -681,7 +681,7 @@ $("prShowArchive").addEventListener("click",async()=>{
     return `<div class="pr-arc-item">
       <div class="pr-arc-head">
         <b>${esc(a.title||"—")}</b>
-        <span class="pr-arc-date">${a.sent_at?new Date(a.sent_at).toLocaleString("ru-RU"):"—"}</span>
+        <span class="pr-arc-date">${a.sent_at?new Date(a.sent_at).toLocaleString("ru-RU",{timeZone:"Europe/Moscow"}):"—"}</span>
         <span class="pr-arc-fund">${VSRF_PAYROLL.fmtMoney(a.fund_amount||0)}</span>
       </div>
       <div class="pr-arc-sub">${a.period_from||"?"} — ${a.period_to||"?"} · отделов ${calc.departments.length} · отправил: ${esc(a.sent_by_name||"—")}</div>
@@ -726,7 +726,7 @@ async function generateSplitImages(){
           <div class="pr-pv-emblem">◈</div>
         </div>
         <div class="pr-pv-title">${esc(head)}</div>
-        <div class="pr-pv-subtitle">№ ${new Date().getTime().toString().slice(-6)} · ${esc(new Date().toLocaleDateString("ru-RU",{day:"2-digit",month:"long",year:"numeric"}))}</div>
+        <div class="pr-pv-subtitle">№ ${new Date().getTime().toString().slice(-6)} · ${esc(new Date().toLocaleDateString("ru-RU",{timeZone:"Europe/Moscow",day:"2-digit",month:"long",year:"numeric"}))}</div>
         <div class="pr-pv-name">«${esc(DRAFT.title||"Премия")}»</div>
         ${DRAFT.period_from||DRAFT.period_to?`<div class="pr-pv-period">ЗА ПЕРИОД: ${esc(fmtDateRu(DRAFT.period_from))} — ${esc(fmtDateRu(DRAFT.period_to))}</div>`:""}
         <div class="pr-pv-fund-box">
@@ -839,6 +839,6 @@ $("prSend").addEventListener("click",async()=>{
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26512f5aeefe917',t:'MTc4NTkyNTI3Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2677b46493f9da9',t:'MTc4NTk1MDUyMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

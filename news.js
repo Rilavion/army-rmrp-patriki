@@ -48,7 +48,7 @@ window.VSRF_NEWS=(function(){
   }
 
   function fmt(d){
-    try{return new Date(d).toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"})}catch(e){return d}
+    try{return new Date(d).toLocaleDateString("ru-RU",{timeZone:"Europe/Moscow",day:"numeric",month:"long",year:"numeric"})}catch(e){return d}
   }
 
   function daysBetween(d1,d2){
