@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=116">
+<link rel="stylesheet" href="style.css?v=117">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}[data-staff]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
@@ -98,18 +98,18 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я ОБрСпН · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=116"></script>
-<script src="config.js?v=116"></script>
-<script src="main.js?v=116"></script>
-<script src="format-utils.js?v=116"></script>
-<script src="holiday-engine.js?v=116"></script>
-<script src="settings-panel.js?v=116"></script>
-<script src="sound-engine.js?v=116"></script>
-<script src="auth.js?v=116"></script>
-<script src="roles-engine.js?v=116"></script>
-<script src="search-engine.js?v=116"></script>
-<script src="notify-engine.js?v=116"></script>
-<script src="requests-engine.js?v=116"></script>
+<script src="supabase-loader.js?v=117"></script>
+<script src="config.js?v=117"></script>
+<script src="main.js?v=117"></script>
+<script src="format-utils.js?v=117"></script>
+<script src="holiday-engine.js?v=117"></script>
+<script src="settings-panel.js?v=117"></script>
+<script src="sound-engine.js?v=117"></script>
+<script src="auth.js?v=117"></script>
+<script src="roles-engine.js?v=117"></script>
+<script src="search-engine.js?v=117"></script>
+<script src="notify-engine.js?v=117"></script>
+<script src="requests-engine.js?v=117"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -294,6 +294,8 @@ function applyConditionals(){
 
 async function onSubmit(e){
   e.preventDefault();
+  const btn=e.target.querySelector('button[type="submit"]');
+  if(btn&&btn.disabled) return;
   const fd=new FormData(e.target);
   const values={};
   const allFields=(FORM.fields||[]).slice();
@@ -333,9 +335,11 @@ async function onSubmit(e){
   }
 
   if(KIND==="dismissal"||KIND==="promotion"){
-    if(stat&&SETTINGS&&SETTINGS.block_if_violations){
+    const shouldBlock=!SETTINGS||SETTINGS.block_if_violations!==false;
+    if(stat&&shouldBlock){
       msg.className="form-msg info";msg.textContent="Проверка реестра нарушений...";
       const cnt=await VSRF_REQUESTS.checkActiveViolations(stat);
+      console.log("[REQ-FORM] активных нарушений у",stat,":",cnt);
       if(cnt>0){
         msg.className="form-msg error";
         msg.innerHTML="⛔ У сотрудника с этим статиком есть <b>"+cnt+"</b> активн"+(cnt===1?"ое нарушение":"ых нарушений")+" в реестре. Подача "+(KIND==="dismissal"?"увольнения":"повышения")+" заблокирована. Обратитесь к ВП для их снятия.";
@@ -357,12 +361,21 @@ async function onSubmit(e){
   }
 
   msg.className="form-msg info";msg.textContent="Отправка заявки...";
-  const r=await VSRF_REQUESTS.submit(KIND,values,fio,stat,discord);
+  if(btn){btn.disabled=true;btn.style.opacity=".6";btn.textContent="⏳ Отправка...";}
+  let r;
+  try{
+    r=await VSRF_REQUESTS.submit(KIND,values,fio,stat,discord);
+  }catch(err){
+    r={ok:false,error:err&&err.message||"Неизвестная ошибка"};
+  }
+  if(btn){btn.disabled=false;btn.style.opacity="";btn.textContent="📨 Подать заявку";}
   if(!r.ok){msg.className="form-msg error";msg.textContent="Ошибка: "+r.error;return}
+  msg.className="";msg.textContent="";
   $("rfCode").textContent=r.code;
   $("rfSuccessModal").classList.add("active");
   e.target.reset();
   applyConditionals();
+  if(KIND==="promotion") renderDynamicPromotionFields();
 }
 
 $("rfSuccessOk").addEventListener("click",()=>$("rfSuccessModal").classList.remove("active"));
@@ -383,6 +396,6 @@ setTimeout(bootWhenReady,300);
 setTimeout(bootWhenReady,1500);
 setTimeout(bootWhenReady,3000);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a264bf207afbe955',t:'MTc4NTkyMTg0Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a265005199a5e917',t:'MTc4NTkyNDUxMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

@@ -158,10 +158,11 @@ select,option{color-scheme:inherit}
 }
 [data-theme="light"] .nav-header-unit{color:#5a4c34}
 
-.nav-section{padding:16px 20px 4px}
+.nav-section{padding:16px 16px 4px}
 .nav-section-title{
   font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;
-  color:var(--muted);font-weight:700;margin-bottom:10px;opacity:.7;
+  color:var(--muted);font-weight:700;margin:0 0 10px;opacity:.7;
+  padding:0 14px;
   display:flex;align-items:center;gap:8px;
 }
 .nav-section-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}

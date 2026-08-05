@@ -117,13 +117,21 @@ window.VSRF_REQUESTS=(function(){
     const norm=String(stat).replace(/\D/g,"");
     if(!norm) return 0;
     try{
-      const {data}=await c.from("violations_registry")
-        .select("id,target_static")
+      const {data,error}=await c.from("violations_registry")
+        .select("id,target_static,removed_at,expires_at")
         .is("removed_at",null)
-        .limit(100);
+        .limit(500);
+      if(error){console.warn("[REQ] checkActiveViolations err:",error.message);return 0}
       if(!data) return 0;
-      return data.filter(v=>String(v.target_static||"").replace(/\D/g,"")===norm).length;
-    }catch(e){return 0}
+      const now=Date.now();
+      const matched=data.filter(v=>{
+        if(String(v.target_static||"").replace(/\D/g,"")!==norm) return false;
+        if(v.expires_at){const t=new Date(v.expires_at).getTime();if(!isNaN(t)&&t<now) return false}
+        return true;
+      });
+      console.log("[REQ] checkActiveViolations("+stat+")="+matched.length,"total in reg:",data.length);
+      return matched.length;
+    }catch(e){console.warn("[REQ] checkActiveViolations exc:",e.message);return 0}
   }
 
   function timeToMinutes(t){
