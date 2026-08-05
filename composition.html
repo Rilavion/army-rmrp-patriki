@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=121">
+<link rel="stylesheet" href="style.css?v=122">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -230,21 +230,21 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="html2canvas.min.js?v=121"></script>
-<script src="supabase-loader.js?v=121"></script>
-<script src="config.js?v=121"></script>
-<script src="main.js?v=121"></script>
-<script src="format-utils.js?v=121"></script>
-<script src="holiday-engine.js?v=121"></script>
-<script src="settings-panel.js?v=121"></script>
-<script src="sound-engine.js?v=121"></script>
-<script src="faq-engine.js?v=121"></script>
-<script src="search-engine.js?v=121"></script>
-<script src="notify-engine.js?v=121"></script>
-<script src="auth.js?v=121"></script>
-<script src="roles-engine.js?v=121"></script>
-<script src="select-enhance.js?v=121"></script>
-<script src="composition-engine.js?v=121"></script>
+<script src="html2canvas.min.js?v=122"></script>
+<script src="supabase-loader.js?v=122"></script>
+<script src="config.js?v=122"></script>
+<script src="main.js?v=122"></script>
+<script src="format-utils.js?v=122"></script>
+<script src="holiday-engine.js?v=122"></script>
+<script src="settings-panel.js?v=122"></script>
+<script src="sound-engine.js?v=122"></script>
+<script src="faq-engine.js?v=122"></script>
+<script src="search-engine.js?v=122"></script>
+<script src="notify-engine.js?v=122"></script>
+<script src="auth.js?v=122"></script>
+<script src="roles-engine.js?v=122"></script>
+<script src="select-enhance.js?v=122"></script>
+<script src="composition-engine.js?v=122"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -464,40 +464,6 @@ function expRefresh(){
   $("expPreview").innerHTML=expBuildHtml(opts);
 }
 
-async function expRender(){
-  const scale=parseFloat($("expScale").value)||2;
-  const node=document.getElementById("expCanvas");
-  if(!node) return null;
-  node.querySelectorAll("canvas,svg,iframe").forEach(el=>{
-    const r=el.getBoundingClientRect();
-    if(!r.width||!r.height) el.remove();
-  });
-  sanitizeColors(node);
-  const canvas=await html2canvas(node,{
-    backgroundColor:"#0f1e17",
-    scale:scale,
-    useCORS:true,
-    allowTaint:true,
-    logging:false,
-    imageTimeout:15000,
-    onclone:function(doc){
-      const cn=doc.getElementById("expCanvas");
-      if(cn) sanitizeColors(cn);
-    },
-    ignoreElements:function(el){
-      if(el.tagName==="CANVAS"||el.tagName==="IFRAME") return true;
-      if(el.id==="bgCanvas") return true;
-      if(el.classList&&el.classList.contains("bg-noise")) return true;
-      if(el.tagName==="SVG"){
-        const r=el.getBoundingClientRect();
-        if(!r.width||!r.height) return true;
-      }
-      return false;
-    }
-  });
-  return canvas;
-}
-
 function parseColorToRgba(str){
   if(!str) return null;
   str=String(str).trim();
@@ -621,6 +587,86 @@ function sanitizeColors(root){
       }
     }catch(e){}
   }
+}
+
+function stripZeroSizeBackgrounds(root){
+  const all=[root].concat(Array.from(root.querySelectorAll("*")));
+  let removed=0;
+  for(const el of all){
+    if(!el.getBoundingClientRect) continue;
+    const r=el.getBoundingClientRect();
+    const cs=(function(){try{return getComputedStyle(el)}catch(e){return null}})();
+    if(!cs) continue;
+    const hasBgImg=cs.backgroundImage&&cs.backgroundImage!=="none";
+    const hidden=cs.display==="none"||cs.visibility==="hidden";
+    if(hidden){
+      el.style.setProperty("background-image","none","important");
+      el.style.setProperty("background","none","important");
+      continue;
+    }
+    if(hasBgImg && (r.width<1 || r.height<1)){
+      el.style.setProperty("background-image","none","important");
+      el.style.setProperty("background","none","important");
+      removed++;
+    }
+    if(cs.backgroundImage && (cs.backgroundImage.indexOf("gradient")!==-1)){
+      if(r.width<1||r.height<1){
+        el.style.setProperty("background-image","none","important");
+        removed++;
+      }
+    }
+  }
+  if(removed) console.log("[EXP] stripped zero-size bg from",removed,"els");
+}
+
+async function expRender(){
+  const scale=parseFloat($("expScale").value)||2;
+  const node=document.getElementById("expCanvas");
+  if(!node) return null;
+  node.querySelectorAll("canvas,svg,iframe").forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(!r.width||!r.height) el.remove();
+  });
+  sanitizeColors(node);
+  stripZeroSizeBackgrounds(node);
+  const canvas=await html2canvas(node,{
+    backgroundColor:"#0f1e17",
+    scale:scale,
+    useCORS:true,
+    allowTaint:true,
+    logging:false,
+    imageTimeout:15000,
+    onclone:function(doc){
+      const cn=doc.getElementById("expCanvas");
+      if(cn){
+        cn.querySelectorAll("canvas,iframe").forEach(el=>el.remove());
+        cn.querySelectorAll("svg").forEach(el=>{
+          const r=el.getBoundingClientRect();
+          if(!r.width||!r.height) el.remove();
+        });
+        sanitizeColors(cn);
+        stripZeroSizeBackgrounds(cn);
+      }
+    },
+    ignoreElements:function(el){
+      if(el.tagName==="CANVAS"||el.tagName==="IFRAME") return true;
+      if(el.id==="bgCanvas") return true;
+      if(el.classList&&el.classList.contains("bg-noise")) return true;
+      if(el.tagName==="SVG"){
+        const r=el.getBoundingClientRect();
+        if(!r.width||!r.height) return true;
+      }
+      try{
+        const r=el.getBoundingClientRect();
+        if(r.width===0&&r.height===0){
+          const cs=getComputedStyle(el);
+          if(cs.backgroundImage&&cs.backgroundImage!=="none") return true;
+        }
+      }catch(e){}
+      return false;
+    }
+  });
+  return canvas;
 }
 
 $("exportPngBtn").addEventListener("click",()=>{
@@ -917,6 +963,6 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a265566c6c92e921',t:'MTc4NTkyODA0MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2655d211abee921',t:'MTc4NTkyODMxNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
