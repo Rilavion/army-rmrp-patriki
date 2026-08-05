@@ -10,7 +10,8 @@ window.VSRF_REQUESTS=(function(){
   };
 
   async function getForm(kind){
-    const c=client();if(!c) return null;
+    const c=client();
+    if(!c){console.warn("[REQ] getForm("+kind+"): нет client (auth не готов)");return null}
     const {data,error}=await c.from("request_forms").select("*").eq("id",kind).maybeSingle();
     if(error) console.warn("[REQ] getForm error:",error.message);
     console.log("[REQ] getForm("+kind+") →",data);
