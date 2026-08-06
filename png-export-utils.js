@@ -164,7 +164,7 @@ window.VSRF_PNG=(function(){
     stripZeroSizeBackgrounds(node);
     return await html2canvas(node,{
       backgroundColor:opts.backgroundColor==="transparent"?null:(opts.backgroundColor||null),
-      scale:opts.scale||2,
+      scale:opts.scale||3,
       useCORS:true,
       allowTaint:true,
       logging:false,
@@ -173,12 +173,35 @@ window.VSRF_PNG=(function(){
         const styleFix=doc.createElement("style");
         styleFix.textContent=`
           .hier-cmd-inner::after,.hier-cmd-inner::before,
+          .hier-cmd::after,.hier-cmd::before,
           .hier-member::before,.hier-member::after,
           .hier-officer::before,.hier-officer::after,
           .auto-card::before,.auto-card::after,
           .hier-sub-head::before,.hier-sub-head::after{
             display:none !important;content:none !important;background:none !important;
             -webkit-mask:none !important;mask:none !important;animation:none !important;
+            border:none !important;box-shadow:none !important;
+          }
+          .hier-cmd-inner{
+            box-shadow:0 12px 28px rgba(0,0,0,.4) !important;
+            border:2px solid #cda85a !important;
+            transform:none !important;
+          }
+          .hier-cmd-inner:hover{
+            transform:none !important;
+            box-shadow:0 12px 28px rgba(0,0,0,.4) !important;
+          }
+          .hier-cmd-photo img,.hier-officer-photo img,.hier-member-photo img{
+            filter:none !important;
+          }
+          .hier-officer,.hier-member{
+            box-shadow:0 8px 20px rgba(0,0,0,.35) !important;
+            transform:none !important;
+          }
+          .exp-hier-wrap .hier-staff-grid{
+            display:grid !important;
+            grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+            gap:16px !important;
           }
           *{animation:none !important;transition:none !important;backdrop-filter:none !important}
           *:hover{transform:none !important}

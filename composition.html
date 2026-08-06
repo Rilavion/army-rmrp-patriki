@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=139">
+<link rel="stylesheet" href="style.css?v=141">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -218,8 +218,8 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)">
         Масштаб: <select id="expScale" class="msg-input" style="width:auto;padding:4px 8px">
           <option value="1">1× (обычный)</option>
-          <option value="2" selected>2× (Retina)</option>
-          <option value="3">3× (максимум)</option>
+          <option value="2">2× (Retina)</option>
+          <option value="3" selected>3× (максимум, лучшее качество)</option>
         </select>
       </label>
     </div>
@@ -234,24 +234,24 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="html2canvas.min.js?v=139"></script>
-<script src="supabase-loader.js?v=139"></script>
-<script src="config.js?v=139"></script>
-<script src="main.js?v=139"></script>
-<script src="format-utils.js?v=139"></script>
-<script src="holiday-engine.js?v=139"></script>
-<script src="settings-panel.js?v=139"></script>
-<script src="sound-engine.js?v=139"></script>
-<script src="faq-engine.js?v=139"></script>
-<script src="search-engine.js?v=139"></script>
-<script src="ds-cache.js?v=139"></script>
-<script src="notify-engine.js?v=139"></script>
-<script src="notify-live.js?v=139"></script>
-<script src="auth.js?v=139"></script>
-<script src="roles-engine.js?v=139"></script>
-<script src="select-enhance.js?v=139"></script>
-<script src="image-compress.js?v=139"></script>
-<script src="composition-engine.js?v=139"></script>
+<script src="html2canvas.min.js?v=141"></script>
+<script src="supabase-loader.js?v=141"></script>
+<script src="config.js?v=141"></script>
+<script src="main.js?v=141"></script>
+<script src="format-utils.js?v=141"></script>
+<script src="holiday-engine.js?v=141"></script>
+<script src="settings-panel.js?v=141"></script>
+<script src="sound-engine.js?v=141"></script>
+<script src="faq-engine.js?v=141"></script>
+<script src="search-engine.js?v=141"></script>
+<script src="ds-cache.js?v=141"></script>
+<script src="notify-engine.js?v=141"></script>
+<script src="notify-live.js?v=141"></script>
+<script src="auth.js?v=141"></script>
+<script src="roles-engine.js?v=141"></script>
+<script src="select-enhance.js?v=141"></script>
+<script src="image-compress.js?v=141"></script>
+<script src="composition-engine.js?v=141"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -714,7 +714,7 @@ function stripZeroSizeBackgrounds(root){
 }
 
 async function expRender(){
-  const scale=parseFloat($("expScale").value)||2;
+  const scale=parseFloat($("expScale").value)||3;
   const node=document.getElementById("expCanvas");
   if(!node) return null;
   node.querySelectorAll("canvas,svg,iframe").forEach(el=>{
@@ -732,6 +732,43 @@ async function expRender(){
     logging:false,
     imageTimeout:15000,
     onclone:function(doc){
+      const styleFix=doc.createElement("style");
+      styleFix.textContent=`
+        .hier-cmd-inner::after,.hier-cmd-inner::before,
+        .hier-cmd::after,.hier-cmd::before,
+        .hier-member::before,.hier-member::after,
+        .hier-officer::before,.hier-officer::after,
+        .auto-card::before,.auto-card::after,
+        .hier-sub-head::before,.hier-sub-head::after{
+          display:none !important;content:none !important;background:none !important;
+          -webkit-mask:none !important;mask:none !important;animation:none !important;
+          border:none !important;box-shadow:none !important;
+        }
+        .hier-cmd-inner{
+          box-shadow:0 12px 28px rgba(0,0,0,.4) !important;
+          border:2px solid #cda85a !important;
+          transform:none !important;
+        }
+        .hier-cmd-inner:hover{
+          transform:none !important;
+          box-shadow:0 12px 28px rgba(0,0,0,.4) !important;
+        }
+        .hier-cmd-photo img,.hier-officer-photo img,.hier-member-photo img{
+          filter:none !important;
+        }
+        .hier-officer,.hier-member{
+          box-shadow:0 8px 20px rgba(0,0,0,.35) !important;
+          transform:none !important;
+        }
+        .exp-hier-wrap .hier-staff-grid{
+          display:grid !important;
+          grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+          gap:16px !important;
+        }
+        *{animation:none !important;transition:none !important;backdrop-filter:none !important}
+        *:hover{transform:none !important}
+      `;
+      doc.head.appendChild(styleFix);
       const cn=doc.getElementById("expCanvas");
       if(cn){
         cn.querySelectorAll("canvas,iframe").forEach(el=>el.remove());
@@ -1162,6 +1199,6 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26efd72afa2ec62',t:'MTc4NjAyOTI1Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a27139f85f509dd3',t:'MTc4NjA1MjcwNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
