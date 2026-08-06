@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg">
+<title>Статистика налётов · ВС РФ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=138">
+<style id="vsrf-admin-guard">
+[data-admin]{display:none !important}[data-staff]{display:none !important}
+body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
+body.vsrf-is-staff .nav a[data-staff]{display:inline-flex !important}
+body.vsrf-is-admin [data-admin]:not(.nav a){display:initial !important}
+body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas><div class="bg-noise"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-icon"><img src="https://lh7-us.googleusercontent.com/rirXWnCVAAskqtGbpb8KBbSUWJafqWOPSC8nR5Z4OjYMdAr3Vt6_DiF_Uw_S3XbeGLlN9m6Pfd_ET-E8LPjCKNruw-wWsyN8137M8mtS7IY9TsrGF3Iap15_bzfNUF8-305JxpiyZAp-yHpQZmLbBfg" alt="ВС"></div>
+      <div class="brand-text">
+        <span class="brand-label">Штаб</span>
+        <span class="brand-name">Статистика налётов</span>
+      </div>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html" data-page="index.html" data-transition>Главная</a>
+      <a href="info.html" data-page="info.html" data-transition>Информация</a>
+      <a href="ustav.html" data-page="ustav.html" data-transition>Уставы</a>
+      <a href="training.html" data-page="training.html" data-transition>Обучение</a>
+      <a href="composition.html" data-page="composition.html" data-transition>Состав</a>
+      <a href="docs.html" data-page="docs.html" data-transition data-perm="docs:view">Документы</a>
+      <a href="news.html" data-page="news.html" data-transition>Новости</a>
+      <a href="autopark.html" data-page="autopark.html" data-transition>Автопарк</a>
+      <a href="map.html" data-page="map.html" data-transition>Карта</a>
+      <a href="faq.html" data-page="faq.html" data-transition>FAQ</a>
+      <a href="complaints.html" data-page="complaints.html" data-transition>Жалобы</a>
+      <a href="supply.html" data-page="supply.html" data-transition data-perm="supply:view">Поставки</a>
+      <a href="apps.html" data-page="apps.html" data-transition data-perm="apps:view">Заявления</a>
+      <a href="vp.html" data-page="vp.html" data-transition data-perm="vp:view">Проверки ВП</a>
+      <a href="complaints-review.html" data-page="complaints-review.html" data-transition data-perm="complaints:review,complaints:view">Рассмотрение жалоб</a>
+      <a href="leave.html" data-page="leave.html" data-transition data-loggedin>Увольнительная</a>
+      <a href="vacation-ic.html" data-page="vacation-ic.html" data-transition data-loggedin>Отпуск IC</a>
+      <a href="vacation-ooc.html" data-page="vacation-ooc.html" data-transition data-loggedin>Отпуск OOC</a>
+      <a href="dismissal.html" data-page="dismissal.html" data-transition data-loggedin>Увольнение</a>
+      <a href="promotion.html" data-page="promotion.html" data-transition data-loggedin>Повышение</a>
+      <a href="restoration.html" data-page="restoration.html" data-transition>Восстановление в ВС РФ</a>
+      <a href="requests-review.html" data-page="requests-review.html" data-transition data-perm="requests:review,requests:view">Рассмотрение заявок</a>
+      <a href="payroll.html" data-page="payroll.html" data-transition data-perm="payroll:view">Реестр премирования</a>
+      <a href="raids.html" data-page="raids.html" class="active" data-transition data-perm="raids:view">Статистика налётов</a>
+      <a href="message.html" data-page="message.html" data-transition data-perm="messages:send">Сообщения</a>
+      <a href="lk.html" data-page="lk.html" data-transition>Личный кабинет</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" id="rdSettingsBtn" data-perm="raids:settings">⚙ Настройки</button>
+      <button class="search-btn" data-open-search title="Поиск"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.49-5-5zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg><span>Поиск</span></button>
+      <button class="icon-btn" data-open-notify title="Уведомления" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span class="vsrf-notify-badge" data-notify-badge></span></button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Сменить тему"><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24"><path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.42-1.42M4.92 19.08l1.42-1.42m0-11.32L4.92 4.92m14.16 14.16l-1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <button class="login-btn" data-open-login><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg><span>Войти</span></button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="apps-head">
+    <div class="container">
+      <h1 class="apps-head-title">💥 Статистика налётов</h1>
+      <div class="apps-head-subtitle">Аналитика по пингам двух ключевых ролей — успешные и неудачные операции</div>
+    </div>
+  </section>
+
+  <section class="apps-body">
+    <div class="container" style="max-width:1200px">
+      <div id="rdGuard" style="display:none"><div class="apps-guard-box"><div class="apps-guard-icon">⚠</div><h2>Доступ ограничен</h2><p>Просмотр статистики доступен только Старшему Составу, Оператору ВП и Администратору.</p></div></div>
+
+      <div id="rdRoot" style="display:none">
+        <div class="rd-controls">
+          <div class="rd-tabs">
+            <button class="rd-tab active" data-period="7">📅 7 дней</button>
+            <button class="rd-tab" data-period="30">📆 30 дней</button>
+            <button class="rd-tab" data-period="all">🏆 Максимум</button>
+            <button class="rd-tab" data-period="custom">🔧 Свой период</button>
+          </div>
+          <div class="rd-custom" id="rdCustom" style="display:none">
+            <label>С <input type="date" id="rdFrom"></label>
+            <label>По <input type="date" id="rdTo"></label>
+            <button class="btn btn-gold btn-sm" id="rdApply">Применить</button>
+          </div>
+        </div>
+
+        <div class="rd-cards">
+          <div class="rd-card rd-card-success">
+            <div class="rd-card-icon">✅</div>
+            <div class="rd-card-body">
+              <div class="rd-card-label">Успешные</div>
+              <div class="rd-card-value" id="rdCntSuccess">—</div>
+            </div>
+          </div>
+          <div class="rd-card rd-card-fail">
+            <div class="rd-card-icon">❌</div>
+            <div class="rd-card-body">
+              <div class="rd-card-label">Неудачные</div>
+              <div class="rd-card-value" id="rdCntFail">—</div>
+            </div>
+          </div>
+          <div class="rd-card rd-card-total">
+            <div class="rd-card-icon">💥</div>
+            <div class="rd-card-body">
+              <div class="rd-card-label">Всего налётов</div>
+              <div class="rd-card-value" id="rdCntTotal">—</div>
+            </div>
+          </div>
+          <div class="rd-card rd-card-rate">
+            <div class="rd-card-icon">📊</div>
+            <div class="rd-card-body">
+              <div class="rd-card-label">% Успеха</div>
+              <div class="rd-card-value" id="rdRate">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rd-bar-wrap">
+          <div class="rd-bar-title">Соотношение</div>
+          <div class="rd-bar">
+            <div class="rd-bar-success" id="rdBarSuccess" style="width:0%"><span id="rdBarSuccessLbl"></span></div>
+            <div class="rd-bar-fail" id="rdBarFail" style="width:0%"><span id="rdBarFailLbl"></span></div>
+          </div>
+        </div>
+
+        <div class="rd-weeks" data-perm="raids:clear">
+          <div class="rd-weeks-head">
+            <span>🗑 Управление данными (только Администратор)</span>
+          </div>
+          <div id="rdWeeks"></div>
+        </div>
+
+        <div class="rd-log">
+          <div class="rd-log-head">
+            <span>📜 Журнал событий</span>
+            <span class="rd-log-count" id="rdLogCount"></span>
+          </div>
+          <div id="rdLogList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal-back" id="rdSettingsModal">
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>⚙ Настройки статистики налётов</h3>
+    <div class="modal-sub" style="margin-bottom:16px">Бот считает +1 к статистике когда в выбранных каналах кто-то пингует одну из настроенных ролей.</div>
+    <div class="form-group"><label>✅ Роль-пинг «Успешный налёт»</label><div id="rdRoleSuccess"></div></div>
+    <div class="form-group"><label>📡 Канал «Успешные налёты»</label><div id="rdChSuccess"></div></div>
+    <hr style="border:none;border-top:1px solid rgba(205,168,90,.15);margin:16px 0">
+    <div class="form-group"><label>❌ Роль-пинг «Неудачный налёт»</label><div id="rdRoleFail"></div></div>
+    <div class="form-group"><label>📡 Канал «Неудачные налёты»</label><div id="rdChFail"></div></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-gold btn-sm" id="rdSettingsSave">💾 Сохранить</button>
+    </div>
+    <div class="form-msg" id="rdSettingsMsg" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<div class="modal-back" id="loginModal">
+  <div class="modal"><button class="modal-close" aria-label="Закрыть">✕</button><h3>Вход</h3>
+    <form><div class="form-group"><label>Email</label><input type="email" name="email" required></div><div class="form-group"><label>Пароль</label><input type="password" name="password" required></div><button class="btn btn-gold" style="width:100%" type="submit">Войти</button><div class="form-msg"></div></form>
+  </div>
+</div>
+
+<footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я МСБр · в/ч №12132</span></div></div></footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="supabase-loader.js?v=138"></script>
+<script src="config.js?v=138"></script>
+<script src="main.js?v=138"></script>
+<script src="format-utils.js?v=138"></script>
+<script src="holiday-engine.js?v=138"></script>
+<script src="settings-panel.js?v=138"></script>
+<script src="sound-engine.js?v=138"></script>
+<script src="auth.js?v=138"></script>
+<script src="roles-engine.js?v=138"></script>
+<script src="ds-cache.js?v=138"></script>
+<script src="search-engine.js?v=138"></script>
+<script src="notify-engine.js?v=138"></script>
+<script src="notify-live.js?v=138"></script>
+<script src="raids-engine.js?v=138"></script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+const $=id=>document.getElementById(id);
+const toast=$("toast");
+function showToast(t,type){toast.textContent=t;toast.className="toast show "+(type||"");setTimeout(()=>toast.classList.remove("show"),2200)}
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ruDT=iso=>{if(!iso) return "—";return new Date(iso).toLocaleString("ru-RU",{timeZone:"Europe/Moscow",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})};
+const ruD=iso=>{if(!iso) return "—";return new Date(iso).toLocaleDateString("ru-RU",{timeZone:"Europe/Moscow",day:"2-digit",month:"2-digit",year:"numeric"})};
+
+let CHANNELS=[],ROLES=[],SETTINGS=null,CURRENT_ITEMS=[];
+
+async function boot(){
+  const canView=window.VSRF_ROLES&&window.VSRF_ROLES.can("raids","view");
+  if(!canView){$("rdGuard").style.display="";$("rdRoot").style.display="none";return}
+  $("rdGuard").style.display="none";$("rdRoot").style.display="";
+  SETTINGS=await VSRF_RAIDS.getSettings();
+  await loadPeriod("7");
+}
+
+async function loadDsData(){
+  if(!window.VSRF_AUTH||!window.VSRF_AUTH.state.client) return;
+  const c=window.VSRF_AUTH.state.client;
+  if(window.VSRF_DS_CACHE){
+    CHANNELS=await window.VSRF_DS_CACHE.fetchCached("channels",async()=>{
+      const {data}=await c.from("ds_channels").select("channel_id,name,parent_name").order("name");
+      return data||[];
+    });
+    ROLES=await window.VSRF_DS_CACHE.fetchCached("roles",async()=>{
+      const {data}=await c.from("ds_guild_roles").select("role_id,name,position").order("position",{ascending:false});
+      return data||[];
+    });
+  } else {
+    const {data:ch}=await c.from("ds_channels").select("channel_id,name,parent_name").order("name");CHANNELS=ch||[];
+    const {data:rl}=await c.from("ds_guild_roles").select("role_id,name,position").order("position",{ascending:false});ROLES=rl||[];
+  }
+}
+
+function chSelectHtml(id,cur){
+  const byParent=new Map();
+  for(const c of CHANNELS){const k=c.parent_name||"Без категории";if(!byParent.has(k)) byParent.set(k,[]);byParent.get(k).push(c)}
+  let opts=`<option value="">— не выбрано —</option>`;
+  for(const [pn,list] of byParent){
+    opts+=`<optgroup label="${esc(pn)}">`;
+    for(const c of list) opts+=`<option value="${c.channel_id}" ${c.channel_id===cur?"selected":""}>#${esc(c.name)}</option>`;
+    opts+=`</optgroup>`;
+  }
+  return `<select id="${id}" class="msg-input">${opts}</select>`;
+}
+function roleSelectHtml(id,cur){
+  return `<select id="${id}" class="msg-input"><option value="">— не выбрано —</option>${ROLES.filter(r=>r.name!=="@everyone").map(r=>`<option value="${r.role_id}" ${r.role_id===cur?"selected":""}>@${esc(r.name)}</option>`).join("")}</select>`;
+}
+
+async function openSettings(){
+  const canS=window.VSRF_ROLES&&window.VSRF_ROLES.can("raids","settings");
+  if(!canS){showToast("Только для админа","error");return}
+  await loadDsData();
+  SETTINGS=await VSRF_RAIDS.getSettings()||{};
+  $("rdRoleSuccess").innerHTML=roleSelectHtml("rdRoleSuccessSel",SETTINGS.success_role_id||"");
+  $("rdRoleFail").innerHTML=roleSelectHtml("rdRoleFailSel",SETTINGS.fail_role_id||"");
+  $("rdChSuccess").innerHTML=chSelectHtml("rdChSuccessSel",SETTINGS.channel_success_id||"");
+  $("rdChFail").innerHTML=chSelectHtml("rdChFailSel",SETTINGS.channel_fail_id||"");
+  $("rdSettingsMsg").textContent="";
+  $("rdSettingsModal").classList.add("active");
+}
+$("rdSettingsBtn").addEventListener("click",openSettings);
+$("rdSettingsModal").querySelector(".modal-close").addEventListener("click",()=>$("rdSettingsModal").classList.remove("active"));
+$("rdSettingsModal").addEventListener("click",e=>{if(e.target===$("rdSettingsModal")) $("rdSettingsModal").classList.remove("active")});
+$("rdSettingsSave").addEventListener("click",async()=>{
+  const row={
+    success_role_id:document.getElementById("rdRoleSuccessSel").value||null,
+    fail_role_id:document.getElementById("rdRoleFailSel").value||null,
+    channel_success_id:document.getElementById("rdChSuccessSel").value||null,
+    channel_fail_id:document.getElementById("rdChFailSel").value||null
+  };
+  const r=await VSRF_RAIDS.saveSettings(row);
+  const msg=$("rdSettingsMsg");
+  if(!r.ok){msg.className="form-msg error";msg.textContent="Ошибка: "+r.error;return}
+  msg.className="form-msg success";msg.textContent="✓ Сохранено. Бот подхватит новые настройки автоматически.";
+  SETTINGS=await VSRF_RAIDS.getSettings();
+  setTimeout(()=>$("rdSettingsModal").classList.remove("active"),1200);
+});
+
+async function loadPeriod(period){
+  let fromIso=null,toIso=null;
+  const now=Date.now();
+  if(period==="7") fromIso=new Date(now-7*86400000).toISOString();
+  else if(period==="30") fromIso=new Date(now-30*86400000).toISOString();
+  else if(period==="custom"){
+    const f=$("rdFrom").value,t=$("rdTo").value;
+    if(f) fromIso=new Date(f+"T00:00:00").toISOString();
+    if(t) toIso=new Date(t+"T23:59:59").toISOString();
+  }
+  const st=await VSRF_RAIDS.stats(fromIso,toIso);
+  CURRENT_ITEMS=st.items;
+  $("rdCntSuccess").textContent=st.success;
+  $("rdCntFail").textContent=st.fail;
+  $("rdCntTotal").textContent=st.total;
+  $("rdRate").textContent=st.total?st.successRate+"%":"—";
+
+  const sPct=st.total?Math.round(st.success/st.total*100):0;
+  const fPct=st.total?100-sPct:0;
+  $("rdBarSuccess").style.width=sPct+"%";
+  $("rdBarFail").style.width=fPct+"%";
+  $("rdBarSuccessLbl").textContent=st.success>0?st.success+" ("+sPct+"%)":"";
+  $("rdBarFailLbl").textContent=st.fail>0?st.fail+" ("+fPct+"%)":"";
+
+  renderWeeks(st.items);
+  renderLog(st.items);
+}
+
+function renderLog(items){
+  const box=$("rdLogList");
+  $("rdLogCount").textContent="("+items.length+")";
+  if(!items.length){box.innerHTML=`<div class="rd-log-empty">За выбранный период событий нет.</div>`;return}
+  box.innerHTML=items.slice(0,200).map(e=>{
+    const isS=e.kind==="success";
+    return `<div class="rd-log-item ${isS?"rd-log-s":"rd-log-f"}">
+      <div class="rd-log-mark">${isS?"✅":"❌"}</div>
+      <div class="rd-log-body">
+        <div class="rd-log-when">${ruDT(e.created_at)} · <span class="rd-log-ch">#${esc(e.channel_name||"—")}</span></div>
+        <div class="rd-log-author">👤 ${esc(e.ds_author_name||"—")}</div>
+        ${e.content_preview?`<div class="rd-log-preview">${esc(e.content_preview).slice(0,140)}</div>`:""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function weekKeyMoscow(iso){
+  const d=new Date(iso);
+  const p=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Moscow",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(d);
+  const y=parseInt(p.find(x=>x.type==="year").value);
+  const m=parseInt(p.find(x=>x.type==="month").value)-1;
+  const day=parseInt(p.find(x=>x.type==="day").value);
+  const dt=new Date(Date.UTC(y,m,day));
+  const dow=dt.getUTCDay()||7;
+  dt.setUTCDate(dt.getUTCDate()-dow+1);
+  return dt.toISOString().slice(0,10);
+}
+
+function renderWeeks(items){
+  const canClear=window.VSRF_ROLES&&window.VSRF_ROLES.can("raids","clear");
+  const box=$("rdWeeks");if(!box) return;
+  if(!canClear){box.parentElement.style.display="none";return}
+  box.parentElement.style.display="";
+  const map=new Map();
+  for(const e of items){
+    const wk=weekKeyMoscow(e.created_at);
+    if(!map.has(wk)) map.set(wk,{s:0,f:0});
+    const b=map.get(wk);if(e.kind==="success") b.s++;else b.f++;
+  }
+  if(!map.size){box.innerHTML=`<div class="rd-week-empty">Событий нет — чистить нечего.</div>`;return}
+  const rows=Array.from(map.entries()).sort((a,b)=>b[0].localeCompare(a[0]));
+  box.innerHTML=rows.map(([wk,b])=>{
+    const start=new Date(wk+"T00:00:00");
+    const end=new Date(start.getTime()+7*86400000-1);
+    return `<div class="rd-week">
+      <div class="rd-week-info">
+        <b>${ruD(start.toISOString())} — ${ruD(end.toISOString())}</b>
+        <span class="rd-week-stat">✅ ${b.s} · ❌ ${b.f}</span>
+      </div>
+      <button class="btn btn-ghost btn-sm rd-week-del" data-week="${wk}">🗑 Очистить неделю</button>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("[data-week]").forEach(btn=>btn.addEventListener("click",async()=>{
+    const wk=btn.dataset.week;
+    if(!confirm("Удалить ВСЕ события за неделю "+wk+" (7 дней)? Действие необратимо.")) return;
+    btn.disabled=true;btn.textContent="⏳";
+    const r=await VSRF_RAIDS.clearWeek(wk);
+    if(!r.ok){showToast("Ошибка: "+r.error,"error");btn.disabled=false;btn.textContent="🗑 Очистить неделю";return}
+    showToast("Удалено записей: "+r.deleted,"success");
+    await loadPeriod(currentPeriod());
+  }));
+}
+
+function currentPeriod(){
+  const active=document.querySelector(".rd-tab.active");
+  return active?active.dataset.period:"7";
+}
+
+document.querySelectorAll(".rd-tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".rd-tab").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  const p=t.dataset.period;
+  $("rdCustom").style.display=p==="custom"?"":"none";
+  if(p!=="custom") loadPeriod(p);
+}));
+$("rdApply").addEventListener("click",()=>loadPeriod("custom"));
+
+if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
+setTimeout(boot,600);
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26eb8e68ff7f13b',t:'MTc4NjAyNjQ0NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
+</html>
