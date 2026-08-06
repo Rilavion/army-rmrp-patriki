@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=138">
+<link rel="stylesheet" href="style.css?v=139">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -214,6 +214,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
     <div class="exp-controls" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding:12px;background:rgba(21,36,29,.45);border-radius:10px;border:1px solid rgba(205,168,90,.2)">
       <label class="cr-notify" style="display:inline-flex"><input type="checkbox" id="expShowContacts" checked><span>Показывать контакты (📞 📡)</span></label>
       <label class="cr-notify" style="display:inline-flex"><input type="checkbox" id="expShowPhotos" checked><span>Показывать фото</span></label>
+      <label class="cr-notify" style="display:inline-flex"><input type="checkbox" id="expOnlyCards"><span>🎴 Только карточки (без обложки/фона)</span></label>
       <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)">
         Масштаб: <select id="expScale" class="msg-input" style="width:auto;padding:4px 8px">
           <option value="1">1× (обычный)</option>
@@ -233,24 +234,24 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="html2canvas.min.js?v=138"></script>
-<script src="supabase-loader.js?v=138"></script>
-<script src="config.js?v=138"></script>
-<script src="main.js?v=138"></script>
-<script src="format-utils.js?v=138"></script>
-<script src="holiday-engine.js?v=138"></script>
-<script src="settings-panel.js?v=138"></script>
-<script src="sound-engine.js?v=138"></script>
-<script src="faq-engine.js?v=138"></script>
-<script src="search-engine.js?v=138"></script>
-<script src="ds-cache.js?v=138"></script>
-<script src="notify-engine.js?v=138"></script>
-<script src="notify-live.js?v=138"></script>
-<script src="auth.js?v=138"></script>
-<script src="roles-engine.js?v=138"></script>
-<script src="select-enhance.js?v=138"></script>
-<script src="image-compress.js?v=138"></script>
-<script src="composition-engine.js?v=138"></script>
+<script src="html2canvas.min.js?v=139"></script>
+<script src="supabase-loader.js?v=139"></script>
+<script src="config.js?v=139"></script>
+<script src="main.js?v=139"></script>
+<script src="format-utils.js?v=139"></script>
+<script src="holiday-engine.js?v=139"></script>
+<script src="settings-panel.js?v=139"></script>
+<script src="sound-engine.js?v=139"></script>
+<script src="faq-engine.js?v=139"></script>
+<script src="search-engine.js?v=139"></script>
+<script src="ds-cache.js?v=139"></script>
+<script src="notify-engine.js?v=139"></script>
+<script src="notify-live.js?v=139"></script>
+<script src="auth.js?v=139"></script>
+<script src="roles-engine.js?v=139"></script>
+<script src="select-enhance.js?v=139"></script>
+<script src="image-compress.js?v=139"></script>
+<script src="composition-engine.js?v=139"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -482,8 +483,16 @@ function expBuildHtml(opts){
   if(!src){return `<div style="padding:40px;color:#e77070">Ошибка: иерархия не найдена</div>`}
 
   const clone=src.cloneNode(true);
-  clone.querySelectorAll(".hier-edit-btn,.hier-edit-group,.hier-edit-corner,.hier-sub-edit-btn,.hier-member-actions,.hier-officer-add,.hier-add-btn,.hier-add-wrap,.hier-grid-cell.empty,#addHqBtn,#addSubBtn,[data-add-member]").forEach(el=>el.remove());
-  clone.querySelectorAll(".hier-member").forEach(el=>el.removeAttribute("draggable"));
+  clone.querySelectorAll(".hier-edit-btn,.hier-edit-group,.hier-edit-corner,.hier-sub-edit-btn,.hier-member-actions,.hier-officer-add,.hier-add-btn,.hier-add-wrap,#addHqBtn,#addSubBtn,[data-add-member]").forEach(el=>el.remove());
+  clone.querySelectorAll(".hier-grid-cell.empty").forEach(el=>{
+    el.classList.remove("empty");
+    el.classList.add("hollow");
+    el.innerHTML="";
+    el.removeAttribute("data-drop-cell");
+    el.removeAttribute("data-empty-add");
+    el.removeAttribute("title");
+  });
+  clone.querySelectorAll(".hier-member").forEach(el=>{el.removeAttribute("draggable");el.classList.remove("is-draggable","dragging")});
   clone.querySelectorAll("canvas,svg").forEach(el=>{
     const r=el.getBoundingClientRect();
     if(!r.width||!r.height) el.remove();
@@ -503,6 +512,14 @@ function expBuildHtml(opts){
   }
 
   const totalPeople=1+(STATE.hq_slots||[]).filter(s=>s.key!=="cmd_brigade"&&STATE.hq[s.key]&&STATE.hq[s.key].name).length + (STATE.subs||[]).reduce((a,s)=>a+((s.members||[]).length),0);
+
+  if(opts&&opts.onlyCards){
+    const wrap=document.createElement("div");
+    wrap.id="expCanvas";
+    wrap.className="exp-canvas exp-canvas-transparent";
+    wrap.appendChild(clone);
+    return wrap.outerHTML;
+  }
 
   const wrap=document.createElement("div");
   wrap.id="expCanvas";
@@ -535,7 +552,8 @@ function expBuildHtml(opts){
 function expRefresh(){
   const opts={
     showContacts:$("expShowContacts").checked,
-    showPhotos:$("expShowPhotos").checked
+    showPhotos:$("expShowPhotos").checked,
+    onlyCards:$("expOnlyCards").checked
   };
   $("expPreview").innerHTML=expBuildHtml(opts);
 }
@@ -705,8 +723,9 @@ async function expRender(){
   });
   sanitizeColors(node);
   stripZeroSizeBackgrounds(node);
+  const transparent=node.classList.contains("exp-canvas-transparent");
   const canvas=await html2canvas(node,{
-    backgroundColor:"#0f1e17",
+    backgroundColor:transparent?null:"#0f1e17",
     scale:scale,
     useCORS:true,
     allowTaint:true,
@@ -753,6 +772,7 @@ $("exportPngBtn").addEventListener("click",()=>{
 $("expRefreshBtn").addEventListener("click",expRefresh);
 $("expShowContacts").addEventListener("change",expRefresh);
 $("expShowPhotos").addEventListener("change",expRefresh);
+$("expOnlyCards").addEventListener("change",expRefresh);
 
 $("expDownloadBtn").addEventListener("click",async()=>{
   const btn=$("expDownloadBtn");
@@ -1143,5 +1163,5 @@ boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26eb7deea3af13b',t:'MTc4NjAyNjQwMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26efd72afa2ec62',t:'MTc4NjAyOTI1Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

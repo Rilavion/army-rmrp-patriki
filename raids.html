@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=138">
+<link rel="stylesheet" href="style.css?v=139">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}[data-staff]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
@@ -126,12 +126,43 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
           </div>
         </div>
 
-        <div class="rd-bar-wrap">
-          <div class="rd-bar-title">Соотношение</div>
-          <div class="rd-bar">
-            <div class="rd-bar-success" id="rdBarSuccess" style="width:0%"><span id="rdBarSuccessLbl"></span></div>
-            <div class="rd-bar-fail" id="rdBarFail" style="width:0%"><span id="rdBarFailLbl"></span></div>
+        <div class="rd-viz-wrap" id="rdVizWrap">
+          <div class="rd-viz-head">
+            <div class="rd-viz-title">📊 Визуализация</div>
+            <div class="rd-viz-actions">
+              <button class="btn btn-ghost btn-sm" id="rdExportCopy">📋 Скопировать PNG</button>
+              <button class="btn btn-gold btn-sm" id="rdExportDl">💾 Скачать PNG</button>
+            </div>
           </div>
+          <div class="rd-viz" id="rdViz">
+            <div class="rd-donut-wrap">
+              <svg class="rd-donut" viewBox="0 0 200 200" id="rdDonutSvg">
+                <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(21,36,29,.5)" stroke-width="28"/>
+                <circle cx="100" cy="100" r="80" fill="none" stroke="#e97a7a" stroke-width="28" id="rdDonutFail" transform="rotate(-90 100 100)"/>
+                <circle cx="100" cy="100" r="80" fill="none" stroke="#7dd97d" stroke-width="28" id="rdDonutSuccess" transform="rotate(-90 100 100)"/>
+                <text x="100" y="94" text-anchor="middle" class="rd-donut-total" id="rdDonutTotal">0</text>
+                <text x="100" y="118" text-anchor="middle" class="rd-donut-sub">всего</text>
+              </svg>
+              <div class="rd-donut-legend">
+                <div class="rd-donut-item"><span class="rd-donut-dot" style="background:#7dd97d"></span><span class="rd-donut-lbl">✅ Успешные</span><span class="rd-donut-val" id="rdLegSuccess">0 (0%)</span></div>
+                <div class="rd-donut-item"><span class="rd-donut-dot" style="background:#e97a7a"></span><span class="rd-donut-lbl">❌ Неудачные</span><span class="rd-donut-val" id="rdLegFail">0 (0%)</span></div>
+              </div>
+            </div>
+            <div class="rd-extra">
+              <div class="rd-extra-title">📈 Детальная статистика</div>
+              <div class="rd-extra-grid">
+                <div class="rd-extra-item"><div class="rd-extra-k">Средне/день</div><div class="rd-extra-v" id="rdAvgDay">—</div></div>
+                <div class="rd-extra-item"><div class="rd-extra-k">Средне/неделю</div><div class="rd-extra-v" id="rdAvgWeek">—</div></div>
+                <div class="rd-extra-item"><div class="rd-extra-k">Дней в периоде</div><div class="rd-extra-v" id="rdDays">—</div></div>
+                <div class="rd-extra-item"><div class="rd-extra-k">Лучший день</div><div class="rd-extra-v" id="rdBestDay">—</div></div>
+                <div class="rd-extra-item"><div class="rd-extra-k">Худший день</div><div class="rd-extra-v" id="rdWorstDay">—</div></div>
+                <div class="rd-extra-item"><div class="rd-extra-k">Активных дней</div><div class="rd-extra-v" id="rdActiveDays">—</div></div>
+                <div class="rd-extra-item"><div class="rd-extra-k">Первый налёт</div><div class="rd-extra-v" id="rdFirstEv">—</div></div>
+                <div class="rd-extra-item"><div class="rd-extra-k">Последний налёт</div><div class="rd-extra-v" id="rdLastEv">—</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="rd-daily" id="rdDaily"></div>
         </div>
 
         <div class="rd-weeks" data-perm="raids:clear">
@@ -180,20 +211,22 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <div class="toast" id="toast"></div>
 
-<script src="supabase-loader.js?v=138"></script>
-<script src="config.js?v=138"></script>
-<script src="main.js?v=138"></script>
-<script src="format-utils.js?v=138"></script>
-<script src="holiday-engine.js?v=138"></script>
-<script src="settings-panel.js?v=138"></script>
-<script src="sound-engine.js?v=138"></script>
-<script src="auth.js?v=138"></script>
-<script src="roles-engine.js?v=138"></script>
-<script src="ds-cache.js?v=138"></script>
-<script src="search-engine.js?v=138"></script>
-<script src="notify-engine.js?v=138"></script>
-<script src="notify-live.js?v=138"></script>
-<script src="raids-engine.js?v=138"></script>
+<script src="html2canvas.min.js?v=139"></script>
+<script src="png-export-utils.js?v=139"></script>
+<script src="supabase-loader.js?v=139"></script>
+<script src="config.js?v=139"></script>
+<script src="main.js?v=139"></script>
+<script src="format-utils.js?v=139"></script>
+<script src="holiday-engine.js?v=139"></script>
+<script src="settings-panel.js?v=139"></script>
+<script src="sound-engine.js?v=139"></script>
+<script src="auth.js?v=139"></script>
+<script src="roles-engine.js?v=139"></script>
+<script src="ds-cache.js?v=139"></script>
+<script src="search-engine.js?v=139"></script>
+<script src="notify-engine.js?v=139"></script>
+<script src="notify-live.js?v=139"></script>
+<script src="raids-engine.js?v=139"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -295,13 +328,110 @@ async function loadPeriod(period){
 
   const sPct=st.total?Math.round(st.success/st.total*100):0;
   const fPct=st.total?100-sPct:0;
-  $("rdBarSuccess").style.width=sPct+"%";
-  $("rdBarFail").style.width=fPct+"%";
-  $("rdBarSuccessLbl").textContent=st.success>0?st.success+" ("+sPct+"%)":"";
-  $("rdBarFailLbl").textContent=st.fail>0?st.fail+" ("+fPct+"%)":"";
+  renderDonut(st.success,st.fail);
+  $("rdLegSuccess").textContent=`${st.success} (${sPct}%)`;
+  $("rdLegFail").textContent=`${st.fail} (${fPct}%)`;
 
+  renderExtra(st.items,fromIso,toIso);
+  renderDaily(st.items);
   renderWeeks(st.items);
   renderLog(st.items);
+}
+
+function renderDonut(succ,fail){
+  const total=succ+fail;
+  const svg=$("rdDonutSvg");
+  const circleSuccess=$("rdDonutSuccess");
+  const circleFail=$("rdDonutFail");
+  const R=80;const C=2*Math.PI*R;
+  circleSuccess.setAttribute("stroke-dasharray",C);
+  circleFail.setAttribute("stroke-dasharray",C);
+  if(!total){
+    circleSuccess.setAttribute("stroke-dashoffset",C);
+    circleFail.setAttribute("stroke-dashoffset",C);
+    $("rdDonutTotal").textContent="0";
+    return;
+  }
+  const sLen=(succ/total)*C;
+  const fLen=(fail/total)*C;
+  circleFail.setAttribute("stroke-dashoffset",0);
+  circleFail.setAttribute("stroke-dasharray",`${C} 0`);
+  circleSuccess.setAttribute("stroke-dashoffset",0);
+  circleSuccess.setAttribute("stroke-dasharray",`${sLen} ${C-sLen}`);
+  $("rdDonutTotal").textContent=String(total);
+}
+
+function ruShortDate(iso){
+  try{return new Date(iso).toLocaleDateString("ru-RU",{timeZone:"Europe/Moscow",day:"2-digit",month:"2-digit"})}
+  catch(e){return "—"}
+}
+function mskDayKey(iso){
+  const d=new Date(iso);
+  const p=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Moscow",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(d);
+  const y=p.find(x=>x.type==="year").value;
+  const m=p.find(x=>x.type==="month").value;
+  const dd=p.find(x=>x.type==="day").value;
+  return `${y}-${m}-${dd}`;
+}
+function groupByDay(items){
+  const map=new Map();
+  for(const e of items){
+    const k=mskDayKey(e.created_at);
+    if(!map.has(k)) map.set(k,{s:0,f:0});
+    const b=map.get(k);if(e.kind==="success") b.s++;else b.f++;
+  }
+  return map;
+}
+
+function renderExtra(items,fromIso,toIso){
+  if(!items.length){
+    ["rdAvgDay","rdAvgWeek","rdDays","rdBestDay","rdWorstDay","rdActiveDays","rdFirstEv","rdLastEv"].forEach(id=>$(id).textContent="—");
+    return;
+  }
+  const sorted=items.slice().sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  const first=sorted[0].created_at;
+  const last=sorted[sorted.length-1].created_at;
+  const startMs=fromIso?new Date(fromIso).getTime():new Date(first).getTime();
+  const endMs=toIso?new Date(toIso).getTime():Date.now();
+  const days=Math.max(1,Math.ceil((endMs-startMs)/86400000));
+  const byDay=groupByDay(items);
+  const dayCounts=Array.from(byDay.entries()).map(([k,v])=>({k,total:v.s+v.f,s:v.s,f:v.f}));
+  dayCounts.sort((a,b)=>b.total-a.total);
+  const best=dayCounts[0];
+  const worst=dayCounts[dayCounts.length-1];
+  $("rdAvgDay").textContent=(items.length/days).toFixed(1);
+  $("rdAvgWeek").textContent=(items.length/days*7).toFixed(1);
+  $("rdDays").textContent=days;
+  $("rdActiveDays").textContent=dayCounts.length;
+  $("rdBestDay").innerHTML=best?`<b>${ruShortDate(best.k)}</b><br><span style="font-size:11px;color:var(--muted)">✅ ${best.s} · ❌ ${best.f}</span>`:"—";
+  $("rdWorstDay").innerHTML=(worst&&worst!==best)?`<b>${ruShortDate(worst.k)}</b><br><span style="font-size:11px;color:var(--muted)">✅ ${worst.s} · ❌ ${worst.f}</span>`:"—";
+  $("rdFirstEv").textContent=ruDT(first);
+  $("rdLastEv").textContent=ruDT(last);
+}
+
+function renderDaily(items){
+  const box=$("rdDaily");
+  if(!items.length){box.innerHTML="";return}
+  const byDay=groupByDay(items);
+  const keys=Array.from(byDay.keys()).sort();
+  const last=keys.slice(-14);
+  if(last.length<2){box.innerHTML="";return}
+  const maxTotal=Math.max(...last.map(k=>{const b=byDay.get(k);return b.s+b.f}));
+  box.innerHTML=`<div class="rd-daily-title">📅 Динамика по дням (последние ${last.length})</div>
+    <div class="rd-daily-bars">${last.map(k=>{
+      const b=byDay.get(k);
+      const total=b.s+b.f;
+      const hS=maxTotal?(b.s/maxTotal*100):0;
+      const hF=maxTotal?(b.f/maxTotal*100):0;
+      return `<div class="rd-daily-col" title="${k} · ✅${b.s} · ❌${b.f}">
+        <div class="rd-daily-stack">
+          <div class="rd-daily-fail" style="height:${hF}%"></div>
+          <div class="rd-daily-success" style="height:${hS}%"></div>
+        </div>
+        <div class="rd-daily-lbl">${ruShortDate(k)}</div>
+        <div class="rd-daily-val">${total}</div>
+      </div>`;
+    }).join("")}</div>`;
 }
 
 function renderLog(items){
@@ -382,9 +512,59 @@ document.querySelectorAll(".rd-tab").forEach(t=>t.addEventListener("click",()=>{
 }));
 $("rdApply").addEventListener("click",()=>loadPeriod("custom"));
 
+async function exportPng(mode){
+  const btn=mode==="copy"?$("rdExportCopy"):$("rdExportDl");
+  const orig=btn.textContent;
+  btn.disabled=true;btn.textContent="⏳ Рендер...";
+  const wrap=$("rdVizWrap");
+  const cloneWrap=document.createElement("div");
+  cloneWrap.id="rdExportCanvas";
+  cloneWrap.className="rd-export-canvas";
+  const inner=document.createElement("div");
+  inner.className="rd-export-inner";
+  inner.innerHTML=`
+    <div class="rd-export-head">
+      <div class="rd-export-title">💥 Статистика налётов</div>
+      <div class="rd-export-sub">1-я МСБр · в/ч №12132 · <span id="rdExpPeriod"></span></div>
+    </div>
+    <div class="rd-export-body"></div>
+    <div class="rd-export-foot">📅 Экспорт: ${new Date().toLocaleString("ru-RU",{timeZone:"Europe/Moscow",day:"2-digit",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})} МСК</div>
+  `;
+  const period=document.querySelector(".rd-tab.active").textContent.trim();
+  inner.querySelector("#rdExpPeriod").textContent=period;
+  const cardsClone=document.querySelector(".rd-cards").cloneNode(true);
+  const vizClone=$("rdViz").cloneNode(true);
+  vizClone.querySelectorAll(".rd-viz-actions,.rd-viz-head .rd-viz-actions").forEach(el=>el.remove());
+  const dailyClone=$("rdDaily").cloneNode(true);
+  inner.querySelector(".rd-export-body").appendChild(cardsClone);
+  inner.querySelector(".rd-export-body").appendChild(vizClone);
+  if(dailyClone.innerHTML.trim()) inner.querySelector(".rd-export-body").appendChild(dailyClone);
+  cloneWrap.appendChild(inner);
+  cloneWrap.style.cssText="position:fixed;left:-99999px;top:0;width:1100px;z-index:-1;pointer-events:none";
+  document.body.appendChild(cloneWrap);
+  try{
+    const opts={scale:2,backgroundColor:null};
+    if(mode==="copy"){
+      const r=await VSRF_PNG.copyToClipboard(cloneWrap,opts);
+      if(r.ok) showToast("✓ Скопировано в буфер (Ctrl+V в Discord)","success");
+      else showToast("Ошибка: "+r.error,"error");
+    } else {
+      const fname="ВСРФ_Налёты_"+new Date().toISOString().slice(0,10)+".png";
+      await VSRF_PNG.download(cloneWrap,fname,opts);
+      showToast("✓ PNG скачан","success");
+    }
+  }catch(e){showToast("Ошибка: "+e.message,"error");console.warn(e)}
+  finally{
+    document.body.removeChild(cloneWrap);
+    btn.disabled=false;btn.textContent=orig;
+  }
+}
+$("rdExportDl").addEventListener("click",()=>exportPng("dl"));
+$("rdExportCopy").addEventListener("click",()=>exportPng("copy"));
+
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26eb8e68ff7f13b',t:'MTc4NjAyNjQ0NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26efd2e784fec62',t:'MTc4NjAyOTI0Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
