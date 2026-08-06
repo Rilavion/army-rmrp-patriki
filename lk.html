@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=134">
+<link rel="stylesheet" href="style.css?v=135">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -73,6 +73,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <a href="vacation-ooc.html" data-page="vacation-ooc.html" data-transition data-loggedin>Отпуск OOC</a>
       <a href="dismissal.html" data-page="dismissal.html" data-transition data-loggedin>Увольнение</a>
       <a href="promotion.html" data-page="promotion.html" data-transition data-loggedin>Повышение</a>
+      <a href="restoration.html" data-page="restoration.html" data-transition>Восстановление в ВС РФ</a>
       <a href="requests-review.html" data-page="requests-review.html" data-transition data-perm="requests:review,requests:view">Рассмотрение заявок</a>
       <a href="payroll.html" data-page="payroll.html" data-transition data-perm="payroll:view">Реестр премирования</a>
       <a href="message.html" data-page="message.html" data-transition data-perm="messages:send">Сообщения</a>
@@ -126,6 +127,30 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
               <span class="lk-panel-title">Журнал аудита</span>
             </div>
             <div class="lk-panel-body">
+              <div class="lk-audit-controls">
+                <input type="text" id="lkAuditSearch" class="msg-input" placeholder="🔍 Поиск: по имени, коду, типу, дате...">
+                <select id="lkAuditType" class="msg-input" style="max-width:180px">
+                  <option value="">Все типы</option>
+                  <option value="news">📰 Новости</option>
+                  <option value="vehicle">🚙 Автопарк</option>
+                  <option value="ustav">📖 Уставы</option>
+                  <option value="lesson">🎓 Уроки</option>
+                  <option value="app">📋 Заявления</option>
+                  <option value="complaint">⚠ Жалобы</option>
+                  <option value="request">📄 Заявки</option>
+                  <option value="violation">⚠ Нарушения</option>
+                  <option value="vp">🎖 ВП</option>
+                  <option value="supply">📦 Поставки</option>
+                  <option value="payroll">💰 Премии</option>
+                  <option value="role">👤 Роли</option>
+                </select>
+                <select id="lkAuditPeriod" class="msg-input" style="max-width:150px">
+                  <option value="">Всё время</option>
+                  <option value="1">За сутки</option>
+                  <option value="7">За неделю</option>
+                  <option value="30">За месяц</option>
+                </select>
+              </div>
               <div class="lk-audit" id="lkAudit">
                 <div class="lk-act-empty">Загрузка активности...</div>
               </div>
@@ -325,20 +350,20 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=134"></script>
-<script src="config.js?v=134"></script>
-<script src="main.js?v=134"></script>
-<script src="format-utils.js?v=134"></script>
-<script src="auth.js?v=134"></script>
-<script src="roles-engine.js?v=134"></script>
-<script src="holiday-engine.js?v=134"></script>
+<script src="supabase-loader.js?v=135"></script>
+<script src="config.js?v=135"></script>
+<script src="main.js?v=135"></script>
+<script src="format-utils.js?v=135"></script>
+<script src="auth.js?v=135"></script>
+<script src="roles-engine.js?v=135"></script>
+<script src="holiday-engine.js?v=135"></script>
 <script src="settings-panel.js"></script>
 <script src="sound-engine.js"></script>
 <script src="faq-engine.js"></script>
 <script src="search-engine.js"></script>
-<script src="ds-cache.js?v=134"></script>
+<script src="ds-cache.js?v=135"></script>
 <script src="notify-engine.js"></script>
-<script src="notify-live.js?v=134"></script>
+<script src="notify-live.js?v=135"></script>
 
 <script src="lk-engine.js"></script>
 <script>
@@ -444,11 +469,46 @@ function initNotifyPanel(){
   setTimeout(render,300);
 }
 
+let AUDIT_ALL=[];
 async function renderAudit(){
   const box=$("lkAudit");
-  const items=await VSRF_LK.recent({limit:50});
-  if(!items.length){box.innerHTML=`<div class="lk-act-empty">Пока нет действий на сайте.<br>Создайте первую запись — и здесь появится история.</div>`;return}
-  box.innerHTML=items.map(it=>{
+  box.innerHTML='<div class="lk-act-empty">Загрузка активности...</div>';
+  AUDIT_ALL=await VSRF_LK.recent({limit:200});
+  applyAuditFilter();
+}
+function applyAuditFilter(){
+  const box=$("lkAudit");
+  const q=(($("lkAuditSearch")||{}).value||"").trim().toLowerCase();
+  const type=($("lkAuditType")||{}).value||"";
+  const period=($("lkAuditPeriod")||{}).value||"";
+  const now=Date.now();
+  let items=AUDIT_ALL.slice();
+  if(type){
+    items=items.filter(it=>{
+      const t=it.type||"";
+      if(type==="request") return t.startsWith("request-");
+      if(type==="complaint") return t==="complaint"||t==="complaint-verdict";
+      if(type==="app") return t==="app"||t==="app-verdict";
+      if(type==="violation") return t==="violation"||t==="violation-removed";
+      if(type==="vp") return t==="vp"||t==="vp-check";
+      return t===type;
+    });
+  }
+  if(period){
+    const cutoff=now-parseInt(period)*86400000;
+    items=items.filter(it=>{const t=new Date(it.at||0).getTime();return t>=cutoff});
+  }
+  if(q){
+    items=items.filter(it=>{
+      const hay=((it.title||"")+" "+(it.who||"")+" "+(it.type||"")+" "+(it.at||"")).toLowerCase();
+      return hay.indexOf(q)>=0;
+    });
+  }
+  if(!items.length){
+    box.innerHTML=`<div class="lk-act-empty">${q||type||period?"По фильтру ничего не найдено.":"Пока нет действий на сайте."}</div>`;
+    return;
+  }
+  box.innerHTML='<div class="lk-audit-count">Показано: <b>'+items.length+'</b> из '+AUDIT_ALL.length+'</div>'+items.map(it=>{
     const when=it.at?new Date(it.at).toLocaleString("ru-RU",{timeZone:"Europe/Moscow",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
     const color=TYPE_COLORS[it.type]||"var(--gold)";
     const label=TYPE_LABELS[it.type]||"Запись";
@@ -467,6 +527,12 @@ async function renderAudit(){
     </a>`;
   }).join("");
 }
+document.addEventListener("input",e=>{
+  if(e.target&&(e.target.id==="lkAuditSearch"||e.target.id==="lkAuditType"||e.target.id==="lkAuditPeriod")) applyAuditFilter();
+});
+document.addEventListener("change",e=>{
+  if(e.target&&(e.target.id==="lkAuditType"||e.target.id==="lkAuditPeriod")) applyAuditFilter();
+});
 
 const HF_ICONS=["✦","★","⚔","◈","❆","⚜","☀","✧","♛","⚑","☭","⚓","✈","☘","♥","☆","❋","✺","☯","✵"];
 
@@ -695,6 +761,6 @@ if(rolesBtn){
 }
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26914c5289ff102',t:'MTc4NTk2NzI5NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26d98bfcd95f132',t:'MTc4NjAxNDY0Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

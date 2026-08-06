@@ -6,7 +6,8 @@ window.VSRF_REQUESTS=(function(){
     vacation_ic:{label:"Отпуск (IC)",icon:"🏖",color:"#8fd97a"},
     vacation_ooc:{label:"Отпуск (OOC)",icon:"💤",color:"#a2d8ff"},
     dismissal:{label:"Увольнение",icon:"⛔",color:"#e97a7a"},
-    promotion:{label:"Повышение",icon:"⭐",color:"#f0d89b"}
+    promotion:{label:"Повышение",icon:"⭐",color:"#f0d89b"},
+    restoration:{label:"Восстановление",icon:"🔄",color:"#7ac3f0"}
   };
 
   async function getForm(kind){

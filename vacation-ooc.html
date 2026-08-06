@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=134">
+<link rel="stylesheet" href="style.css?v=135">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}[data-staff]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
@@ -41,6 +41,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       <a href="vacation-ooc.html" data-page="vacation-ooc.html" data-transition data-loggedin>Отпуск OOC</a>
       <a href="dismissal.html" data-page="dismissal.html" data-transition data-loggedin>Увольнение</a>
       <a href="promotion.html" data-page="promotion.html" data-transition data-loggedin>Повышение</a>
+      <a href="restoration.html" data-page="restoration.html" data-transition>Восстановление в ВС РФ</a>
       <a href="supply.html" data-page="supply.html" data-transition data-perm="supply:view">Поставки</a>
       <a href="apps.html" data-page="apps.html" data-transition data-perm="apps:view">Заявления</a>
       <a href="vp.html" data-page="vp.html" data-transition data-perm="vp:view">Проверки ВП</a>
@@ -73,6 +74,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   <section class="apps-body">
     <div class="container">
       <div id="rfRoot"><div class="apps-empty"><p>Загрузка формы...</p></div></div>
+      <div id="rfInfo" style="display:none;margin-top:24px"></div>
     </div>
   </section>
 </main>
@@ -98,26 +100,26 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я МСБр · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=134"></script>
-<script src="config.js?v=134"></script>
-<script src="main.js?v=134"></script>
-<script src="format-utils.js?v=134"></script>
-<script src="holiday-engine.js?v=134"></script>
-<script src="settings-panel.js?v=134"></script>
-<script src="sound-engine.js?v=134"></script>
-<script src="auth.js?v=134"></script>
-<script src="roles-engine.js?v=134"></script>
-<script src="search-engine.js?v=134"></script>
-<script src="ds-cache.js?v=134"></script>
-<script src="notify-engine.js?v=134"></script>
-<script src="notify-live.js?v=134"></script>
-<script src="requests-engine.js?v=134"></script>
+<script src="supabase-loader.js?v=135"></script>
+<script src="config.js?v=135"></script>
+<script src="main.js?v=135"></script>
+<script src="format-utils.js?v=135"></script>
+<script src="holiday-engine.js?v=135"></script>
+<script src="settings-panel.js?v=135"></script>
+<script src="sound-engine.js?v=135"></script>
+<script src="auth.js?v=135"></script>
+<script src="roles-engine.js?v=135"></script>
+<script src="search-engine.js?v=135"></script>
+<script src="ds-cache.js?v=135"></script>
+<script src="notify-engine.js?v=135"></script>
+<script src="notify-live.js?v=135"></script>
+<script src="requests-engine.js?v=135"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
-const PAGE_MAP={"leave.html":"leave","vacation-ic.html":"vacation_ic","vacation-ooc.html":"vacation_ooc","dismissal.html":"dismissal","promotion.html":"promotion"};
+const PAGE_MAP={"leave.html":"leave","vacation-ic.html":"vacation_ic","vacation-ooc.html":"vacation_ooc","dismissal.html":"dismissal","promotion.html":"promotion","restoration.html":"restoration"};
 const currentFile=(location.pathname.split("/").pop()||"leave.html").toLowerCase();
 const KIND=PAGE_MAP[currentFile]||"leave";
 
@@ -165,6 +167,24 @@ const DEFAULT_FIELDS={
     {key:"submitter_discord",label:"Discord (@тег или ID)",type:"text",required:true,placeholder:"@user или 1234567890...",group:"Личные данные"},
     {key:"current_rank",label:"Текущее звание",type:"select",required:true,options:["Рядовой","Ефрейтор","Младший Сержант","Сержант","Старший Сержант","Старшина","Прапорщик","Старший Прапорщик"],group:"Звание"},
     {key:"target_rank",label:"Желаемое звание",type:"select",required:true,options:["Ефрейтор","Младший Сержант","Сержант","Старший Сержант","Старшина","Прапорщик","Старший Прапорщик"],group:"Звание"}
+  ],
+  restoration:[
+    {key:"submitter_fio",label:"Имя Фамилия",type:"text",required:true,placeholder:"Иван Иванов",group:"Личные данные"},
+    {key:"submitter_static",label:"Статик",type:"text",required:true,placeholder:"111-111",group:"Личные данные"},
+    {key:"submitter_discord",label:"Discord (@тег или ID)",type:"text",required:true,placeholder:"@user или 1234567890...",group:"Личные данные"},
+    {key:"restore_type",label:"Тип восстановления",type:"select",required:true,options:["По военному билету","По служебному удостоверению"],group:"Восстановление"},
+    {key:"vb_rank",label:"Звание в ВБ / удостоверении",type:"select",required:true,options:["Старший Сержант","Старшина","Прапорщик","Старший Прапорщик","Младший Лейтенант","Лейтенант","Старший Лейтенант","Капитан","Майор","Подполковник","Полковник"],group:"Восстановление"},
+    {key:"dismissed_at",label:"Дата увольнения из фракции",type:"date",required:true,group:"Восстановление"},
+    {key:"dismiss_reason",label:"Причина прошлого увольнения",type:"select",required:true,options:["По собственному желанию","Иное"],group:"Восстановление"},
+    {key:"name_changed",label:"Менял(а) имя/фамилию после увольнения?",type:"select",required:true,options:["Нет","Да"],group:"Восстановление"},
+    {key:"vb_screenshot",label:"Скриншот военного билета (URL, с бодикамерой)",type:"url",required:true,placeholder:"https://...",group:"Документы"},
+    {key:"passport_screenshot",label:"Скриншот паспорта (URL, с бодикамерой)",type:"url",required:true,placeholder:"https://...",group:"Документы"},
+    {key:"personal_file",label:"Скриншот личного дела (URL, с бодикамерой)",type:"url",required:true,placeholder:"https://...",group:"Документы"},
+    {key:"certificates",label:"Скриншот всех справок (URL, с бодикамерой)",type:"url",required:true,placeholder:"https://...",group:"Документы"},
+    {key:"udost_screenshot",label:"Скриншот удостоверения (URL, при наличии)",type:"url",required:false,placeholder:"https://...",group:"Документы"},
+    {key:"ready_reattest",label:"Готов пройти переаттестацию",type:"checkbox",required:true,group:"Согласие"},
+    {key:"rules_ack",label:"Ознакомлен(а) с правилами восстановления (за подделку — наказание)",type:"checkbox",required:true,group:"Согласие"},
+    {key:"comment",label:"Дополнительный комментарий",type:"textarea",required:false,placeholder:"Опционально",group:"Согласие"}
   ]
 };
 
@@ -173,14 +193,16 @@ const KIND_TITLES={
   vacation_ic:"Отпуск IC (RP)",
   vacation_ooc:"Отпуск OOC (NonRP)",
   dismissal:"Увольнение из бригады",
-  promotion:"Заявка на повышение"
+  promotion:"Заявка на повышение",
+  restoration:"Восстановление в ВС РФ"
 };
 const KIND_SUBS={
   leave:"Не более 60 минут (можно разбить 2×30). Ефрейтор и выше.",
   vacation_ic:"Ролевой отпуск — до 7 дней раз в месяц. Ст. Сержант и выше.",
   vacation_ooc:"Отпуск по личным причинам (работа/учёба/жизнь).",
   dismissal:"Заявление на выход из состава бригады. Требуется одобрение командования.",
-  promotion:"Заявка с прикреплением подтверждений (экзамен, статистика поставок и т.д.)."
+  promotion:"Заявка с прикреплением подтверждений (экзамен, статистика поставок и т.д.).",
+  restoration:"Восстановление в ряды военнослужащих ВС РФ по военному билету или служебному удостоверению."
 };
 
 let FORM=null, SETTINGS=null;
@@ -229,6 +251,63 @@ async function boot(){
     }
   }
   render();
+  if(KIND==="restoration") renderRestorationInfo();
+}
+
+function renderRestorationInfo(){
+  const box=$("rfInfo");if(!box) return;
+  box.style.display="";
+  box.innerHTML=`
+    <div class="cf-group rst-info">
+      <div class="cf-group-title">📋 Регламент восстановления звания по Военному билету</div>
+      <div class="cf-group-body">
+        <p>В случае восстановления в ряды военнослужащих ВС РФ согласно Военному билету (далее — <b>ВБ</b>), будет назначена <b>переаттестация</b> у Батальона Военной полиции.</p>
+        <div class="rst-table">
+          <div class="rst-table-head"><div>Звание в ВБ</div><div>Фактическое звание после восстановления</div></div>
+          <div class="rst-row"><div>Сержант или младше</div><div style="color:#e97a7a">Восстановление НЕВОЗМОЖНО</div></div>
+          <div class="rst-row"><div>Старший Сержант</div><div>Старший Сержант</div></div>
+          <div class="rst-row"><div>Старшина</div><div>Старший Сержант</div></div>
+          <div class="rst-row"><div>Прапорщик</div><div>от Старшего Сержанта до Старшины</div></div>
+          <div class="rst-row"><div>Старший Прапорщик</div><div>от Старшего Сержанта до Прапорщика</div></div>
+          <div class="rst-row"><div>Младший Лейтенант</div><div>от Старшего Сержанта до Старшего Прапорщика</div></div>
+          <div class="rst-row"><div>Лейтенант</div><div>от Старшего Сержанта до Младшего Лейтенанта</div></div>
+          <div class="rst-row"><div>Старший Лейтенант и выше</div><div>от Старшего Сержанта до Младшего Лейтенанта</div></div>
+        </div>
+        <p style="color:var(--gold-b);margin-top:14px">💠 При восстановлении по <b>служебному удостоверению</b> присваивается ранг <b>−3 от указанного</b>.<br>Пример: удостоверение «Капитан» → звание «Младший Лейтенант».</p>
+        <p style="color:#e97a7a;font-weight:600">⚠ При несоблюдении правил и ограничений заявка будет отклонена.</p>
+      </div>
+    </div>
+
+    <div class="cf-group rst-info">
+      <div class="cf-group-title">📜 Критерии восстановления</div>
+      <div class="cf-group-body">
+        <ol class="rst-list">
+          <li><b>9.1.</b> При смене имени и/или фамилии восстановление во фракцию <b>невозможно</b>.</li>
+          <li><b>9.2.</b> Любой сотрудник имеет право восстановиться в звании <b>на −3 ранга</b> <i>(при восстановлении по удостоверению)</i>.</li>
+          <li><b>9.3.</b> Восстановление разрешено, если сотрудник был уволен из фракции <b>менее месяца назад</b> <i>(при восстановлении по удостоверению)</i>.</li>
+          <li><b>9.4.</b> Восстановление разрешено только, если сотрудник был уволен <b>по собственному желанию</b>.</li>
+          <li><b>9.7.</b> Доказательством может быть только скриншот удостоверения — <b>дата и время в правом верхнем углу должны быть видны</b>. Любое редактирование, обрезание и т.п. — запрещено.</li>
+          <li><b>9.8.</b> Игрок по военному билету может быть восстановлен во фракции Армия. Максимальный ранг для восстановления по ВБ — <b>Младший Лейтенант</b>. Ранг определяется на переаттестации, но не выше Младшего Лейтенанта и не ниже Старшего Сержанта.</li>
+        </ol>
+        <p style="color:var(--gold);font-style:italic;margin-top:10px">⏱ Любой скриншот / фиксация имеет срок годности <b>72 часа</b>.</p>
+      </div>
+    </div>
+
+    <div class="cf-group rst-info">
+      <div class="cf-group-title">🎖 ПРАВИЛА ВОССТАНОВЛЕНИЯ ПО ВОЕННОМУ БИЛЕТУ</div>
+      <div class="cf-group-body">
+        <p style="color:#e97a7a;font-weight:600">⚠ ГЛАВНОЕ ПРАВИЛО: граждане, имеющие в военном билете звание <b>Сержант и ниже</b>, восстановлению НЕ ПОДЛЕЖАТ (только общий призыв, без бодикамеры).</p>
+        <div class="rst-ranks">
+          <div class="rst-rank"><div class="rst-rank-icon">🎖</div><div class="rst-rank-body"><b>Звание выше Лейтенанта</b> (Капитан, Майор и т.д.)<br><span>Восстановление в диапазоне от Старшего Сержанта до Младшего Лейтенанта (максимум).</span></div></div>
+          <div class="rst-rank"><div class="rst-rank-icon">🗂</div><div class="rst-rank-body"><b>Младший Лейтенант</b><br><span>Восстанавливается на Ст. Сержант — Мл. Лейтенант, строго после успешной переаттестации.</span></div></div>
+          <div class="rst-rank"><div class="rst-rank-icon">🥇</div><div class="rst-rank-body"><b>Старший Прапорщик</b><br><span>Максимум — Ст. Сержант — Старший Прапорщик.</span></div></div>
+          <div class="rst-rank"><div class="rst-rank-icon">🛡</div><div class="rst-rank-body"><b>Прапорщик</b><br><span>Максимум — Ст. Сержант — Прапорщик.</span></div></div>
+          <div class="rst-rank"><div class="rst-rank-icon">🎗</div><div class="rst-rank-body"><b>Старшина</b><br><span>Максимум — Ст. Сержант — Старшина.</span></div></div>
+          <div class="rst-rank"><div class="rst-rank-icon">🪖</div><div class="rst-rank-body"><b>Старший Сержант</b><br><span>Максимум — Старший Сержант.</span></div></div>
+        </div>
+        <p style="color:var(--muted);font-style:italic;margin-top:14px;font-size:12px">ℹ Примечание для Старшего Состава: перед вынесением вердикта обязательно проверяйте достоверность документов (в игре, на подделку) и заносите данные в кадровый аудит.</p>
+      </div>
+    </div>`;
 }
 
 function fieldHtml(f){
@@ -437,6 +516,6 @@ setTimeout(bootWhenReady,300);
 setTimeout(bootWhenReady,1500);
 setTimeout(bootWhenReady,3000);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26915cb1e7ff102',t:'MTc4NTk2NzMzNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26d99d0bf6af132',t:'MTc4NjAxNDY4Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

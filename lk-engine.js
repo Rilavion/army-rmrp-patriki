@@ -56,19 +56,19 @@ window.VSRF_LK=(function(){
       safe(async()=>{
         const {data}=await c.from("applications").select("id,app_type,submitter_name,submitter_discord,status,responded_by_name,responded_at,created_at").order("created_at",{ascending:false}).limit(20);
         (data||[]).forEach(x=>{
-          activity.push({type:"app",title:"📋 Заявление · "+(x.app_type||"—"),who:x.submitter_name||x.submitter_discord||"—",at:x.created_at,icon:"📋",href:"apps.html"});
+          activity.push({type:"app",title:"📋 Заявление · "+(x.app_type||"—"),who:x.submitter_name||x.submitter_discord||"—",at:x.created_at,icon:"📋",href:"apps.html#app-"+x.id});
           if(x.responded_at&&x.status!=="new"){
             const st=x.status==="approved"?"✅ Одобрено":x.status==="rejected"?"❌ Отказано":"↩ "+x.status;
-            activity.push({type:"app-verdict",title:st+" · "+(x.app_type||"—"),who:x.responded_by_name||"—",at:x.responded_at,icon:"⚖",href:"apps.html"});
+            activity.push({type:"app-verdict",title:st+" · "+(x.app_type||"—"),who:x.responded_by_name||"—",at:x.responded_at,icon:"⚖",href:"apps.html#app-"+x.id});
           }
         });
       }),
       safe(async()=>{
         const {data}=await c.from("complaints").select("id,code,target_fio,submitter_fio,status,verdict_by_name,verdict_at,created_at").order("created_at",{ascending:false}).limit(20);
         (data||[]).forEach(x=>{
-          activity.push({type:"complaint",title:"⚠ Жалоба · "+(x.code||"—"),who:x.submitter_fio||"—",at:x.created_at,icon:"⚠",href:"complaints-review.html"});
+          activity.push({type:"complaint",title:"⚠ Жалоба · "+(x.code||"—"),who:x.submitter_fio||"—",at:x.created_at,icon:"⚠",href:"complaints-review.html#c-"+x.id});
           if(x.verdict_at){
-            activity.push({type:"complaint-verdict",title:"⚖ Вердикт по жалобе · "+(x.code||""),who:x.verdict_by_name||"—",at:x.verdict_at,icon:"⚖",href:"complaints-review.html"});
+            activity.push({type:"complaint-verdict",title:"⚖ Вердикт по жалобе · "+(x.code||""),who:x.verdict_by_name||"—",at:x.verdict_at,icon:"⚖",href:"complaints-review.html#c-"+x.id});
           }
         });
       }),
@@ -77,10 +77,10 @@ window.VSRF_LK=(function(){
         const kMeta={leave:{i:"🕒",l:"Увольнительная"},vacation_ic:{i:"🏖",l:"Отпуск IC"},vacation_ooc:{i:"💤",l:"Отпуск OOC"},promotion:{i:"⭐",l:"Повышение"},dismissal:{i:"⛔",l:"Увольнение"}};
         (data||[]).forEach(x=>{
           const m=kMeta[x.kind]||{i:"📄",l:x.kind||""};
-          activity.push({type:"request-"+x.kind,title:m.i+" "+m.l+" · "+(x.code||""),who:x.submitter_fio||"—",at:x.created_at,icon:m.i,href:"requests-review.html"});
+          activity.push({type:"request-"+x.kind,title:m.i+" "+m.l+" · "+(x.code||""),who:x.submitter_fio||"—",at:x.created_at,icon:m.i,href:"requests-review.html#r-"+x.id});
           if(x.verdict_at){
             const st=x.status==="approved"?"✅ Одобрено":x.status==="rejected"?"❌ Отказано":"↩ "+x.status;
-            activity.push({type:"request-verdict",title:st+" · "+m.l+" · "+(x.code||""),who:x.verdict_by_name||"—",at:x.verdict_at,icon:"⚖",href:"requests-review.html"});
+            activity.push({type:"request-verdict",title:st+" · "+m.l+" · "+(x.code||""),who:x.verdict_by_name||"—",at:x.verdict_at,icon:"⚖",href:"requests-review.html#r-"+x.id});
           }
         });
       }),

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=134">
+<link rel="stylesheet" href="style.css?v=135">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -66,6 +66,7 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <a href="vacation-ooc.html" data-page="vacation-ooc.html" data-transition data-loggedin>Отпуск OOC</a>
       <a href="dismissal.html" data-page="dismissal.html" data-transition data-loggedin>Увольнение</a>
       <a href="promotion.html" data-page="promotion.html" data-transition data-loggedin>Повышение</a>
+      <a href="restoration.html" data-page="restoration.html" data-transition>Восстановление в ВС РФ</a>
       <a href="requests-review.html" data-page="requests-review.html" data-transition data-perm="requests:review,requests:view">Рассмотрение заявок</a>
       <a href="payroll.html" data-page="payroll.html" data-transition data-perm="payroll:view">Реестр премирования</a>
       <a href="message.html" data-page="message.html" data-transition data-perm="messages:send">Сообщения</a>
@@ -177,6 +178,10 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
               </div>
             </div>
             <div class="toc-label"><span>Оглавление</span><span id="tocCounter" style="font-weight:400;letter-spacing:.05em"></span></div>
+            <div class="usearch-wrap">
+              <input type="search" id="usSearch" class="msg-input" placeholder="🔍 Поиск по документу..." autocomplete="off">
+              <div class="usearch-hits" id="usHits" style="display:none"></div>
+            </div>
             <ul class="toc" id="tocList"></ul>
           </div>
         </aside>
@@ -318,22 +323,22 @@ try{
   console.log("[VSRF_USTAV] localStorage cache cleared");
 }catch(e){}
 </script>
-<script src="supabase-loader.js?v=134"></script>
-<script src="config.js?v=134"></script>
-<script src="auth.js?v=134"></script>
-<script src="roles-engine.js?v=134"></script>
-<script src="ustav-engine.js?v=134"></script>
-<script src="main.js?v=134"></script>
-<script src="format-utils.js?v=134"></script>
-<script src="holiday-engine.js?v=134"></script>
-<script src="sound-engine.js?v=134"></script>
-<script src="settings-panel.js?v=134"></script>
-<script src="faq-engine.js?v=134"></script>
-<script src="search-engine.js?v=134"></script>
-<script src="ds-cache.js?v=134"></script>
-<script src="notify-engine.js?v=134"></script>
-<script src="notify-live.js?v=134"></script>
-<script src="select-enhance.js?v=134"></script>
+<script src="supabase-loader.js?v=135"></script>
+<script src="config.js?v=135"></script>
+<script src="auth.js?v=135"></script>
+<script src="roles-engine.js?v=135"></script>
+<script src="ustav-engine.js?v=135"></script>
+<script src="main.js?v=135"></script>
+<script src="format-utils.js?v=135"></script>
+<script src="holiday-engine.js?v=135"></script>
+<script src="sound-engine.js?v=135"></script>
+<script src="settings-panel.js?v=135"></script>
+<script src="faq-engine.js?v=135"></script>
+<script src="search-engine.js?v=135"></script>
+<script src="ds-cache.js?v=135"></script>
+<script src="notify-engine.js?v=135"></script>
+<script src="notify-live.js?v=135"></script>
+<script src="select-enhance.js?v=135"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -711,8 +716,100 @@ $("edSave").addEventListener("click",async()=>{
 });
 window.VSRF_USTAV_TOC=[];
 boot();
+
+let USEARCH_TIMER=null;
+function usClearHighlights(){
+  paperArticle.querySelectorAll("mark.us-hl").forEach(m=>{
+    const p=m.parentNode;while(m.firstChild) p.insertBefore(m.firstChild,m);p.removeChild(m);p.normalize();
+  });
+  paperArticle.querySelectorAll(".art.us-active").forEach(a=>a.classList.remove("us-active"));
+}
+function usHighlightInArt(art,q){
+  if(!q) return 0;
+  const re=new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","gi");
+  let count=0;
+  function walk(node){
+    if(node.nodeType===3){
+      const t=node.nodeValue;
+      if(!re.test(t)) return;
+      re.lastIndex=0;
+      const frag=document.createDocumentFragment();
+      let last=0,m;
+      while((m=re.exec(t))!==null){
+        if(m.index>last) frag.appendChild(document.createTextNode(t.slice(last,m.index)));
+        const mk=document.createElement("mark");mk.className="us-hl";mk.textContent=m[0];
+        frag.appendChild(mk);count++;
+        last=m.index+m[0].length;
+      }
+      if(last<t.length) frag.appendChild(document.createTextNode(t.slice(last)));
+      node.parentNode.replaceChild(frag,node);
+      re.lastIndex=0;
+    } else if(node.nodeType===1 && node.tagName!=="MARK" && node.tagName!=="BUTTON"){
+      Array.from(node.childNodes).forEach(walk);
+    }
+  }
+  walk(art);
+  return count;
+}
+
+function usSearch(q){
+  usClearHighlights();
+  const hits=$("usHits");
+  q=(q||"").trim();
+  if(!q||q.length<2){hits.style.display="none";hits.innerHTML="";return}
+  if(!currentSlug){hits.style.display="block";hits.innerHTML='<div class="us-hit-empty">Откройте документ, чтобы искать внутри.</div>';return}
+  const d=DATA.find(x=>x.slug===currentSlug);if(!d){hits.style.display="none";return}
+  const ql=q.toLowerCase();
+  const results=[];
+  (d.chapters||[]).forEach(c=>{
+    (c.articles||[]).forEach(a=>{
+      const txt=(a.text||"")+" "+(a.title||"");
+      if(txt.toLowerCase().indexOf(ql)<0) return;
+      const idx=txt.toLowerCase().indexOf(ql);
+      const start=Math.max(0,idx-30);
+      const excerpt=(start>0?"…":"")+txt.slice(start,idx+q.length+80)+(idx+q.length+80<txt.length?"…":"");
+      const anchor=`${d.slug}--${c.id}--${a.num.replace(/\./g,"_")}`;
+      results.push({num:a.num,title:c.title,excerpt,anchor});
+    });
+  });
+  if(!results.length){hits.style.display="block";hits.innerHTML='<div class="us-hit-empty">Ничего не найдено.</div>';return}
+  hits.style.display="block";
+  hits.innerHTML='<div class="us-hit-count">Найдено: '+results.length+'</div>'+results.slice(0,30).map(r=>{
+    const escQ=q.replace(/[<>&"']/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&#39;"}[c]));
+    const escEx=r.excerpt.replace(/[<>&"']/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&#39;"}[c]));
+    const re=new RegExp("("+escQ+")","gi");
+    return `<a class="us-hit" data-anchor="${r.anchor}"><div class="us-hit-num">${VSRF_USTAV.esc(r.num)} · ${VSRF_USTAV.esc(r.title)}</div><div class="us-hit-ex">${escEx.replace(re,'<b>$1</b>')}</div></a>`;
+  }).join("");
+  hits.querySelectorAll("[data-anchor]").forEach(el=>el.addEventListener("click",()=>{
+    const anc=el.dataset.anchor;
+    const art=document.getElementById(anc);
+    if(!art) return;
+    usClearHighlights();
+    usHighlightInArt(art,q);
+    art.classList.add("us-active");
+    art.scrollIntoView({behavior:"smooth",block:"center"});
+    setTimeout(()=>art.classList.remove("us-active"),3000);
+  }));
+  const total=results.reduce((s,r)=>{
+    const art=document.getElementById(r.anchor);
+    if(art) return s+usHighlightInArt(art,q);
+    return s;
+  },0);
+}
+
+const usSearchInput=document.getElementById("usSearch");
+if(usSearchInput){
+  usSearchInput.addEventListener("input",()=>{
+    clearTimeout(USEARCH_TIMER);
+    const v=usSearchInput.value;
+    USEARCH_TIMER=setTimeout(()=>usSearch(v),200);
+  });
+  usSearchInput.addEventListener("keydown",e=>{
+    if(e.key==="Escape"){usSearchInput.value="";usSearch("")}
+  });
+}
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9dbb0e82ce92c',t:'MTc4NDgwMTAzNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26915abf852f102',t:'MTc4NTk2NzMzMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26d99b9ca85f132',t:'MTc4NjAxNDY4Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
