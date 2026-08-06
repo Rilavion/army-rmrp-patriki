@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=138">
+<link rel="stylesheet" href="style.css?v=140">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -123,7 +123,7 @@ body.vsrf-is-logged [data-loggedin]:not(.nav a){display:initial !important}
           </select>
         </div>
         <div class="learn-toolbar-r">
-          <button class="btn btn-gold btn-sm" id="learnAddBtn" data-admin>+ Добавить материал</button>
+          <button class="btn btn-gold btn-sm" id="learnAddBtn" data-perm="learn:edit">+ Добавить материал</button>
         </div>
       </div>
 
@@ -224,21 +224,21 @@ body.vsrf-is-logged [data-loggedin]:not(.nav a){display:initial !important}
   </div>
 </div>
 
-<script src="supabase-loader.js?v=138"></script>
-<script src="config.js?v=138"></script>
-<script src="auth.js?v=138"></script>
-<script src="roles-engine.js?v=138"></script>
-<script src="learn-engine.js?v=138"></script>
-<script src="main.js?v=138"></script>
-<script src="format-utils.js?v=138"></script>
-<script src="holiday-engine.js?v=138"></script>
-<script src="settings-panel.js?v=138"></script>
-<script src="faq-engine.js?v=138"></script>
-<script src="search-engine.js?v=138"></script>
-<script src="ds-cache.js?v=138"></script>
-<script src="notify-engine.js?v=138"></script>
-<script src="notify-live.js?v=138"></script>
-<script src="sound-engine.js?v=138"></script>
+<script src="supabase-loader.js?v=140"></script>
+<script src="config.js?v=140"></script>
+<script src="auth.js?v=140"></script>
+<script src="roles-engine.js?v=140"></script>
+<script src="learn-engine.js?v=140"></script>
+<script src="main.js?v=140"></script>
+<script src="format-utils.js?v=140"></script>
+<script src="holiday-engine.js?v=140"></script>
+<script src="settings-panel.js?v=140"></script>
+<script src="faq-engine.js?v=140"></script>
+<script src="search-engine.js?v=140"></script>
+<script src="ds-cache.js?v=140"></script>
+<script src="notify-engine.js?v=140"></script>
+<script src="notify-live.js?v=140"></script>
+<script src="sound-engine.js?v=140"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -299,7 +299,7 @@ function renderGrid(){
           </div>
           <div class="learn-card-acts">
             <button class="btn btn-gold btn-sm" data-view="${m.id}">Открыть</button>
-            <button class="btn btn-ghost btn-sm" data-edit="${m.id}" data-admin style="display:none">✎</button>
+            <button class="btn btn-ghost btn-sm" data-edit="${m.id}" data-perm="learn:edit" style="display:none">✎</button>
           </div>
         </div>`).join("")}
       </div>
@@ -312,10 +312,8 @@ function renderGrid(){
 }
 
 function applyAdminVisibility(){
-  const isAdmin=!!(window.VSRF_ROLES&&window.VSRF_ROLES.can("learn","edit"));
-  document.body.classList.toggle("vsrf-is-admin",isAdmin);
-  document.body.classList.toggle("vsrf-is-staff",!!(window.VSRF_ROLES&&window.VSRF_ROLES.isStaff()));
   updateLoggedFlag();
+  if(window.VSRF_ROLES&&window.VSRF_ROLES.applyPermGates) window.VSRF_ROLES.applyPermGates();
 }
 
 $("learnSearch").addEventListener("input",()=>{SEARCH=$("learnSearch").value.trim();renderGrid()});
@@ -392,5 +390,5 @@ if(window.VSRF_AUTH) VSRF_AUTH.onChange(updateLoggedFlag);
 setTimeout(()=>{loadAll();applyAdminVisibility()},600);
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26eb8909b04f13b',t:'MTc4NjAyNjQzMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2704a36ca22f106',t:'MTc4NjA0Mjg4Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

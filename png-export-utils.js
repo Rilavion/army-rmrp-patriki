@@ -170,6 +170,20 @@ window.VSRF_PNG=(function(){
       logging:false,
       imageTimeout:15000,
       onclone:function(doc){
+        const styleFix=doc.createElement("style");
+        styleFix.textContent=`
+          .hier-cmd-inner::after,.hier-cmd-inner::before,
+          .hier-member::before,.hier-member::after,
+          .hier-officer::before,.hier-officer::after,
+          .auto-card::before,.auto-card::after,
+          .hier-sub-head::before,.hier-sub-head::after{
+            display:none !important;content:none !important;background:none !important;
+            -webkit-mask:none !important;mask:none !important;animation:none !important;
+          }
+          *{animation:none !important;transition:none !important;backdrop-filter:none !important}
+          *:hover{transform:none !important}
+        `;
+        doc.head.appendChild(styleFix);
         const cn=doc.getElementById(node.id);
         if(cn){
           cn.querySelectorAll("canvas,iframe").forEach(el=>el.remove());

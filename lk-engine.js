@@ -115,6 +115,46 @@ window.VSRF_LK=(function(){
         (data||[]).forEach(x=>{
           activity.push({type:"role",title:"👤 Роль · "+(x.role||"—"),who:x.display_name||"—",at:x.updated_at||x.created_at,icon:"👤",href:"lk.html"});
         });
+      }),
+      safe(async()=>{
+        const {data}=await c.from("tests").select("id,title,slug,created_at,updated_at,author_name").order("updated_at",{ascending:false,nullsFirst:false}).limit(15);
+        (data||[]).forEach(x=>activity.push({type:"test",title:"📝 Тест · "+(x.title||x.slug||"—"),who:x.author_name||"—",at:x.updated_at||x.created_at,icon:"📝",href:"tests.html"}));
+      }),
+      safe(async()=>{
+        const {data}=await c.from("test_attempts").select("id,test_id,fio,static_id,score,total,percent,started_at,finished_at,review_status,reviewed_by_name,reviewed_at").order("finished_at",{ascending:false}).limit(30);
+        (data||[]).forEach(x=>{
+          const pct=x.percent!=null?x.percent+"%":(x.total?Math.round(x.score/x.total*100)+"%":"—");
+          activity.push({type:"test-attempt",title:"📝 Экзамен пройден · "+pct,who:x.fio||x.static_id||"—",at:x.finished_at||x.started_at,icon:"📝",href:"tests.html"});
+          if(x.reviewed_at){
+            const st=x.review_status==="passed"?"✅ Зачёт":x.review_status==="failed"?"❌ Незачёт":"⚖ Проверено";
+            activity.push({type:"test-review",title:st+" · тест",who:x.reviewed_by_name||"—",at:x.reviewed_at,icon:"⚖",href:"tests.html"});
+          }
+        });
+      }),
+      safe(async()=>{
+        const {data}=await c.from("train_categories").select("id,title,created_at,updated_at").order("updated_at",{ascending:false,nullsFirst:false}).limit(10);
+        (data||[]).forEach(x=>activity.push({type:"lesson-cat",title:"📚 Категория · "+(x.title||"—"),who:"—",at:x.updated_at||x.created_at,icon:"📚",href:"training.html"}));
+      }),
+      safe(async()=>{
+        const {data}=await c.from("holiday_state").select("state,updated_at,updated_by_name").eq("id",1).maybeSingle();
+        if(data&&data.updated_at){
+          const st=data.state||{};
+          const themeName=st.label||st.key||(st.enabled?"Тема":"Без темы");
+          activity.push({type:"holiday",title:"🎨 Праздничная тема · "+themeName,who:data.updated_by_name||"—",at:data.updated_at,icon:"🎨",href:"lk.html"});
+        }
+      }),
+      safe(async()=>{
+        const {data}=await c.from("composition").select("id,updated_at,updated_by_name").eq("id",1).maybeSingle();
+        if(data&&data.updated_at){
+          activity.push({type:"composition",title:"👥 Изменение состава",who:data.updated_by_name||"—",at:data.updated_at,icon:"👥",href:"composition.html"});
+        }
+      }),
+      safe(async()=>{
+        const {data}=await c.from("raids_events").select("id,kind,ds_author_name,created_at").order("created_at",{ascending:false}).limit(20);
+        (data||[]).forEach(x=>{
+          const t=x.kind==="success"?"✅ Успешный налёт":"❌ Неудачный налёт";
+          activity.push({type:"raid-"+x.kind,title:"💥 "+t,who:x.ds_author_name||"—",at:x.created_at,icon:"💥",href:"raids.html"});
+        });
       })
     ]);
 

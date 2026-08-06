@@ -47,7 +47,15 @@ window.VSRF_HOLIDAY=(function(){
     const auth=window.VSRF_AUTH;
     if(!auth||!auth.state||!auth.state.client||!auth.state.user) return false;
     try{
-      const {error}=await auth.state.client.from("holiday_state").upsert({id:1,state:cfg,updated_at:new Date().toISOString()});
+      const user=auth.state.user;
+      const meta=user.user_metadata||{};
+      const name=meta.display_name||user.email||"—";
+      const row={id:1,state:cfg,updated_at:new Date().toISOString(),updated_by:user.id,updated_by_name:name};
+      const {error}=await auth.state.client.from("holiday_state").upsert(row);
+      if(error && (error.message||"").indexOf("updated_by")>=0){
+        const {error:e2}=await auth.state.client.from("holiday_state").upsert({id:1,state:cfg,updated_at:new Date().toISOString()});
+        return !e2;
+      }
       return !error;
     }catch(e){return false}
   }
