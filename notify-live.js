@@ -38,7 +38,7 @@ window.VSRF_NOTIFY_LIVE=(function(){
       url:()=>"complaints-review.html",perm:{sec:"complaints",act:"review"}
     }
   };
-  const KINDS={leave:{i:"🕒",l:"увольнительная"},vacation_ic:{i:"🏖",l:"отпуск IC"},vacation_ooc:{i:"💤",l:"отпуск OOC"},promotion:{i:"⭐",l:"повышение"},dismissal:{i:"⛔",l:"увольнение"}};
+  const KINDS={leave:{i:"🕒",l:"увольнительная"},vacation_ic:{i:"🏖",l:"отпуск IC"},vacation_ooc:{i:"💤",l:"отпуск OOC"},promotion:{i:"⭐",l:"повышение"},dismissal:{i:"⛔",l:"увольнение"},restoration:{i:"🔄",l:"восстановление"}};
   for(const k of Object.keys(KINDS)){
     EVENTS["requests."+k+".new"]={
       label:`${KINDS[k].i} Заявки: ${KINDS[k].l}`,

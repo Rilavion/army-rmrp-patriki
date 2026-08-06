@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=135">
+<link rel="stylesheet" href="style.css?v=137">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}[data-staff]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
@@ -73,8 +73,8 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
   <section class="apps-body">
     <div class="container">
+      <div id="rfInfo" style="display:none;margin-bottom:24px"></div>
       <div id="rfRoot"><div class="apps-empty"><p>Загрузка формы...</p></div></div>
-      <div id="rfInfo" style="display:none;margin-top:24px"></div>
     </div>
   </section>
 </main>
@@ -100,20 +100,20 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я МСБр · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=135"></script>
-<script src="config.js?v=135"></script>
-<script src="main.js?v=135"></script>
-<script src="format-utils.js?v=135"></script>
-<script src="holiday-engine.js?v=135"></script>
-<script src="settings-panel.js?v=135"></script>
-<script src="sound-engine.js?v=135"></script>
-<script src="auth.js?v=135"></script>
-<script src="roles-engine.js?v=135"></script>
-<script src="search-engine.js?v=135"></script>
-<script src="ds-cache.js?v=135"></script>
-<script src="notify-engine.js?v=135"></script>
-<script src="notify-live.js?v=135"></script>
-<script src="requests-engine.js?v=135"></script>
+<script src="supabase-loader.js?v=137"></script>
+<script src="config.js?v=137"></script>
+<script src="main.js?v=137"></script>
+<script src="format-utils.js?v=137"></script>
+<script src="holiday-engine.js?v=137"></script>
+<script src="settings-panel.js?v=137"></script>
+<script src="sound-engine.js?v=137"></script>
+<script src="auth.js?v=137"></script>
+<script src="roles-engine.js?v=137"></script>
+<script src="search-engine.js?v=137"></script>
+<script src="ds-cache.js?v=137"></script>
+<script src="notify-engine.js?v=137"></script>
+<script src="notify-live.js?v=137"></script>
+<script src="requests-engine.js?v=137"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -258,9 +258,11 @@ function renderRestorationInfo(){
   const box=$("rfInfo");if(!box) return;
   box.style.display="";
   box.innerHTML=`
-    <div class="cf-group rst-info">
-      <div class="cf-group-title">📋 Регламент восстановления звания по Военному билету</div>
-      <div class="cf-group-body">
+    <div class="rst-hint">💡 Ознакомьтесь с регламентом ниже перед подачей заявки. Кликните на заголовок чтобы развернуть/свернуть.</div>
+
+    <details class="rst-details" open>
+      <summary><span class="rst-summary-icon">📋</span><span class="rst-summary-text">Регламент восстановления звания по Военному билету</span><span class="rst-summary-arrow">▾</span></summary>
+      <div class="rst-details-body">
         <p>В случае восстановления в ряды военнослужащих ВС РФ согласно Военному билету (далее — <b>ВБ</b>), будет назначена <b>переаттестация</b> у Батальона Военной полиции.</p>
         <div class="rst-table">
           <div class="rst-table-head"><div>Звание в ВБ</div><div>Фактическое звание после восстановления</div></div>
@@ -276,11 +278,11 @@ function renderRestorationInfo(){
         <p style="color:var(--gold-b);margin-top:14px">💠 При восстановлении по <b>служебному удостоверению</b> присваивается ранг <b>−3 от указанного</b>.<br>Пример: удостоверение «Капитан» → звание «Младший Лейтенант».</p>
         <p style="color:#e97a7a;font-weight:600">⚠ При несоблюдении правил и ограничений заявка будет отклонена.</p>
       </div>
-    </div>
+    </details>
 
-    <div class="cf-group rst-info">
-      <div class="cf-group-title">📜 Критерии восстановления</div>
-      <div class="cf-group-body">
+    <details class="rst-details">
+      <summary><span class="rst-summary-icon">📜</span><span class="rst-summary-text">Критерии восстановления</span><span class="rst-summary-arrow">▾</span></summary>
+      <div class="rst-details-body">
         <ol class="rst-list">
           <li><b>9.1.</b> При смене имени и/или фамилии восстановление во фракцию <b>невозможно</b>.</li>
           <li><b>9.2.</b> Любой сотрудник имеет право восстановиться в звании <b>на −3 ранга</b> <i>(при восстановлении по удостоверению)</i>.</li>
@@ -289,13 +291,13 @@ function renderRestorationInfo(){
           <li><b>9.7.</b> Доказательством может быть только скриншот удостоверения — <b>дата и время в правом верхнем углу должны быть видны</b>. Любое редактирование, обрезание и т.п. — запрещено.</li>
           <li><b>9.8.</b> Игрок по военному билету может быть восстановлен во фракции Армия. Максимальный ранг для восстановления по ВБ — <b>Младший Лейтенант</b>. Ранг определяется на переаттестации, но не выше Младшего Лейтенанта и не ниже Старшего Сержанта.</li>
         </ol>
-        <p style="color:var(--gold);font-style:italic;margin-top:10px">⏱ Любой скриншот / фиксация имеет срок годности <b>72 часа</b>.</p>
+        <p style="color:var(--gold);font-style:italic;margin-top:10px">📅 Восстановление возможно <b>в течение 30 дней</b> с момента увольнения (по собственному желанию либо иному). После этого срока — только через общий призыв.</p>
       </div>
-    </div>
+    </details>
 
-    <div class="cf-group rst-info">
-      <div class="cf-group-title">🎖 ПРАВИЛА ВОССТАНОВЛЕНИЯ ПО ВОЕННОМУ БИЛЕТУ</div>
-      <div class="cf-group-body">
+    <details class="rst-details">
+      <summary><span class="rst-summary-icon">🎖</span><span class="rst-summary-text">Правила восстановления по военному билету</span><span class="rst-summary-arrow">▾</span></summary>
+      <div class="rst-details-body">
         <p style="color:#e97a7a;font-weight:600">⚠ ГЛАВНОЕ ПРАВИЛО: граждане, имеющие в военном билете звание <b>Сержант и ниже</b>, восстановлению НЕ ПОДЛЕЖАТ (только общий призыв, без бодикамеры).</p>
         <div class="rst-ranks">
           <div class="rst-rank"><div class="rst-rank-icon">🎖</div><div class="rst-rank-body"><b>Звание выше Лейтенанта</b> (Капитан, Майор и т.д.)<br><span>Восстановление в диапазоне от Старшего Сержанта до Младшего Лейтенанта (максимум).</span></div></div>
@@ -307,7 +309,31 @@ function renderRestorationInfo(){
         </div>
         <p style="color:var(--muted);font-style:italic;margin-top:14px;font-size:12px">ℹ Примечание для Старшего Состава: перед вынесением вердикта обязательно проверяйте достоверность документов (в игре, на подделку) и заносите данные в кадровый аудит.</p>
       </div>
+    </details>
+
+    <div class="rst-ack" id="rstAckBox">
+      <label class="rst-ack-label">
+        <input type="checkbox" id="rstAckChk">
+        <span>Я ознакомлен(а) со всеми правилами и регламентом восстановления, указанными выше. Понимаю, что за подделку документов буду нести наказание.</span>
+      </label>
+      <div class="rst-ack-hint">🔒 Форма заявки откроется после подтверждения ознакомления.</div>
     </div>`;
+
+  const chk=$("rstAckChk");
+  const rfRoot=$("rfRoot");
+  const ackBox=$("rstAckBox");
+  if(chk&&rfRoot){
+    rfRoot.classList.add("rst-locked");
+    chk.addEventListener("change",()=>{
+      if(chk.checked){
+        rfRoot.classList.remove("rst-locked");
+        ackBox.classList.add("rst-ack-done");
+      }else{
+        rfRoot.classList.add("rst-locked");
+        ackBox.classList.remove("rst-ack-done");
+      }
+    });
+  }
 }
 
 function fieldHtml(f){
@@ -408,6 +434,14 @@ async function onSubmit(e){
   e.preventDefault();
   const btn=e.target.querySelector('button[type="submit"]');
   if(btn&&btn.disabled) return;
+  if(KIND==="restoration"){
+    const ack=$("rstAckChk");
+    if(!ack||!ack.checked){
+      const m=$("rfMsg");if(m){m.className="form-msg error";m.textContent="⛔ Отметьте «Я ознакомлен(а) с правилами» выше перед отправкой заявки."}
+      const box=$("rstAckBox");if(box){box.scrollIntoView({behavior:"smooth",block:"center"});box.classList.add("rst-ack-warn");setTimeout(()=>box.classList.remove("rst-ack-warn"),2000)}
+      return;
+    }
+  }
   const fd=new FormData(e.target);
   const values={};
   const allFields=(FORM.fields||[]).slice();
@@ -517,5 +551,5 @@ setTimeout(bootWhenReady,1500);
 setTimeout(bootWhenReady,3000);
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26d98f47acdf132',t:'MTc4NjAxNDY1MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26deae069daf10f',t:'MTc4NjAxODAwNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

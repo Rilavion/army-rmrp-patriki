@@ -7,7 +7,7 @@
 <title>Рассмотрение заявок · ВС РФ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=136">
+<link rel="stylesheet" href="style.css?v=137">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}[data-staff]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin]{display:inline-flex !important}
@@ -72,6 +72,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
         <button class="vp-arc-tab" data-kind="vacation_ooc">💤 Отпуск OOC <span class="cr-count" id="rvCntVOOC">0</span></button>
         <button class="vp-arc-tab" data-kind="dismissal">⛔ Увольнения <span class="cr-count" id="rvCntDism">0</span></button>
         <button class="vp-arc-tab" data-kind="promotion">⭐ Повышения <span class="cr-count" id="rvCntProm">0</span></button>
+        <button class="vp-arc-tab" data-kind="restoration">🔄 Восстановления <span class="cr-count" id="rvCntRest">0</span></button>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
         <select id="rvStatus" class="msg-input" style="max-width:200px">
@@ -113,25 +114,37 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я МСБр · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=136"></script>
-<script src="config.js?v=136"></script>
-<script src="main.js?v=136"></script>
-<script src="format-utils.js?v=136"></script>
-<script src="holiday-engine.js?v=136"></script>
-<script src="settings-panel.js?v=136"></script>
-<script src="sound-engine.js?v=136"></script>
-<script src="auth.js?v=136"></script>
-<script src="roles-engine.js?v=136"></script>
-<script src="search-engine.js?v=136"></script>
-<script src="ds-cache.js?v=136"></script>
-<script src="notify-engine.js?v=136"></script>
-<script src="notify-live.js?v=136"></script>
-<script src="requests-engine.js?v=136"></script>
+<script src="supabase-loader.js?v=137"></script>
+<script src="config.js?v=137"></script>
+<script src="main.js?v=137"></script>
+<script src="format-utils.js?v=137"></script>
+<script src="holiday-engine.js?v=137"></script>
+<script src="settings-panel.js?v=137"></script>
+<script src="sound-engine.js?v=137"></script>
+<script src="auth.js?v=137"></script>
+<script src="roles-engine.js?v=137"></script>
+<script src="search-engine.js?v=137"></script>
+<script src="ds-cache.js?v=137"></script>
+<script src="notify-engine.js?v=137"></script>
+<script src="notify-live.js?v=137"></script>
+<script src="requests-engine.js?v=137"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ruDT=iso=>{if(!iso) return "—";return new Date(iso).toLocaleString("ru-RU",{timeZone:"Europe/Moscow",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})};
+const LABELS={
+  submitter_fio:"ФИО",submitter_static:"Статик",submitter_discord:"Discord",position:"Должность",department:"Отдел",
+  leave_date:"Дата увала",split:"Разбить 2×30",time_start:"Начало ч.1",time_start_2:"Начало ч.2",duration:"Длительность (мин)",
+  reason:"Причина / Обоснование",mil_id:"Военный билет №",from_date:"Дата начала",to_date:"Дата окончания",
+  current_rank:"Текущее звание",target_rank:"Желаемое звание",exam_link:"Ссылка на экзамен",supply_link:"Ссылка на статистику поставок",vp_link:"Ссылка на проверку ВП",
+  achievements:"Достижения / Заслуги",return_gear:"Сдача имущества",
+  restore_type:"Тип восстановления",vb_rank:"Звание в ВБ / удостоверении",dismissed_at:"Дата увольнения",
+  dismiss_reason:"Причина прошлого увольнения",name_changed:"Смена имени/фамилии",
+  vb_screenshot:"Скриншот военного билета",passport_screenshot:"Скриншот паспорта",personal_file:"Личное дело",
+  certificates:"Скриншот справок",udost_screenshot:"Скриншот удостоверения",
+  ready_reattest:"Готов пройти переаттестацию",rules_ack:"Согласен с правилами",comment:"Комментарий"
+};
 let ALL=[], KIND="", CUR=null, CUR_V=null;
 
 async function boot(){
@@ -150,6 +163,7 @@ async function loadAll(){
   $("rvCntVOOC").textContent=ALL.filter(x=>x.kind==="vacation_ooc"&&pend(x)).length;
   $("rvCntDism").textContent=ALL.filter(x=>x.kind==="dismissal"&&pend(x)).length;
   $("rvCntProm").textContent=ALL.filter(x=>x.kind==="promotion"&&pend(x)).length;
+  const rc=$("rvCntRest");if(rc) rc.textContent=ALL.filter(x=>x.kind==="restoration"&&pend(x)).length;
   renderList();
 }
 
@@ -194,8 +208,16 @@ async function openDetail(id){
   const canDel=window.VSRF_ROLES&&window.VSRF_ROLES.can("requests","delete");
   const valuesRows=Object.entries(r.values||{}).map(([k,v])=>{
     if(v===""||v==null||v===false) return "";
-    const val=typeof v==="boolean"?"✓":String(v);
-    return `<div class="cr-kv"><div class="cr-k">${esc(k)}</div><div class="cr-v">${esc(val)}</div></div>`;
+    const label=LABELS[k]||k;
+    let vHtml;
+    if(typeof v==="boolean"){vHtml="✓ Да"}
+    else {
+      const s=String(v);
+      const isUrl=/^https?:\/\/\S+$/i.test(s.trim());
+      if(isUrl) vHtml=`<a href="${esc(s.trim())}" target="_blank" rel="noopener" class="cr-link">🔗 ${esc(s.trim().slice(0,80))}${s.length>80?"…":""}</a>`;
+      else vHtml=esc(s).replace(/\n/g,"<br>");
+    }
+    return `<div class="cr-kv"><div class="cr-k">${esc(label)}</div><div class="cr-v">${vHtml}</div></div>`;
   }).join("");
   const verd=r.status!=="pending"?`<div class="cr-verdict-doc"><div class="cr-vd-head"><div class="cr-vd-title">${r.status==="approved"?"✅ ОДОБРЕНО":r.status==="rejected"?"❌ ОТКАЗАНО":"↩ ОТОЗВАНО"}</div><div class="cr-vd-code">Заявка ${esc(r.code)}</div></div><div class="cr-vd-body"><div class="cr-vd-row"><span class="cr-vd-lbl">Вынес:</span> <b>${esc(r.verdict_by_name||"—")}</b></div><div class="cr-vd-row"><span class="cr-vd-lbl">Дата:</span> ${ruDT(r.verdict_at)}</div>${r.verdict_comment?`<div class="cr-vd-comment">${esc(r.verdict_comment).replace(/\n/g,"<br>")}</div>`:""}</div></div>`:"";
   $("rvDetailBody").innerHTML=`
@@ -271,6 +293,6 @@ async function tryOpenFromHash(){
 }
 setTimeout(tryOpenFromHash,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26db6584862f132',t:'MTc4NjAxNTg1NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26deb90ff80f10f',t:'MTc4NjAxODAzNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

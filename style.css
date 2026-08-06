@@ -5509,3 +5509,18 @@ mark.us-hl{background:rgba(255,213,79,.4);color:inherit;padding:0 2px;border-rad
 .rst-details[open]>summary{border-bottom:1px solid rgba(205,168,90,.2)}
 .rst-details-body{padding:16px 20px 18px}
 .rst-details-body p{color:var(--text);line-height:1.5;margin:8px 0}
+
+.rst-ack{margin:14px 0 6px;padding:16px 20px;background:linear-gradient(135deg,rgba(233,122,122,.12),rgba(205,168,90,.08));border:2px solid rgba(233,122,122,.4);border-radius:12px;transition:.3s}
+.rst-ack.rst-ack-done{border-color:rgba(141,217,122,.6);background:linear-gradient(135deg,rgba(141,217,122,.15),rgba(205,168,90,.08))}
+.rst-ack.rst-ack-warn{animation:rstAckShake .5s}
+@keyframes rstAckShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px);box-shadow:0 0 0 3px rgba(233,122,122,.4)}75%{transform:translateX(8px);box-shadow:0 0 0 3px rgba(233,122,122,.4)}}
+.rst-ack-label{display:flex;gap:12px;align-items:flex-start;cursor:pointer;font-size:14px;line-height:1.4;color:var(--text);font-weight:500}
+.rst-ack-label input[type="checkbox"]{width:22px;height:22px;flex-shrink:0;accent-color:var(--gold);cursor:pointer;margin-top:1px}
+.rst-ack-hint{margin-top:10px;font-size:12px;color:var(--muted);font-style:italic}
+.rst-ack.rst-ack-done .rst-ack-hint{color:#7dd97d}
+.rst-ack.rst-ack-done .rst-ack-hint::before{content:"✓ "}
+.rst-locked{opacity:.4;pointer-events:none;filter:grayscale(.5);position:relative}
+.rst-locked::after{content:"🔒 Подтвердите ознакомление выше";position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(15,30,23,.95);border:1px solid var(--gold);color:var(--gold-b);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;letter-spacing:.05em;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+
+.cr-link{color:var(--gold-b);text-decoration:none;padding:4px 10px;background:rgba(205,168,90,.12);border:1px solid rgba(205,168,90,.3);border-radius:6px;display:inline-block;transition:.2s;word-break:break-all;font-family:'Inter',monospace;font-size:12px}
+.cr-link:hover{background:rgba(205,168,90,.25);border-color:var(--gold);transform:translateY(-1px);box-shadow:0 4px 12px rgba(205,168,90,.25)}
