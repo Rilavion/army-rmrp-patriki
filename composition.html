@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=141">
+<link rel="stylesheet" href="style.css?v=143">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 body.vsrf-is-admin .nav a[data-admin],body.vsrf-is-admin .footer-col a[data-admin]{display:inline-flex !important}
@@ -69,7 +69,6 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
       <a href="requests-review.html" data-page="requests-review.html" data-transition data-perm="requests:review,requests:view">Рассмотрение заявок</a>
       <a href="payroll.html" data-page="payroll.html" data-transition data-perm="payroll:view">Реестр премирования</a>
       <a href="raids.html" data-page="raids.html" data-transition data-perm="raids:view">Статистика налётов</a>
-      <a href="message.html" data-page="message.html" data-transition data-perm="messages:send">Сообщения</a>
       <a href="lk.html" data-page="lk.html" data-transition>Личный кабинет</a>
     </nav>
     <div class="header-actions">
@@ -234,24 +233,24 @@ body.vsrf-is-admin .footer-col a[data-admin]{display:block !important}
   </div>
 </div>
 
-<script src="html2canvas.min.js?v=141"></script>
-<script src="supabase-loader.js?v=141"></script>
-<script src="config.js?v=141"></script>
-<script src="main.js?v=141"></script>
-<script src="format-utils.js?v=141"></script>
-<script src="holiday-engine.js?v=141"></script>
-<script src="settings-panel.js?v=141"></script>
-<script src="sound-engine.js?v=141"></script>
-<script src="faq-engine.js?v=141"></script>
-<script src="search-engine.js?v=141"></script>
-<script src="ds-cache.js?v=141"></script>
-<script src="notify-engine.js?v=141"></script>
-<script src="notify-live.js?v=141"></script>
-<script src="auth.js?v=141"></script>
-<script src="roles-engine.js?v=141"></script>
-<script src="select-enhance.js?v=141"></script>
-<script src="image-compress.js?v=141"></script>
-<script src="composition-engine.js?v=141"></script>
+<script src="html2canvas.min.js?v=143"></script>
+<script src="supabase-loader.js?v=143"></script>
+<script src="config.js?v=143"></script>
+<script src="main.js?v=143"></script>
+<script src="format-utils.js?v=143"></script>
+<script src="holiday-engine.js?v=143"></script>
+<script src="settings-panel.js?v=143"></script>
+<script src="sound-engine.js?v=143"></script>
+<script src="faq-engine.js?v=143"></script>
+<script src="search-engine.js?v=143"></script>
+<script src="ds-cache.js?v=143"></script>
+<script src="notify-engine.js?v=143"></script>
+<script src="notify-live.js?v=143"></script>
+<script src="auth.js?v=143"></script>
+<script src="roles-engine.js?v=143"></script>
+<script src="select-enhance.js?v=143"></script>
+<script src="image-compress.js?v=143"></script>
+<script src="composition-engine.js?v=143"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 
@@ -734,39 +733,46 @@ async function expRender(){
     onclone:function(doc){
       const styleFix=doc.createElement("style");
       styleFix.textContent=`
-        .hier-cmd-inner::after,.hier-cmd-inner::before,
-        .hier-cmd::after,.hier-cmd::before,
-        .hier-member::before,.hier-member::after,
-        .hier-officer::before,.hier-officer::after,
-        .auto-card::before,.auto-card::after,
-        .hier-sub-head::before,.hier-sub-head::after{
+        #expCanvas .hier-cmd-inner::after,#expCanvas .hier-cmd-inner::before,
+        #expCanvas .hier-cmd::after,#expCanvas .hier-cmd::before,
+        #expCanvas .hier-member::before,#expCanvas .hier-member::after,
+        #expCanvas .hier-officer::before,#expCanvas .hier-officer::after,
+        #expCanvas .auto-card::before,#expCanvas .auto-card::after,
+        #expCanvas .hier-sub-head::before,#expCanvas .hier-sub-head::after{
           display:none !important;content:none !important;background:none !important;
           -webkit-mask:none !important;mask:none !important;animation:none !important;
-          border:none !important;box-shadow:none !important;
+          border:none !important;box-shadow:none !important;opacity:0 !important;
         }
-        .hier-cmd-inner{
-          box-shadow:0 12px 28px rgba(0,0,0,.4) !important;
+        #expCanvas .hier-cmd,#expCanvas .hier-cmd-inner{
+          box-shadow:0 12px 28px rgba(0,0,0,.45) !important;
           border:2px solid #cda85a !important;
           transform:none !important;
-        }
-        .hier-cmd-inner:hover{
-          transform:none !important;
-          box-shadow:0 12px 28px rgba(0,0,0,.4) !important;
-        }
-        .hier-cmd-photo img,.hier-officer-photo img,.hier-member-photo img{
+          background:linear-gradient(180deg,#1c2b23,#0f1a14) !important;
           filter:none !important;
         }
-        .hier-officer,.hier-member{
+        #expCanvas .hier-cmd-inner *,#expCanvas .hier-officer *,#expCanvas .hier-member *{
+          animation:none !important;transition:none !important;
+        }
+        #expCanvas .hier-cmd-photo,#expCanvas .hier-officer-photo,#expCanvas .hier-member-photo{
+          box-shadow:none !important;filter:none !important;
+        }
+        #expCanvas .hier-cmd-photo img,#expCanvas .hier-officer-photo img,#expCanvas .hier-member-photo img{
+          filter:none !important;
+        }
+        #expCanvas .hier-officer,#expCanvas .hier-member{
           box-shadow:0 8px 20px rgba(0,0,0,.35) !important;
           transform:none !important;
+          background:linear-gradient(180deg,#1c2b23,#0f1a14) !important;
         }
-        .exp-hier-wrap .hier-staff-grid{
+        #expCanvas .hier-staff-grid{
           display:grid !important;
           grid-template-columns:repeat(4,minmax(0,1fr)) !important;
           gap:16px !important;
+          width:100% !important;max-width:none !important;
         }
-        *{animation:none !important;transition:none !important;backdrop-filter:none !important}
-        *:hover{transform:none !important}
+        #expCanvas .hier-staff{max-width:none !important;width:100% !important}
+        #expCanvas *{animation:none !important;transition:none !important;backdrop-filter:none !important}
+        #expCanvas *:hover{transform:none !important;box-shadow:inherit !important}
       `;
       doc.head.appendChild(styleFix);
       const cn=doc.getElementById("expCanvas");
@@ -775,6 +781,18 @@ async function expRender(){
         cn.querySelectorAll("svg").forEach(el=>{
           const r=el.getBoundingClientRect();
           if(!r.width||!r.height) el.remove();
+        });
+        const cmdInners=cn.querySelectorAll(".hier-cmd-inner,.hier-officer,.hier-member");
+        cmdInners.forEach(el=>{
+          el.style.setProperty("box-shadow","0 10px 24px rgba(0,0,0,.4)","important");
+          el.style.setProperty("filter","none","important");
+          el.style.setProperty("transform","none","important");
+        });
+        const grids=cn.querySelectorAll(".hier-staff-grid");
+        grids.forEach(g=>{
+          g.style.setProperty("grid-template-columns","repeat(4,minmax(0,1fr))","important");
+          g.style.setProperty("gap","16px","important");
+          g.style.setProperty("width","100%","important");
         });
         sanitizeColors(cn);
         stripZeroSizeBackgrounds(cn);
@@ -1199,6 +1217,6 @@ if(window.VSRF_AUTH) window.VSRF_AUTH.onChange(updateAdmin);
 boot();
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f9e7d78e2fe92c',t:'MTc4NDgwMTUzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a27139f85f509dd3',t:'MTc4NjA1MjcwNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a274aa200d47ec51',t:'MTc4NjA4ODc1NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>

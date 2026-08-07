@@ -64,33 +64,21 @@ window.VSRF_SUPPLY=(function(){
     return {ok:true};
   }
 
-  async function requestDsDelete(id){
-    const c=await client();if(!c) return {ok:false,error:"no client"};
-    const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
-    const name=(function(){try{return localStorage.getItem("vsrf-my-display-name")||(s&&s.user&&s.user.email)||"admin"}catch(e){return "admin"}})();
-    const {data,error}=await c.from("supply_ds_delete_requests").insert({supply_id:id,requested_by:s&&s.user?s.user.id:null,requested_by_name:name}).select().single();
-    if(error) return {ok:false,error:error.message};
-    return {ok:true,id:data.id};
-  }
-  async function pollDsDelete(id,timeoutMs){
-    const c=await client();if(!c) return {ok:false,error:"no client"};
-    const deadline=Date.now()+(timeoutMs||20000);
-    while(Date.now()<deadline){
-      const {data}=await c.from("supply_ds_delete_requests").select("*").eq("id",id).maybeSingle();
-      if(data&&(data.status==="done"||data.status==="error")) return {ok:data.status==="done",error:data.message};
-      await new Promise(r=>setTimeout(r,900));
-    }
-    return {ok:false,error:"timeout"};
-  }
-
-  async function replaceRequest(oldId){
+  async function replaceRequest(oldId, editedValues, editedFio, editedStatic, editedDiscord){
     const c=await client();if(!c) return {ok:false,error:"no client"};
     const {data:old}=await c.from("supply_requests").select("*").eq("id",oldId).maybeSingle();
     if(!old) return {ok:false,error:"старая заявка не найдена"};
+    const fio=editedFio!=null?String(editedFio).trim():old.fio;
+    const st=editedStatic!=null?String(editedStatic).trim():old.static_id;
+    const dc=editedDiscord!=null?(String(editedDiscord).trim()||null):old.discord;
+    const vals=editedValues!=null?editedValues:(old.values||{});
     const {data,error}=await c.rpc("submit_supply_request",{
-      p_fio:old.fio,p_static:old.static_id,p_discord:old.discord,p_values:old.values||{}
+      p_fio:fio,p_static:st,p_discord:dc,p_values:vals
     });
     if(error) return {ok:false,error:error.message};
+    await c.from("supply_requests").update({
+      dispute_resolution:"Заменено новой заявкой #"+data
+    }).eq("id",oldId);
     return {ok:true,new_id:data};
   }
 
@@ -134,5 +122,5 @@ window.VSRF_SUPPLY=(function(){
     return data||[];
   }
 
-  return {esc,validStatic,fetchForm,saveForm,submit,fetchRequests,updateRequest,deleteRequest,requestDsDelete,pollDsDelete,replaceRequest,deleteAll,requestRescan,pollRescan,fetchDsChannels,fetchDsRoles};
+  return {esc,validStatic,fetchForm,saveForm,submit,fetchRequests,updateRequest,deleteRequest,replaceRequest,deleteAll,requestRescan,pollRescan,fetchDsChannels,fetchDsRoles};
 })();
