@@ -5631,3 +5631,68 @@ text.rd-donut-sub{font-family:'Inter',sans-serif;font-size:11px;fill:#a8a08a;let
 .exp-canvas-transparent .hier-grid{background:transparent}
 .exp-canvas-transparent .hier-connector{opacity:.5}
 .exp-canvas-transparent .hier-grid-cell.hollow{background:transparent !important;border:none !important;visibility:hidden}
+
+.stats-page{max-width:1200px;margin:0 auto;padding:20px}
+.stats-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.stats-title{font-family:'Cormorant Garamond',serif;font-size:34px;color:var(--gold-b);line-height:1.1;margin:0}
+.stats-sub{color:var(--muted);font-size:13px;margin-top:4px}
+.stats-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stats-copy-msg{font-size:12px;color:var(--muted);padding:6px 10px;min-height:26px;transition:.2s}
+.stats-copy-msg.ok{color:#7dd97d}
+.stats-copy-msg.err{color:#e97a7a}
+.stats-copy-msg.info{color:var(--gold-b)}
+
+.stats-filters{background:rgba(21,36,29,.55);border:1px solid rgba(205,168,90,.2);border-radius:10px;padding:14px;margin-bottom:16px}
+.stats-filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.stats-filter{display:flex;flex-direction:column;gap:4px}
+.stats-filter label{font:600 10px/1 Inter;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);opacity:.85}
+.stats-filter select,.stats-filter input{background:rgba(15,25,20,.7);border:1px solid rgba(205,168,90,.25);color:#f5ecd6;padding:6px 8px;border-radius:6px;font-family:Inter;font-size:13px}
+.stats-filter select:focus,.stats-filter input:focus{outline:none;border-color:var(--gold)}
+.stats-filters-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.stats-preset{background:rgba(205,168,90,.1);border:1px solid rgba(205,168,90,.3);color:var(--gold-b);padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;transition:.15s;font-family:Inter}
+.stats-preset:hover{background:rgba(205,168,90,.2);border-color:var(--gold)}
+.stats-preset.active{background:var(--gold);color:#0f1e17;font-weight:700}
+.stats-reset{background:transparent;border:1px solid rgba(233,122,122,.4);color:#e97a7a;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;margin-left:auto}
+.stats-reset:hover{background:rgba(233,122,122,.15)}
+
+.stats-body{background:rgba(21,36,29,.55);border:1px solid rgba(205,168,90,.2);border-radius:10px;padding:20px}
+.stats-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.stats-card{background:rgba(15,25,20,.6);border:1px solid rgba(205,168,90,.15);border-radius:8px;padding:14px;text-align:center}
+.stats-card-label{font:600 10px/1 Inter;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.stats-card-value{font-family:'Cormorant Garamond',serif;font-size:34px;color:var(--gold-b);line-height:1;font-weight:600}
+.stats-card-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.stats-card.ok .stats-card-value{color:#7dd97d}
+.stats-card.err .stats-card-value{color:#e97a7a}
+.stats-card.pend .stats-card-value{color:#e6b800}
+.stats-card.info .stats-card-value{color:#5a8fcd}
+
+.stats-block{margin-top:20px;background:rgba(15,25,20,.5);border:1px solid rgba(205,168,90,.12);border-radius:8px;padding:14px}
+.stats-block-title{font:600 12px/1 Inter;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.stats-bar{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:13px}
+.stats-bar-label{min-width:150px;color:#f5ecd6}
+.stats-bar-track{flex:1;height:16px;background:rgba(0,0,0,.35);border-radius:4px;overflow:hidden;position:relative}
+.stats-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),#f0d89b);transition:width .5s}
+.stats-bar-fill.ok{background:linear-gradient(90deg,#5aa653,#7dd97d)}
+.stats-bar-fill.err{background:linear-gradient(90deg,#c95555,#e97a7a)}
+.stats-bar-fill.pend{background:linear-gradient(90deg,#b89a30,#e6b800)}
+.stats-bar-fill.info{background:linear-gradient(90deg,#3a6a9a,#5a8fcd)}
+.stats-bar-val{min-width:70px;text-align:right;color:var(--gold-b);font-weight:600;font-size:12px}
+
+.stats-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.stats-table th{text-align:left;padding:8px 10px;background:rgba(205,168,90,.08);color:var(--gold);font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid rgba(205,168,90,.2)}
+.stats-table td{padding:8px 10px;border-bottom:1px solid rgba(205,168,90,.08);color:#f5ecd6}
+.stats-table tr:hover td{background:rgba(205,168,90,.04)}
+.stats-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.stats-empty{padding:40px;text-align:center;color:var(--muted);font-style:italic}
+
+.stats-png-canvas{background:linear-gradient(160deg,#0f1e17,#15241d);padding:32px 40px 24px;border:2px solid #cda85a;border-radius:20px;width:1100px;color:#f5ecd6;font-family:'Inter',sans-serif;position:fixed;left:-99999px;top:0}
+.stats-png-head{text-align:center;padding-bottom:16px;border-bottom:1px solid rgba(205,168,90,.3);margin-bottom:16px}
+.stats-png-title{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:#f0d89b;line-height:1}
+.stats-png-sub{color:#c8bea4;font-size:13px;margin-top:6px}
+.stats-png-foot{margin-top:16px;padding-top:12px;border-top:1px solid rgba(205,168,90,.2);text-align:center;color:#a8a08a;font-size:11px;letter-spacing:.1em}
+
+.apps-cfg-box{background:rgba(21,36,29,.6);border:1px solid rgba(205,168,90,.3);border-radius:10px;padding:16px;margin-bottom:16px}
+.apps-cfg-title{font:700 12px/1 Inter;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.apps-cfg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.apps-cfg-help{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.5}
+.apps-cfg-actions{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}

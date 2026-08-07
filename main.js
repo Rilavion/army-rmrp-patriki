@@ -49,10 +49,12 @@
         "supply-stats.html":"supply:stats",
         "apps-stats.html":"apps:view",
         "requests-review.html":"requests:review,requests:view",
+        "requests-stats.html":"requests:review,requests:view",
         "requests-settings.html":"requests:settings",
         "supply-admin.html":"supply:admin",
         "docs.html":"docs:view",
         "complaints-review.html":"complaints:review,complaints:view",
+        "complaints-stats.html":"complaints:review,complaints:view",
         "complaints-form.html":"complaints:form_edit,complaints:settings",
         "complaints-settings.html":"complaints:settings",
         "payroll.html":"payroll:view",
@@ -68,7 +70,7 @@
 
       const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html","complaints.html"];
       const loggedInPages=["tests.html","leave.html","vacation-ic.html","vacation-ooc.html","dismissal.html","promotion.html","restoration.html"];
-      const staffPages=["apps.html","apps-stats.html","vp.html","complaints-review.html","requests-review.html","requests-settings.html","payroll.html","supply.html","supply-stats.html","docs.html","lk.html","raids.html"];
+      const staffPages=["apps.html","apps-stats.html","vp.html","complaints-review.html","complaints-stats.html","requests-review.html","requests-stats.html","requests-settings.html","payroll.html","supply.html","supply-stats.html","docs.html","lk.html","raids.html"];
       const alwaysVisibleForLogged=["lk.html"];
 
 

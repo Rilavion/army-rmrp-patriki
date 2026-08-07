@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=143">
+<link rel="stylesheet" href="style.css?v=145">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -47,6 +47,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       <a href="apps.html" data-page="apps.html" data-transition data-perm="apps:view">Заявления</a>
       <a href="vp.html" data-page="vp.html" data-transition data-perm="vp:view">Проверки ВП</a>
       <a href="complaints-review.html" data-page="complaints-review.html" data-transition data-perm="complaints:review,complaints:view">Рассмотрение жалоб</a>
+      <a href="complaints-stats.html" data-page="complaints-stats.html" data-transition data-perm="complaints:review,complaints:view">Статистика жалоб</a>
       <a href="leave.html" data-page="leave.html" data-transition data-loggedin>Увольнительная</a>
       <a href="vacation-ic.html" data-page="vacation-ic.html" data-transition data-loggedin>Отпуск IC</a>
       <a href="vacation-ooc.html" data-page="vacation-ooc.html" data-transition data-loggedin>Отпуск OOC</a>
@@ -54,6 +55,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       <a href="promotion.html" data-page="promotion.html" data-transition data-loggedin>Повышение</a>
       <a href="restoration.html" data-page="restoration.html" data-transition>Восстановление в ВС РФ</a>
       <a href="requests-review.html" data-page="requests-review.html" data-transition data-perm="requests:review,requests:view">Рассмотрение заявок</a>
+      <a href="requests-stats.html" data-page="requests-stats.html" data-transition data-perm="requests:review,requests:view">Статистика заявок</a>
       <a href="payroll.html" data-page="payroll.html" data-transition data-perm="payroll:view">Реестр премирования</a>
       <a href="raids.html" data-page="raids.html" data-transition data-perm="raids:view">Статистика налётов</a>
       <a href="lk.html" data-page="lk.html" data-transition>Личный кабинет</a>
@@ -82,6 +84,39 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       <div id="asGuard" style="display:none"><div class="apps-guard-box"><div class="apps-guard-icon">⚠</div><h2>Доступ ограничен</h2><p>Раздел доступен только сотрудникам с правами на заявления.</p></div></div>
 
       <div id="asRoot" style="display:none">
+        <div class="apps-cfg-box" id="asCfgBox" style="display:none" data-perm="apps:admin">
+          <div class="apps-cfg-title">⚙ Настройки бота (только admin)</div>
+          <div class="apps-cfg-grid">
+            <div class="stats-filter"><label>Канал приёма заявлений</label>
+              <select id="asCfgIn"></select>
+            </div>
+            <div class="stats-filter"><label>Канал вердиктов</label>
+              <select id="asCfgOut"></select>
+            </div>
+            <div class="stats-filter"><label>Пинг-роль #1</label>
+              <select id="asCfgRole1"></select>
+            </div>
+            <div class="stats-filter"><label>Пинг-роль #2 (опц.)</label>
+              <select id="asCfgRole2"></select>
+            </div>
+          </div>
+          <div class="apps-cfg-help">
+            Бот читает новые заявления из «канала приёма», а после вынесения вердикта отправляет embed с решением в «канал вердиктов». При каждом вердикте будут пинговаться указанные роли. Настройки применяются в течение 30 секунд после сохранения.
+          </div>
+          <div class="apps-cfg-actions">
+            <button class="btn btn-gold btn-sm" id="asCfgSave">💾 Сохранить</button>
+            <span class="stats-copy-msg" id="asCfgMsg"></span>
+          </div>
+        </div>
+
+        <div class="stats-actions" style="margin-bottom:12px">
+          <button class="btn btn-ghost btn-sm" id="asCopyText">📋 Копировать (Discord)</button>
+          <button class="btn btn-ghost btn-sm" id="asCopyMd">📝 Копировать (Markdown)</button>
+          <button class="btn btn-gold btn-sm" id="asCopyPng">🖼 Копировать PNG</button>
+          <button class="btn btn-ghost btn-sm" id="asDownloadPng">⬇ PNG-файл</button>
+          <span class="stats-copy-msg" id="asCopyMsg"></span>
+        </div>
+
         <div class="ss-toolbar">
           <div class="ss-toolbar-l">
             <label class="vp-search-lbl">
@@ -157,6 +192,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       </div>
     </div>
   </section>
+  <div class="stats-png-canvas" id="asPngCanvas" aria-hidden="true"></div>
 </main>
 
 <div class="modal-back" id="loginModal">
@@ -166,20 +202,22 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> · 1-я МСБр · в/ч №12132</span></div></div></footer>
 
-<script src="supabase-loader.js?v=143"></script>
-<script src="config.js?v=143"></script>
-<script src="auth.js?v=143"></script>
-<script src="roles-engine.js?v=143"></script>
-<script src="apps-engine.js?v=143"></script>
-<script src="main.js?v=143"></script>
-<script src="format-utils.js?v=143"></script>
-<script src="holiday-engine.js?v=143"></script>
-<script src="settings-panel.js?v=143"></script>
-<script src="sound-engine.js?v=143"></script>
-<script src="search-engine.js?v=143"></script>
-<script src="ds-cache.js?v=143"></script>
-<script src="notify-engine.js?v=143"></script>
-<script src="notify-live.js?v=143"></script>
+<script src="supabase-loader.js?v=145"></script>
+<script src="config.js?v=145"></script>
+<script src="auth.js?v=145"></script>
+<script src="roles-engine.js?v=145"></script>
+<script src="apps-engine.js?v=145"></script>
+<script src="main.js?v=145"></script>
+<script src="format-utils.js?v=145"></script>
+<script src="holiday-engine.js?v=145"></script>
+<script src="settings-panel.js?v=145"></script>
+<script src="sound-engine.js?v=145"></script>
+<script src="search-engine.js?v=145"></script>
+<script src="ds-cache.js?v=145"></script>
+<script src="notify-engine.js?v=145"></script>
+<script src="notify-live.js?v=148"></script>
+<script src="png-export-utils.js?v=148"></script>
+<script src="stats-utils.js?v=148"></script>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id);
@@ -357,9 +395,137 @@ $("asUser").addEventListener("change",render);
 $("asType").addEventListener("change",render);
 $("asFilterStatus").addEventListener("change",()=>renderList(filtered()));
 
-if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
-setTimeout(boot,600);
+async function initCopyAndCfg(){
+  if(window.VSRF_STATS){
+    window.VSRF_STATS.bindCopyButtons({
+      textBtnId:"asCopyText", mdBtnId:"asCopyMd", pngBtnId:"asCopyPng", pngDownloadBtnId:"asDownloadPng",
+      msgId:"asCopyMsg", pngFilename:"apps-stats.png", pngScale:2,
+      getSections:getSectionsForCopy,
+      getPngNode:()=>{ renderPngNode(); return $("asPngCanvas"); }
+    });
+  }
+  const isAdmin=window.VSRF_ROLES&&window.VSRF_ROLES.can("apps","admin");
+  if(isAdmin){
+    $("asCfgBox").style.display="";
+    await loadAppsCfg();
+    const btn=$("asCfgSave");
+    if(btn && !btn.dataset.bound){ btn.dataset.bound="1"; btn.addEventListener("click",saveAppsCfg); }
+  }
+}
+
+function getSectionsForCopy(){
+  const list=filtered();
+  const total=list.length;
+  const counts={new:0,approved:0,rejected:0,archived:0};
+  const users={};
+  const types={};
+  for(const r of list){
+    const s=r.status||"new";
+    if(counts[s]!=null) counts[s]++;
+    if(r.responded_by_name) users[r.responded_by_name]=(users[r.responded_by_name]||0)+1;
+    if(r.app_type) types[r.app_type]=(types[r.app_type]||0)+1;
+  }
+  const processed=counts.approved+counts.rejected;
+  const approvedPct=processed?Math.round(counts.approved*100/processed):0;
+  const sections=[
+    { title:"📊 Статистика заявлений", subtitle:filterSummaryApps() },
+    { rows:[
+      ["Всего",String(total)],
+      ["Ожидают",String(counts.new)],
+      ["Одобрено",counts.approved+(processed?" ("+approvedPct+"%)":"")],
+      ["Отказано",String(counts.rejected)],
+      ["В архиве",String(counts.archived)],
+      ["Обработано",String(processed)]
+    ] }
+  ];
+  const t=Object.entries(types).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if(t.length) sections.push({ title:"Топ типов", rows:t.map(x=>[x[0],String(x[1])]) });
+  const u=Object.entries(users).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if(u.length) sections.push({ title:"Топ обработчиков", rows:u.map(x=>[x[0],String(x[1])]) });
+  return sections;
+}
+
+function filterSummaryApps(){
+  const p=$("asPeriod").options[$("asPeriod").selectedIndex].textContent;
+  const parts=["период: "+p];
+  const u=$("asUser").value; if(u) parts.push("обработчик: "+u);
+  const t=$("asType").value; if(t) parts.push("тип: "+t);
+  return parts.join(" · ");
+}
+
+function renderPngNode(){
+  const secs=getSectionsForCopy();
+  const cards=secs[1].rows.map(([k,v])=>`<div class="stats-card"><div class="stats-card-label">${esc(k)}</div><div class="stats-card-value">${esc(v)}</div></div>`).join("");
+  let body='<div class="stats-cards">'+cards+"</div>";
+  for(let i=2;i<secs.length;i++){
+    const s=secs[i];
+    body+='<div class="stats-block"><div class="stats-block-title">'+esc(s.title)+'</div><table class="stats-table"><tbody>'+
+      s.rows.map(r=>`<tr><td>${esc(r[0])}</td><td class="num">${esc(r[1])}</td></tr>`).join("")+'</tbody></table></div>';
+  }
+  $("asPngCanvas").innerHTML=`
+    <div class="stats-png-head">
+      <div class="stats-png-title">Статистика заявлений</div>
+      <div class="stats-png-sub">${esc(filterSummaryApps())}</div>
+    </div>
+    ${body}
+    <div class="stats-png-foot">1-я МСБр · в/ч 12132 · ${window.VSRF_STATS.nowStamp()} МСК</div>
+  `;
+}
+
+let APPS_CH=[], APPS_ROLES=[];
+async function loadAppsCfg(){
+  const c=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.client;
+  if(!c) return;
+  const [chR,rlR,stR]=await Promise.all([
+    c.from("ds_channels").select("channel_id,name,parent_name").order("name"),
+    c.from("ds_guild_roles").select("role_id,name,position").order("position",{ascending:false}),
+    c.from("apps_settings").select("*").eq("id",1).maybeSingle()
+  ]);
+  APPS_CH=chR.data||[]; APPS_ROLES=rlR.data||[];
+  const s=stR.data||{};
+  fillChSel("asCfgIn",s.incoming_channel_id||"");
+  fillChSel("asCfgOut",s.verdict_channel_id||"");
+  fillRoleSel("asCfgRole1",s.ping_role_id||"");
+  fillRoleSel("asCfgRole2",s.ping_role_id_2||"");
+}
+function fillChSel(id,cur){
+  const byP=new Map();
+  for(const x of APPS_CH){ const k=x.parent_name||"Без категории"; if(!byP.has(k)) byP.set(k,[]); byP.get(k).push(x); }
+  let opts='<option value="">— не выбрано —</option>';
+  for(const [pn,list] of byP){
+    opts+='<optgroup label="'+esc(pn)+'">';
+    for(const c of list) opts+='<option value="'+c.channel_id+'" '+(c.channel_id===cur?"selected":"")+'>#'+esc(c.name)+'</option>';
+    opts+='</optgroup>';
+  }
+  $(id).innerHTML=opts;
+}
+function fillRoleSel(id,cur){
+  $(id).innerHTML='<option value="">— не выбрано —</option>'+APPS_ROLES.filter(r=>r.name!=="@everyone").map(r=>'<option value="'+r.role_id+'" '+(r.role_id===cur?"selected":"")+'>@'+esc(r.name)+'</option>').join("");
+}
+async function saveAppsCfg(){
+  const c=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.client;
+  if(!c) return;
+  const msg=$("asCfgMsg");
+  msg.className="stats-copy-msg info"; msg.textContent="Сохранение…";
+  const patch={
+    id:1,
+    incoming_channel_id:$("asCfgIn").value||null,
+    verdict_channel_id:$("asCfgOut").value||null,
+    ping_role_id:$("asCfgRole1").value||null,
+    ping_role_id_2:$("asCfgRole2").value||null,
+    updated_at:new Date().toISOString(),
+    updated_by:window.VSRF_AUTH.state.user.id,
+    updated_by_name:window.VSRF_AUTH.state.user.email
+  };
+  const {error}=await c.from("apps_settings").upsert(patch,{onConflict:"id"});
+  if(error){ msg.className="stats-copy-msg err"; msg.textContent="✗ "+error.message; return; }
+  msg.className="stats-copy-msg ok"; msg.textContent="✓ Сохранено. Бот подхватит в течение 30 сек.";
+  setTimeout(()=>{ msg.textContent=""; msg.className="stats-copy-msg"; },4000);
+}
+
+if(window.VSRF_ROLES) VSRF_ROLES.onChange(()=>{ boot(); initCopyAndCfg(); });
+setTimeout(()=>{ boot(); initCopyAndCfg(); },600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a274a9d91eacec51',t:'MTc4NjA4ODc0Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a27879066b52f13f',t:'MTc4NjEyODY4Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
