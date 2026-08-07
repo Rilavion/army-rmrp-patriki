@@ -69,8 +69,8 @@
         a.removeAttribute("data-staff");
       });
 
-      const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html","complaints.html"];
-      const loggedInPages=["tests.html","leave.html","vacation-ic.html","vacation-ooc.html","dismissal.html","promotion.html","restoration.html","report.html"];
+      const publicPages=["index.html","info.html","ustav.html","training.html","learn.html","composition.html","news.html","autopark.html","map.html","faq.html","complaints.html","report.html"];
+      const loggedInPages=["tests.html","leave.html","vacation-ic.html","vacation-ooc.html","dismissal.html","promotion.html","restoration.html"];
       const staffPages=["apps.html","apps-stats.html","vp.html","complaints-review.html","complaints-stats.html","requests-review.html","requests-stats.html","requests-settings.html","payroll.html","supply.html","supply-stats.html","docs.html","lk.html","raids.html","report-settings.html"];
       const alwaysVisibleForLogged=["lk.html"];
 

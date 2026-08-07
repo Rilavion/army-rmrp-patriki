@@ -51,7 +51,7 @@
       <a href="payroll.html" data-page="payroll.html" data-transition data-perm="payroll:view">Реестр премирования</a>
       <a href="raids.html" data-page="raids.html" data-transition data-perm="raids:view">Статистика налётов</a>
       <a href="lk.html" data-page="lk.html" data-transition>Личный кабинет</a>
-      <a href="report.html" data-page="report.html" data-transition data-loggedin>Еженедельный отчёт</a>
+      <a href="report.html" data-page="report.html" data-transition>Еженедельный отчёт</a>
     </nav>
     <div class="header-actions">
       <a href="lk.html" class="btn btn-ghost btn-sm">Личный кабинет</a>
@@ -72,7 +72,7 @@
   <section class="apps-body">
     <div class="container" style="max-width:900px">
       <div id="repGuard" style="display:none">
-        <div class="apps-guard-box"><div class="apps-guard-icon">🔒</div><h2>Требуется вход</h2><p>Отчёты доступны только авторизованным пользователям. <a href="#" data-open-login>Войти →</a></p></div>
+        <div class="apps-guard-box"><div class="apps-guard-icon">📭</div><h2>Форма недоступна</h2><p>Администратор ещё не настроил ни один шаблон отчёта.</p></div>
       </div>
 
       <div id="repRoot" style="display:none">
@@ -141,8 +141,6 @@ const LS_KEY="vsrf_report_draft_v1";
 let FORMS=[], CURFORM=null;
 
 async function boot(){
-  const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
-  if(!s||!s.user){ $("repGuard").style.display=""; $("repRoot").style.display="none"; return; }
   $("repGuard").style.display="none"; $("repRoot").style.display="";
   await loadForms();
   restoreDraft();
@@ -279,11 +277,11 @@ $("repSend").addEventListener("click",async()=>{
   $("repSend").disabled=true;
   try{
     const c=window.VSRF_AUTH.state.client;
-    const user=window.VSRF_AUTH.state.user;
+    const user=window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
     const row={
       form_id:CURFORM.id,
-      submitter_uid:user.id,
-      submitter_email:user.email||null,
+      submitter_uid:user?user.id:null,
+      submitter_email:user?(user.email||null):null,
       submitter_fio:fio, submitter_static:stat, submitter_position:pos,
       values, status:"pending"
     };
@@ -301,6 +299,12 @@ $("repSend").addEventListener("click",async()=>{
 async function pollStatus(id){
   const c=window.VSRF_AUTH.state.client;
   const msg=$("repMsg");
+  const isLogged=window.VSRF_AUTH.state&&window.VSRF_AUTH.state.user;
+  if(!isLogged){
+    msg.className="stats-copy-msg ok"; msg.textContent="✓ Отчёт отправлен. Проверь публикацию в Discord через 10-15 сек.";
+    localStorage.removeItem(LS_KEY);
+    return;
+  }
   for(let i=0;i<20;i++){
     await new Promise(r=>setTimeout(r,3000));
     const {data}=await c.from("report_send_requests").select("status,message,ds_message_id").eq("id",id).maybeSingle();
@@ -321,6 +325,6 @@ async function pollStatus(id){
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,600);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a27916dde8e6e988',t:'MTc4NjEzNTE1Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2793c454ebaf116',t:'MTc4NjEzNjY4NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
