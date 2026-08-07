@@ -5696,3 +5696,6 @@ text.rd-donut-sub{font-family:'Inter',sans-serif;font-size:11px;fill:#a8a08a;let
 .apps-cfg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
 .apps-cfg-help{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.5}
 .apps-cfg-actions{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.nav a[data-page="requests-stats.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8zM3 21h18v2H3z"/></svg>')}
+.nav a[data-page="complaints-stats.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM7 14h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zm-8-4h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 6h10v2H7V6z"/></svg>')}
