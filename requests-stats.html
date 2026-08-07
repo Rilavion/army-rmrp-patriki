@@ -137,10 +137,18 @@
 </main>
 
 <script src="supabase-loader.js?v=148"></script>
+<script src="config.js?v=148"></script>
 <script src="auth.js?v=148"></script>
-<script src="roles.js?v=148"></script>
+<script src="roles-engine.js?v=148"></script>
 <script src="main.js?v=148"></script>
-<script src="theme.js?v=148"></script>
+<script src="format-utils.js?v=148"></script>
+<script src="holiday-engine.js?v=148"></script>
+<script src="settings-panel.js?v=148"></script>
+<script src="sound-engine.js?v=148"></script>
+<script src="search-engine.js?v=148"></script>
+<script src="ds-cache.js?v=148"></script>
+<script src="notify-engine.js?v=148"></script>
+<script src="notify-live.js?v=148"></script>
 <script src="html2canvas.min.js?v=148"></script>
 <script src="png-export-utils.js?v=148"></script>
 <script src="stats-utils.js?v=148"></script>
@@ -156,24 +164,18 @@ function $(id){return document.getElementById(id)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c])}
 
 async function boot(){
-  await new Promise(r=>{
-    const check=()=>{
-      if(window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.client) r();
-      else setTimeout(check,100);
-    };
-    check();
-  });
-  const s=window.VSRF_AUTH.state;
-  if(!s.user){ $("rsGuard").style.display="block"; return; }
   const roles=window.VSRF_ROLES;
   const ok=roles && (roles.can("requests","view")||roles.can("requests","review"));
-  if(!ok){ $("rsGuard").style.display="block"; return; }
-  $("rsRoot").style.display="block";
+  if(!ok){ $("rsGuard").style.display="block"; $("rsRoot").style.display="none"; return; }
+  $("rsGuard").style.display="none"; $("rsRoot").style.display="block";
+  document.body.classList.toggle("vsrf-is-staff",true);
+  document.body.classList.toggle("vsrf-is-admin",!!(roles&&roles.isAdmin&&roles.isAdmin()));
   await load();
 }
 
 async function load(){
-  const c=window.VSRF_AUTH.state.client;
+  const c=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.client;
+  if(!c){ $("rsBody").innerHTML='<div class="stats-empty">Инициализация…</div>'; setTimeout(load,300); return; }
   const {data,error}=await c.from("requests").select("*").order("created_at",{ascending:false}).limit(3000);
   if(error){ $("rsBody").innerHTML='<div class="stats-empty">Ошибка: '+esc(error.message)+'</div>'; return; }
   ALL=data||[];
@@ -399,8 +401,8 @@ function renderPng(list){
   `;
 }
 
-boot().catch(e=>{ console.warn("boot err",e); $("rsBody").innerHTML='<div class="stats-empty">Ошибка: '+esc(e.message)+'</div>'; });
+if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
+setTimeout(boot,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2788e760c21f13f',t:'MTc4NjEyOTU2NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a278a8bcdd8af13f',t:'MTc4NjEzMDY0MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
