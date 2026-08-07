@@ -68,23 +68,50 @@ window.VSRF_STATS=(function(){
     return parts.join("\n").trim();
   }
 
+  async function withVisibleNode(node, fn){
+    if(!node) return await fn(node);
+    const prev={
+      position:node.style.position, left:node.style.left, top:node.style.top,
+      opacity:node.style.opacity, zIndex:node.style.zIndex,
+      pointerEvents:node.style.pointerEvents, visibility:node.style.visibility
+    };
+    node.style.position="fixed";
+    node.style.left="0px";
+    node.style.top="0px";
+    node.style.opacity="0.01";
+    node.style.zIndex="-1";
+    node.style.pointerEvents="none";
+    node.style.visibility="visible";
+    await new Promise(r=>setTimeout(r,50));
+    try{
+      return await fn(node);
+    } finally {
+      node.style.position=prev.position||"";
+      node.style.left=prev.left||"";
+      node.style.top=prev.top||"";
+      node.style.opacity=prev.opacity||"";
+      node.style.zIndex=prev.zIndex||"";
+      node.style.pointerEvents=prev.pointerEvents||"";
+      node.style.visibility=prev.visibility||"";
+    }
+  }
+
   async function copyPNG(node,filename,scale){
     if(!window.VSRF_PNG||!node) return {ok:false,error:"PNG модуль не готов"};
+    if(!navigator.clipboard||!window.ClipboardItem) return {ok:false,error:"буфер обмена недоступен в этом браузере"};
     try{
-      const canvas=await window.VSRF_PNG.toCanvas(node,{scale:scale||2,backgroundColor:"#15241d"});
-      if(!canvas) return {ok:false,error:"canvas пуст"};
-      const res=await window.VSRF_PNG.copyToClipboard(canvas);
-      return res;
-    }catch(e){ return {ok:false,error:e.message}; }
+      return await withVisibleNode(node, async(n)=>{
+        return await window.VSRF_PNG.copyToClipboard(n,{scale:scale||2,backgroundColor:"#15241d"});
+      });
+    }catch(e){ return {ok:false,error:e.message||String(e)}; }
   }
   async function downloadPNG(node,filename,scale){
     if(!window.VSRF_PNG||!node) return {ok:false,error:"PNG модуль не готов"};
     try{
-      const canvas=await window.VSRF_PNG.toCanvas(node,{scale:scale||2,backgroundColor:"#15241d"});
-      if(!canvas) return {ok:false,error:"canvas пуст"};
-      window.VSRF_PNG.download(canvas,filename||"stats.png");
-      return {ok:true};
-    }catch(e){ return {ok:false,error:e.message}; }
+      return await withVisibleNode(node, async(n)=>{
+        return await window.VSRF_PNG.download(n,filename||"stats.png",{scale:scale||2,backgroundColor:"#15241d"});
+      });
+    }catch(e){ return {ok:false,error:e.message||String(e)}; }
   }
 
   function bindCopyButtons(cfg){
@@ -94,10 +121,12 @@ window.VSRF_STATS=(function(){
     const btnPngDl=cfg.pngDownloadBtnId?document.getElementById(cfg.pngDownloadBtnId):null;
     const msg=cfg.msgId?document.getElementById(cfg.msgId):null;
     function say(t,cls){
+      if(cls==="err") console.warn("[VSRF_STATS]",t);
       if(!msg) return;
       msg.textContent=t;
       msg.className="stats-copy-msg "+(cls||"");
-      setTimeout(()=>{if(msg.textContent===t){msg.textContent="";msg.className="stats-copy-msg"}},2500);
+      const hideAfter=cls==="err"?7000:2500;
+      setTimeout(()=>{if(msg.textContent===t){msg.textContent="";msg.className="stats-copy-msg"}},hideAfter);
     }
     if(btnText) btnText.addEventListener("click",async()=>{
       const secs=cfg.getSections();
