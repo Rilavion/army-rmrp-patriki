@@ -96,67 +96,120 @@ window.VSRF_STATS=(function(){
     }
   }
 
-  const PNG_STYLE_OVERRIDE=`
-    .stats-png-canvas,.stats-png-canvas *{color:#f5ecd6 !important;font-family:'Inter',Arial,sans-serif !important}
-    .stats-png-canvas{background:#15241d !important;border:2px solid #cda85a !important}
-    .stats-png-canvas .stats-png-title{color:#f0d89b !important;font-family:'Cormorant Garamond',Georgia,serif !important}
-    .stats-png-canvas .stats-png-sub,.stats-png-canvas .stats-png-foot{color:#c8bea4 !important}
-    .stats-png-canvas .stats-block-title{color:#cda85a !important}
-    .stats-png-canvas .stats-card{background:#0f1e17 !important;border:1px solid rgba(205,168,90,.35) !important}
-    .stats-png-canvas .stats-card-label{color:#a8a08a !important}
-    .stats-png-canvas .stats-card-value{color:#f0d89b !important;font-family:'Cormorant Garamond',Georgia,serif !important}
-    .stats-png-canvas .stats-card.ok .stats-card-value{color:#7dd97d !important}
-    .stats-png-canvas .stats-card.err .stats-card-value{color:#e97a7a !important}
-    .stats-png-canvas .stats-card.pend .stats-card-value{color:#e6b800 !important}
-    .stats-png-canvas .stats-card.info .stats-card-value{color:#5a8fcd !important}
-    .stats-png-canvas .stats-block{background:#0f1e17 !important;border:1px solid rgba(205,168,90,.25) !important}
-    .stats-png-canvas .stats-bar-label{color:#f5ecd6 !important}
-    .stats-png-canvas .stats-bar-val{color:#f0d89b !important}
-    .stats-png-canvas .stats-bar-track{background:#0a1410 !important}
-    .stats-png-canvas .stats-bar-fill{background:linear-gradient(90deg,#cda85a,#f0d89b) !important}
-    .stats-png-canvas .stats-bar-fill.ok{background:linear-gradient(90deg,#5aa653,#7dd97d) !important}
-    .stats-png-canvas .stats-bar-fill.err{background:linear-gradient(90deg,#c95555,#e97a7a) !important}
-    .stats-png-canvas .stats-bar-fill.pend{background:linear-gradient(90deg,#b89a30,#e6b800) !important}
-    .stats-png-canvas .stats-bar-fill.info{background:linear-gradient(90deg,#3a6a9a,#5a8fcd) !important}
-    .stats-png-canvas .stats-table th{background:rgba(205,168,90,.15) !important;color:#cda85a !important;border-bottom:1px solid rgba(205,168,90,.3) !important}
-    .stats-png-canvas .stats-table td{color:#f5ecd6 !important;border-bottom:1px solid rgba(205,168,90,.12) !important}
-    .stats-png-canvas .rd-daily-stack{background:#0a1410 !important}
-    .stats-png-canvas .rd-daily-success{background:linear-gradient(180deg,#7dd97d,#5aa653) !important}
-    .stats-png-canvas .rd-daily-fail{background:linear-gradient(180deg,#e97a7a,#c95555) !important}
-    .stats-png-canvas .rd-daily-lbl{color:#a8a08a !important}
-    .stats-png-canvas .rd-daily-val{color:#f0d89b !important}
-  `;
-
-  function pngOpts(scale){
-    return {
-      scale:scale||2,
-      backgroundColor:"#15241d",
-      onclone:function(cn,doc){
-        try{
-          const style=doc.createElement("style");
-          style.textContent=PNG_STYLE_OVERRIDE;
-          doc.head.appendChild(style);
-        }catch(e){}
+  function inlineHTML(sections, title, subtitle){
+    const CSS_INLINE=`
+      background:#15241d;padding:32px 40px 24px;border:2px solid #cda85a;border-radius:20px;
+      width:1100px;color:#f5ecd6;font-family:Arial,sans-serif;box-sizing:border-box;
+    `;
+    let html=`<div style="${CSS_INLINE}">`;
+    html+=`<div style="text-align:center;padding-bottom:16px;border-bottom:1px solid rgba(205,168,90,.35);margin-bottom:20px">
+      <div style="font-family:Georgia,serif;font-size:36px;font-weight:700;color:#f0d89b;line-height:1.1">${esc(title)}</div>
+      ${subtitle?`<div style="color:#c8bea4;font-size:13px;margin-top:8px">${esc(subtitle)}</div>`:""}
+    </div>`;
+    for(const s of sections){
+      if(s.title && !s.rows && !s.cards) html+=`<div style="color:#cda85a;font:600 12px Arial;letter-spacing:.2em;text-transform:uppercase;margin:16px 0 10px">${esc(s.title)}</div>`;
+      if(Array.isArray(s.cards)){
+        html+=`<div style="display:grid;grid-template-columns:repeat(${Math.min(s.cards.length,6)},1fr);gap:12px;margin-bottom:16px">`;
+        for(const c of s.cards){
+          const col=c[2]==="ok"?"#7dd97d":c[2]==="err"?"#e97a7a":c[2]==="pend"?"#e6b800":c[2]==="info"?"#5a8fcd":"#f0d89b";
+          html+=`<div style="background:#0f1e17;border:1px solid rgba(205,168,90,.35);border-radius:8px;padding:14px;text-align:center">
+            <div style="color:#a8a08a;font:600 10px Arial;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px">${esc(c[0])}</div>
+            <div style="color:${col};font-family:Georgia,serif;font-size:32px;font-weight:700;line-height:1">${esc(String(c[1]))}</div>
+          </div>`;
+        }
+        html+=`</div>`;
       }
-    };
+      if(Array.isArray(s.rows)){
+        if(s.title && (s.cards===undefined)) html+=`<div style="color:#cda85a;font:600 12px Arial;letter-spacing:.2em;text-transform:uppercase;margin:16px 0 10px">${esc(s.title)}</div>`;
+        html+=`<div style="background:#0f1e17;border:1px solid rgba(205,168,90,.25);border-radius:8px;padding:14px;margin-bottom:12px">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">`;
+        for(const r of s.rows){
+          html+=`<tr>
+            <td style="padding:6px 10px;color:#f5ecd6;border-bottom:1px solid rgba(205,168,90,.12)">${esc(r[0])}</td>
+            <td style="padding:6px 10px;text-align:right;color:#f0d89b;font-weight:600;border-bottom:1px solid rgba(205,168,90,.12);font-variant-numeric:tabular-nums">${esc(r[1])}</td>
+          </tr>`;
+        }
+        html+=`</table></div>`;
+      }
+      if(Array.isArray(s.bars)){
+        if(s.title) html+=`<div style="color:#cda85a;font:600 12px Arial;letter-spacing:.2em;text-transform:uppercase;margin:16px 0 10px">${esc(s.title)}</div>`;
+        html+=`<div style="background:#0f1e17;border:1px solid rgba(205,168,90,.25);border-radius:8px;padding:14px;margin-bottom:12px">`;
+        const max=Math.max(...s.bars.map(b=>b[1]),1);
+        for(const b of s.bars){
+          const w=Math.max(2,b[1]*100/max);
+          html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:13px">
+            <div style="min-width:180px;color:#f5ecd6">${esc(b[0])}</div>
+            <div style="flex:1;height:16px;background:#0a1410;border-radius:4px;overflow:hidden"><div style="height:100%;width:${w}%;background:linear-gradient(90deg,#cda85a,#f0d89b)"></div></div>
+            <div style="min-width:50px;text-align:right;color:#f0d89b;font-weight:600;font-size:12px">${b[1]}</div>
+          </div>`;
+        }
+        html+=`</div>`;
+      }
+    }
+    html+=`<div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(205,168,90,.3);text-align:center;color:#a8a08a;font-size:11px;letter-spacing:.1em">1-я МСБр · в/ч 12132 · ${nowStamp()} МСК</div>`;
+    html+=`</div>`;
+    return html;
   }
 
-  async function copyPNG(node,filename,scale){
-    if(!window.VSRF_PNG||!node) return {ok:false,error:"PNG модуль не готов"};
-    if(!navigator.clipboard||!window.ClipboardItem) return {ok:false,error:"буфер обмена недоступен в этом браузере"};
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c])}
+
+  async function renderPngFromSections(sections, title, subtitle, opts){
+    if(!window.html2canvas) return {ok:false,error:"html2canvas не подключён"};
+    opts=opts||{};
+    const wrap=document.createElement("div");
+    wrap.style.cssText="position:fixed;left:0;top:0;z-index:-1;opacity:0.01;pointer-events:none";
+    wrap.innerHTML=inlineHTML(sections, title, subtitle);
+    document.body.appendChild(wrap);
+    await new Promise(r=>setTimeout(r,60));
     try{
-      return await withVisibleNode(node, async(n)=>{
-        return await window.VSRF_PNG.copyToClipboard(n,pngOpts(scale));
+      const canvas=await window.html2canvas(wrap.firstElementChild,{
+        scale:opts.scale||2,
+        backgroundColor:"#15241d",
+        useCORS:true,
+        logging:false,
+        imageTimeout:15000,
+        ignoreElements:function(el){
+          if(el.tagName==="CANVAS"&&el.id==="bgCanvas") return true;
+          if(el.classList&&el.classList.contains("bg-noise")) return true;
+          return false;
+        }
       });
-    }catch(e){ return {ok:false,error:e.message||String(e)}; }
+      return {ok:true, canvas};
+    }catch(e){
+      return {ok:false, error:e.message||String(e)};
+    } finally {
+      document.body.removeChild(wrap);
+    }
   }
-  async function downloadPNG(node,filename,scale){
-    if(!window.VSRF_PNG||!node) return {ok:false,error:"PNG модуль не готов"};
-    try{
-      return await withVisibleNode(node, async(n)=>{
-        return await window.VSRF_PNG.download(n,filename||"stats.png",pngOpts(scale));
-      });
-    }catch(e){ return {ok:false,error:e.message||String(e)}; }
+
+  async function copyPNG(_node, filename, scale, sectionsAndTitle){
+    if(!navigator.clipboard||!window.ClipboardItem) return {ok:false,error:"буфер обмена недоступен в этом браузере"};
+    if(!sectionsAndTitle) return {ok:false,error:"нет данных для PNG (getSections вернул null)"};
+    const r=await renderPngFromSections(sectionsAndTitle.sections, sectionsAndTitle.title, sectionsAndTitle.subtitle, {scale});
+    if(!r.ok) return r;
+    return new Promise(res=>{
+      r.canvas.toBlob(async blob=>{
+        try{
+          await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
+          res({ok:true});
+        }catch(e){ res({ok:false,error:e.message}); }
+      },"image/png");
+    });
+  }
+  async function downloadPNG(_node, filename, scale, sectionsAndTitle){
+    if(!sectionsAndTitle) return {ok:false,error:"нет данных для PNG"};
+    const r=await renderPngFromSections(sectionsAndTitle.sections, sectionsAndTitle.title, sectionsAndTitle.subtitle, {scale});
+    if(!r.ok) return r;
+    return new Promise(res=>{
+      r.canvas.toBlob(blob=>{
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement("a");
+        a.href=url; a.download=filename||"stats.png";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+        res({ok:true});
+      },"image/png");
+    });
   }
 
   function bindCopyButtons(cfg){
@@ -183,16 +236,32 @@ window.VSRF_STATS=(function(){
       const r=await toClipboard(buildMarkdown(secs));
       say(r.ok?"✓ Скопировано в Markdown":"✗ Ошибка: "+(r.error||""),r.ok?"ok":"err");
     });
+    function pngData(){
+      if(cfg.getPngData) return cfg.getPngData();
+      const secs=cfg.getSections()||[];
+      const first=secs[0]||{};
+      const isHeaderOnly=first.title && !first.rows && !first.cards && !first.bars;
+      const title=first.title||"Статистика";
+      const subtitle=first.subtitle||"";
+      const rest=isHeaderOnly?secs.slice(1):secs;
+      const sections=rest.map(s=>{
+        if(s.rows && s.rows.length){
+          if(!s.title && s.rows.length<=8){
+            return { cards: s.rows.map(r=>[r[0], r[1], ""]) };
+          }
+        }
+        return s;
+      });
+      return { title, subtitle, sections };
+    }
     if(btnPng) btnPng.addEventListener("click",async()=>{
-      const node=cfg.getPngNode();
       say("⏳ Готовим PNG…","info");
-      const r=await copyPNG(node,cfg.pngFilename,cfg.pngScale);
+      const r=await copyPNG(null,cfg.pngFilename,cfg.pngScale,pngData());
       say(r.ok?"✓ PNG в буфере":"✗ "+(r.error||"ошибка"),r.ok?"ok":"err");
     });
     if(btnPngDl) btnPngDl.addEventListener("click",async()=>{
-      const node=cfg.getPngNode();
       say("⏳ Готовим PNG…","info");
-      const r=await downloadPNG(node,cfg.pngFilename,cfg.pngScale);
+      const r=await downloadPNG(null,cfg.pngFilename,cfg.pngScale,pngData());
       say(r.ok?"✓ Скачано":"✗ "+(r.error||"ошибка"),r.ok?"ok":"err");
     });
   }
