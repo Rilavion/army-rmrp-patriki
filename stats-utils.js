@@ -96,12 +96,57 @@ window.VSRF_STATS=(function(){
     }
   }
 
+  const PNG_STYLE_OVERRIDE=`
+    .stats-png-canvas,.stats-png-canvas *{color:#f5ecd6 !important;font-family:'Inter',Arial,sans-serif !important}
+    .stats-png-canvas{background:#15241d !important;border:2px solid #cda85a !important}
+    .stats-png-canvas .stats-png-title{color:#f0d89b !important;font-family:'Cormorant Garamond',Georgia,serif !important}
+    .stats-png-canvas .stats-png-sub,.stats-png-canvas .stats-png-foot{color:#c8bea4 !important}
+    .stats-png-canvas .stats-block-title{color:#cda85a !important}
+    .stats-png-canvas .stats-card{background:#0f1e17 !important;border:1px solid rgba(205,168,90,.35) !important}
+    .stats-png-canvas .stats-card-label{color:#a8a08a !important}
+    .stats-png-canvas .stats-card-value{color:#f0d89b !important;font-family:'Cormorant Garamond',Georgia,serif !important}
+    .stats-png-canvas .stats-card.ok .stats-card-value{color:#7dd97d !important}
+    .stats-png-canvas .stats-card.err .stats-card-value{color:#e97a7a !important}
+    .stats-png-canvas .stats-card.pend .stats-card-value{color:#e6b800 !important}
+    .stats-png-canvas .stats-card.info .stats-card-value{color:#5a8fcd !important}
+    .stats-png-canvas .stats-block{background:#0f1e17 !important;border:1px solid rgba(205,168,90,.25) !important}
+    .stats-png-canvas .stats-bar-label{color:#f5ecd6 !important}
+    .stats-png-canvas .stats-bar-val{color:#f0d89b !important}
+    .stats-png-canvas .stats-bar-track{background:#0a1410 !important}
+    .stats-png-canvas .stats-bar-fill{background:linear-gradient(90deg,#cda85a,#f0d89b) !important}
+    .stats-png-canvas .stats-bar-fill.ok{background:linear-gradient(90deg,#5aa653,#7dd97d) !important}
+    .stats-png-canvas .stats-bar-fill.err{background:linear-gradient(90deg,#c95555,#e97a7a) !important}
+    .stats-png-canvas .stats-bar-fill.pend{background:linear-gradient(90deg,#b89a30,#e6b800) !important}
+    .stats-png-canvas .stats-bar-fill.info{background:linear-gradient(90deg,#3a6a9a,#5a8fcd) !important}
+    .stats-png-canvas .stats-table th{background:rgba(205,168,90,.15) !important;color:#cda85a !important;border-bottom:1px solid rgba(205,168,90,.3) !important}
+    .stats-png-canvas .stats-table td{color:#f5ecd6 !important;border-bottom:1px solid rgba(205,168,90,.12) !important}
+    .stats-png-canvas .rd-daily-stack{background:#0a1410 !important}
+    .stats-png-canvas .rd-daily-success{background:linear-gradient(180deg,#7dd97d,#5aa653) !important}
+    .stats-png-canvas .rd-daily-fail{background:linear-gradient(180deg,#e97a7a,#c95555) !important}
+    .stats-png-canvas .rd-daily-lbl{color:#a8a08a !important}
+    .stats-png-canvas .rd-daily-val{color:#f0d89b !important}
+  `;
+
+  function pngOpts(scale){
+    return {
+      scale:scale||2,
+      backgroundColor:"#15241d",
+      onclone:function(cn,doc){
+        try{
+          const style=doc.createElement("style");
+          style.textContent=PNG_STYLE_OVERRIDE;
+          doc.head.appendChild(style);
+        }catch(e){}
+      }
+    };
+  }
+
   async function copyPNG(node,filename,scale){
     if(!window.VSRF_PNG||!node) return {ok:false,error:"PNG модуль не готов"};
     if(!navigator.clipboard||!window.ClipboardItem) return {ok:false,error:"буфер обмена недоступен в этом браузере"};
     try{
       return await withVisibleNode(node, async(n)=>{
-        return await window.VSRF_PNG.copyToClipboard(n,{scale:scale||2,backgroundColor:"#15241d"});
+        return await window.VSRF_PNG.copyToClipboard(n,pngOpts(scale));
       });
     }catch(e){ return {ok:false,error:e.message||String(e)}; }
   }
@@ -109,7 +154,7 @@ window.VSRF_STATS=(function(){
     if(!window.VSRF_PNG||!node) return {ok:false,error:"PNG модуль не готов"};
     try{
       return await withVisibleNode(node, async(n)=>{
-        return await window.VSRF_PNG.download(n,filename||"stats.png",{scale:scale||2,backgroundColor:"#15241d"});
+        return await window.VSRF_PNG.download(n,filename||"stats.png",pngOpts(scale));
       });
     }catch(e){ return {ok:false,error:e.message||String(e)}; }
   }

@@ -5699,3 +5699,33 @@ text.rd-donut-sub{font-family:'Inter',sans-serif;font-size:11px;fill:#a8a08a;let
 
 .nav a[data-page="requests-stats.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8zM3 21h18v2H3z"/></svg>')}
 .nav a[data-page="complaints-stats.html"]{--nav-icon:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cda85a"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM7 14h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zm-8-4h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 6h10v2H7V6z"/></svg>')}
+
+.stats-png-canvas,
+.stats-png-canvas *{color:#f5ecd6}
+.stats-png-canvas .stats-png-title{color:#f0d89b}
+.stats-png-canvas .stats-png-sub,
+.stats-png-canvas .stats-png-foot{color:#c8bea4}
+.stats-png-canvas .stats-block-title{color:#cda85a}
+.stats-png-canvas .stats-card{background:#0f1e17;border:1px solid rgba(205,168,90,.3)}
+.stats-png-canvas .stats-card-label{color:#a8a08a}
+.stats-png-canvas .stats-card-value{color:#f0d89b}
+.stats-png-canvas .stats-card.ok .stats-card-value{color:#7dd97d}
+.stats-png-canvas .stats-card.err .stats-card-value{color:#e97a7a}
+.stats-png-canvas .stats-card.pend .stats-card-value{color:#e6b800}
+.stats-png-canvas .stats-card.info .stats-card-value{color:#5a8fcd}
+.stats-png-canvas .stats-block{background:#0f1e17;border:1px solid rgba(205,168,90,.25)}
+.stats-png-canvas .stats-bar-label{color:#f5ecd6}
+.stats-png-canvas .stats-bar-val{color:#f0d89b}
+.stats-png-canvas .stats-bar-track{background:#0a1410}
+.stats-png-canvas .stats-bar-fill{background:linear-gradient(90deg,#cda85a,#f0d89b)}
+.stats-png-canvas .stats-bar-fill.ok{background:linear-gradient(90deg,#5aa653,#7dd97d)}
+.stats-png-canvas .stats-bar-fill.err{background:linear-gradient(90deg,#c95555,#e97a7a)}
+.stats-png-canvas .stats-bar-fill.pend{background:linear-gradient(90deg,#b89a30,#e6b800)}
+.stats-png-canvas .stats-bar-fill.info{background:linear-gradient(90deg,#3a6a9a,#5a8fcd)}
+.stats-png-canvas .stats-table th{background:rgba(205,168,90,.15);color:#cda85a;border-bottom:1px solid rgba(205,168,90,.3)}
+.stats-png-canvas .stats-table td{color:#f5ecd6;border-bottom:1px solid rgba(205,168,90,.12)}
+.stats-png-canvas .rd-daily-stack{background:#0a1410}
+.stats-png-canvas .rd-daily-success{background:linear-gradient(180deg,#7dd97d,#5aa653)}
+.stats-png-canvas .rd-daily-fail{background:linear-gradient(180deg,#e97a7a,#c95555)}
+.stats-png-canvas .rd-daily-lbl{color:#a8a08a}
+.stats-png-canvas .rd-daily-val{color:#f0d89b}
