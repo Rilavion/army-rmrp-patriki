@@ -68,18 +68,21 @@ window.VSRF_SUPPLY=(function(){
     const c=await client();if(!c) return {ok:false,error:"no client"};
     const {data:old}=await c.from("supply_requests").select("*").eq("id",oldId).maybeSingle();
     if(!old) return {ok:false,error:"старая заявка не найдена"};
-    const fio=editedFio!=null?String(editedFio).trim():old.fio;
-    const st=editedStatic!=null?String(editedStatic).trim():old.static_id;
-    const dc=editedDiscord!=null?(String(editedDiscord).trim()||null):old.discord;
-    const vals=editedValues!=null?editedValues:(old.values||{});
-    const {data,error}=await c.rpc("submit_supply_request",{
-      p_fio:fio,p_static:st,p_discord:dc,p_values:vals
-    });
+    const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
+    const editorName=(function(){try{return localStorage.getItem("vsrf-my-display-name")||(s&&s.user&&s.user.email)||"admin"}catch(e){return "admin"}})();
+    const patch={
+      dispute_resolution:"Заменено · "+editorName+" · "+new Date().toISOString(),
+      replaced_at:new Date().toISOString(),
+      replaced_by:s&&s.user?s.user.id:null,
+      replaced_by_name:editorName
+    };
+    if(editedFio!=null) patch.fio=String(editedFio).trim();
+    if(editedStatic!=null) patch.static_id=String(editedStatic).trim();
+    if(editedDiscord!=null) patch.discord=String(editedDiscord).trim()||null;
+    if(editedValues!=null) patch.values=editedValues;
+    const {error}=await c.from("supply_requests").update(patch).eq("id",oldId);
     if(error) return {ok:false,error:error.message};
-    await c.from("supply_requests").update({
-      dispute_resolution:"Заменено новой заявкой #"+data
-    }).eq("id",oldId);
-    return {ok:true,new_id:data};
+    return {ok:true,new_id:oldId,replaced_in_place:true};
   }
 
   async function deleteAll(fromISO,toISO){
