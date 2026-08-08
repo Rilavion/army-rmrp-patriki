@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=149">
+<link rel="stylesheet" href="style.css?v=150">
 <style id="vsrf-admin-guard">
 [data-admin]{display:none !important}
 [data-staff]{display:none !important}
@@ -59,6 +59,8 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       <a href="raids.html" data-page="raids.html" data-transition data-perm="raids:view">Статистика налётов</a>
       <a href="report.html" data-page="report.html" data-transition>Еженедельный отчёт</a>
       <a href="report-settings.html" data-page="report-settings.html" data-transition data-perm="report:settings">Настройки отчётов</a>
+      <a href="vp-request.html" data-page="vp-request.html" data-transition data-perm="vp_request:submit">Запрос на наказание</a>
+      <a href="vp-request-settings.html" data-page="vp-request-settings.html" data-transition data-perm="vp_request:settings">Настройки запросов ВП</a>
       <a href="lk.html" data-page="lk.html" data-transition>Личный кабинет</a>
     </nav>
     <div class="header-actions">
@@ -105,6 +107,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
       <div id="crRoot" style="display:none">
         <div class="vp-arc-tabs" style="margin-bottom:14px">
           <button class="vp-arc-tab active" data-tab="pending">📥 Ожидают вердикта <span class="cr-count" id="crCntPending">0</span></button>
+          <button class="vp-arc-tab" data-tab="vpreq">⚖ Запросы от ВП <span class="cr-count" id="crCntVpReq">0</span></button>
           <button class="vp-arc-tab" data-tab="decided">✓ Рассмотренные <span class="cr-count" id="crCntDecided">0</span></button>
           <button class="vp-arc-tab" data-tab="registry">📋 Реестр нарушений <span class="cr-count" id="crCntActive">0</span></button>
         </div>
@@ -112,6 +115,11 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
         <div class="cr-tab-body" id="crTabPending">
           <div class="apps-empty" id="crPendEmpty" style="display:none"><h3>Нет ожидающих жалоб</h3><p>Все жалобы рассмотрены.</p></div>
           <div id="crPendList" class="cr-list"></div>
+        </div>
+
+        <div class="cr-tab-body" id="crTabVpreq" style="display:none">
+          <div class="apps-empty" id="crVpReqEmpty" style="display:none"><h3>Нет запросов от ВП</h3><p>Запросы на выдачу наказания появятся здесь.</p></div>
+          <div id="crVpReqList" class="cr-list"></div>
         </div>
 
         <div class="cr-tab-body" id="crTabDecided" style="display:none">
@@ -210,6 +218,20 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
+<div class="modal-back" id="crVpReqModal">
+  <div class="modal modal-xl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <div id="crVpReqBody"></div>
+  </div>
+</div>
+
+<div class="modal-back" id="crVpEditModal">
+  <div class="modal modal-xl">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <div id="crVpEditBody"></div>
+  </div>
+</div>
+
 <div class="modal-back" id="crAddViolModal">
   <div class="modal modal-xl">
     <button class="modal-close" aria-label="Закрыть">✕</button>
@@ -281,7 +303,7 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
 
 <script src="supabase-loader.js?v=145"></script>
 <script src="config.js?v=145"></script>
-<script src="main.js?v=149"></script>
+<script src="main.js?v=150"></script>
 <script src="holiday-engine.js?v=145"></script>
 <script src="settings-panel.js?v=145"></script>
 <script src="sound-engine.js?v=145"></script>
@@ -343,7 +365,7 @@ const FIELD_LABELS={
 };
 function labelOf(key){return FIELD_LABELS[key]||key}
 
-let TAB="pending", ALL_COMP=[], ALL_REG=[], CUR_COMP=null, CUR_ADD_KIND=null, CUR_VERDICT=null;
+let TAB="pending", ALL_COMP=[], ALL_REG=[], ALL_VPREQ=[], CUR_COMP=null, CUR_VPREQ=null, CUR_ADD_KIND=null, CUR_VERDICT=null;
 
 async function boot(){
   const canView=window.VSRF_ROLES&&(window.VSRF_ROLES.can("complaints","view")||window.VSRF_ROLES.can("complaints","review"));
@@ -357,13 +379,17 @@ async function loadAll(){
   try{
     ALL_COMP=await VSRF_COMPLAINTS.fetchAll();
     ALL_REG=await VSRF_REGISTRY.fetchAll();
+    const c=window.VSRF_AUTH.state.client;
+    const {data:vpq}=await c.from("violations_registry").select("*").eq("status","pending").order("created_at",{ascending:false});
+    ALL_VPREQ=vpq||[];
   }catch(e){console.warn("loadAll:",e.message)}
   const pend=ALL_COMP.filter(x=>x.status==="pending");
   const dec=ALL_COMP.filter(x=>x.status==="decided");
-  const activeReg=ALL_REG.filter(x=>!x.removed_at);
+  const activeReg=ALL_REG.filter(x=>x.status!=="removed"&&!x.removed_at&&x.status!=="pending");
   $("crCntPending").textContent=pend.length;
   $("crCntDecided").textContent=dec.length;
   $("crCntActive").textContent=activeReg.length;
+  $("crCntVpReq").textContent=ALL_VPREQ.length;
   renderTab();
 }
 
@@ -404,6 +430,144 @@ function renderTab(){
   if(TAB==="pending") renderComplaintsList(ALL_COMP.filter(x=>x.status==="pending"),$("crPendList"),$("crPendEmpty"));
   else if(TAB==="decided") renderComplaintsList(ALL_COMP.filter(x=>x.status==="decided"),$("crDecList"),$("crDecEmpty"));
   else if(TAB==="registry") renderRegistry();
+  else if(TAB==="vpreq") renderVpRequests();
+}
+
+const KIND_L={warn:"Предупреждение",reproach:"Выговор",talk:"Беседа с ВП",confinement:"Дисц. заключение",uval:"Увал"};
+const KIND_I={warn:"⚠",reproach:"‼",talk:"💬",confinement:"🔒",uval:"⛔"};
+
+function renderVpRequests(){
+  const box=$("crVpReqList"), empty=$("crVpReqEmpty");
+  if(!ALL_VPREQ.length){empty.style.display="";box.innerHTML="";return}
+  empty.style.display="none";
+  box.innerHTML=ALL_VPREQ.map(v=>{
+    const ic=KIND_I[v.kind]||"•", lbl=KIND_L[v.kind]||v.kind;
+    const conf=v.kind==="confinement"&&v.confinement_minutes?` · ${v.confinement_minutes} мин`:"";
+    return `<div class="cr-item" data-vpq="${v.id}">
+      <div class="cr-item-head">
+        <span class="cr-verd-badge cr-pending">⏳ Ожидает</span>
+        <span class="cr-item-title">${ic} ${esc(lbl)}${esc(conf)}</span>
+        <span class="cr-item-date">${ruDT(v.requested_at||v.created_at)}</span>
+      </div>
+      <div class="cr-item-sub">Запросил: <b>${esc(v.requested_by_name||"—")}</b>${v.requested_by_static?" · <code>"+esc(v.requested_by_static)+"</code>":""}${v.requested_by_position?" · "+esc(v.requested_by_position):""}</div>
+      <div class="cr-item-target">🎯 <b>${esc(v.target_fio||"—")}</b> ${v.target_static?`<span class="cr-static">${esc(v.target_static)}</span>`:""}</div>
+      <div class="cr-item-desc">${esc(String(v.reason||"").slice(0,300))}</div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("[data-vpq]").forEach(el=>el.addEventListener("click",()=>openVpReqModal(el.dataset.vpq)));
+}
+
+function openVpReqModal(id){
+  CUR_VPREQ=ALL_VPREQ.find(x=>String(x.id)===String(id));
+  if(!CUR_VPREQ) return;
+  const v=CUR_VPREQ;
+  const canReview=window.VSRF_ROLES&&(window.VSRF_ROLES.can("vp_request","review")||window.VSRF_ROLES.isAdmin());
+  const canEdit=canReview;
+  const ic=KIND_I[v.kind]||"•", lbl=KIND_L[v.kind]||v.kind;
+  const extra=v.request_extra||{};
+  $("crVpReqBody").innerHTML=`
+    <h3>${ic} Запрос: ${esc(lbl)}</h3>
+    <div class="modal-sub">Подан: ${ruDT(v.requested_at||v.created_at)}</div>
+    <div class="cr-tb-box" style="margin-top:14px">
+      <div class="cr-tb-title">🎯 Нарушитель</div>
+      <div class="cr-tb-body"><b>${esc(v.target_fio||"—")}</b>${v.target_static?" · <code>"+esc(v.target_static)+"</code>":""}${v.target_position?" · "+esc(v.target_position):""}</div>
+    </div>
+    <div class="cr-tb-box" style="margin-top:10px">
+      <div class="cr-tb-title">👮 Запросил</div>
+      <div class="cr-tb-body"><b>${esc(v.requested_by_name||"—")}</b>${v.requested_by_static?" · <code>"+esc(v.requested_by_static)+"</code>":""}${v.requested_by_position?" · "+esc(v.requested_by_position):""}</div>
+    </div>
+    <div class="cr-tb-box" style="margin-top:10px">
+      <div class="cr-tb-title">📝 Описание</div>
+      <div class="cr-tb-body">${esc(v.reason||"—").replace(/\n/g,"<br>")}</div>
+    </div>
+    ${v.kind==="confinement"&&v.confinement_minutes?`<div class="cr-tb-box" style="margin-top:10px"><div class="cr-tb-title">⏱ Срок</div><div class="cr-tb-body">${v.confinement_minutes} мин</div></div>`:""}
+    ${extra.article?`<div class="cr-tb-box" style="margin-top:10px"><div class="cr-tb-title">📖 Статья</div><div class="cr-tb-body">${esc(extra.article)}</div></div>`:""}
+    ${v.evidence_url?`<div class="cr-tb-box" style="margin-top:10px"><div class="cr-tb-title">🔗 Доказательства</div><div class="cr-tb-body"><a href="${esc(v.evidence_url)}" target="_blank" style="color:var(--gold)">Открыть →</a></div></div>`:""}
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      ${canEdit?`<button class="btn btn-ghost btn-sm" id="crVpqEditBtn">✎ Редактировать</button>`:""}
+      ${canReview?`<button class="btn btn-gold btn-sm" id="crVpqApprove">✅ Одобрить (выдать наказание)</button>`:""}
+      ${canReview?`<button class="btn btn-ghost btn-sm" id="crVpqRefuse" style="color:#e97a7a">❌ Отказать</button>`:""}
+    </div>
+  `;
+  document.getElementById("crVpReqModal").classList.add("open");
+  const eb=document.getElementById("crVpqEditBtn"); if(eb) eb.addEventListener("click",()=>openVpEdit(v));
+  const ab=document.getElementById("crVpqApprove"); if(ab) ab.addEventListener("click",()=>reviewVpq(true));
+  const rb=document.getElementById("crVpqRefuse"); if(rb) rb.addEventListener("click",()=>reviewVpq(false));
+}
+
+async function reviewVpq(approve){
+  const v=CUR_VPREQ; if(!v) return;
+  const comment=prompt(approve?"Комментарий (опц.):":"Причина отказа:");
+  if(!approve && (!comment||!comment.trim())){ alert("Причина отказа обязательна"); return; }
+  const c=window.VSRF_AUTH.state.client;
+  const u=window.VSRF_AUTH.state.user;
+  const nm=(localStorage.getItem("vsrf-my-display-name")||u.email);
+  try{
+    if(approve){
+      const settings=await VSRF_REGISTRY.fetchSettings?VSRF_REGISTRY.fetchSettings():null;
+      let expiresAt=null;
+      try{
+        const {data:st}=await c.from("violations_settings").select("*").eq("id",1).maybeSingle();
+        if(st){
+          const days={warn:st.expire_warn_days,reproach:st.expire_reproach_days,talk:st.expire_talk_days}[v.kind];
+          if(days) expiresAt=new Date(Date.now()+days*86400000).toISOString();
+          if(v.kind==="confinement"&&v.confinement_minutes) expiresAt=new Date(Date.now()+v.confinement_minutes*60000).toISOString();
+        }
+      }catch(e){}
+      const {error}=await c.from("violations_registry").update({
+        status:"active", reviewed_by_uid:u.id, reviewed_by_name:nm, reviewed_at:new Date().toISOString(),
+        reviewer_comment:comment||null, expires_at:expiresAt, issued_by_name:v.requested_by_name
+      }).eq("id",v.id);
+      if(error) throw error;
+      await c.from("violations_history").insert({violation_id:v.id, action:"approve", changed_by_uid:u.id, changed_by_name:nm, comment:comment||null, after_data:{status:"active"}});
+    } else {
+      const {error}=await c.from("violations_registry").update({
+        status:"refused", reviewed_by_uid:u.id, reviewed_by_name:nm, reviewed_at:new Date().toISOString(),
+        reviewer_comment:comment, removed_at:new Date().toISOString(), removed_by_name:nm, removed_reason:"Отказ по запросу: "+comment
+      }).eq("id",v.id);
+      if(error) throw error;
+      await c.from("violations_history").insert({violation_id:v.id, action:"refuse", changed_by_uid:u.id, changed_by_name:nm, comment:comment, after_data:{status:"refused"}});
+    }
+    document.getElementById("crVpReqModal").classList.remove("open");
+    await loadAll();
+  }catch(e){ alert("Ошибка: "+e.message); }
+}
+
+function openVpEdit(v){
+  const html=`<h3>✎ Редактирование запроса</h3>
+    <div class="form-group"><label>ФИО нарушителя</label><input class="msg-input" id="veTFio" value="${esc(v.target_fio||"")}"></div>
+    <div class="form-group"><label>Статик нарушителя</label><input class="msg-input" id="veTStatic" value="${esc(v.target_static||"")}"></div>
+    <div class="form-group"><label>Должность нарушителя</label><input class="msg-input" id="veTPos" value="${esc(v.target_position||"")}"></div>
+    <div class="form-group"><label>Вид наказания</label><select class="msg-input" id="veKind">${Object.entries(KIND_L).map(([k,l])=>`<option value="${k}" ${k===v.kind?"selected":""}>${KIND_I[k]} ${esc(l)}</option>`).join("")}</select></div>
+    <div class="form-group"><label>Срок (мин, для Дисц.закл.)</label><input type="number" class="msg-input" id="veConf" value="${v.confinement_minutes||0}"></div>
+    <div class="form-group"><label>Описание</label><textarea class="msg-input" id="veReason" rows="4">${esc(v.reason||"")}</textarea></div>
+    <div class="form-group"><label>Ссылка на доказательства</label><input class="msg-input" id="veEv" value="${esc(v.evidence_url||"")}"></div>
+    <div class="form-group"><label>Комментарий к правке (лог)</label><input class="msg-input" id="veLog" placeholder="Что и почему поменяли"></div>
+    <div style="display:flex;gap:10px;margin-top:12px"><button class="btn btn-gold" id="veSave">💾 Сохранить</button><button class="btn btn-ghost btn-sm" id="veCancel">Отмена</button></div>`;
+  $("crVpEditBody").innerHTML=html;
+  document.getElementById("crVpReqModal").classList.remove("open");
+  document.getElementById("crVpEditModal").classList.add("open");
+  document.getElementById("veCancel").addEventListener("click",()=>document.getElementById("crVpEditModal").classList.remove("open"));
+  document.getElementById("veSave").addEventListener("click",async()=>{
+    const c=window.VSRF_AUTH.state.client;
+    const u=window.VSRF_AUTH.state.user;
+    const nm=(localStorage.getItem("vsrf-my-display-name")||u.email);
+    const before={target_fio:v.target_fio,target_static:v.target_static,kind:v.kind,reason:v.reason,evidence_url:v.evidence_url,confinement_minutes:v.confinement_minutes,target_position:v.target_position};
+    const after={
+      target_fio:document.getElementById("veTFio").value.trim(),
+      target_static:document.getElementById("veTStatic").value.trim(),
+      target_position:document.getElementById("veTPos").value.trim()||null,
+      kind:document.getElementById("veKind").value,
+      confinement_minutes:parseInt(document.getElementById("veConf").value)||null,
+      reason:document.getElementById("veReason").value.trim(),
+      evidence_url:document.getElementById("veEv").value.trim()||null
+    };
+    const {error}=await c.from("violations_registry").update(after).eq("id",v.id);
+    if(error){alert("Ошибка: "+error.message);return}
+    await c.from("violations_history").insert({violation_id:v.id, action:"edit", changed_by_uid:u.id, changed_by_name:nm, comment:document.getElementById("veLog").value.trim()||null, before_data:before, after_data:after});
+    document.getElementById("crVpEditModal").classList.remove("open");
+    await loadAll();
+  });
 }
 
 function renderComplaintsList(list,box,emptyEl){
@@ -625,7 +789,7 @@ $("crVerdSave").addEventListener("click",async()=>{
 function renderRegistry(){
   const showRem=$("crShowRemoved").checked;
   const q=$("crRegSearch").value.trim().toLowerCase();
-  let list=ALL_REG.slice();
+  let list=ALL_REG.slice().filter(x=>x.status!=="pending"&&x.status!=="refused");
   if(!showRem) list=list.filter(x=>!x.removed_at);
   if(q) list=list.filter(x=>(x.target_fio||"").toLowerCase().includes(q)||(x.target_static||"").toLowerCase().includes(q));
   const box=$("crRegList");
@@ -863,6 +1027,6 @@ setTimeout(()=>{
   }
 },1500);
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2793afceeeff116',t:'MTc4NjEzNjYzMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a28228cccac8f3a6',t:'MTc4NjIzMDI1OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
 </html>
