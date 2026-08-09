@@ -52,17 +52,40 @@ window.VSRF_DSAC=(function(){
   }
 
   function ensureDropdown(input){
-    const parent=input.parentElement;
-    if(!parent) return null;
-    if(getComputedStyle(parent).position==="static") parent.style.position="relative";
-    let dd=parent.querySelector(".vsrf-dsac-dd");
+    let dd=input._vsrfDsacDd;
     if(!dd){
       dd=document.createElement("div");
       dd.className="vsrf-dsac-dd cr-dropdown";
+      dd.style.position="fixed";
       dd.style.display="none";
-      parent.appendChild(dd);
+      dd.style.left="0";
+      dd.style.right="auto";
+      dd.style.top="0";
+      dd.style.zIndex="99999";
+      document.body.appendChild(dd);
+      input._vsrfDsacDd=dd;
     }
     return dd;
+  }
+
+  function positionDropdown(input, dd){
+    if(!input || !dd) return;
+    const r=input.getBoundingClientRect();
+    const vw=window.innerWidth || document.documentElement.clientWidth;
+    const vh=window.innerHeight || document.documentElement.clientHeight;
+    let width=Math.max(r.width, 260);
+    if(width > vw - 20) width = vw - 20;
+    let left=r.left;
+    if(left + width > vw - 8) left = Math.max(8, vw - width - 8);
+    if(left < 8) left = 8;
+    let top=r.bottom + 4;
+    dd.style.width=width+"px";
+    dd.style.left=left+"px";
+    const ddH=dd.offsetHeight || 280;
+    if(top + ddH > vh - 8 && r.top - 4 - ddH > 8){
+      top = r.top - 4 - ddH;
+    }
+    dd.style.top=top+"px";
   }
 
   function bind(inputSel, targets){
@@ -92,7 +115,7 @@ window.VSRF_DSAC=(function(){
       }).slice(0,10);
       if(!matches.length){
         dd.innerHTML='<div class="cr-dd-empty">Ничего не найдено</div>';
-        dd.style.display=""; return;
+        dd.style.display=""; positionDropdown(input,dd); return;
       }
       dd.innerHTML=matches.map(m=>{
         const posPart=m.position?`<span class="cr-dd-pos">${esc(m.position)}</span>`:"";
@@ -103,6 +126,7 @@ window.VSRF_DSAC=(function(){
         </div>`;
       }).join("");
       dd.style.display="";
+      positionDropdown(input,dd);
       dd.querySelectorAll(".cr-dd-item").forEach(el=>el.addEventListener("mousedown",e=>{
         e.preventDefault();
         input.value=el.dataset.fio;
@@ -121,6 +145,9 @@ window.VSRF_DSAC=(function(){
     input.addEventListener("focus",e=>{ if(e.target.value.trim().length>=2) render(e.target.value); });
     input.addEventListener("blur",()=>setTimeout(()=>dd.style.display="none",200));
     input.addEventListener("keydown",e=>{ if(e.key==="Escape") dd.style.display="none"; });
+    const reposition=()=>{ if(dd.style.display!=="none") positionDropdown(input,dd); };
+    window.addEventListener("scroll",reposition,true);
+    window.addEventListener("resize",reposition);
     load();
   }
 
@@ -134,28 +161,35 @@ window.VSRF_DSAC=(function(){
     });
 
     const rules=[
-      { fioSel:'input[name="submitter_fio"]',
-        stat:['[name="submitter_static"]'],
-        did:['[name="submitter_discord_id"]','[name="submitter_discord"]'],
-        pos:['[name="submitter_position"]'] },
-      { fioSel:'input[name="target_fio"]',
-        stat:['[name="target_static"]'],
-        did:['[name="target_discord_id"]','[name="target_discord"]'],
-        pos:['[name="target_position"]'] }
+      { fioSel:'input[name="submitter_fio"], input#vpqFio, input#repFio',
+        stat:['[name="submitter_static"]','#vpqStatic','#repStatic'],
+        did:['[name="submitter_discord_id"]','[name="submitter_discord"]','#vpqDid','#vpqF_submitter_discord'],
+        pos:['[name="submitter_position"]','#vpqPos','#repPos'] },
+      { fioSel:'input[name="target_fio"], input#vpqTFio',
+        stat:['[name="target_static"]','#vpqTStatic'],
+        did:['[name="target_discord_id"]','[name="target_discord"]','#vpqTDid','#vpqF_target_discord'],
+        pos:['[name="target_position"]','#vpqF_target_position'] }
     ];
-    function firstMatch(root,list){
+    function firstMatch(list, forms){
       if(!list) return null;
-      for(const s of list){ const el=root.querySelector(s); if(el) return el; }
+      for(const s of list){
+        for(const root of forms){
+          try{ const el=root.querySelector(s); if(el) return el; }catch(e){}
+        }
+      }
       return null;
     }
     for(const r of rules){
-      document.querySelectorAll(r.fioSel).forEach(inp=>{
+      let fios;
+      try{ fios=document.querySelectorAll(r.fioSel); }catch(e){ continue; }
+      fios.forEach(inp=>{
         if(inp.dataset.dsacBound==="1") return;
-        const form=inp.closest("form")||document;
+        const form=inp.closest("form");
+        const scopes=form?[form,document]:[document];
         const targets={
-          stat: firstMatch(form,r.stat),
-          did:  firstMatch(form,r.did),
-          pos:  firstMatch(form,r.pos)
+          stat: firstMatch(r.stat, scopes),
+          did:  firstMatch(r.did, scopes),
+          pos:  firstMatch(r.pos, scopes)
         };
         bind(inp,targets);
       });
