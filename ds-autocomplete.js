@@ -98,7 +98,20 @@ window.VSRF_DSAC=(function(){
 
     function resolveT(sel){
       if(!sel) return null;
-      if(typeof sel==="string") return document.querySelector(sel);
+      if(typeof sel==="string"){
+        const form=input.closest("form");
+        if(form){ const el=form.querySelector(sel); if(el) return el; }
+        return document.querySelector(sel);
+      }
+      if(Array.isArray(sel)){
+        const form=input.closest("form");
+        for(const s of sel){
+          if(form){ const el=form.querySelector(s); if(el) return el; }
+          const el2=document.querySelector(s);
+          if(el2) return el2;
+        }
+        return null;
+      }
       return sel;
     }
 
@@ -129,9 +142,8 @@ window.VSRF_DSAC=(function(){
       positionDropdown(input,dd);
       dd.querySelectorAll(".cr-dd-item").forEach(el=>el.addEventListener("mousedown",e=>{
         e.preventDefault();
+        input._vsrfDsacSuppress=true;
         input.value=el.dataset.fio;
-        input.dispatchEvent(new Event("input",{bubbles:true}));
-        input.dispatchEvent(new Event("change",{bubbles:true}));
         const sT=resolveT(targets.stat);
         if(sT && el.dataset.static){ sT.value=formatStatic(el.dataset.static); sT.dispatchEvent(new Event("input",{bubbles:true})); sT.dispatchEvent(new Event("change",{bubbles:true})); }
         const dT=resolveT(targets.did);
@@ -139,10 +151,13 @@ window.VSRF_DSAC=(function(){
         const pT=resolveT(targets.pos);
         if(pT && el.dataset.pos && !pT.value){ pT.value=el.dataset.pos; pT.dispatchEvent(new Event("input",{bubbles:true})); pT.dispatchEvent(new Event("change",{bubbles:true})); }
         dd.style.display="none";
+        try{ input.blur(); }catch(err){}
+        input.dispatchEvent(new Event("change",{bubbles:true}));
+        setTimeout(()=>{ input._vsrfDsacSuppress=false; },300);
       }));
     }
-    input.addEventListener("input",e=>render(e.target.value));
-    input.addEventListener("focus",e=>{ if(e.target.value.trim().length>=2) render(e.target.value); });
+    input.addEventListener("input",e=>{ if(input._vsrfDsacSuppress) return; render(e.target.value); });
+    input.addEventListener("focus",e=>{ if(input._vsrfDsacSuppress) return; if(e.target.value.trim().length>=2) render(e.target.value); });
     input.addEventListener("blur",()=>setTimeout(()=>dd.style.display="none",200));
     input.addEventListener("keydown",e=>{ if(e.key==="Escape") dd.style.display="none"; });
     const reposition=()=>{ if(dd.style.display!=="none") positionDropdown(input,dd); };
@@ -170,28 +185,12 @@ window.VSRF_DSAC=(function(){
         did:['[name="target_discord_id"]','[name="target_discord"]','#vpqTDid','#vpqF_target_discord'],
         pos:['[name="target_position"]','#vpqF_target_position'] }
     ];
-    function firstMatch(list, forms){
-      if(!list) return null;
-      for(const s of list){
-        for(const root of forms){
-          try{ const el=root.querySelector(s); if(el) return el; }catch(e){}
-        }
-      }
-      return null;
-    }
     for(const r of rules){
       let fios;
       try{ fios=document.querySelectorAll(r.fioSel); }catch(e){ continue; }
       fios.forEach(inp=>{
         if(inp.dataset.dsacBound==="1") return;
-        const form=inp.closest("form");
-        const scopes=form?[form,document]:[document];
-        const targets={
-          stat: firstMatch(r.stat, scopes),
-          did:  firstMatch(r.did, scopes),
-          pos:  firstMatch(r.pos, scopes)
-        };
-        bind(inp,targets);
+        bind(inp,{ stat:r.stat, did:r.did, pos:r.pos });
       });
     }
   }
