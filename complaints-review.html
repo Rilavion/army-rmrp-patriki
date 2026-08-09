@@ -489,7 +489,7 @@ function openVpReqModal(id){
       ${canReview?`<button class="btn btn-ghost btn-sm" id="crVpqRefuse" style="color:#e97a7a">❌ Отказать</button>`:""}
     </div>
   `;
-  document.getElementById("crVpReqModal").classList.add("open");
+  document.getElementById("crVpReqModal").classList.add("active");
   const eb=document.getElementById("crVpqEditBtn"); if(eb) eb.addEventListener("click",()=>openVpEdit(v));
   const ab=document.getElementById("crVpqApprove"); if(ab) ab.addEventListener("click",()=>reviewVpq(true));
   const rb=document.getElementById("crVpqRefuse"); if(rb) rb.addEventListener("click",()=>reviewVpq(false));
@@ -528,7 +528,7 @@ async function reviewVpq(approve){
       if(error) throw error;
       await c.from("violations_history").insert({violation_id:v.id, action:"refuse", changed_by_uid:u.id, changed_by_name:nm, comment:comment, after_data:{status:"refused"}});
     }
-    document.getElementById("crVpReqModal").classList.remove("open");
+    document.getElementById("crVpReqModal").classList.remove("active");
     await loadAll();
   }catch(e){ alert("Ошибка: "+e.message); }
 }
@@ -545,9 +545,9 @@ function openVpEdit(v){
     <div class="form-group"><label>Комментарий к правке (лог)</label><input class="msg-input" id="veLog" placeholder="Что и почему поменяли"></div>
     <div style="display:flex;gap:10px;margin-top:12px"><button class="btn btn-gold" id="veSave">💾 Сохранить</button><button class="btn btn-ghost btn-sm" id="veCancel">Отмена</button></div>`;
   $("crVpEditBody").innerHTML=html;
-  document.getElementById("crVpReqModal").classList.remove("open");
-  document.getElementById("crVpEditModal").classList.add("open");
-  document.getElementById("veCancel").addEventListener("click",()=>document.getElementById("crVpEditModal").classList.remove("open"));
+  document.getElementById("crVpReqModal").classList.remove("active");
+  document.getElementById("crVpEditModal").classList.add("active");
+  document.getElementById("veCancel").addEventListener("click",()=>document.getElementById("crVpEditModal").classList.remove("active"));
   document.getElementById("veSave").addEventListener("click",async()=>{
     const c=window.VSRF_AUTH.state.client;
     const u=window.VSRF_AUTH.state.user;
@@ -565,7 +565,7 @@ function openVpEdit(v){
     const {error}=await c.from("violations_registry").update(after).eq("id",v.id);
     if(error){alert("Ошибка: "+error.message);return}
     await c.from("violations_history").insert({violation_id:v.id, action:"edit", changed_by_uid:u.id, changed_by_name:nm, comment:document.getElementById("veLog").value.trim()||null, before_data:before, after_data:after});
-    document.getElementById("crVpEditModal").classList.remove("open");
+    document.getElementById("crVpEditModal").classList.remove("active");
     await loadAll();
   });
 }
@@ -995,6 +995,13 @@ $("crEditSave").addEventListener("click",async()=>{
   },700);
 });
 
+["crVpReqModal","crVpEditModal"].forEach(id=>{
+  const m=document.getElementById(id); if(!m) return;
+  const close=m.querySelector(".modal-close");
+  if(close) close.addEventListener("click",()=>m.classList.remove("active"));
+  m.addEventListener("click",e=>{ if(e.target===m) m.classList.remove("active"); });
+});
+
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,700);
 
@@ -1027,6 +1034,5 @@ setTimeout(()=>{
   }
 },1500);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a28228cccac8f3a6',t:'MTc4NjIzMDI1OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a282946a88efec61',t:'MTc4NjIzNDY2Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
