@@ -181,10 +181,21 @@ window.VSRF_VP=(function(){
 
   function calcSnapshotStats(snapshot){
     const KEYS=["medbook","narko","driver","passport","personal_file","weapon_license","attestation"];
+    function normalize(m){
+      const hasNo=KEYS.some(k=>m[k]==="no");
+      const hasProof=!!(m.evidence_url && String(m.evidence_url).trim());
+      if(hasNo && !hasProof){
+        const out=Object.assign({},m);
+        for(const k of KEYS){ if(out[k]==="no") out[k]=null; }
+        return out;
+      }
+      return m;
+    }
     const totals={};for(const k of KEYS) totals[k]={yes:0,no:0,absent:0,none:0};
     let checked=0,partial=0,unchecked=0,total=0;
     for(const g of snapshot.groups||[]){
-      for(const m of (g.list||[])){
+      for(const raw of (g.list||[])){
+        const m=normalize(raw);
         total++;
         let set=0;
         for(const k of KEYS){
