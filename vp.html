@@ -151,7 +151,8 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
           </button>
           <button class="btn btn-ghost btn-sm" id="vpArchiveBtn" title="Архив проверок и статистика">📊 Архив</button>
           <button class="btn btn-gold btn-sm" id="vpSaveArchiveBtn" title="Сохранить текущие проверки в архив">💾 В архив</button>
-          <button class="btn btn-gold btn-sm" id="vpSettingsBtn" data-perm="vp:settings" title="Настройка ролей и отделов">⚙ Настройки</button>
+          <button class="btn btn-gold btn-sm" id="vpAddDeptBtn" data-perm="vp:settings" title="Добавить отдел из роли Discord">＋ Отдел</button>
+          <button class="btn btn-ghost btn-sm" id="vpSettingsBtn" data-perm="vp:settings" title="Управление отделами и ролями">⚙ Роли</button>
         </div>
       </div>
 
@@ -305,29 +306,32 @@ body.vsrf-is-staff [data-staff]:not(.nav a){display:initial !important}
   </div>
 </div>
 
+<div class="modal-back" id="vpAddDeptModal">
+  <div class="modal">
+    <button class="modal-close" aria-label="Закрыть">✕</button>
+    <h3>＋ Добавить отдел (из роли Discord)</h3>
+    <div class="modal-sub">Выберите роль Discord — все её участники попадут в отдельную таблицу.</div>
+    <div class="form-group">
+      <label>Роль Discord</label>
+      <select id="vpAddDeptRole" class="msg-input"></select>
+    </div>
+    <div class="form-group">
+      <label>Название отдела (можно своё)</label>
+      <input type="text" id="vpAddDeptName" class="msg-input" placeholder="Оставьте пустым — будет имя роли">
+    </div>
+    <div class="form-msg" id="vpAddDeptMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gold-b);margin-top:14px">
+      <button class="btn btn-ghost btn-sm" id="vpAddDeptCancel">Отмена</button>
+      <button class="btn btn-gold btn-sm" id="vpAddDeptSave">＋ Добавить</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-back" id="vpSettingsModal">
   <div class="modal modal-xxl">
     <button class="modal-close" aria-label="Закрыть">✕</button>
-    <h3>Настройки проверок ВП</h3>
-    <div class="modal-sub">
-      Для каждой роли Discord выберите <b>что делать</b> и (опционально) <b>что она означает</b>.
-    </div>
-
-    <div class="vp-map-explain">
-      <div class="vp-map-explain-col">
-        <div class="vp-map-explain-title">👁 Показ в таблице</div>
-        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-neu">— не влияет</span> — роль не учитывается</div>
-        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-inc">✓ Показывать</span> — юзеры с этой ролью попадают в таблицу</div>
-        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-exc">✕ Скрывать</span> — юзеры с этой ролью НЕ попадают (Уволен, Гражданин, ЧС)</div>
-        <div class="vp-map-explain-item vp-map-explain-note">Если ни одна роль не отмечена «Показывать» — показываются ВСЕ (кроме скрытых)</div>
-      </div>
-      <div class="vp-map-explain-col">
-        <div class="vp-map-explain-title">🏷 Значение роли</div>
-        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-neu">— обычная</span> — просто роль</div>
-        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-dept">🏢 Отдел</span> — создаст отдельную таблицу для этих людей</div>
-        <div class="vp-map-explain-item"><span class="vp-pill vp-pill-pos">🎖 Должность</span> — отобразится в колонке «Звание/Должность»</div>
-      </div>
-    </div>
+    <h3>Управление ролями Discord</h3>
+    <div class="modal-sub">Для быстрого добавления отдела используйте кнопку <b>＋ Отдел</b> на главном экране.</div>
 
     <div class="vp-settings-toolbar">
       <input type="search" class="vp-search" id="vpMapSearch" placeholder="Поиск роли по названию..." style="max-width:340px">
@@ -811,9 +815,11 @@ async function renderAll(force){
 
     const html=ALL_GROUPS.map(renderTable).filter(Boolean).join("");
     if(!html){
+      const noDept=!mapping.some(m=>m.role_kind==="department");
       box.innerHTML=`<div class="apps-empty">
-        <h3>${filtered.length===0?"Пока никто не подходит под фильтры":"Ничего не найдено"}</h3>
-        <p>${filtered.length===0?"Откройте <b>⚙ Настройки</b> и пометьте роли отделами или «Показывать».":"Попробуйте другой запрос в поиске."}</p>
+        <div class="apps-empty-icon">🏢</div>
+        <h3>${noDept?"Отделы ещё не выбраны":"Ничего не найдено"}</h3>
+        <p>${noDept?"Нажмите кнопку <b>＋ Отдел</b> вверху, чтобы добавить отдел из роли Discord.<br>Все участники этой роли попадут в отдельную таблицу для проверки.":"Попробуйте другой запрос в поиске."}</p>
       </div>`;
     } else {
       box.innerHTML=html;
@@ -1013,6 +1019,51 @@ $("vpMapSave").addEventListener("click",async ()=>{
 });
 
 $("vpSettingsBtn").addEventListener("click",openMapping);
+
+function openAddDeptModal(){
+  const sel=$("vpAddDeptRole");
+  const already=new Set(ALL_MAPPING.filter(m=>m.role_kind==="department").map(m=>m.role_id));
+  const opts=ALL_ROLES.filter(r=>!already.has(r.role_id) && r.name!=="@everyone")
+    .sort((a,b)=>(b.position||0)-(a.position||0))
+    .map(r=>`<option value="${esc(r.role_id)}" data-name="${esc(r.name)}">@${esc(r.name)}</option>`).join("");
+  sel.innerHTML=opts||'<option value="">Все роли уже добавлены как отделы</option>';
+  $("vpAddDeptName").value="";
+  $("vpAddDeptMsg").textContent="";
+  $("vpAddDeptMsg").className="form-msg";
+  $("vpAddDeptModal").classList.add("active");
+}
+
+$("vpAddDeptBtn").addEventListener("click",openAddDeptModal);
+$("vpAddDeptCancel").addEventListener("click",()=>$("vpAddDeptModal").classList.remove("active"));
+$("vpAddDeptModal").querySelector(".modal-close").addEventListener("click",()=>$("vpAddDeptModal").classList.remove("active"));
+$("vpAddDeptModal").addEventListener("click",e=>{if(e.target===$("vpAddDeptModal")) $("vpAddDeptModal").classList.remove("active")});
+
+$("vpAddDeptSave").addEventListener("click",async()=>{
+  const roleId=$("vpAddDeptRole").value;
+  const msg=$("vpAddDeptMsg");
+  if(!roleId){ msg.className="form-msg error"; msg.textContent="Выберите роль"; return; }
+  const role=ALL_ROLES.find(r=>r.role_id===roleId);
+  const customName=$("vpAddDeptName").value.trim();
+  const label=customName || (role?role.name:"");
+  const existing=ALL_MAPPING.find(m=>m.role_id===roleId);
+  const row={
+    role_id: roleId,
+    role_name: role?role.name:"",
+    show: existing?existing.show:null,
+    role_kind: "department",
+    label: label
+  };
+  msg.className="form-msg info"; msg.textContent="Сохранение...";
+  const r=await VSRF_VP.saveMappingBatch([row],[]);
+  if(!r.ok){ msg.className="form-msg error"; msg.textContent="Ошибка: "+r.error; return; }
+  msg.className="form-msg success"; msg.textContent="✓ Отдел добавлен";
+  setTimeout(async()=>{
+    $("vpAddDeptModal").classList.remove("active");
+    ALL_MAPPING=await VSRF_VP.fetchMapping();
+    LAST_RENDER_HASH="";
+    renderAll(true);
+  },500);
+});
 
 function subscribeRealtime(){
   const s=window.VSRF_AUTH&&window.VSRF_AUTH.state;
@@ -1470,6 +1521,6 @@ $("vpArcDetailSend").addEventListener("click",async()=>{
   setTimeout(()=>openArcDetail(CURRENT_ARC.id),1200);
 });
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a288064d69a4f0ff',t:'MTc4NjI5MTc2MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2896bde28c4ec56',t:'MTc4NjMwNjQwNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
