@@ -93,10 +93,11 @@
             <div class="cf-group-title">👤 Запрашивающий (ВП)</div>
             <div class="cf-group-body">
               <div class="msg-row">
-                <div class="form-group msg-flex-1"><label>ФИО <span style="color:#e97a7a">*</span></label><input class="msg-input" id="vpqFio" required></div>
+                <div class="form-group msg-flex-1"><label>ФИО <span style="color:#e97a7a">*</span></label><input class="msg-input" id="vpqFio" required placeholder="Начните вводить ФИО..." data-dsac data-dsac-stat="#vpqStatic" data-dsac-pos="#vpqPos" data-dsac-did="#vpqDid"></div>
                 <div class="form-group msg-flex-1"><label>Статик <span style="color:#e97a7a">*</span></label><input class="msg-input" id="vpqStatic" required></div>
               </div>
               <div class="form-group"><label>Должность / Звание <span style="color:#e97a7a">*</span></label><input class="msg-input" id="vpqPos" required></div>
+              <input type="hidden" id="vpqDid">
             </div>
           </div>
 
@@ -104,9 +105,10 @@
             <div class="cf-group-title">🎯 Нарушитель</div>
             <div class="cf-group-body">
               <div class="msg-row">
-                <div class="form-group msg-flex-1"><label>ФИО нарушителя <span style="color:#e97a7a">*</span></label><input class="msg-input" id="vpqTFio" required></div>
+                <div class="form-group msg-flex-1"><label>ФИО нарушителя <span style="color:#e97a7a">*</span></label><input class="msg-input" id="vpqTFio" required placeholder="Начните вводить ФИО..." data-dsac data-dsac-stat="#vpqTStatic" data-dsac-did="#vpqTDid"></div>
                 <div class="form-group msg-flex-1"><label>Статик нарушителя <span style="color:#e97a7a">*</span></label><input class="msg-input" id="vpqTStatic" required></div>
               </div>
+              <input type="hidden" id="vpqTDid">
             </div>
           </div>
 
@@ -129,6 +131,7 @@
 <script src="config.js?v=150"></script>
 <script src="auth.js?v=150"></script>
 <script src="roles-engine.js?v=150"></script>
+<script src="ds-autocomplete.js?v=150"></script>
 <script src="main.js?v=150"></script>
 <script src="format-utils.js?v=150"></script>
 <script src="holiday-engine.js?v=150"></script>
@@ -153,6 +156,7 @@ async function boot(){
   if(!ok){ $("vpqGuard").style.display=""; $("vpqRoot").style.display="none"; return; }
   $("vpqGuard").style.display="none"; $("vpqRoot").style.display="";
   await loadForms();
+  if(window.VSRF_DSAC) window.VSRF_DSAC.bindAll();
   restoreDraft();
 }
 
@@ -282,9 +286,11 @@ $("vpqSend").addEventListener("click",async()=>{
     const u=window.VSRF_AUTH.state.user;
     const extra=Object.assign({},values);
     delete extra.kind; delete extra.confinement_minutes; delete extra.description; delete extra.evidence_url; delete extra.target_position; delete extra.target_discord;
+    const targetDid=$("vpqTDid").value||values.target_discord||null;
+    const authorDid=$("vpqDid").value||null;
     const row={
       target_fio:tfio, target_static:tstat,
-      target_discord_id:values.target_discord||null,
+      target_discord_id:targetDid,
       target_position:values.target_position||null,
       kind:kind,
       reason:values.description||"—",
@@ -294,6 +300,7 @@ $("vpqSend").addEventListener("click",async()=>{
       status:"pending",
       issued_by_uid:u.id,
       issued_by_name:fio,
+      issued_by_discord_id:authorDid,
       requested_by_uid:u.id,
       requested_by_name:fio,
       requested_by_static:stat,
@@ -314,6 +321,6 @@ $("vpqSend").addEventListener("click",async()=>{
 if(window.VSRF_ROLES) VSRF_ROLES.onChange(boot);
 setTimeout(boot,600);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2822b0ad87cf3a6',t:'MTc4NjIzMDM1MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a28774ac79b49dc4',t:'MTc4NjI4NTc5NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
 </body>
 </html>
