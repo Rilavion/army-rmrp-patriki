@@ -4,17 +4,27 @@ window.VSRF_DSAC=(function(){
 
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c])}
 
+  async function waitForClient(timeoutMs){
+    const deadline=Date.now()+(timeoutMs||10000);
+    while(Date.now()<deadline){
+      const c=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.client;
+      if(c) return c;
+      await new Promise(r=>setTimeout(r,200));
+    }
+    return null;
+  }
+
   async function load(force){
-    if(DS_LIST && !force) return DS_LIST;
+    if(DS_LIST && DS_LIST.length && !force) return DS_LIST;
     if(loading) return loading;
     loading=(async()=>{
-      const c=window.VSRF_AUTH&&window.VSRF_AUTH.state&&window.VSRF_AUTH.state.client;
-      if(!c){ loading=null; return []; }
       try{
+        const c=await waitForClient(10000);
+        if(!c){ console.warn("[dsac] no client after 10s"); return []; }
         const {data,error}=await c.from("ds_members").select("parsed_fio,parsed_static,parsed_dept,discord_id,raw_nick,display_name").eq("active",true).limit(2000);
-        if(error){ console.warn("[dsac] load:",error.message); loading=null; return []; }
+        if(error){ console.warn("[dsac] load:",error.message); return []; }
         const seen=new Set();
-        DS_LIST=(data||[]).filter(m=>{
+        const list=(data||[]).filter(m=>{
           const fio=(m.parsed_fio||m.display_name||m.raw_nick||"").trim();
           if(!fio) return false;
           const k=fio+"|"+(m.parsed_static||"");
@@ -25,9 +35,10 @@ window.VSRF_DSAC=(function(){
           did:m.discord_id||"",
           position:m.parsed_dept||""
         }));
-        console.log("[dsac] loaded",DS_LIST.length);
-        return DS_LIST;
-      }catch(e){ console.warn("[dsac]:",e.message); DS_LIST=[]; return []; }
+        if(list.length) DS_LIST=list;
+        console.log("[dsac] loaded",list.length);
+        return list;
+      }catch(e){ console.warn("[dsac]:",e.message); return []; }
       finally { loading=null; }
     })();
     return loading;
@@ -123,17 +134,28 @@ window.VSRF_DSAC=(function(){
     });
 
     const rules=[
-      { fioSel:'input[name="submitter_fio"]', stat:'[name="submitter_static"]', did:'[name="submitter_discord_id"]', pos:'[name="submitter_position"]' },
-      { fioSel:'input[name="target_fio"]',    stat:'[name="target_static"]',    did:'[name="target_discord_id"]',    pos:'[name="target_position"]' }
+      { fioSel:'input[name="submitter_fio"]',
+        stat:['[name="submitter_static"]'],
+        did:['[name="submitter_discord_id"]','[name="submitter_discord"]'],
+        pos:['[name="submitter_position"]'] },
+      { fioSel:'input[name="target_fio"]',
+        stat:['[name="target_static"]'],
+        did:['[name="target_discord_id"]','[name="target_discord"]'],
+        pos:['[name="target_position"]'] }
     ];
+    function firstMatch(root,list){
+      if(!list) return null;
+      for(const s of list){ const el=root.querySelector(s); if(el) return el; }
+      return null;
+    }
     for(const r of rules){
       document.querySelectorAll(r.fioSel).forEach(inp=>{
         if(inp.dataset.dsacBound==="1") return;
         const form=inp.closest("form")||document;
         const targets={
-          stat: r.stat?form.querySelector(r.stat):null,
-          did:  r.did?form.querySelector(r.did):null,
-          pos:  r.pos?form.querySelector(r.pos):null
+          stat: firstMatch(form,r.stat),
+          did:  firstMatch(form,r.did),
+          pos:  firstMatch(form,r.pos)
         };
         bind(inp,targets);
       });
@@ -151,16 +173,30 @@ window.VSRF_DSAC=(function(){
     if(need) bindAll();
   });
 
+  let observerStarted=false;
   function startObserver(){
+    if(observerStarted) return;
+    if(!document.body){ setTimeout(startObserver,50); return; }
     try{
       mo.observe(document.body,{childList:true,subtree:true});
-    }catch(e){}
+      observerStarted=true;
+      console.log("[dsac] observer started");
+    }catch(e){ console.warn("[dsac] observer:",e.message); }
   }
 
+  startObserver();
   if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",()=>{ bindAll(); startObserver(); setTimeout(bindAll,500); setTimeout(bindAll,2000); });
+    document.addEventListener("DOMContentLoaded",()=>{
+      startObserver(); bindAll();
+      setTimeout(bindAll,500);
+      setTimeout(bindAll,1500);
+      setTimeout(bindAll,3000);
+    });
   } else {
-    bindAll(); startObserver(); setTimeout(bindAll,500); setTimeout(bindAll,2000);
+    bindAll();
+    setTimeout(bindAll,500);
+    setTimeout(bindAll,1500);
+    setTimeout(bindAll,3000);
   }
 
   return { load, bind, bindAll };
