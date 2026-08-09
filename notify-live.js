@@ -36,6 +36,14 @@ window.VSRF_NOTIFY_LIVE=(function(){
       title:r=>"⚠ Новая жалоба · "+(r.code||""),
       body:r=>`Нарушитель: ${r.target_fio||"—"} · ${r.target_static||""}`,
       url:()=>"complaints-review.html",perm:{sec:"complaints",act:"review"}
+    },
+    "vp_request.new":{
+      label:"⚖ Запросы от ВП",
+      table:"violations_registry",fields:"id,kind,target_fio,target_static,requested_by_name,requested_at,created_at,status",
+      filter:q=>q.eq("status","pending"),
+      title:r=>`⚖ Запрос ВП · ${({warn:"Предупреждение",reproach:"Выговор",talk:"Беседа",confinement:"Дисц.закл.",uval:"Увал"}[r.kind])||r.kind||""}`,
+      body:r=>`На: ${r.target_fio||"—"}${r.target_static?" · "+r.target_static:""}${r.requested_by_name?" · от "+r.requested_by_name:""}`,
+      url:()=>"complaints-review.html",perm:{sec:"vp_request",act:"review"}
     }
   };
   const KINDS={leave:{i:"🕒",l:"увольнительная"},vacation_ic:{i:"🏖",l:"отпуск IC"},vacation_ooc:{i:"💤",l:"отпуск OOC"},promotion:{i:"⭐",l:"повышение"},dismissal:{i:"⛔",l:"увольнение"},restoration:{i:"🔄",l:"восстановление"}};
